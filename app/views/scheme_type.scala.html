@@ -1,0 +1,50 @@
+@(param: String)(implicit request: Request[AnyRef], flash: Flash)
+@* type of scheme template *@
+
+@import views.html.templates._
+@import uk.gov.hmrc.play.views.html.helpers
+@import views.html.helpers.error_overview
+
+@ers_main(title = Messages("ers.app_title")) {
+
+		<p class="font-xsmall"><a href="@routes.CheckingServiceController.startPage()" class="link-back">@Html(Messages("ers.back"))</a></p>
+		@header(Messages("ers_scheme_type.page_title"))
+		@if(flash.get("scheme-not-selected-error").isDefined) {
+			@error_overview(flash.get("scheme-not-selected-error"), "error-summary")
+		}
+		@helpers.form(action = routes.CheckingServiceController.schemeTypeSelected()) {
+		    <fieldset>
+		    	<legend class="title-with-error">
+					<span class="visuallyhidden">@Html(Messages("ers_scheme_type.page_title"))</span>
+					@if(flash.get("scheme-not-selected-error").isDefined) {
+						<div aria-labelledby="error-heading" class="validation-message" id="error-summary" role="alert" tabindex="-1">
+							<span id="error-heading">@flash.get("scheme-not-selected-error").</span>
+						</div>
+					}
+				</legend>
+		    	<div class="form-field @if(flash.get("scheme-not-selected-error").isDefined) {error}">
+		    		<label for="csop-radio-button" class="block-label @(if(param == "1") "selected")">
+		    			<input id="csop-radio-button" type="radio" name="schemeType" value="1" @(if(param == "1") "checked" else "")>
+		    			@Html(Messages("ers_scheme_type.csop"))<br>
+		    		</label>
+		    		<label for="emi-radio-button" class="block-label @(if(param == "2") "selected")">
+		    			<input id="emi-radio-button" type="radio" name="schemeType" value="2" @(if(param == "2") "checked" else "")>
+		    			@Html(Messages("ers_scheme_type.emi"))<br>
+		    		</label>
+		    		<label for="saye-radio-button" class="block-label @(if(param == "4") "selected")">
+		    			<input id="saye-radio-button" type="radio" name="schemeType" value="4" @(if(param == "4") "checked" else "")>
+		    			@Html(Messages("ers_scheme_type.saye"))<br>
+		    		</label>
+		    		<label for="sip-radio-button" class="block-label @(if(param == "5") "selected")">
+		    			<input id="sip-radio-button" type="radio" name="schemeType" value="5" @(if(param == "5") "checked" else "")>
+		    			@Html(Messages("ers_scheme_type.sip"))<br>
+		    		</label>
+		    		<label for="other-radio-button" class="block-label @(if(param == "3") "selected")">
+		    			<input id="other-radio-button" type="radio" name="schemeType" value="3" @(if(param == "3") "checked" else "")>
+		    			@Html(Messages("ers_scheme_type.other"))<br>
+		    		</label>
+		    	</div>
+		    </fieldset>
+		    <input role="button" id="continue" class="button" type="submit" value="@Html(Messages("ers_scheme_type.continue"))">
+		}	
+}

@@ -1,0 +1,25 @@
+GET /								controllers.CheckingServiceController.startPage()
+
+GET /assets/*file					controllers.AssetsController.at(path="/public", file)
+
+GET /start							controllers.CheckingServiceController.startPage()
+
+GET /check-file-type				controllers.CheckingServiceController.checkFileTypePage()
+POST /check-file-type				controllers.CheckingServiceController.checkFileTypeSelected()
+
+GET /check-csv-file					controllers.CheckingServiceController.checkCSVFilePage()
+POST /check-csv-file				controllers.UploadController.uploadCSVFile(fileId: String)
+
+GET /check-file						controllers.CheckingServiceController.checkODSFilePage()
+POST /check-file					controllers.UploadController.uploadODSFile(fileId: String)
+
+GET /scheme-type					controllers.CheckingServiceController.schemeTypePage()
+POST /scheme-type					controllers.CheckingServiceController.schemeTypeSelected()
+
+GET /checking-success			    controllers.CheckingServiceController.checkingSuccessPage()
+GET /checking-errors				controllers.CheckingServiceController.checkingErrorsPage()
+GET /format-errors				    controllers.CheckingServiceController.formatErrorsPage()
+
+GET /error-report			    	controllers.HtmlReportController.htmlErrorReportPage()
+
+GET /not-authorised                 controllers.AuthorizationController.notAuthorised()
