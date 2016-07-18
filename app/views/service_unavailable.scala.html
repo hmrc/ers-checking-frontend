@@ -1,0 +1,14 @@
+@* Service Unavailable Template File *@
+@(param: Any)(implicit request: Request[AnyRef])
+
+@ers_main(title = Messages("ers.app_title")) {
+	<header id="page-header">
+	
+	<h1>@Html(Messages("ers_service_unavailable.page_title"))</h1>
+			
+	<div class="application-notice help-notice">
+		<p>@Html(Messages("ers_service_unavailable.para1"))</p>	
+	</div>
+		
+	
+}

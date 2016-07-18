@@ -1,0 +1,47 @@
+@(scheme: String, invalidChars: String)(implicit request: Request[AnyRef], flash: Flash)
+@* check return file Template *@
+
+@import _root_.views.html.templates._
+@import uk.gov.hmrc.play.views.html.helpers
+@import utils.PageBuilder._
+@import utils.ContentUtil._
+
+@scripts = {
+	<script>var INVALID_CHARACTERS=/@Html(invalidChars)/</script>
+	<script src='@routes.AssetsController.at("javascripts/ers_scripts.js")'> </script>
+	<script src='@routes.AssetsController.at("javascripts/ers_csv_scripts.js")'> </script>
+}
+
+@ers_main(title = Messages("ers.app_title"), scripts) {
+
+	<div id="file-wrapper">
+		<p class="font-xsmall"><a href="@routes.CheckingServiceController.checkFileTypePage()" class="link-back">@Html(Messages("ers.back"))</a></p>
+		@header(Messages("ers_check_csv_file.title"))
+		<div class="validation-summary visibility" role="group" aria-labelledby="error-summary-heading" tabindex="-1">
+			<h1 class="heading-medium error-summary-heading" id="error-summary-heading">
+				@Html(Messages("validation.summary.heading"))
+			</h1>
+			<ul class="error-summary-list">
+				<li class="validation-summary-message"><a href="#error-summary">@Html(Messages("csv_file_upload.summary_error"))</a></li>
+			</ul>
+		</div>
+		@helpers.form(action = routes.UploadController.uploadCSVFile(scheme), 'id -> "upload-file-form", 'enctype -> "multipart/form-data") {
+			@for(a <- 0 to getNumberOfBrowseButtons(scheme)-1) {
+				<div class="form-field">
+					<label class="input-csv-file-name-heading" for="fileUpload[@a]">@Messages(getPageElement(scheme,PAGE_CHECK_CSV_FILE,"file"+a))</label>
+					<input id="fileUpload[@a]" class="input-csv-file-name" type="file" name="fileUpload[@a]" accept=".csv" size="40"/>
+				</div>
+			}
+			@if(flash.get("filetype-error").isDefined) {
+				<div aria-labelledby="error-heading" class="validation-message" id="error-summary" role="alert" tabindex="-1">
+				@flash.get("filetype-error")
+				</div>
+			}
+			<!--<div id="remove-csv-files-link-container"><a href="@routes.CheckingServiceController.checkCSVFilePage()" id="remove-csv-file-link">@Html(Messages("ers_check_csv_file.clear_all_link"))</a></div>-->
+			<div id="csv-files-button">
+				<button role="button" id="check-file-button" class="button" type="submit" value="@Html(Messages("ers_check_csv_file.check_file_button"))">@Html(Messages("ers_check_csv_file.check_file_button"))</button>
+				@spinner()
+			</div>
+		}
+	</div>
+}

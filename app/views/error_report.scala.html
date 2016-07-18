@@ -1,0 +1,20 @@
+@(fileType: String, schemeName: String, fileName: String, schemeNameShort: String)(implicit request: Request[AnyRef], flash: Flash)
+@* check return file Template *@
+
+@import views.html.templates._
+@import utils.PageBuilder._
+
+@ers_main(title = Messages("ers.app_title")) {
+	<p class="font-xsmall"><a href="@getPageBackLink(fileType)" class="link-back">@Html(Messages("ers.back"))</a></p>
+	@header(Messages("ers_error_report.page_title", schemeName, schemeNameShort))
+		<div class="panel-indent">
+			<p>@Html(Messages("ers_error_report.alert"))</p>
+			<p>@Html(Messages("ers_error_report.alert_2", fileName))</p>
+		</div>
+		<div>
+			<a href="@routes.HtmlReportController.htmlErrorReportPage()" id="view-html-error-report-link">@Html(Messages("ers_error_report.view_as_html2"))</a>.
+		</div>
+		<div class="bottom-grey"></div>    
+		<h2 class="heading-medium">@Html(Messages("ers_error_report.sub_heading"))</h2>
+		<p><a href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@Html(Messages("ers_error_report.instructions2"))</a>.</p>
+}

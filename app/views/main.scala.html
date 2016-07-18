@@ -1,0 +1,105 @@
+@(applicationConfig: config.ApplicationConfig = config.ApplicationConfig,
+title: String,
+headerNav: Option[views.helpers.HeaderNav] = None,
+contentHeader: Option[Html] = None,
+sidebar: Html = HtmlFormat.empty,
+userLoggedIn: Boolean = false,
+supportLinkEnabled: Boolean = true,
+getHelpForm: Html  = HtmlFormat.empty,
+linkElement : Option[Html] = None,
+scriptElement: Option[Html] = None)(mainContent: Html = HtmlFormat.empty)
+
+@import layouts.{govuk_template => hmrcGovUkTemplate}
+@import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
+@import uk.gov.hmrc.play.views.html.{helpers => uiHelpers}
+
+@head = {
+    @uiLayouts.head(
+        assetsPrefix = applicationConfig.assetsPrefix,
+        linkElem = linkElement,
+        headScripts = None)
+    <meta name="format-detection" content="telephone=no"/>
+}
+
+@headerNavLinks = {
+    <li></li>
+}
+
+@insideHeader = {
+    @if(headerNav) {
+        @uiLayouts.header_nav(
+            navTitle = headerNav.get.title,
+            navTitleLink = headerNav.get.titleLink,
+            showBetaLink = headerNav.get.showBetaLink,
+            navLinks = headerNav.get.links
+        )
+    }
+}
+
+@afterHeader = {}
+
+@bodyEnd = {
+    @uiLayouts.footer(
+        analyticsToken = applicationConfig.analyticsToken,
+        analyticsHost = applicationConfig.analyticsHost,
+        assetsPrefix = applicationConfig.assetsPrefix,
+        ssoUrl = None,
+        scriptElem = scriptElement,
+        gaCalls = None
+    )
+}
+
+@footerTop = {}
+@footerLinks = {}
+
+
+@betaBanner = {
+    @uiLayouts.betaBanner(
+        userLoggedIn = userLoggedIn,
+        betaFeedbackUrl = applicationConfig.betaFeedbackUrl,
+        betaFeedbackUnauthenticatedUrl = applicationConfig.betaFeedbackUnauthenticatedUrl,
+        showFeedbackLinkInBetaBanner = true)
+}
+
+@serviceInfo = {
+    @uiLayouts.serviceInfo(
+        betaBanner = betaBanner,
+        includeGridWrapper = false,
+        serviceInfoContent = None,
+        includeHMRCBranding = false
+    )
+}
+
+
+@mainContentHeader = {
+    @contentHeader.map { contentHeaderVal =>
+        @uiLayouts.main_content_header(contentHeader = contentHeaderVal)
+    }
+}
+
+@getHelpForm = @{uiHelpers.reportAProblemLink(applicationConfig.reportAProblemPartialUrl, applicationConfig.reportAProblemNonJSUrl)}
+
+@content = {
+<main id="wrapper" role="main">
+    <div id="content">
+        <div class="ers-service-info">
+            @betaBanner
+        </div>
+        <div class="grid-layout grid-layout--stacked">
+            <div class="grid-layout__column grid-layout__column--2-3">
+                @mainContent
+                @getHelpForm
+            </div>
+            <div class="grid-layout__column grid-layout__column--1-3">
+                @if(sidebar == HtmlFormat.empty) {
+                &nbsp;
+                } else {
+                @sidebar
+                }
+            </div>
+        </div>
+    </div>
+</main>
+}
+
+@hmrcGovUkTemplate(Some(title), None)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(uiLayouts.footer_links()), true)(content)

@@ -1,0 +1,20 @@
+@* checking success Template File *@
+@(implicit request: Request[AnyRef])
+
+@import views.html.templates._
+
+@ers_main(title = Messages("ers.app_title")) {	
+	<div class="success-banner"  id="success-message">
+		<header>
+			<h1 class="heading-xlarge success-font" id="title">
+				<img src='@routes.AssetsController.at("images/tick.png")' alt="tick.">&nbsp;@Html(Messages("ers_file_format_successful.page_title"))
+			</h1>
+		</header>
+		<p>@Html(Messages("ers_file_format_successful.banner"))</p>
+	</div>
+	<div class="bottom-grey"></div>  
+		<h2 class="heading-medium">@Html(Messages("ers_file_format_successful.sub_heading"))</h2>
+		<p>@Html(Messages("ers_file_format_successful.instructions"))</p>
+		<p><a href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@Html(Messages("ers_file_format_successful.return_to_start_page_link"))</a></p>
+		<a href="https://www.gov.uk/done/employment-related-securities-files" id="finished">@Html(Messages("ers_file_format_successful.feedback"))</a>&nbsp;@Html(Messages("ers_file_format_successful.feedback_time"))
+}
