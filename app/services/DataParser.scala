@@ -18,7 +18,6 @@ package services
 
 import java.util.concurrent.TimeUnit
 
-import hmrc.gsi.gov.uk.services.validation._
 import metrics.Metrics
 import models._
 import play.api.Logger
@@ -29,6 +28,7 @@ import services.audit.AuditEvents
 import services.validation.ErsValidator
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.services.validation.{ValidationError,DataValidator}
 import utils.ContentUtil
 
 import scala.collection.mutable.ListBuffer

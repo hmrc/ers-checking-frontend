@@ -16,9 +16,10 @@
 
 package utils
 
-import hmrc.gsi.gov.uk.services.validation.ValidationError
 import models.SheetErrors
 import play.api.i18n.Messages
+import uk.gov.hmrc.services.validation.ValidationError
+
 import scala.collection.mutable.ListBuffer
 
 object HtmlCreator extends HtmlCreator

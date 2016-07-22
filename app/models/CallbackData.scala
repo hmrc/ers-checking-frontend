@@ -16,8 +16,8 @@
 
 package models
 
-import hmrc.gsi.gov.uk.services.validation._
 import play.api.libs.json.{JsObject, Json}
+import uk.gov.hmrc.services.validation._
 
 import scala.collection.mutable.ListBuffer
 

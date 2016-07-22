@@ -19,8 +19,9 @@ package services
 import java.io.File
 import java.nio.file.Files
 
+import com.typesafe.config.ConfigFactory
+import uk.gov.hmrc.services.validation.{DataValidator, ValidationError}
 import controllers.Fixtures
-import hmrc.gsi.gov.uk.services.validation.DataValidator
 import org.scalatest.mock.MockitoSugar
 import play.api.i18n.Messages
 import play.api.libs.Files.TemporaryFile
@@ -28,7 +29,7 @@ import play.api.mvc.MultipartFormData
 import play.api.mvc.MultipartFormData.FilePart
 import services.ERSTemplatesInfo._
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 
 class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
@@ -63,7 +64,7 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with WithFakeAppli
     }
 
     "validate multiple CSV files" in {
-      val request = Fixtures.buildFakeRequestWithSessionId("POST").withMultipartFormDataBody(getMockFileCSV())
+      val request = Fixtures.buildFakeRequestWithSessionId("POST").withMultipartFormDataBody(getMockFileCSV)
       val result = CsvFileProcessor.validateCsvFiles("3")(request, Fixtures.buildFakeUser,hc = HeaderCarrier())
      // result.map(_.errors.size shouldBe  4)
     }
@@ -84,10 +85,9 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with WithFakeAppli
     CsvFileProcessor.converter("a,b,c") shouldBe Array("a","b","c")
   }
 
-  def getMockFileCSV() = {
-
+  def getMockFileCSV = {
     val userDirectory = System.getProperty("user.dir")
-    val tempFile = TemporaryFile((new java.io.File(userDirectory+"/test/resources/copy/Other_Grants_V3")).toString, ".csv")
+    val tempFile = TemporaryFile(new java.io.File(userDirectory+"/test/resources/copy/Other_Grants_V3").toString, ".csv")
     //val tempFile = TemporaryFile(new java.io.File("/test/the.csv"))
     val part = FilePart[TemporaryFile](key = "fileParam", filename = "Other_Grants_V3.csv", contentType = Some("Content-Type: multipart/form-data"), ref = tempFile)
     val file = MultipartFormData(dataParts = Map(), files = Seq(part), badParts = Seq(), missingFileParts = Seq())

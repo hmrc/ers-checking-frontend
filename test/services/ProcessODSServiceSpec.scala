@@ -18,7 +18,7 @@ package services
 
 import java.io.File
 
-import hmrc.gsi.gov.uk.services.validation._
+import uk.gov.hmrc.services.validation._
 import models.SheetErrors
 import org.mockito.Matchers._
 import org.mockito.Mockito._

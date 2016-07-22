@@ -16,7 +16,7 @@
 
 package controllers
 
-import hmrc.gsi.gov.uk.services.validation.{Cell, ValidationError}
+import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 import models.SheetErrors
 import play.api.test.{FakeRequest, FakeApplication, WithApplication}
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L0
