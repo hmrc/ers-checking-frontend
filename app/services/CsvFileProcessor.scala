@@ -18,7 +18,6 @@ package services
 
 import java.io.File
 
-import hmrc.gsi.gov.uk.services.validation.{DataValidator, ValidationError}
 import models.{ERSFileProcessingException, SheetErrors}
 import org.apache.commons.io.{FileUtils, LineIterator}
 import play.api.Logger
@@ -27,6 +26,7 @@ import play.api.mvc.{AnyContent, Request}
 import services.validation.ErsValidator
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.services.validation.{DataValidator, ValidationError}
 import utils.{CacheUtil, UploadedFileUtil}
 
 import scala.collection.mutable.ListBuffer
@@ -99,8 +99,8 @@ trait CsvFileProcessor extends DataGenerator {
     val errorsList: ListBuffer[ValidationError] = new ListBuffer()
 
     try {
-      while (iterator.hasNext()) {
-        rowCount =  (rowCount +1)
+      while (iterator.hasNext) {
+        rowCount = rowCount+1
         val rowData: Array[String] = iterator.nextLine().split(",")
         if(!isBlankRow(rowData)){
           Logger.debug("Row Num :- "+ rowCount +  " -- Data retrieved:-" + rowData.mkString)
@@ -114,7 +114,6 @@ trait CsvFileProcessor extends DataGenerator {
           }
         }
       }
-
       errorsList
     }
     catch {

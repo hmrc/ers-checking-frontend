@@ -16,9 +16,9 @@
 
 package services.validation.CSOPTestData
 
-import hmrc.gsi.gov.uk.services.validation.Cell
 import models.ValidationErrorData
 import org.apache.commons.lang3.StringUtils
+import uk.gov.hmrc.services.validation.Cell
 
 /**
  * Created by matt on 27/01/16.

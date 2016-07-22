@@ -42,7 +42,7 @@ private object AppDependencies {
     //"uk.gov.hmrc" %% "url-builder" % urlBuilderVersion,
     "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.9",
     "commons-io" % "commons-io" % "2.5",
-  "uk.gov.hmrc" %% "data-validation-lib" % "0.1"
+  "uk.gov.hmrc" %% "tabular-data-validator" % "1.0.0"
   )
 
   trait TestDependencies {

@@ -18,7 +18,7 @@ package controllers
 
 import java.util.NoSuchElementException
 import java.util.concurrent.TimeoutException
-import hmrc.gsi.gov.uk.services.validation.{Cell, ValidationError}
+import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 import models.SheetErrors
 import org.mockito.Matchers._
 import org.mockito.Mockito._
