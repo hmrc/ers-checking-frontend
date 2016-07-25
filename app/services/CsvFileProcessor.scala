@@ -42,16 +42,15 @@ object CsvFileProcessor extends CsvFileProcessor
 trait CsvFileProcessor extends DataGenerator {
   val cacheUtil:CacheUtil
 
-
   val converter: (String) => Array[String] = _.split(",")
 
   def readCSVFile(filename:String,file: File,scheme:String)(implicit request: Request[AnyContent], hc : HeaderCarrier) = {
     Logger.debug("file.getName" + filename)
     val sheetName = identifyAndDefineSheet(filename,scheme )
 
-    val validator = setValidator(sheetName)
+    implicit val validator = setValidator(sheetName)
     Logger.debug("validator set " + validator.toString)
-    SheetErrors(sheetName, validateFile(file:File, validator:DataValidator, sheetName))
+    SheetErrors(sheetName, validateFile(file:File, sheetName, ErsValidator.validateRow))
 
   }
 
@@ -92,7 +91,7 @@ trait CsvFileProcessor extends DataGenerator {
     }
   }
 
-  def validateFile(file:File, validator:DataValidator, sheetName : String)  : ListBuffer[ValidationError]= {
+  def validateFile(file:File, sheetName:String, validator:(Seq[String],Int,DataValidator) => Option[List[ValidationError]])(implicit dataValidator:DataValidator): ListBuffer[ValidationError]= {
     val iterator:LineIterator = FileUtils.lineIterator(file, "UTF-8")
 
     var rowCount = 0
@@ -104,7 +103,7 @@ trait CsvFileProcessor extends DataGenerator {
         val rowData: Array[String] = iterator.nextLine().split(",")
         if(!isBlankRow(rowData)){
           Logger.debug("Row Num :- "+ rowCount +  " -- Data retrieved:-" + rowData.mkString)
-          ErsValidator.validateRow(rowData,rowCount,validator) match {
+          validator(rowData,rowCount,dataValidator) match {
             case errors:Option[List[ValidationError]] if errors.isDefined => {
             //  Logger.debug("Error while Validating File + Formatting errors present " + errors.toString)
               Logger.debug("schemeErrors size is " + errors.size)

@@ -20,16 +20,16 @@ import java.io.File
 import java.nio.file.Files
 
 import com.typesafe.config.ConfigFactory
-import uk.gov.hmrc.services.validation.{DataValidator, ValidationError}
 import controllers.Fixtures
 import org.scalatest.mock.MockitoSugar
 import play.api.i18n.Messages
 import play.api.libs.Files.TemporaryFile
 import play.api.mvc.MultipartFormData
 import play.api.mvc.MultipartFormData.FilePart
-import services.ERSTemplatesInfo._
+import services.validation.ErsValidator
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.services.validation.{DataValidator, ValidationError}
 
 
 class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
@@ -48,9 +48,8 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with WithFakeAppli
   "The CsvFileProcessor service " must {
 
     "validate file data and return errors" in {
-      val validator = ERSValidationConfigs.getValidator(ersSheets("Other_Grants_V3").configFileName)
       val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv")
-      val result = CsvFileProcessor.validateFile(fileCopied,validator, "Other_Grants_V3.csv")
+      val result = CsvFileProcessor.validateFile(fileCopied,"Other_Grants_V3.csv",ErsValidator.validateRow)(DataValidator(ConfigFactory.load.getConfig("ers-other-grants-validation-config")))
     //  Thread.sleep(2000)
       result.size shouldBe 4
     }
@@ -71,10 +70,10 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
     "throw the correct error message in the validateFile function" in{
       val result = intercept[Exception]{
-        val validator = DataValidator
+        def validator(rowData:Seq[String],rowCount:Int,dataValidator:DataValidator): Option[List[ValidationError]] = throw new Exception
         Files.copy(file.toPath,new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv").toPath)
         val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv")
-        CsvFileProcessor.validateFile(fileCopied, validator, "Other_Grants_V3.csv")
+        CsvFileProcessor.validateFile(fileCopied, "Other_Grants_V3.csv", validator)(mock[DataValidator])
       }
       result.getMessage shouldEqual  Messages("ers.exceptions.dataParser.fileParsingError", "Other_Grants_V3.csv")
     }
