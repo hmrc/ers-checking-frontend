@@ -2,7 +2,7 @@ credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
 
 
 resolvers ++= Seq(
-  Resolver.url("hmrc-releases", url("https://dl.bintray.com/hmrc/hmrc-releases"))(Resolver.ivyStylePatterns),
+  Resolver.url("sbt-plugin-releases", url("https://dl.bintray.com/hmrc/sbt-plugin-releases"))(Resolver.ivyStylePatterns),
   Resolver.url("scoverage-bintray", url("https://dl.bintray.com/sksamuel/sbt-plugins/"))(Resolver.ivyStylePatterns)
 )
 
