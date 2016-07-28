@@ -34,6 +34,7 @@ trait MicroService {
     .enablePlugins(plugins: _*)
     .enablePlugins(SbtAutoBuildPlugin, SbtGitVersioning)
     .enablePlugins(SbtDistributablesPlugin)
+    .settings(publishingSettings: _*)
     .settings(playSettings ++ scoverageSettings: _*)
     .settings(scalaSettings: _*)
     .settings(defaultSettings(): _*)
@@ -54,7 +55,6 @@ trait MicroService {
       addTestReportOption(IntegrationTest, "int-test-reports"),
       testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
       parallelExecution in IntegrationTest := false)
-    .settings(buildInfoPackage := "uk.gov.hmrc.cato.frontend")
     .settings(
       sources in doc in Compile := List(),
       sources in doc in Test := List()
