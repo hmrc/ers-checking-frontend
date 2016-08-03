@@ -34,7 +34,7 @@ class SIPAwardsV3ValidationTest extends PlaySpec with ERSValidationSIPAwardsTest
       val row = Row(1,Seq(cellD,cellC))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellD,"mandatoryD","D01","'4. If free shares, are performance conditions attached to their award? (yes/no)' must be answered if '3. Type of shares awarded Enter a number from 1 to 4 depending on the type of share awarded. Follow the link at cell B10 for a list of the types of share which can be awarded' was answered with 2.")
+        ValidationError(cellD,"mandatoryD","D01","Enter 'yes' or 'no'.")
       ))
     }
 
@@ -44,7 +44,7 @@ class SIPAwardsV3ValidationTest extends PlaySpec with ERSValidationSIPAwardsTest
       val row = Row(1, Seq(cellE, cellC))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellE, "mandatoryE", "E01", "'5. If matching shares, what is the ratio of shares to partnership shares? Enter ratio for example 2:1; 2/1' must be answered if '3. Type of shares awarded Enter a number from 1 to 4 depending on the type of share awarded. Follow the link at cell B10 for a list of the types of share which can be awarded' was answered with 1.")
+        ValidationError(cellE, "mandatoryE", "E01", "Enter the ratio of the matching shares (numbers must be separated by a ':' or '/', for example, 2:1 or 2/1).")
       ))
     }
 
@@ -54,7 +54,7 @@ class SIPAwardsV3ValidationTest extends PlaySpec with ERSValidationSIPAwardsTest
       val row = Row(1, Seq(cellP, cellO))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellP, "mandatoryP", "P01", "'16. If no, was the market value agreed with HMRC? (yes/no)' must be answered if '15. Are the shares listed on a recognised stock exchange? (yes/no)' was answered with NO.")
+        ValidationError(cellP, "mandatoryP", "P01", "Enter 'yes' or 'no'.")
       ))
     }
 
@@ -64,7 +64,7 @@ class SIPAwardsV3ValidationTest extends PlaySpec with ERSValidationSIPAwardsTest
       val row = Row(1, Seq(cellQ, cellP))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellQ, "mandatoryQ", "Q01", "'17. If yes, enter the HMRC reference given' must be answered if '16. If no, was the market value agreed with HMRC? (yes/no)' was answered with YES.")
+        ValidationError(cellQ, "mandatoryQ", "Q01", "Enter the HMRC reference (must be less than 11 characters).")
       ))
     }
 
@@ -98,7 +98,7 @@ class SIPOutV3ValidationTest extends PlaySpec with ERSValidationSIPOutTestData w
     val row = Row(1, Seq(cellP, cellO))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
     resOpt mustBe Some(List(
-      ValidationError(cellP, "mandatoryP", "P01", "'16. If no, for other than dividend shares, was PAYE operated? (yes/no)' must be answered if '15. Have all the shares been held in the plan for 5 years or more at the date they ceased to be part of the plan? (yes/no) If yes, no more information is needed for this event. If no, go to question 16' was answered with NO.")
+      ValidationError(cellP, "mandatoryP", "P01", "Enter 'yes' or 'no'.")
     ))
   }
 
@@ -108,7 +108,7 @@ class SIPOutV3ValidationTest extends PlaySpec with ERSValidationSIPOutTestData w
     val row = Row(1, Seq(cellQ, cellP))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
     resOpt mustBe Some(List(
-      ValidationError(cellQ, "mandatoryQ", "Q01", "'17. If no, does this withdrawal of shares qualify for tax relief? (yes/no)' must be answered if '16. If no, for other than dividend shares, was PAYE operated? (yes/no)' was answered with NO.")
+      ValidationError(cellQ, "mandatoryQ", "Q01", "Enter 'yes' or 'no'.")
     ))
   }
 
