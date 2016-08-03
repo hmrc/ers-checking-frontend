@@ -64,27 +64,27 @@ trait ERSValidationSIPAwardsTestData {
         //column I
         "When awarded/totalMatchingAwardsPerEmployeeGreaterThan3600 conforms to the expected number format, no validation error should be raised",
         "Return an error message when awarded/totalMatchingAwardsPerEmployeeGreaterThan3600 is larger than the maximum value allowed",
-        "Return an error message when awarded/totalMatchingAwardsPerEmployeeGreaterThan3600 is not a whole number",
+        "Return an error message when awarded/totalMatchingAwardsPerEmployeeGreaterThan3600 has more than 2 digits after the decimal point",
         //column J
         "When awarded/totalFreeAwardsPerEmployeeAtLimitOf3000 conforms to the expected number format, no validation error should be raised",
         "Return an error message when awarded/totalFreeAwardsPerEmployeeAtLimitOf3000 is larger than the maximum value allowed",
-        "Return an error message when awarded/totalFreeAwardsPerEmployeeAtLimitOf3000 is not a whole number",
+        "Return an error message when awarded/totalFreeAwardsPerEmployeeAtLimitOf3000 has more than 2 digits after the decimal point",
         //column K
         "When awarded/totalPartnershipAwardsPerEmployeeGreaterThan1800 conforms to the expected number format, no validation error should be raised",
         "Return an error message when awarded/totalPartnershipAwardsPerEmployeeGreaterThan1800 is larger than the maximum value allowed",
-        "Return an error message when awarded/totalPartnershipAwardsPerEmployeeGreaterThan1800 is not a whole number",
+        "Return an error message when awarded/totalPartnershipAwardsPerEmployeeGreaterThan1800 has more than 2 digits after the decimal point",
         //column L
         "When awarded/totalPartnershipAwardsPerEmployeeAtLimitOf1500 conforms to the expected number format, no validation error should be raised",
         "Return an error message when awarded/totalPartnershipAwardsPerEmployeeAtLimitOf1500 is larger than the maximum value allowed",
-        "Return an error message when awarded/totalPartnershipAwardsPerEmployeeAtLimitOf1500 is not a whole number",
+        "Return an error message when awarded/totalPartnershipAwardsPerEmployeeAtLimitOf1500 has more than 2 digits after the decimal point",
         //column M
         "When awarded/totalMatchingAwardsPerEmployeeGreaterThan3600B conforms to the expected number format, no validation error should be raised",
         "Return an error message when awarded/totalMatchingAwardsPerEmployeeGreaterThan3600B is larger than the maximum value allowed",
-        "Return an error message when awarded/totalMatchingAwardsPerEmployeeGreaterThan3600B is not a whole number",
+        "Return an error message when awarded/totalMatchingAwardsPerEmployeeGreaterThan3600B has more than 2 digits after the decimal point",
         //column N
         "When awarded/totalMatchingAwardsPerEmployeeAtLimitOf3000 conforms to the expected number format, no validation error should be raised",
         "Return an error message when awarded/totalMatchingAwardsPerEmployeeAtLimitOf3000 is larger than the maximum value allowed",
-        "Return an error message when awarded/totalMatchingAwardsPerEmployeeAtLimitOf3000 is not a whole number",
+        "Return an error message when awarded/totalMatchingAwardsPerEmployeeAtLimitOf3000 has more than 2 digits after the decimal point",
         //column O
         "When awarded/sharesListedOnSE is yes or no, no validation error should be raised",
         "Return an error message when awarded/sharesListedOnSE is not yes or no",
@@ -130,23 +130,23 @@ trait ERSValidationSIPAwardsTestData {
       Cell("H", rowNumber, "oneTwoThree"),
       Cell("H", rowNumber, "123456789012345.1234"),
       Cell("I", rowNumber, "123456"),
-      Cell("I", rowNumber, "1234567"),
-      Cell("I", rowNumber, "12.5"),
+      Cell("I", rowNumber, "123456789012"),
+      Cell("I", rowNumber, "12.123"),
       Cell("J", rowNumber, "123456"),
-      Cell("J", rowNumber, "1234567"),
-      Cell("J", rowNumber, "12.5"),
+      Cell("J", rowNumber, "123456789012"),
+      Cell("J", rowNumber, "12.567"),
       Cell("K", rowNumber, "123456"),
-      Cell("K", rowNumber, "1234567"),
-      Cell("K", rowNumber, "12.5"),
+      Cell("K", rowNumber, "123456789012"),
+      Cell("K", rowNumber, "12.567"),
       Cell("L", rowNumber, "123456"),
-      Cell("L", rowNumber, "1234567"),
-      Cell("L", rowNumber, "12.5"),
+      Cell("L", rowNumber, "123456789012"),
+      Cell("L", rowNumber, "12.567"),
       Cell("M", rowNumber, "123456"),
-      Cell("M", rowNumber, "1234567"),
-      Cell("M", rowNumber, "12.5"),
+      Cell("M", rowNumber, "123456789012"),
+      Cell("M", rowNumber, "12.567"),
       Cell("N", rowNumber, "123456"),
-      Cell("N", rowNumber, "1234567"),
-      Cell("N", rowNumber, "12.5"),
+      Cell("N", rowNumber, "123456789012"),
+      Cell("N", rowNumber, "12.567"),
       Cell("O", rowNumber, "Yes"),
       Cell("O", rowNumber, "yess"),
       Cell("O", rowNumber, ""),
@@ -165,96 +165,75 @@ trait ERSValidationSIPAwardsTestData {
       //column A
       None,
       Some(List(ValidationErrorData("error.1", "001", "Enter a date that matches the yyyy-mm-dd pattern."))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "'1. Date of event(yyyy-mm-dd)' must have an entry."))),
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter a date that matches the yyyy-mm-dd pattern."))),
       //column B
       None,
       Some(List(ValidationErrorData("error.2", "002", "Must be a whole number and be less than 1,000,000."))),
       Some(List(
-        ValidationErrorData("error.2", "002", "Must be a whole number and be less than 1,000,000."),
-        ValidationErrorData("error.3", "003", "This entry must be a whole number."))
+        ValidationErrorData("error.2", "002", "Must be a whole number and be less than 1,000,000."))
       ),
       //column C
       None,
-      Some(List(ValidationErrorData("error.4", "004", "Enter '1', '2', '3' or '4'."))),
-      Some(List(
-        ValidationErrorData("error.4", "004", "Enter '1', '2', '3' or '4'."),
-        ValidationErrorData("error.5", "005", "This entry is larger than the maximum number value allowed."))),
-      Some(List(
-        ValidationErrorData("error.4", "004", "Enter '1', '2', '3' or '4'."),
-        ValidationErrorData("error.5", "005", "This entry is larger than the maximum number value allowed."),
-        ValidationErrorData("error.6", "006", "This entry must be a whole number."))),
-      Some(List(
-        ValidationErrorData("error.4", "004", "Enter '1', '2', '3' or '4'."),
-        ValidationErrorData("error.5", "005", "This entry is larger than the maximum number value allowed."),
-        ValidationErrorData("error.7", "007", "This entry must be either a positive number or a zero."))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "'3. Type of shares awarded Enter a number from 1 to 4 depending on the type of share awarded. Follow the link at cell B10 for a list of the types of share which can be awarded' must have an entry."))),
+      Some(List(ValidationErrorData("error.3", "003", "Enter '1', '2', '3' or '4'."))),
+      Some(List(ValidationErrorData("error.3", "003", "Enter '1', '2', '3' or '4'."))),
+      Some(List(ValidationErrorData("error.3", "003", "Enter '1', '2', '3' or '4'."))),
+      Some(List(ValidationErrorData("error.3", "003", "Enter '1', '2', '3' or '4'."))),
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter '1', '2', '3' or '4'."))),
       //column D
       None,
-      Some(List(ValidationErrorData("error.8", "008", "Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.4", "004", "Enter 'yes' or 'no'."))),
       //column E
       None,
-      Some(List(ValidationErrorData("error.9", "009", "Enter the ratio of the matching shares (numbers must be separated by a ':' or '/', for example, 2:1 or 2/1)."))),
+      Some(List(ValidationErrorData("error.5", "005", "Enter the ratio of the matching shares (numbers must be separated by a ':' or '/', for example, 2:1 or 2/1)."))),
       //column F
       None,
-      Some(List(ValidationErrorData("error.10", "010", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-      Some(List(
-        ValidationErrorData("error.10", "010", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."),
-        ValidationErrorData("error.11", "011", "This entry must be a number made up of digits."),
-        ValidationErrorData("error.12", "012", "This entry is larger than the maximum number value allowed."))
-      ),
-      Some(List(ValidationErrorData("error.12", "012", "This entry is larger than the maximum number value allowed."))),
+      Some(List(ValidationErrorData("error.6", "006", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.6", "006", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.6", "006", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
       //column G
       None,
-      Some(List(ValidationErrorData("error.13", "013", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
-      Some(List(
-        ValidationErrorData("error.13", "013", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."),
-        ValidationErrorData("error.14", "014", "This entry must be a number made up of digits."),
-        ValidationErrorData("error.15", "015", "This entry is larger than the maximum number value allowed."))
-      ),
-      Some(List(ValidationErrorData("error.15", "015", "This entry is larger than the maximum number value allowed."))),
+      Some(List(ValidationErrorData("error.7", "007", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.7", "007", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.7", "007", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
       //column H
       None,
-      Some(List(ValidationErrorData("error.16", "016", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-      Some(List(
-        ValidationErrorData("error.16", "016", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."),
-        ValidationErrorData("error.17", "017", "This entry must be a number made up of digits."),
-        ValidationErrorData("error.18", "018", "This entry is larger than the maximum number value allowed."))
-      ),
-      Some(List(ValidationErrorData("error.18", "018", "This entry is larger than the maximum number value allowed."))),
+      Some(List(ValidationErrorData("error.8", "008", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.8", "008", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.8", "008", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
       //column I
       None,
-      Some(List(ValidationErrorData("error.19", "019", "Must be a whole number and be less than 1,000,000."))),
-      Some(List(ValidationErrorData("error.20", "020", "This entry must be a whole number."))),
+      Some(List(ValidationErrorData("error.9", "009", "It should be a whole number that has no more than 11 digits."))),
+      Some(List(ValidationErrorData("error.9", "009", "It should be a whole number that has no more than 11 digits."))),
       //column J
       None,
-      Some(List(ValidationErrorData("error.21", "021", "Must be a whole number and be less than 1,000,000."))),
-      Some(List(ValidationErrorData("error.22", "022", "This entry must be a whole number."))),
+      Some(List(ValidationErrorData("error.10", "010", "It should be a whole number that has no more than 11 digits."))),
+      Some(List(ValidationErrorData("error.10", "010", "It should be a whole number that has no more than 11 digits."))),
       //column K
       None,
-      Some(List(ValidationErrorData("error.23", "023", "Must be a whole number and be less than 1,000,000."))),
-      Some(List(ValidationErrorData("error.24", "024", "This entry must be a whole number."))),
+      Some(List(ValidationErrorData("error.11", "011", "It should be a whole number that has no more than 11 digits."))),
+      Some(List(ValidationErrorData("error.11", "011", "It should be a whole number that has no more than 11 digits."))),
       //column L
       None,
-      Some(List(ValidationErrorData("error.25", "025", "Must be a whole number and be less than 1,000,000."))),
-      Some(List(ValidationErrorData("error.26", "026", "This entry must be a whole number."))),
+      Some(List(ValidationErrorData("error.12", "012", "It should be a whole number that has no more than 11 digits."))),
+      Some(List(ValidationErrorData("error.12", "012", "It should be a whole number that has no more than 11 digits."))),
       //column M
       None,
-      Some(List(ValidationErrorData("error.27", "027", "Must be a whole number and be less than 1,000,000."))),
-      Some(List(ValidationErrorData("error.28", "028", "This entry must be a whole number."))),
+      Some(List(ValidationErrorData("error.13", "013", "It should be a whole number that has no more than 11 digits."))),
+      Some(List(ValidationErrorData("error.13", "013", "It should be a whole number that has no more than 11 digits."))),
       //column N
       None,
-      Some(List(ValidationErrorData("error.29", "029", "Must be a whole number and be less than 1,000,000."))),
-      Some(List(ValidationErrorData("error.30", "030", "This entry must be a whole number."))),
+      Some(List(ValidationErrorData("error.14", "014", "It should be a whole number that has no more than 11 digits."))),
+      Some(List(ValidationErrorData("error.14", "014", "It should be a whole number that has no more than 11 digits."))),
       //column O
       None,
-      Some(List(ValidationErrorData("error.31", "031", "Enter 'yes' or 'no'."))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "'15. Are the shares listed on a recognised stock exchange? (yes/no)' must have an entry."))),
+      Some(List(ValidationErrorData("error.15", "015", "Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter 'yes' or 'no'."))),
       //column P
       None,
-      Some(List(ValidationErrorData("error.32", "032", "Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.16", "016", "Enter 'yes' or 'no'."))),
       //column Q
       None,
-      Some(List(ValidationErrorData("error.33", "033", "Enter the HMRC reference (must be less than 11 characters).")))
+      Some(List(ValidationErrorData("error.17", "017", "Enter the HMRC reference (must be less than 11 characters).")))
     )
     expectedResults
   }
@@ -291,12 +270,12 @@ trait ERSValidationSIPAwardsTestData {
       Cell("F", rowNumber, "1234.12345"),
       Cell("G", rowNumber, "1234.12345"),
       Cell("H", rowNumber, "1234.12345"),
-      Cell("I", rowNumber, "1234567"),
-      Cell("J", rowNumber, "1234567"),
-      Cell("K", rowNumber, "1234567"),
-      Cell("L", rowNumber, "1234567"),
-      Cell("M", rowNumber, "1234567"),
-      Cell("N", rowNumber, "1234567"),
+      Cell("I", rowNumber, "123456789012"),
+      Cell("J", rowNumber, "123456789012"),
+      Cell("K", rowNumber, "123456789012"),
+      Cell("L", rowNumber, "123456789012"),
+      Cell("M", rowNumber, "123456789012"),
+      Cell("N", rowNumber, "123456789012"),
       Cell("O", rowNumber, "yess"),
       Cell("P", rowNumber, "yess"),
       Cell("Q", rowNumber, "abcada123456782145")

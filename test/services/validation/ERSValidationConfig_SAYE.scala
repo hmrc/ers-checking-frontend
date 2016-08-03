@@ -32,7 +32,7 @@ class ERSValidationConfig_SAYE_SayeGrantedTests extends PlaySpec with ERSValidat
       val row = Row(1, Seq(cellG, cellF))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellG, "mandatoryG", "G01", "'7. If no, was the market value agreed with HMRC? (yes/no)' must be answered if '6. Are the shares listed on a recognised stock exchange? (yes/no)' was answered with NO.")))
+        ValidationError(cellG, "mandatoryG", "G01", "Enter 'yes' or 'no'.")))
     }
 
     "make Q8 mandatory when Q6 is answered with yes" in {
@@ -41,7 +41,7 @@ class ERSValidationConfig_SAYE_SayeGrantedTests extends PlaySpec with ERSValidat
       val row = Row(1,Seq(cellH,cellG))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellH,"mandatoryH","G02","'8. If yes enter the HMRC reference given' must be answered if '7. If no, was the market value agreed with HMRC? (yes/no)' was answered with YES.")
+        ValidationError(cellH,"mandatoryH","G02","Enter the HMRC reference (must be less than 11 characters).")
       ))
     }
   }
@@ -58,10 +58,10 @@ class ERSValidationConfig_SAYE_SayeRCLTests extends PlaySpec with ERSValidationS
       val row = Row(1, Seq(cellC, cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellC, "mandatoryC", "C01", "'3. If yes, amount or value £ e.g. 10.1234' must be answered if '2. Was money or value received by the option holder or anyone else when the option was released, exchanged, cancelled or lapsed? (yes/no) If yes go to question 3, otherwise no more information is needed for this event.' was answered with YES.")
+        ValidationError(cellC, "mandatoryC", "C01", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it).")
       ))
     }
- }
+  }
 }
 
 class ERSValidationConfig_SAYE_ExercisedTests extends PlaySpec with ERSValidationSAYEExercisedTestData with ValidationTestRunner {
@@ -75,7 +75,7 @@ class ERSValidationConfig_SAYE_ExercisedTests extends PlaySpec with ERSValidatio
       val row = Row(1, Seq(cellJ, cellI))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellJ, "mandatoryJ", "J01", "'10. If no, was the market value agreed with HMRC? (yes/no)' must be answered if '9. Were the shares subject to the option listed on a recognised stock exchange? (yes/no) If yes go to question 12 If no go to question 10' was answered with NO.")))
+        ValidationError(cellJ, "mandatoryJ", "J01", "Enter 'yes' or 'no'.")))
     }
 
     "make Q11 a mandatory field when Q9 is answered with yes" in {
@@ -84,7 +84,7 @@ class ERSValidationConfig_SAYE_ExercisedTests extends PlaySpec with ERSValidatio
       val row = Row(1, Seq(cellK, cellJ))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellK, "mandatoryK", "K01", "'11. If yes enter the HMRC reference given' must be answered if '10. If no, was the market value agreed with HMRC? (yes/no)' was answered with YES.")))
+        ValidationError(cellK, "mandatoryK", "K01", "Enter the HMRC reference (must be less than 11 characters).")))
     }
-   }
+  }
 }

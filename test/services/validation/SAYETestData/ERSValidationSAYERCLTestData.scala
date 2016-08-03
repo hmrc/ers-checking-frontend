@@ -19,46 +19,43 @@ package services.validation.SAYETestData
 import uk.gov.hmrc.services.validation.Cell
 import models.ValidationErrorData
 
-/**
- * Created by gusso on 14/04/16.
- */
 trait ERSValidationSAYERCLTestData {
   val rowNumber:Int = 1
 
   def getDescriptions: List[String] = {
     val descriptions =
       List(
-      //column A
-          "When dateOfEvent conforms to the expected date format, no validation error should be raised",
-          "Return an error message when dateOfEvent does not conform to the expect date format",
-          "Return an error message when dateOfEvent has been left empty",
-      //column B
-          "When wasMoneyOrValueGiven is a correctly formatted yes or no answer, no validation error should be raised",
-          "Return an error message when wasMoneyOrValueGiven does not match yes or no",
-          "Return an error message when wasMoneyOrValueGiven is left empty",
-      //column C
-          "When amountReleased is a correctly formatted number, no validation error should be raised",
-          "Return an error message when amountReleased does not have 4 digits after the decimal point",
-          "Return an error message when amountReleased is not a number",
-          "Return an error message when amountReleased is too large",
-      //column D
-          "When individualReleased\\firstName is a correctly formatted first name, no validation error should be raised",
-          "Return an error message when individualReleased\\firstName exceeds the maximum character length",
-          "Return an error message when individualReleased\\firstName is left empty",
-      //column E
-          "When individualReleased\\secondName is a correctly formatted first name, no validation error should be raised",
-          "Return an error message when individualReleased\\secondName exceeds the maximum character length",
-      //column F
-          "When individualReleased\\surname is a correctly formatted first name, no validation error should be raised",
-          "Return an error message when individualReleased\\surname exceeds the maximum character length",
-          "Return an error message when individualReleased\\surname is left empty",
-      //column G
-          "When individualReleased\\nino is a correctly formatted NINO, no validation error should be raised",
-          "Return an error message when individualReleased\\nino does not conform to the expected NINO format",
-      //column H
+        //column A
+        "When dateOfEvent conforms to the expected date format, no validation error should be raised",
+        "Return an error message when dateOfEvent does not conform to the expect date format",
+        "Return an error message when dateOfEvent has been left empty",
+        //column B
+        "When wasMoneyOrValueGiven is a correctly formatted yes or no answer, no validation error should be raised",
+        "Return an error message when wasMoneyOrValueGiven does not match yes or no",
+        "Return an error message when wasMoneyOrValueGiven is left empty",
+        //column C
+        "When amountReleased is a correctly formatted number, no validation error should be raised",
+        "Return an error message when amountReleased does not have 4 digits after the decimal point",
+        "Return an error message when amountReleased is not a number",
+        "Return an error message when amountReleased is too large",
+        //column D
+        "When individualReleased\\firstName is a correctly formatted first name, no validation error should be raised",
+        "Return an error message when individualReleased\\firstName exceeds the maximum character length",
+        "Return an error message when individualReleased\\firstName is left empty",
+        //column E
+        "When individualReleased\\secondName is a correctly formatted first name, no validation error should be raised",
+        "Return an error message when individualReleased\\secondName exceeds the maximum character length",
+        //column F
+        "When individualReleased\\surname is a correctly formatted first name, no validation error should be raised",
+        "Return an error message when individualReleased\\surname exceeds the maximum character length",
+        "Return an error message when individualReleased\\surname is left empty",
+        //column G
+        "When individualReleased\\nino is a correctly formatted NINO, no validation error should be raised",
+        "Return an error message when individualReleased\\nino does not conform to the expected NINO format",
+        //column H
         "When individualReleased\\payeReference is a correctly formatted PAYE ref, no validation errror should be raised",
         "Reutrn an error message when individualReleased\\payeReference does not conform to the expected PAYE format",
-      //column I
+        //column I
         "When payeOperatedApplied is Yes or No, no validation error should be raised",
         "Return an error message when payeOperatedApplied is not yes or no",
         "Return an error message when payeOperatedApplied is left empty"
@@ -101,32 +98,29 @@ trait ERSValidationSAYERCLTestData {
     val expectedResults = List(
       None,
       Some(List(ValidationErrorData("error.1", "001", "Enter a date that matches the yyyy-mm-dd pattern."))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "'1. Date of event(yyyy-mm-dd)' must have an entry."))),
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter a date that matches the yyyy-mm-dd pattern."))),
       None,
       Some(List(ValidationErrorData("error.2", "002", "Enter 'yes' or 'no'."))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "'2. Was money or value received by the option holder or anyone else when the option was released, exchanged, cancelled or lapsed? (yes/no) If yes go to question 3, otherwise no more information is needed for this event.' must have an entry."))),
-        None,
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter 'yes' or 'no'."))),
+      None,
       Some(List(ValidationErrorData("error.3", "003", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-      Some(List(
-        ValidationErrorData("error.3", "003", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."),
-        ValidationErrorData("error.4", "004", "This entry must be a number made up of digits."),
-        ValidationErrorData("error.5", "005", "This entry is larger than the maximum number value allowed."))),
-      Some(List(ValidationErrorData("error.5", "005", "This entry is larger than the maximum number value allowed."))),
+      Some(List(ValidationErrorData("error.3", "003", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.3", "003", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
       None,
-      Some(List(ValidationErrorData("error.6", "006", "Enter a first name (must be less than 36 characters)."))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "'4. Employee first name' must have an entry."))),
+      Some(List(ValidationErrorData("error.4", "004", "Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
       None,
-      Some(List(ValidationErrorData("error.7", "007", "Must be less than 36 characters."))),
+      Some(List(ValidationErrorData("error.5", "005", "Must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes."))),
       None,
-      Some(List(ValidationErrorData("error.8", "008", "Enter a last name (must be less than 36 characters)."))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "'6. Employee last name' must have an entry."))),
+      Some(List(ValidationErrorData("error.6", "006", "Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
       None,
-      Some(List(ValidationErrorData("error.9", "009", "The National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter."))),
+      Some(List(ValidationErrorData("error.7", "007", "National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter."))),
       None,
-      Some(List(ValidationErrorData("error.10", "010", "PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters."))),
+      Some(List(ValidationErrorData("error.8", "008", "PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters."))),
       None,
-      Some(List(ValidationErrorData("error.11", "011", "Enter 'yes' or 'no'."))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "'9. Was PAYE operated? (yes/no)' must have an entry.")))
+      Some(List(ValidationErrorData("error.9", "009", "Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter 'yes' or 'no'.")))
     )
 
     expectedResults

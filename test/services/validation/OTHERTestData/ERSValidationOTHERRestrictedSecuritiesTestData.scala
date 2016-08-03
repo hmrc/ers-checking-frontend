@@ -128,7 +128,7 @@ trait ERSValidationOTHERRestrictedSecuritiesTestData {
       Cell("G",rowNumber,"AB123456A"),
       Cell("G",rowNumber,"12123456A"),
       Cell("H",rowNumber,"123/XZ55555555"),
-      Cell("H",rowNumber,"123XZ5555555???5"),
+      Cell("H",rowNumber,"123/??"),
       Cell("I",rowNumber,"2018-09-12"),
       Cell("I",rowNumber,"20150918"),
       Cell("I",rowNumber,""),
@@ -173,96 +173,80 @@ trait ERSValidationOTHERRestrictedSecuritiesTestData {
     val expectedResults = List(
       //A
       None,
-      Some(List(ValidationErrorData("error.1","001","The date must match the yyyy-mm-dd pattern."))),
-      Some(List(ValidationErrorData("MANDATORY","100","'1. Date of event (yyyy-mm-dd)' must have an entry."))),
+      Some(List(ValidationErrorData("error.1","001","Enter a date that matches the yyyy-mm-dd pattern."))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter a date that matches the yyyy-mm-dd pattern."))),
       //B
       None,
-      Some(List(ValidationErrorData("error.2","002","This entry must be 'yes' or 'no'."))),
-      Some(List(ValidationErrorData("MANDATORY","100","'2. Is the event in relation to a disclosable tax avoidance scheme? (yes/no)' must have an entry."))),
+      Some(List(ValidationErrorData("error.2","002","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'."))),
       //C
       None,
-      Some(List(ValidationErrorData("error.3","003","The scheme reference number is missing."))),
+      Some(List(ValidationErrorData("error.3","003","Enter the scheme reference number (it should be an 8 digit number)."))),
       //D
       None,
-      Some(List(ValidationErrorData("error.4","004","This entry must contain 35 characters or less."))),
-      Some(List(ValidationErrorData("MANDATORY","100","'4. Employee first name' must have an entry."))),
+      Some(List(ValidationErrorData("error.4","004","Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
       //E
       None,
-      Some(List(ValidationErrorData("error.5","005","This entry must contain 35 characters or less."))),
+      Some(List(ValidationErrorData("error.5","005","Must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes."))),
       //F
       None,
-      Some(List(ValidationErrorData("error.6","006","This entry must contain 35 characters or less."))),
-      Some(List(ValidationErrorData("MANDATORY","100","'6. Employee last name' must have an entry."))),
+      Some(List(ValidationErrorData("error.6","006","Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
       //G
       None,
-      Some(List(ValidationErrorData("error.7","007","The National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter."))),
+      Some(List(ValidationErrorData("error.7","007","National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter."))),
       //H
       None,
       Some(List(ValidationErrorData("error.8","008","PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters."))),
       //I
       None,
-      Some(List(ValidationErrorData("error.9","009","The date must match the yyyy-mm-dd pattern."))),
-      Some(List(ValidationErrorData("MANDATORY","100","'9. Date securities originally acquired (yyyy-mm-dd)' must have an entry."))),
+      Some(List(ValidationErrorData("error.9","009","Enter a date that matches the yyyy-mm-dd pattern."))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter a date that matches the yyyy-mm-dd pattern."))),
       //J
       None,
-      Some(List(ValidationErrorData("error.10","010","This entry must be a number with 2 digits after the decimal point."))),
-      Some(List(
-        ValidationErrorData("error.10","010","This entry must be a number with 2 digits after the decimal point."),
-        ValidationErrorData("error.11","011","This entry must be a number made up of digits."),
-        ValidationErrorData("error.12","012","This entry is larger than the maximum number value allowed.")
-      )),
-      Some(List(ValidationErrorData("error.12","012","This entry is larger than the maximum number value allowed."))),
+      Some(List(ValidationErrorData("error.10","010","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.10","010","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.10","010","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
       //K
       None,
-      Some(List(ValidationErrorData("error.13","013","This entry must be a number with 4 digits after the decimal point."))),
-      Some(List(
-        ValidationErrorData("error.13","013","This entry must be a number with 4 digits after the decimal point."),
-        ValidationErrorData("error.14","014","This entry must be a number made up of digits."),
-        ValidationErrorData("error.15","015","This entry is larger than the maximum number value allowed.")
-      )),
-      Some(List(ValidationErrorData("error.15","015","This entry is larger than the maximum number value allowed."))),
+      Some(List(ValidationErrorData("error.11","011","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.11","011","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.11","011","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
       //L
       None,
-      Some(List(ValidationErrorData("error.16","016","This entry must be 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.12","012","Enter 'yes' or 'no'."))),
       //M
       None,
-      Some(List(ValidationErrorData("error.17","017","This entry must be 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.13","013","Enter 'yes' or 'no'."))),
       //N
       None,
-      Some(List(ValidationErrorData("error.18","018","The HMRC reference must contain 10 characters or less (letters, numbers or both)."))),
+      Some(List(ValidationErrorData("error.14","014","Enter the HMRC reference (must be less than 11 characters)."))),
       //O
       None,
-      Some(List(ValidationErrorData("error.19","019","The date must match the yyyy-mm-dd pattern."))),
+      Some(List(ValidationErrorData("error.15","015","Enter a date that matches the yyyy-mm-dd pattern."))),
       //P
       None,
-      Some(List(ValidationErrorData("error.20","020","This entry must be a number with 4 digits after the decimal point."))),
-      Some(List(
-        ValidationErrorData("error.20","020","This entry must be a number with 4 digits after the decimal point."),
-        ValidationErrorData("error.21","021","This entry must be a number made up of digits."),
-        ValidationErrorData("error.22","022","This entry is larger than the maximum number value allowed.")
-      )),
-      Some(List(ValidationErrorData("error.22","022","This entry is larger than the maximum number value allowed."))),
+      Some(List(ValidationErrorData("error.16","016","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.16","016","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.16","016","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
       //Q
       None,
-      Some(List(ValidationErrorData("error.23","023","This entry must be a number with 4 digits after the decimal point."))),
-      Some(List(
-        ValidationErrorData("error.23","023","This entry must be a number with 4 digits after the decimal point."),
-        ValidationErrorData("error.24","024","This entry must be a number made up of digits."),
-        ValidationErrorData("error.25","025","This entry is larger than the maximum number value allowed.")
-      )),
-      Some(List(ValidationErrorData("error.25","025","This entry is larger than the maximum number value allowed."))),
+      Some(List(ValidationErrorData("error.17","017","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.17","017","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.17","017","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
       //R
       None,
-      Some(List(ValidationErrorData("error.26","026","This entry must be 'yes' or 'no'."))),
-      Some(List(ValidationErrorData("MANDATORY","100","'18. Has a National Insurance Contribution election or agreement been operated (yes/no)' must have an entry."))),
+      Some(List(ValidationErrorData("error.18","018","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'."))),
       //S
       None,
-      Some(List(ValidationErrorData("error.27","027","This entry must be 'yes' or 'no'."))),
-      Some(List(ValidationErrorData("MANDATORY","100","'19. Was PAYE operated? (yes/no)' must have an entry."))),
+      Some(List(ValidationErrorData("error.19","019","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'."))),
       //T
       None,
-      Some(List(ValidationErrorData("error.28","028","This entry must be 'yes' or 'no'."))),
-      Some(List(ValidationErrorData("MANDATORY","100","'20. Was any adjustment made for amounts subject to apportionment for residence or duties outside the UK (yes/no)' must have an entry.")))
+      Some(List(ValidationErrorData("error.20","020","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'.")))
     )
     expectedResults
   }
@@ -302,13 +286,13 @@ trait ERSValidationOTHERRestrictedSecuritiesTestData {
       Cell("E",rowNumber,StringUtils.leftPad("",45, "A")),
       Cell("F",rowNumber,StringUtils.leftPad("",45, "A")),
       Cell("G",rowNumber,"12123456A"),
-      Cell("H",rowNumber,"123XZ55555555???"),
+      Cell("H",rowNumber,"123XZ55555555??"),
       Cell("I",rowNumber,"20150918"),
       Cell("J", rowNumber, StringUtils.leftPad("", 15, "1") + ".34"),
       Cell("K", rowNumber, StringUtils.leftPad("", 15, "1") + ".3234"),
       Cell("L",rowNumber,"n"),
       Cell("M",rowNumber,"y"),
-      Cell("N", rowNumber, "abc1345678901"),
+      Cell("N", rowNumber, "abc12345678901"),
       Cell("O", rowNumber, "2018 09 12"),
       Cell("P", rowNumber, StringUtils.leftPad("", 15, "1") + ".3234"),
       Cell("Q", rowNumber, StringUtils.leftPad("", 15, "1") + ".3234"),

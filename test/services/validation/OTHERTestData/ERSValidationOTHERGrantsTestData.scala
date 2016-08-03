@@ -49,7 +49,7 @@ trait ERSValidationOTHERGrantsTestData {
       Cell("A",rowNumber,"2014-08-30"),
       Cell("A",rowNumber,"2140830"),
       Cell("A",rowNumber,""),
-      Cell("B",rowNumber,"123.00"),
+      Cell("B",rowNumber,"123200"),
       Cell("B",rowNumber,"abc"),
       Cell("B",rowNumber,"12345678"),
       Cell("C",rowNumber,"10.1244"),
@@ -67,30 +67,19 @@ trait ERSValidationOTHERGrantsTestData {
   def getExpectedResults: List[Option[List[ValidationErrorData]]] = {
     val expectedResults = List(
       None,
-      Some(List(ValidationErrorData("error.1","001","The date must match the yyyy-mm-dd pattern."))),
-      Some(List(ValidationErrorData("MANDATORY","100","'1. Date of grant yyyy-mm-dd' must have an entry."))),
+      Some(List(ValidationErrorData("error.1","001","Enter a date that matches the yyyy-mm-dd pattern."))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter a date that matches the yyyy-mm-dd pattern."))),
       None,
-      Some(List(
-        ValidationErrorData("error.2","002","This entry must be a number made up of digits."),
-        ValidationErrorData("error.3","003","This entry is larger than the maximum number value allowed.")
-      )),
-      Some(List(ValidationErrorData("error.3","003","This entry is larger than the maximum number value allowed."))),
+      Some(List(ValidationErrorData("error.2","002","Must be a whole number and be less than 1,000,000."))),
+      Some(List(ValidationErrorData("error.2","002","Must be a whole number and be less than 1,000,000."))),
       None,
-      Some(List(ValidationErrorData("error.4","004","This entry must be a number with 4 digits after the decimal point."))),
-      Some(List(
-        ValidationErrorData("error.4","004","This entry must be a number with 4 digits after the decimal point."),
-        ValidationErrorData("error.5","005","This entry must be a number made up of digits."),
-        ValidationErrorData("error.6","006","This entry is larger than the maximum number value allowed.")
-      )),
-      Some(List(ValidationErrorData("error.6","006","This entry is larger than the maximum number value allowed."))),
+      Some(List(ValidationErrorData("error.3","003","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.3","003","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.3","003","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
       None,
-      Some(List(ValidationErrorData("error.7","007","This entry must be a number with 2 digits after the decimal point."))),
-      Some(List(
-        ValidationErrorData("error.7","007","This entry must be a number with 2 digits after the decimal point."),
-        ValidationErrorData("error.8","008","This entry must be a number made up of digits."),
-        ValidationErrorData("error.9","009","This entry is larger than the maximum number value allowed.")
-      )),
-      Some(List(ValidationErrorData("error.9","009","This entry is larger than the maximum number value allowed.")))
+      Some(List(ValidationErrorData("error.4","004","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.4","004","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.4","004","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it).")))
     )
     expectedResults
   }
@@ -98,7 +87,7 @@ trait ERSValidationOTHERGrantsTestData {
   def getValidRowData:Seq[Cell] = {
     val rowData = Seq(
       Cell("A",rowNumber,"2014-08-30"),
-      Cell("B",rowNumber,"123.00"),
+      Cell("B",rowNumber,"12300"),
       Cell("C",rowNumber,"10.1244"),
       Cell("D",rowNumber,"100.00")
     )
