@@ -27,60 +27,60 @@ trait ERSValidationOTHEREnhancementTestData {
     val descriptions =
       List(
         //column A
-          "When dateOfEvent conforms to the expected date format, no validation error should be raised",
-          "Return an error message when dateOfEvent does not conform to the expect date format",
-          "Return an error message when dateOfEvent has been left empty",
+        "When dateOfEvent conforms to the expected date format, no validation error should be raised",
+        "Return an error message when dateOfEvent does not conform to the expect date format",
+        "Return an error message when dateOfEvent has been left empty",
         //column B
-          "When inRelationToASchemeWithADOTASRef is yes or no, no validation error should be raised",
-          "Return an error message when inRelationToASchemeWithADOTASRef is not a yes or no answer",
-          "Return an error message when inRelationToASchemeWithADOTASRef has been left empty",
+        "When inRelationToASchemeWithADOTASRef is yes or no, no validation error should be raised",
+        "Return an error message when inRelationToASchemeWithADOTASRef is not a yes or no answer",
+        "Return an error message when inRelationToASchemeWithADOTASRef has been left empty",
         //column C
-          "When dotasRef is a correctly formatted SRN, no validation error should be raised",
-          "Return an error message when dotasRef is not a number and eight digits in length",
+        "When dotasRef is a correctly formatted SRN, no validation error should be raised",
+        "Return an error message when dotasRef is not a number and eight digits in length",
         //column D
-          "When individualOptionsPAA\\firstName is a correctly formatted first name, no validation error should be raised",
-          "Return an error message when individualOptionsPAA\\firstName exceeds 35 characters",
-          "Return an error message when individualOptionsPAA\\firstName has been left empty",
+        "When individualOptionsPAA\\firstName is a correctly formatted first name, no validation error should be raised",
+        "Return an error message when individualOptionsPAA\\firstName exceeds 35 characters",
+        "Return an error message when individualOptionsPAA\\firstName has been left empty",
         //column E
-          "When individualOptionsPAA\\secondName is a correctly formatted middle name, no validation error should be raised",
-          "Return an error message when individualOptionsPAA\\secondName exceeds 35 characters",
+        "When individualOptionsPAA\\secondName is a correctly formatted middle name, no validation error should be raised",
+        "Return an error message when individualOptionsPAA\\secondName exceeds 35 characters",
         //column F
-          "When individualOptionsPAS\\surname is a correctly formatted surname, no validation error should be raised",
-          "Return an error message when individualOptionsPAA\\surname exceeds 35 characters",
-          "Return an error message when individualOptionsPAA\\surname has been left empty",
+        "When individualOptionsPAS\\surname is a correctly formatted surname, no validation error should be raised",
+        "Return an error message when individualOptionsPAA\\surname exceeds 35 characters",
+        "Return an error message when individualOptionsPAA\\surname has been left empty",
         //column G
-          "When individualOptionsPAS\\nino is a correctly formatted NINO, no validation error should be raised",
-          "Return an error message when individualOptionsPAA\\nino does not conform to the expected NINO format",
+        "When individualOptionsPAS\\nino is a correctly formatted NINO, no validation error should be raised",
+        "Return an error message when individualOptionsPAA\\nino does not conform to the expected NINO format",
         //column H
-          "When individualOptionsPAS\\payeReference is a correctly formatted PAYE reference, no validation error should be raised",
-          "Return an error message when individualOptionsPAA\\payeReference does not conform to the expected PAYE format",
+        "When individualOptionsPAS\\payeReference is a correctly formatted PAYE reference, no validation error should be raised",
+        "Return an error message when individualOptionsPAA\\payeReference does not conform to the expected PAYE format",
         //column I
-          "When dateSecuritiesOriginallyAcquired conforms to the expected date format, no validation error should be raised",
-          "Return an error message when dateSecuritiesOriginallyAcquired does not conform to the expect date format",
-          "Return an error message when dateSecuritiesOriginallyAcquired has been left empty",
+        "When dateSecuritiesOriginallyAcquired conforms to the expected date format, no validation error should be raised",
+        "Return an error message when dateSecuritiesOriginallyAcquired does not conform to the expect date format",
+        "Return an error message when dateSecuritiesOriginallyAcquired has been left empty",
         //column J
-          "When numberOfSecuritiesOriginallyAcquired conforms to the expected number format, no validation error should be raised",
-          "Return an error message when numberOfSecuritiesOriginallyAcquired does not have 2 digits after the decimal point",
-          "Return an error message when numberOfSecuritiesOriginallyAcquired is not a number",
-          "Return an error message when numberOfSecuritiesOriginallyAcquired exceeds the maximum value",
+        "When numberOfSecuritiesOriginallyAcquired conforms to the expected number format, no validation error should be raised",
+        "Return an error message when numberOfSecuritiesOriginallyAcquired does not have 2 digits after the decimal point",
+        "Return an error message when numberOfSecuritiesOriginallyAcquired is not a number",
+        "Return an error message when numberOfSecuritiesOriginallyAcquired exceeds the maximum value",
         //column K
-          "When totalUMVOn5AprilOrDateOfDisposalIfEarlier conforms to the expected number format, no validation error should be raised",
-          "Return an error message when totalUMVOn5AprilOrDateOfDisposalIfEarlier does not have 4 digits after the decimal point",
-          "Return an error message when totalUMVOn5AprilOrDateOfDisposalIfEarlier is not a number",
-          "Return an error message when totalUMVOn5AprilOrDateOfDisposalIfEarlier exceeds the maximum value",
+        "When totalUMVOn5AprilOrDateOfDisposalIfEarlier conforms to the expected number format, no validation error should be raised",
+        "Return an error message when totalUMVOn5AprilOrDateOfDisposalIfEarlier does not have 4 digits after the decimal point",
+        "Return an error message when totalUMVOn5AprilOrDateOfDisposalIfEarlier is not a number",
+        "Return an error message when totalUMVOn5AprilOrDateOfDisposalIfEarlier exceeds the maximum value",
         //column L
-          "When totalUMVIgnoringArtificialIncreaseOnDateOfTaxableEvent conforms to the expected number format, no validation error should be raised",
-          "Return an error message when totalUMVIgnoringArtificialIncreaseOnDateOfTaxableEvent does not have 4 digits after the decimal point",
-          "Return an error message when totalUMVIgnoringArtificialIncreaseOnDateOfTaxableEvent is not a number",
-          "Return an error message when totalUMVIgnoringArtificialIncreaseOnDateOfTaxableEvent exceeds the maximum value",
+        "When totalUMVIgnoringArtificialIncreaseOnDateOfTaxableEvent conforms to the expected number format, no validation error should be raised",
+        "Return an error message when totalUMVIgnoringArtificialIncreaseOnDateOfTaxableEvent does not have 4 digits after the decimal point",
+        "Return an error message when totalUMVIgnoringArtificialIncreaseOnDateOfTaxableEvent is not a number",
+        "Return an error message when totalUMVIgnoringArtificialIncreaseOnDateOfTaxableEvent exceeds the maximum value",
         //column M
-          "When payeOperatedApplied is a yes or no, no validation error should be raised",
-          "Return an error message when payeOperatedApplied is not a yes or no",
-          "Return an error message when payeOperatedApplied has been left empty",
+        "When payeOperatedApplied is a yes or no, no validation error should be raised",
+        "Return an error message when payeOperatedApplied is not a yes or no",
+        "Return an error message when payeOperatedApplied has been left empty",
         //column N
-          "When adjusmentMadeForUKDuties is a yes or no, no validation error should be raised",
-          "Return an error message when adjusmentMadeForUKDuties is not a yes or no",
-          "Return an error message when adjusmentMadeForUKDuties has been left empty"
+        "When adjusmentMadeForUKDuties is a yes or no, no validation error should be raised",
+        "Return an error message when adjusmentMadeForUKDuties is not a yes or no",
+        "Return an error message when adjusmentMadeForUKDuties has been left empty"
       )
     descriptions
   }
@@ -94,7 +94,7 @@ trait ERSValidationOTHEREnhancementTestData {
       Cell("B", rowNumber, "Yess"),
       Cell("B", rowNumber, ""),
       Cell("C", rowNumber, "12345678"),
-      Cell("C", rowNumber, "123456789"),
+      Cell("C", rowNumber, "12342345678956789"),
       Cell("D", rowNumber, "John"),
       Cell("D", rowNumber, "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"),
       Cell("D", rowNumber, ""),
@@ -137,68 +137,59 @@ trait ERSValidationOTHEREnhancementTestData {
     val expectedResults = List(
       //column A
       None,
-      Some(List(ValidationErrorData("error.1", "001", "The date must match the yyyy-mm-dd pattern."))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "'1. Date of event(yyyy-mm-dd)' must have an entry."))),
+      Some(List(ValidationErrorData("error.1", "001", "Enter a date that matches the yyyy-mm-dd pattern."))),
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter a date that matches the yyyy-mm-dd pattern."))),
       //column B
       None,
-      Some(List(ValidationErrorData("error.2", "002", "This entry must be 'yes' or 'no'."))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "'2. Is the event in relation to a disclosable tax avoidance scheme?(yes/no)' must have an entry."))),
+      Some(List(ValidationErrorData("error.2", "002", "Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter 'yes' or 'no'."))),
       //column C
       None,
-      Some(List(ValidationErrorData("error.3", "003", "The scheme reference number is missing."))),
+      Some(List(ValidationErrorData("error.3", "003", "Enter the scheme reference number (it should be an 8 digit number)."))),
       //column D
       None,
-      Some(List(ValidationErrorData("error.4", "004", "This entry must contain 35 characters or less."))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "'4. Employee first name' must have an entry."))),
+      Some(List(ValidationErrorData("error.4", "004", "Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
       //column E
       None,
-      Some(List(ValidationErrorData("error.5", "005", "This entry must contain 35 characters or less."))),
+      Some(List(ValidationErrorData("error.5", "005", "Must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes."))),
       //column F
       None,
-      Some(List(ValidationErrorData("error.6", "006", "This entry must contain 35 characters or less."))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "'6. Employee last name' must have an entry."))),
+      Some(List(ValidationErrorData("error.6", "006", "Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
       //column G
       None,
-      Some(List(ValidationErrorData("error.7", "007", "The National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter."))),
+      Some(List(ValidationErrorData("error.7", "007", "National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter."))),
       //column H
       None,
       Some(List(ValidationErrorData("error.8", "008", "PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters."))),
       //column I
       None,
-      Some(List(ValidationErrorData("error.9", "009", "The date must match the yyyy-mm-dd pattern."))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "'9. Date securities originally acquired(yyyy-mm-dd)' must have an entry."))),
+      Some(List(ValidationErrorData("error.9", "009", "Enter a date that matches the yyyy-mm-dd pattern."))),
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter a date that matches the yyyy-mm-dd pattern."))),
       //column J
       None,
-      Some(List(ValidationErrorData("error.10", "010", "This entry must be a number with 2 digits after the decimal point."))),
-      Some(List(
-        ValidationErrorData("error.10", "010", "This entry must be a number with 2 digits after the decimal point."),
-        ValidationErrorData("error.11", "011", "This entry must be a number made up of digits."),
-        ValidationErrorData("error.12", "012", "This entry is larger than the maximum number value allowed."))),
-      Some(List(ValidationErrorData("error.12", "012", "This entry is larger than the maximum number value allowed."))),
+      Some(List(ValidationErrorData("error.10", "010", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.10", "010", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.10", "010", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
       //column K
       None,
-      Some(List(ValidationErrorData("error.13", "013", "This entry must be a number with 4 digits after the decimal point."))),
-      Some(List(
-        ValidationErrorData("error.13", "013", "This entry must be a number with 4 digits after the decimal point."),
-        ValidationErrorData("error.14", "014", "This entry must be a number made up of digits."),
-        ValidationErrorData("error.15", "015", "This entry is larger than the maximum number value allowed."))),
-      Some(List(ValidationErrorData("error.15", "015", "This entry is larger than the maximum number value allowed."))),
+      Some(List(ValidationErrorData("error.11", "011", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.11", "011", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.11", "011", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
       //column L
       None,
-      Some(List(ValidationErrorData("error.16", "016", "This entry must be a number with 4 digits after the decimal point."))),
-      Some(List(
-        ValidationErrorData("error.16", "016", "This entry must be a number with 4 digits after the decimal point."),
-        ValidationErrorData("error.17", "017", "This entry must be a number made up of digits."),
-        ValidationErrorData("error.18", "018", "This entry is larger than the maximum number value allowed."))),
-      Some(List(ValidationErrorData("error.18", "018", "This entry is larger than the maximum number value allowed."))),
+      Some(List(ValidationErrorData("error.12", "012", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.12", "012", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.12", "012", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
       //column M
       None,
-      Some(List(ValidationErrorData("error.19", "019", "This entry must be 'yes' or 'no'."))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "'13.Was PAYE operated?(yes/no)' must have an entry."))),
+      Some(List(ValidationErrorData("error.13", "013", "Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter 'yes' or 'no'."))),
       //column M
       None,
-      Some(List(ValidationErrorData("error.20", "020", "This entry must be 'yes' or 'no'."))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "'14.Was any adjustment made for amounts subject to apportionment for residence or duties outside the UK? (yes/no)' must have an entry.")))
+      Some(List(ValidationErrorData("error.14", "014", "Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter 'yes' or 'no'.")))
 
 
 
@@ -230,7 +221,7 @@ trait ERSValidationOTHEREnhancementTestData {
     val rowData = Seq(
       Cell("A", rowNumber, "20-12-2011"),
       Cell("B", rowNumber, "Yess"),
-      Cell("C", rowNumber, "123456789"),
+      Cell("C", rowNumber, "1234567234567889"),
       Cell("D", rowNumber, "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"),
       Cell("E", rowNumber, "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"),
       Cell("F", rowNumber, "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"),

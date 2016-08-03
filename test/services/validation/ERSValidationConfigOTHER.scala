@@ -58,7 +58,7 @@ class OTHEROptionsV3ValidationTest extends PlaySpec with ERSValidationOTHEROptio
     val row = Row(1,Seq(cellC,cellB))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
     resOpt mustBe Some(List(
-      ValidationError(cellC,"mandatoryC","C01","'3. If yes, enter the eight-digit scheme reference number (SRN)' must be answered if '2. Is the event in relation to a disclosable tax avoidance scheme? (yes/no)' was answered with YES.")
+      ValidationError(cellC,"mandatoryC","C01","Enter the scheme reference number (it should be an 8 digit number).")
     ))
   }
 
@@ -70,7 +70,7 @@ class OTHEROptionsV3ValidationTest extends PlaySpec with ERSValidationOTHEROptio
     val row = Row(1,Seq(cellAM,cellAL))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
     resOpt mustBe Some(List(
-      ValidationError(cellAM,"mandatoryAM","AM01","'39. If yes, amount of money or value received £ e.g. 10.1234' must be answered if '38. If securities were not acquired, was money or value received on the release, assignment, cancellation or lapse of the option? (yes/no) If yes go to next question If no, no further information required on this event.' was answered with YES.")
+      ValidationError(cellAM,"mandatoryAM","AM01","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it).")
     ))
   }
 
@@ -101,7 +101,7 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
       val row = Row(1,Seq(cellC,cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellC,"mandatoryB","MB","'3. If yes enter the eight-digit scheme reference number (SRN)' must be answered if '2. Is the event in relation to a disclosable tax avoidance scheme? (yes/no)' was answered with YES.")
+        ValidationError(cellC,"mandatoryB","MB","Enter the scheme reference number (it should be an 8 digit number).")
       ))
     }
 
@@ -111,7 +111,7 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
       val row = Row(1,Seq(cellU,cellT))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellU,"mandatoryT","MT","'21. If the securities are shares, are they listed on a recognised stock exchange? (yes/no) If no go to question 22, If yes go to question 24' must be answered if '20. If the securities are not shares enter ' no' and go to question 24 If the securities are shares, are they part of the largest class of shares in the company? (yes/no)' was answered with YES.")
+        ValidationError(cellU,"mandatoryT","MT","Enter 'yes' or 'no'.")
       ))
     }
 
@@ -121,7 +121,7 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
       val row = Row(1,Seq(cellV,cellU))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellV,"mandatoryU","MU","'22. If shares were not listed on a recognised stock exchange, was valuation agreed with HMRC? (yes/no)' must be answered if '21. If the securities are shares, are they listed on a recognised stock exchange? (yes/no) If no go to question 22, If yes go to question 24' was answered with NO.")
+        ValidationError(cellV,"mandatoryU","MU","Enter 'yes' or 'no'.")
       ))
     }
 
@@ -131,7 +131,7 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
       val row = Row(1,Seq(cellW,cellV))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellW,"mandatoryV","MV","'23. If yes, enter the HMRC reference given' must be answered if '22. If shares were not listed on a recognised stock exchange, was valuation agreed with HMRC? (yes/no)' was answered with YES.")
+        ValidationError(cellW,"mandatoryV","MV","Enter the HMRC reference (must be less than 11 characters).")
       ))
     }
 
@@ -141,7 +141,7 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
       val row = Row(1,Seq(cellZ,cellY))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellZ,"mandatoryY","MY","'26. If restricted, nature of restriction. Enter a number from 1-3, follow the link at cell A7 for a list of restrictions' must be answered if '25. Security type. Enter a number from 1 to 3, (follow the link at cell A7 for a list of security types). If restricted go to next question. If convertible go to question 32. If both restricted and convertible enter 1 and answer all questions 26 to 32. If neither restricted nor convertible go to question 29.' was filled with 1.")
+        ValidationError(cellZ,"mandatoryY","MY","Enter '1', '2' or '3'.")
       ))
     }
 
@@ -151,7 +151,7 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
       val row = Row(1,Seq(cellAD,cellY))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellAD,"mandatoryY2","MY2","'30. If restricted, has an election been operated to disregard restrictions? (yes/no)' must be answered if '25. Security type. Enter a number from 1 to 3, (follow the link at cell A7 for a list of security types). If restricted go to next question. If convertible go to question 32. If both restricted and convertible enter 1 and answer all questions 26 to 32. If neither restricted nor convertible go to question 29.' was filled with 1.")
+        ValidationError(cellAD,"mandatoryY2","MY2","Enter 'yes' or 'no'.")
       ))
     }
 
@@ -161,7 +161,7 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
       val row = Row(1,Seq(cellAE,cellAD))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellAE,"mandatoryD1","MD1","'31. If an election has been operated to disregard restrictions, have all or some been disregarded? (enter all or some)' must be answered if '30. If restricted, has an election been operated to disregard restrictions? (yes/no)' was answered with YES.")
+        ValidationError(cellAE,"mandatoryD1","MD1","Enter 'all' or 'some'.")
       ))
     }
 
@@ -171,7 +171,7 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
       val row = Row(1,Seq(cellAJ,cellAI))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellAJ,"mandatoryI1","MI1","'36. If there was an artificial reduction in value, nature of the artificial reduction Enter a number from 1 to 3. Follow the link in cell A7 for a list of types of artificial restriction' must be answered if '35. Was there an artificial reduction in value on acquisition? (yes/no) If 'yes' go to question 36, if 'No' go to question 37' was answered with YES.")
+        ValidationError(cellAJ,"mandatoryI1","MI1","Enter '1', '2' or '3'.")
       ))
     }
 
@@ -181,37 +181,7 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
       val row = Row(1,Seq(cellAL,cellAK))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellAL,"mandatoryK1","MK1","'38. If shares were acquired under an employee shareholder arrangement, was the total actual market value (AMV) of shares £2,000 or more? (yes/no)' must be answered if '37. Were shares acquired under an employee shareholder arrangement? (yes/no)' was answered with YES.")
-      ))
-    }
-
-    "when Column T is answered NO, column X is a mandatory field" in {
-      val cellX = Cell("X", rowNumber, "")
-      val cellT = Cell("T", rowNumber, "no")
-      val row = Row(1,Seq(cellX,cellT))
-      val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellX,"mandatoryT2","MT2","'24. Number of securities acquired e.g. 100.00' must be answered if '20. If the securities are not shares enter ' no' and go to question 24 If the securities are shares, are they part of the largest class of shares in the company? (yes/no)' was answered with NO.")
-      ))
-    }
-
-    "when Column U is answered YES, column X is a mandatory field" in {
-      val cellX = Cell("X", rowNumber, "")
-      val cellU = Cell("U", rowNumber, "yes")
-      val row = Row(1,Seq(cellX,cellU))
-      val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellX,"mandatoryU2","MU2","'24. Number of securities acquired e.g. 100.00' must be answered if '21. If the securities are shares, are they listed on a recognised stock exchange? (yes/no) If no go to question 22, If yes go to question 24' was answered with YES.")
-      ))
-    }
-
-    "when Column AI is answered NO, column AK is a mandatory field" in {
-      val cellAK = Cell("AK", rowNumber, "")
-      val cellAI = Cell("AI", rowNumber, "no")
-      val row = Row(1,Seq(cellAK,cellAI))
-      val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellAK,"mandatoryI2","MI2","'37. Were shares acquired under an employee shareholder arrangement? (yes/no)' must be answered if '35. Was there an artificial reduction in value on acquisition? (yes/no) If 'yes' go to question 36, if 'No' go to question 37' was answered with NO.")
+        ValidationError(cellAL,"mandatoryK1","MK1","Enter 'yes' or 'no'.")
       ))
     }
 
@@ -232,7 +202,7 @@ class OTHERRestrictedSecuritiesV3_ValidationTest extends PlaySpec with ERSValida
     val row = Row(1,Seq(cellC,cellB))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
     resOpt mustBe Some(List(
-      ValidationError(cellC,"mandatoryC","C01","'3. If yes, enter the eight-digit scheme reference number (SRN)' must be answered if '2. Is the event in relation to a disclosable tax avoidance scheme? (yes/no)' was answered with YES.")
+      ValidationError(cellC,"mandatoryC","C01","Enter the scheme reference number (it should be an 8 digit number).")
     ))
   }
 
@@ -242,7 +212,7 @@ class OTHERRestrictedSecuritiesV3_ValidationTest extends PlaySpec with ERSValida
     val row = Row(1,Seq(cellM,cellL))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
     resOpt mustBe Some(List(
-      ValidationError(cellM,"mandatoryM","M01","'13. If shares were not listed on a recognised stock exchange, was valuation agreed with HMRC? (yes/no)' must be answered if '12. For lifting of restrictions, are the shares listed on a recognised stock exchange? (yes/no)' was answered with NO.")
+      ValidationError(cellM,"mandatoryM","M01","Enter 'yes' or 'no'.")
     ))
   }
 
@@ -252,7 +222,7 @@ class OTHERRestrictedSecuritiesV3_ValidationTest extends PlaySpec with ERSValida
     val row = Row(1,Seq(cellN,cellM))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
     resOpt mustBe Some(List(
-      ValidationError(cellN,"mandatoryN","N01","'14. If yes, enter the HMRC reference given' must be answered if '13. If shares were not listed on a recognised stock exchange, was valuation agreed with HMRC? (yes/no)' was answered with YES.")
+      ValidationError(cellN,"mandatoryN","N01","Enter the HMRC reference (must be less than 11 characters).")
     ))
   }
 
@@ -284,7 +254,7 @@ class OTHEROtherBenefitsV3ValidationTest extends PlaySpec with ERSValidationOTHE
     val row = Row(1,Seq(cellC,cellB))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
     resOpt mustBe Some(List(
-      ValidationError(cellC,"mandatoryB","MB","'3. If yes enter the eight-digit scheme reference number (SRN)' must be answered if '2. Is the event in relation to a disclosable tax avoidance scheme? (yes/no)' was answered with YES.")
+      ValidationError(cellC,"mandatoryB","MB","Enter the scheme reference number (it should be an 8 digit number).")
     ))
   }
 }
@@ -303,7 +273,7 @@ class OTHERConvertibleV3ValidationTest extends PlaySpec with ERSValidationOTHERC
     val row = Row(1, Seq(cellC, cellB))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
     resOpt mustBe Some(List(
-      ValidationError(cellC, "mandatoryC", "C01", "'3. If yes, enter the eight-digit scheme reference number (SRN)' must be answered if '2. Is the event in relation to a disclosable tax avoidance scheme? (yes/no)' was answered with YES.")
+      ValidationError(cellC, "mandatoryC", "C01", "Enter the scheme reference number (it should be an 8 digit number).")
     ))
   }
 
@@ -333,7 +303,7 @@ class OTHERNotionalV3ValidationTest extends PlaySpec with ERSValidationOTHERNoti
       val row = Row(1, Seq(cellC, cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellC, "mandatoryC", "C01", "'3.If yes, enter the eight-digit scheme reference number (SRN)' must be answered if '2.Is the event in relation to a disclosable tax avoidance scheme?(yes/no)' was answered with YES.")
+        ValidationError(cellC, "mandatoryC", "C01", "Enter the scheme reference number (it should be an 8 digit number).")
       ))
     }
   }
@@ -365,7 +335,7 @@ class OTHEREnhancementV3ValidationTest extends PlaySpec with ERSValidationOTHERE
       val row = Row(1, Seq(cellC, cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellC, "mandatoryC", "C01", "'3. If yes, enter the eight-digit scheme reference number (SRN)' must be answered if '2. Is the event in relation to a disclosable tax avoidance scheme?(yes/no)' was answered with YES.")
+        ValidationError(cellC, "mandatoryC", "C01", "Enter the scheme reference number (it should be an 8 digit number).")
       ))
     }
   }
@@ -397,7 +367,7 @@ class OTHERSoldV3ValidationTest extends PlaySpec with ERSValidationOTHERSoldTest
       val row = Row(1, Seq(cellC, cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellC, "mandatoryC", "C01", "'3. If yes, enter the eight-digit scheme reference number (SRN)' must be answered if '2. Is the event in relation to a disclosable tax avoidance scheme?(yes/no)' was answered with YES.")
+        ValidationError(cellC, "mandatoryC", "C01", "Enter the scheme reference number (it should be an 8 digit number).")
       ))
     }
   }
