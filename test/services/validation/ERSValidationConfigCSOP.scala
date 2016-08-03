@@ -33,7 +33,7 @@ class CSOPOptionsGrantedV3ValidationCSOPTest extends PlaySpec with ERSValidation
       val row = Row(1,Seq(cellG,cellF))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellG,"mandatoryG","G01","'7. If no, was the market value agreed with HMRC?(yes/no)' must be answered if '6. Are the shares under the CSOP option listed on a recognised stock exchange?(yes/no)' was answered with NO.")))
+        ValidationError(cellG,"mandatoryG","G01","Enter 'yes' or 'no'.")))
     }
 
     "when sharesListedOnSE is answered yes, hmrcRef is a mandatory field" in {
@@ -42,7 +42,7 @@ class CSOPOptionsGrantedV3ValidationCSOPTest extends PlaySpec with ERSValidation
       val row = Row(1,Seq(cellH,cellG))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellH,"mandatoryH","G02","'8. If yes enter the HMRC reference given' must be answered if '7. If no, was the market value agreed with HMRC?(yes/no)' was answered with YES.")
+        ValidationError(cellH,"mandatoryH","G02","Enter the HMRC reference (must be less than 11 characters).")
       ))
     }
 
@@ -69,7 +69,18 @@ class CSOPOptionsRCLTest extends PlaySpec with ERSValidationCSOPRCLTestData with
     val validator = DataValidator(ConfigFactory.load.getConfig("ers-csop-rcl-validation"))
     runTests(validator, getDescriptions, getTestData, getExpectedResults)
 
+    "when colB is answered yes, colC is a mandatory field" in {
+      val cellC = Cell("C", rowNumber, "")
+      val cellB = Cell("B", rowNumber, "yes")
+      val row = Row(1,Seq(cellB,cellC))
+      val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
+      resOpt mustBe Some(List(
+        ValidationError(cellC,"mandatoryC","C01","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it).")
+      ))
+    }
+
   }
+
 }
 
 class CSOPOptionsExercisedTest extends PlaySpec with ERSValidationCSOPExercisedTestData with ValidationTestRunner{
@@ -85,7 +96,7 @@ class CSOPOptionsExercisedTest extends PlaySpec with ERSValidationCSOPExercisedT
       val row = Row(1,Seq(cellO,cellN))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellO,"mandatoryO","O01","'15. If yes enter the HMRC reference given' must be answered if '14. If the answer to question 10 is no, was the market value agreed with HMRC? (yes/no)' was answered with YES.")
+        ValidationError(cellO,"mandatoryO","O01","Enter the HMRC reference (must be less than 11 characters).")
       ))
     }
 
@@ -95,7 +106,7 @@ class CSOPOptionsExercisedTest extends PlaySpec with ERSValidationCSOPExercisedT
       val row = Row(1,Seq(cellR,cellQ))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellR,"mandatoryR","R01","'18. If yes, deductible amount £ e.g. 10.1234' must be answered if '17. Was PAYE operated? (yes/no)' was answered with YES.")
+        ValidationError(cellR,"mandatoryR","R01","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it).")
       ))
     }
 

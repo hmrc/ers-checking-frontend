@@ -22,7 +22,6 @@ import org.scalatestplus.play.PlaySpec
 
 import services.validation.EMITestData.{ERSValidationEMIRLCTestData, ERSValidationEMINonTaxableTestData, ERSValidationEMIReplacedTestData, ERSValidationEMITaxableTestData, ERSValidationEMIAdjustmentsTestData}
 
-
 class EMIAdjustmentsV3ValidationTest extends PlaySpec with ERSValidationEMIAdjustmentsTestData with ValidationTestRunner {
 
   "ERS Validation tests for EMI Adjustments" should {
@@ -35,7 +34,7 @@ class EMIAdjustmentsV3ValidationTest extends PlaySpec with ERSValidationEMIAdjus
       val row = Row(1,Seq(cellB,cellA))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellB,"mandatoryB","B01","'2. Has there been a change to the description of the shares under option? (yes/no)' must be answered if '1. Has there been any adjustment of options following a variation in the share capital of the company? (yes/no)' was answered with YES.")
+        ValidationError(cellB,"mandatoryB","B01","Enter 'yes' or 'no'.")
       ))
     }
 
@@ -45,7 +44,7 @@ class EMIAdjustmentsV3ValidationTest extends PlaySpec with ERSValidationEMIAdjus
       val row = Row(1,Seq(cellC,cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellC,"mandatoryC","C01","'3. Is the adjustment a disqualifying event? (yes/no). If YES go to question 4. If NO go to question 5.' must be answered if '2. Has there been a change to the description of the shares under option? (yes/no)' was answered with YES.")
+        ValidationError(cellC,"mandatoryC","C01","Enter 'yes' or 'no'.")
       ))
     }
 
@@ -55,7 +54,7 @@ class EMIAdjustmentsV3ValidationTest extends PlaySpec with ERSValidationEMIAdjus
       val row = Row(1,Seq(cellD,cellC))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellD,"mandatoryD","D01","'4. If yes, enter a number from 1 to 8 depending on the nature of the disqualifying event. Follow the link at cell A7 for a list of disqualifying events' must be answered if '3. Is the adjustment a disqualifying event? (yes/no). If YES go to question 4. If NO go to question 5.' was answered with YES.")
+        ValidationError(cellD,"mandatoryD","D01","Enter '1', '2', '3', '4', '5', '6', '7' or '8'.")
       ))
     }
 
@@ -96,7 +95,7 @@ class EMIRLCV3ValidationTest extends PlaySpec with ERSValidationEMIRLCTestData w
       val row = Row(1, Seq(cellC, cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellC, "mandatoryC", "C01", "'3. If yes, enter a number from 1 to 8 depending on the nature of the disqualifying event.Follow the link at cell A7 for a list of disqualifying events' must be answered if '2. Is the release, lapse or cancellation the result of a disqualifying event?(yes/no)' was answered with YES.")
+        ValidationError(cellC, "mandatoryC", "C01", "Enter '1', '2', '3', '4', '5', '6', '7' or '8'.")
       ))
     }
     "when Column J is answered yes, column K is a mandatory field" in {
@@ -105,7 +104,7 @@ class EMIRLCV3ValidationTest extends PlaySpec with ERSValidationEMIRLCTestData w
       val row = Row(1, Seq(cellK, cellJ))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellK, "mandatoryK", "K01", "'11. If yes enter the amount£e.g. 10.1234' must be answered if '10. Was money or value received?(yes/no)If yes go to question 11, otherwise no more information is needed for this event.' was answered with YES.")
+        ValidationError(cellK, "mandatoryK", "K01", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it).")
       ))
     }
     "when Column K is answered, column L is a mandatory field" in {
@@ -114,7 +113,7 @@ class EMIRLCV3ValidationTest extends PlaySpec with ERSValidationEMIRLCTestData w
       val row = Row(1, Seq(cellL, cellK))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellL, "mandatoryL", "L01", "'12. PAYE operated?(yes/no)' must be answered if '11. If yes enter the amount£e.g. 10.1234' was answered.")
+        ValidationError(cellL, "mandatoryL", "L01", "Enter 'yes' or 'no'.")
       ))
     }
   }
@@ -133,7 +132,7 @@ class EMINonTaxableV3ValidationTest extends PlaySpec with ERSValidationEMINonTax
       val row = Row(1,Seq(cellL,cellK))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellL,"mandatoryL","L01","'12. If no, was the market value agreed with HMRC? (yes/no)' must be answered if '11. Are the shares subject to the option exercised listed on a recognised stock exchange? (yes/no)' was answered with NO.")
+        ValidationError(cellL,"mandatoryL","L01","Enter 'yes' or 'no'.")
       ))
     }
 
@@ -143,7 +142,7 @@ class EMINonTaxableV3ValidationTest extends PlaySpec with ERSValidationEMINonTax
       val row = Row(1,Seq(cellM,cellL))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellM,"mandatoryM","M01","'13. If yes, enter the HMRC reference given' must be answered if '12. If no, was the market value agreed with HMRC? (yes/no)' was answered with YES.")
+        ValidationError(cellM,"mandatoryM","M01","Enter the HMRC reference (must be less than 11 characters).")
       ))
     }
 
@@ -177,7 +176,7 @@ class EMITaxableV3ValidationTest extends PlaySpec with ERSValidationEMITaxableTe
       val row = Row(1,Seq(cellC,cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellC,"mandatoryC","C01","'3. If yes, enter a number from 1 to 8 depending on the nature of the disqualifying event. Follow the link at cell A7 for a list of disqualifying events' must be answered if '2. Is this as a result of a disqualifying event? (yes/no)' was answered with YES.")
+        ValidationError(cellC,"mandatoryC","C01","Enter '1', '2', '3', '4', '5', '6', '7' or '8'.")
       ))
     }
 
@@ -187,7 +186,7 @@ class EMITaxableV3ValidationTest extends PlaySpec with ERSValidationEMITaxableTe
       val row = Row(1,Seq(cellP,cellO))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellP,"mandatoryP","P01","'16. Has the market value been agreed with HMRC? (yes/no)' must be answered if '15. Is the company listed on a recognised stock exchange? (yes/no)If yes go to question 18If no go to question 16' was answered with NO.")
+        ValidationError(cellP,"mandatoryP","P01","Enter 'yes' or 'no'.")
       ))
     }
 
@@ -197,7 +196,7 @@ class EMITaxableV3ValidationTest extends PlaySpec with ERSValidationEMITaxableTe
       val row = Row(1,Seq(cellQ,cellP))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellQ,"mandatoryQ","Q01","'17. If yes, enter the HMRC reference given' must be answered if '16. Has the market value been agreed with HMRC? (yes/no)' was answered with YES.")
+        ValidationError(cellQ,"mandatoryQ","Q01","Enter the HMRC reference (must be less than 11 characters).")
       ))
     }
 
