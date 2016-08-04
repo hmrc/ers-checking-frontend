@@ -45,7 +45,7 @@ object ValidationContext extends ERSValidationFormatters{
 }
 
 object ErsValidator {
-  val colNames = List("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","AA","AB","AC","AD","AE")
+  val colNames = List("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","AA","AB","AC","AD","AE","AF","AG","AH","AI","AJ","AK","AL","AM","AN","AO","AP")
 
   def validateRow(rowData:Seq[String],rowNumber:Int, validator: DataValidator) = {
   try {
