@@ -138,6 +138,7 @@ ers_not_authorised.para1=You are not authorised to access ERS checking service
 ers_html_error_report.styles=<div></div>
 ers_html_error_report.styles2=<style>article table td, article table th '{'background:none; padding:10px 20px 10px 0'}' article table td, article table th '{'border:none;'}' article table td, article table th '{'border-bottom: 1px solid #BFC1C3;'}' .column, .row '{'width:10%'}' .report-title '{'text-align:right; margin-top:0; margin-bottom:0;'}'</style>
 ers_html_error_report.report_title={0} ({1}) error report
+ers_html_error_report.number_of_errors_sing=Showing {0} of {1} error found.
 ers_html_error_report.number_of_errors=Showing {0} of {1} errors found.
 ers_html_error_report.formatting_errors=<p id='summary' class='heading-medium'>Your spreadsheet contains {0} formatting errors.</p>
 ers_html_error_report.formatting_errors_singular=<p id='summary' class='heading-medium'>Your spreadsheet contains 1 formatting error.</p>
