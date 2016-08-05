@@ -102,8 +102,17 @@ trait CsvFileProcessor extends DataGenerator {
         rowCount = rowCount+1
         val rowData: Array[String] = iterator.nextLine().split(",")
         if(!isBlankRow(rowData)){
-          Logger.debug("Row Num :- "+ rowCount +  " -- Data retrieved:-" + rowData.mkString)
-          validator(rowData,rowCount,dataValidator) match {
+          val sheetColSize = ERSTemplatesInfo.ersSheets(sheetName.replace(".csv", "")).headerRow.size
+          val dataToValidate = if(rowData.size < sheetColSize) {
+            Logger.warn(s"Difference between amount of columns ${rowData.size} and amount of headers ${sheetColSize}")
+            val additionalEmptyCells: Seq[String] = List.fill(sheetColSize - rowData.size)("")
+            (rowData ++ additionalEmptyCells).take(sheetColSize)
+          }
+          else {
+            rowData.take(sheetColSize)
+          }
+          Logger.debug("Row Num :- "+ rowCount +  " -- Data retrieved:-" + dataToValidate.mkString)
+          validator(dataToValidate, rowCount, dataValidator) match {
             case errors:Option[List[ValidationError]] if errors.isDefined => {
             //  Logger.debug("Error while Validating File + Formatting errors present " + errors.toString)
               Logger.debug("schemeErrors size is " + errors.size)
@@ -116,8 +125,10 @@ trait CsvFileProcessor extends DataGenerator {
       errorsList
     }
     catch {
-      case _:Throwable => UploadedFileUtil.deleteFile(file: File)
+      case ex:Throwable => {
+        UploadedFileUtil.deleteFile(file: File)
         throw new ERSFileProcessingException(Messages("ers.exceptions.dataParser.fileParsingError", sheetName) ,Messages("ers.exceptions.dataParser.parsingOfFileData"))
+      }
     }
     finally {
       LineIterator.closeQuietly(iterator)
