@@ -41,7 +41,7 @@ trait DataParser {
   def validateSpecialCharacters(xmlRowData : String )={
     if(xmlRowData.contains("&")){
       Logger.debug("Found invalid xml in Data Parser, throwing exception")
-      throw new ERSFileProcessingException("Invalid characters found in file: Ampersand (&) characters are not allowed in submissions.", "Found error in the data parser")
+      throw new ERSFileProcessingException(Messages("ers.exceptions.dataParser.configFailure"), Messages("ers.exceptions.dataParser.parsingOfFileData"))
     }
   }
 
@@ -59,8 +59,8 @@ trait DataParser {
       }
       case elem:Option[Elem] => Logger.debug("3.2 Parse row right ")
         Try( Right(xmlRow.get.child.flatMap( parseColumn(_)))).getOrElse{
-          Logger.warn(Messages("ers.exceptions.dataParser.fileRetrievalFailed", row))
-          throw ERSFileProcessingException (Messages("ers.exceptions.dataParser.fileRetrievalFailed", row), Messages("ers.exceptions.dataParser.parserFailure"))
+          Logger.warn(Messages("ers.exceptions.dataParser.fileRetrievalFailed", fileName))
+          throw ERSFileProcessingException (Messages("ers.exceptions.dataParser.fileRetrievalFailed", fileName), Messages("ers.exceptions.dataParser.parserFailure", fileName))
         }
       case _  => {
         Logger.warn(Messages("ers.exceptions.dataParser.fileParsingError", fileName))
@@ -124,7 +124,7 @@ trait DataGenerator extends DataParser with Metrics{
           case 9 => {
             Logger.debug("GetData: incRowNum if  9: " + rowNum + "sheetColSize: " + sheetColSize )
             Logger.debug("sheetName--->" + sheetName)
-            sheetColSize = validateHeaderRow(rowData.right.get, sheetName)
+            sheetColSize = validateHeaderRow(rowData.right.get, sheetName, scheme, fileName)
             incRowNum()
           }
           case _ => {
@@ -180,7 +180,7 @@ trait DataGenerator extends DataParser with Metrics{
 
   def identifyAndDefineSheet(data:String,scheme:String)(implicit headerCarrier: HeaderCarrier, request: Request[_]) = {
     Logger.debug("5.1  case 0 identifyAndDefineSheet  " )
-    val res = getSheet(data)
+    val res = getSheet(data, scheme)
     val schemeName = ContentUtil.getSchemeName(scheme)._2
     res.schemeType.toLowerCase == schemeName.toLowerCase match {
       case true =>  {
@@ -188,27 +188,28 @@ trait DataGenerator extends DataParser with Metrics{
         data }
       case _ => {
         AuditEvents.fileProcessingErrorAudit(res.schemeType, res.sheetName, s"${res.schemeType.toLowerCase} is not equal to ${schemeName.toLowerCase}")
-        Logger.warn(Messages("ers.exceptions.dataParser.incorrectSchemeType", res.schemeType.toLowerCase, schemeName.toLowerCase))
-        throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectSchemeType", res.schemeType.toLowerCase, schemeName.toLowerCase), Messages("ers.exceptions.dataParser.incorrectSchemeType", res.schemeType.toLowerCase, schemeName.toLowerCase))
+        Logger.warn(Messages("ers.exceptions.dataParser.incorrectSchemeType", res.schemeType.toUpperCase, schemeName.toUpperCase))
+        throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectSchemeType", ContentUtil.withArticle(res.schemeType.toUpperCase), ContentUtil.withArticle(schemeName.toUpperCase), res.sheetName), Messages("ers.exceptions.dataParser.incorrectSchemeType", res.schemeType.toLowerCase, schemeName.toLowerCase))
       }
     }
   }
 
-  def getSheet(sheetName:String) = {
+  def getSheet(sheetName:String, scheme:String) = {
     Logger.info(s"Looking for sheetName: ${sheetName}")
     ersSheets.getOrElse(sheetName, {
      //  implicit val hc:HeaderCarrier = new HeaderCarrier()
     //  AuditEvents.fileProcessingErrorAudit(schemeInfo, sheetName, "Could not set the validator")
       Logger.warn(Messages("ers.exceptions.dataParser.unidentifiableSheetName") + sheetName)
-      throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectSheetName", sheetName), Messages("ers.exceptions.dataParser.unidentifiableSheetName") + " " +sheetName)
+      val schemeName = ContentUtil.getSchemeName(scheme)._2
+      throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectSheetName", sheetName, schemeName), Messages("ers.exceptions.dataParser.unidentifiableSheetName") + " " +sheetName)
     })
   }
 
-  def validateHeaderRow(rowData:Seq[String], sheetName:String) =
+  def validateHeaderRow(rowData:Seq[String], sheetName:String, scheme:String, fileName: String) =
   {
     val headerFormat = "[^a-zA-Z0-9]"
 
-    val header = getSheet(sheetName).headerRow.map(_.replaceAll(headerFormat,""))
+    val header = getSheet(sheetName, scheme).headerRow.map(_.replaceAll(headerFormat,""))
     val data = rowData.take(header.size)
     val dataTrim = data.map(_.replaceAll(headerFormat,""))
 
@@ -219,7 +220,7 @@ trait DataGenerator extends DataParser with Metrics{
         implicit val hc:HeaderCarrier = new HeaderCarrier()
      //   AuditEvents.fileProcessingErrorAudit(schemeInfo,sheetName,"Header row invalid")
         Logger.warn("Error while reading File + Incorrect ERS Template")
-        throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectHeader", sheetName),Messages("ers.exceptions.dataParser.headersDontMatch"))
+        throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName),Messages("ers.exceptions.dataParser.headersDontMatch"))
       }
     }
   }

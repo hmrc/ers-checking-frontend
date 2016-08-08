@@ -110,7 +110,7 @@ class ProcessODSServiceSpec extends UnitSpec with MockitoSugar with WithFakeAppl
         )
       override val uploadedFileUtil: UploadedFileUtil = mockUploadedFileUtil
       override val cacheUtil:CacheUtil = mock[CacheUtil]
-      override def parseOdsContent(fileName: String)(implicit scheme:String, authContext: AuthContext, hc: HeaderCarrier,request: Request[_]): ListBuffer[SheetErrors] = new ListBuffer
+      override def parseOdsContent(fileName: String, uploadedFileName: String)(implicit scheme:String, authContext: AuthContext, hc: HeaderCarrier,request: Request[_]): ListBuffer[SheetErrors] = new ListBuffer
     }
 
     //    "return (false, ers_check_file.file_type_error) if uploaded file isn't .ods" in {

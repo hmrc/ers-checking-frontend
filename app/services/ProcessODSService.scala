@@ -93,19 +93,19 @@ trait ProcessODSService {
 
   def checkFileType(uploadedFile: MultipartFormData.FilePart[Files.TemporaryFile])(implicit scheme:String, authContext: AuthContext,hc: HeaderCarrier, request: Request[_]):ListBuffer[SheetErrors] = {
     if (!uploadedFileUtil.checkODSFileType(uploadedFile.filename)) {
-      throw ERSFileProcessingException(Messages("ers_check_file.file_type_error"), Messages("ers_check_file.file_type_error"))
+      throw ERSFileProcessingException(Messages("ers_check_file.file_type_error", uploadedFile.filename), Messages("ers_check_file.file_type_error", uploadedFile.filename))
     }
-    val res = parseOdsContent(uploadedFile.ref.file.getAbsolutePath)(scheme, authContext, hc, request)
+    val res = parseOdsContent(uploadedFile.ref.file.getAbsolutePath, uploadedFile.filename)(scheme, authContext, hc, request)
     UploadedFileUtil.deleteFile(uploadedFile.ref.file)
     res
   }
 
-  def parseOdsContent(fileName: String)(implicit scheme:String, authContext: AuthContext, hc : HeaderCarrier, request: Request[_]): ListBuffer[SheetErrors] = {
+  def parseOdsContent(fileName: String, uploadedFileName: String)(implicit scheme:String, authContext: AuthContext, hc : HeaderCarrier, request: Request[_]): ListBuffer[SheetErrors] = {
 
     val zipFile: ZipFile = new ZipFile(fileName)
     val content: InputStream = zipFile.getInputStream(zipFile.getEntry("content.xml"))
     val processor = new StaxProcessor(content)
-    val result = DataGenerator.getErrors(processor, scheme, fileName)
+    val result = DataGenerator.getErrors(processor, scheme, uploadedFileName)
     zipFile.close()
     result
   }
