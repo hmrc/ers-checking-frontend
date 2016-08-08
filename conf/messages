@@ -40,7 +40,7 @@ ers_check_file_type.alert=Choose the type of file you want to check
 
 ers_check_csv_file.title=Choose the .csv file or files that you want to check for errors
 ers_check_csv_file.check_file_button=Check for errors
-ers_check_csv_file.file_type_error=The attached file is in the wrong format. This is not a CSV file.
+ers_check_csv_file.file_type_error=You chose to check a CSV file, but {0} is not a CSV file.
 ers_check_csv_file.no_file_error=No files selected. Please choose your files.
 ers_check_csv_file.clear_all_link=Clear all
 
@@ -93,7 +93,7 @@ ers_check_file.file_name=No file selected.
 ers_check_file.remove_file_link=Remove file
 ers_check_file.check_file_button=Check for errors
 ers_check_file.back=Back
-ers_check_file.file_type_error=The attached file is in the wrong format. This is not a ODS files.
+ers_check_file.file_type_error=You chose to check an ODS file, but {0} is not an ODS file.
 ers_check_file.no_file_error=No file selected. Please choose your file.
 
 
@@ -167,18 +167,19 @@ ers.exceptions.fileValidatorConnector.serviceUnavailable = Submissions Service S
 ers.exceptions.fileValidatorConnector.sendSubmissions = Send submissions
 ers.exceptions.wiring.noConfig = Could not find config ''cachable.session-cache.domain''
 
-ers.exceptions.dataParser.fileRetrievalFailed = Unable to read row {0} from file.
-ers.exceptions.dataParser.parserFailure = Parser Failure
+ers_format_errors.instructions = Choose a different file to check
+ers.exceptions.dataParser.fileRetrievalFailed = The file that you chose seems to be damaged.<br/>You won’t be able to upload {0} as part of your annual return.
+ers.exceptions.dataParser.parserFailure = The file that you chose seems to be damaged.<br/>You won’t be able to upload {0} as part of your annual return.
 ers.exceptions.dataParser.fileParsingError = The file that you chose to check seems to be damaged. You won’t be able to upload {0} as part of your annual return.
 ers.exceptions.dataParser.parsingOfFileData = Parsing of File Data
-ers.exceptions.dataParser.incorrectSheetName = Sheet name: {0} is incorrect.
-ers.exceptions.dataParser.incorrectSchemeType = The file that you chose to check is for a {0} type scheme or arrangement. Please upload a {1} type file.
+ers.exceptions.dataParser.incorrectSheetName = {0} is not a sheet name (title) that can be used in {1} files.<br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the ERS guidance documents</a> to help you create error-free files.
+ers.exceptions.dataParser.incorrectSchemeType = You chose to check {1} file, but {2} is {0} file.
 ers.exceptions.dataParser.unidentifiableSheetName = Couldn''t identify SheetName
-ers.exceptions.dataParser.incorrectHeader = Header rows have been modified on sheet: {0}
+ers.exceptions.dataParser.incorrectHeader = The headers on {0} in {1} are not right.<br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the ERS guidance documents</a> to make sure they are as required.
 ers.exceptions.dataParser.headersDontMatch = Header doesn''t match
 ers.exceptions.dataParser.fileInvalid = File Invalid, formatting errors present
 ers.exceptions.dataParser.validationFailure = Validation Failure
-ers.exceptions.dataParser.configFailure = Sheet name: {0} is incorrect.
+ers.exceptions.dataParser.configFailure = It has not been possible to check this file.
 
 ers.exceptions.applicationConfig.missingKey = Missing key: {0}
 
