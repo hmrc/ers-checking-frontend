@@ -39,7 +39,7 @@ class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFuture
   "The File Processing Service" must {
 
     "Ensure there are no ampersands in the submitted xml" in {
-      val expectedMessage = "Invalid characters found in file: Ampersand (&) characters are not allowed in submissions."
+      val expectedMessage = "It has not been possible to check this file."
       val inputXml = "<table:table-row table:style-name='ro6'><table:table-cell office:date-value='2015-01-02' table:style-name='ce18' calcext:value-type='date'><text:p>2. Jan. 2015</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>y</text:p></table:table-cell><table:table-cell table:style-name='ce19' calcext:value-type='string'><text:p>12345678901</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>J0hn</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>A.</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>Williams (nee Barratt)</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>A123456A</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>12/B1234579789</text:p></table:table-cell><table:table-cell office:date-value='2015-01-03' table:style-name='ce21' calcext:value-type='date'><text:p>2015-01-03</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>Company & <text:s></text:s>Sons</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>12 Example &Street</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>2nd Star On The Right and <text:s></text:s>Straight On Til Morning</text:p></table:table-cell><table:table-cell table:style-name='Default' calcext:value-type='string'><text:p>Exampley</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>Example-upon-River</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>United Kingdom</text:p></table:table-cell><table:table-cell table:style-name='Default' calcext:value-type='string'><text:p>EX12 3AM</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>AB123549123</text:p></table:table-cell><table:table-cell calcext:value-type='float' office:value='123456790012'><text:p>123456790012</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>123/XZ12345678</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>Another Company Name</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>12 Test Street</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>Test</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>Testing</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>Testing-upon-River</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>United Kingdom</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>TE12 3ST</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>AB123456</text:p></table:table-cell><table:table-cell calcext:value-type='float' office:value='1234567890'><text:p>1234567890</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>123/DC12345678</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>yes</text:p></table:table-cell><table:table-cell calcext:value-type='float' office:value='123.12'><text:p>123.12</text:p></table:table-cell><table:table-cell calcext:value-type='float' office:value='12.1234' table:number-columns-repeated='2'><text:p>12.1234</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>no</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>yes</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>AB12345678</text:p></table:table-cell><table:table-cell calcext:value-type='float' office:value='12.1234'><text:p>12.1234</text:p></table:table-cell><table:table-cell calcext:value-type='string'><text:p>yes</text:p></table:table-cell><table:table-cell calcext:value-type='float' office:value='12.1234'><text:p>12.1234</text:p></table:table-cell><table:table-cell calcext:value-type='string' table:number-columns-repeated='3'><text:p>yes</text:p></table:table-cell><table:table-cell table:number-columns-repeated='982'></table:table-cell></table:table-row>"
 
       val thrown = intercept[ERSFileProcessingException] {dataGeneratorObj.validateSpecialCharacters(inputXml)}
@@ -48,70 +48,70 @@ class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFuture
      }
 
     "validateHeaderRow " in {
-      dataGeneratorObj.validateHeaderRow(XMLTestData.otherHeaderSheet1Data, "Other_Grants_V3") must be (4)
-      val result = Try(dataGeneratorObj.validateHeaderRow(XMLTestData.otherHeaderSheet1Data,"csopHeaderSheet1Data"))
+      dataGeneratorObj.validateHeaderRow(XMLTestData.otherHeaderSheet1Data, "Other_Grants_V3", "OTHER", "Other_Grants_V3.csv") must be (4)
+      val result = Try(dataGeneratorObj.validateHeaderRow(XMLTestData.otherHeaderSheet1Data, "csopHeaderSheet1Data", "CSOP", "CSOP_OptionsGranted_V3.csv"))
       result.isFailure must be (true)
     }
 
     "validate CSOP_OptionsGranted_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(csopHeaderSheet1Data, "CSOP_OptionsGranted_V3") must be (9)
+      dataGeneratorObj.validateHeaderRow(csopHeaderSheet1Data, "CSOP_OptionsGranted_V3", "CSOP", "CSOP_OptionsGranted_V3.csv") must be (9)
     }
     "validate CSOP_OptionsRCL_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(csopHeaderSheet2Data, "CSOP_OptionsRCL_V3") must be (9)
+      dataGeneratorObj.validateHeaderRow(csopHeaderSheet2Data, "CSOP_OptionsRCL_V3", "CSOP", "CSOP_OptionsRCL_V3.csv") must be (9)
     }
     "validate CSOP_OptionsExercised_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(csopHeaderSheet3Data, "CSOP_OptionsExercised_V3") must be (20)
+      dataGeneratorObj.validateHeaderRow(csopHeaderSheet3Data, "CSOP_OptionsExercised_V3", "CSOP", "CSOP_OptionsExercised_V3.csv") must be (20)
     }
 
     "validate SIP_Awards_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(sipHeaderSheet1Data, "SIP_Awards_V3") must be (17)
+      dataGeneratorObj.validateHeaderRow(sipHeaderSheet1Data, "SIP_Awards_V3", "SIP", "SIP_Awards_V3.csv") must be (17)
     }
     "validate SIP_Out_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(sipHeaderSheet2Data, "SIP_Out_V3") must be (17)
+      dataGeneratorObj.validateHeaderRow(sipHeaderSheet2Data, "SIP_Out_V3", "SIP", "SIP_Out_V3.csv") must be (17)
     }
 
     "validate EMI40_Adjustments_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(emiHeaderSheet1Data, "EMI40_Adjustments_V3") must be (14)
+      dataGeneratorObj.validateHeaderRow(emiHeaderSheet1Data, "EMI40_Adjustments_V3", "EMI", "EMI40_Adjustments_V3.csv") must be (14)
     }
     "validate EMI40_Replaced_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(emiHeaderSheet2Data, "EMI40_Replaced_V3") must be (17)
+      dataGeneratorObj.validateHeaderRow(emiHeaderSheet2Data, "EMI40_Replaced_V3", "EMI", "EMI40_Replaced_V3.csv") must be (17)
     }
     "validate EMI40_RLC_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(emiHeaderSheet3Data, "EMI40_RLC_V3") must be (12)
+      dataGeneratorObj.validateHeaderRow(emiHeaderSheet3Data, "EMI40_RLC_V3", "EMI", "EMI40_RLC_V3.csv") must be (12)
     }
     "validate EMI40_NonTaxable_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(emiHeaderSheet4Data, "EMI40_NonTaxable_V3") must be (15)
+      dataGeneratorObj.validateHeaderRow(emiHeaderSheet4Data, "EMI40_NonTaxable_V3", "EMI", "EMI40_NonTaxable_V3.csv") must be (15)
     }
     "validate EMI40_Taxable_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(emiHeaderSheet5Data, "EMI40_Taxable_V3") must be (20)
+      dataGeneratorObj.validateHeaderRow(emiHeaderSheet5Data, "EMI40_Taxable_V3", "EMI", "EMI40_Taxable_V3.csv") must be (20)
     }
 
     "validate Other_Grants_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(otherHeaderSheet1Data, "Other_Grants_V3") must be (4)
+      dataGeneratorObj.validateHeaderRow(otherHeaderSheet1Data, "Other_Grants_V3", "OTHER", "Other_Grants_V3.csv") must be (4)
     }
     "validate Other_Options_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(otherHeaderSheet2Data, "Other_Options_V3") must be (42)
+      dataGeneratorObj.validateHeaderRow(otherHeaderSheet2Data, "Other_Options_V3", "OTHER", "Other_Options_V3.csv") must be (42)
     }
     "validate Other_Acquisition_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(otherHeaderSheet3Data, "Other_Acquisition_V3") must be (40)
+      dataGeneratorObj.validateHeaderRow(otherHeaderSheet3Data, "Other_Acquisition_V3", "OTHER", "Other_Acquisition_V3.csv") must be (40)
     }
     "validate Other_RestrictedSecurities_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(otherHeaderSheet4Data, "Other_RestrictedSecurities_V3") must be (20)
+      dataGeneratorObj.validateHeaderRow(otherHeaderSheet4Data, "Other_RestrictedSecurities_V3", "OTHER", "Other_RestrictedSecurities_V3.csv") must be (20)
     }
     "validate Other_OtherBenefits_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(otherHeaderSheet5Data, "Other_OtherBenefits_V3") must be (13)
+      dataGeneratorObj.validateHeaderRow(otherHeaderSheet5Data, "Other_OtherBenefits_V3", "OTHER", "Other_OtherBenefits_V3.csv") must be (13)
     }
     "validate Other_Convertible_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(otherHeaderSheet6Data, "Other_Convertible_V3") must be (15)
+      dataGeneratorObj.validateHeaderRow(otherHeaderSheet6Data, "Other_Convertible_V3", "OTHER", "Other_Convertible_V3.csv") must be (15)
     }
     "validate Other_Notional_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(otherHeaderSheet7Data, "Other_Notional_V3") must be (13)
+      dataGeneratorObj.validateHeaderRow(otherHeaderSheet7Data, "Other_Notional_V3", "OTHER", "Other_Notional_V3.csv") must be (13)
     }
     "validate Other_Enhancement_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(otherHeaderSheet8Data, "Other_Enhancement_V3") must be (14)
+      dataGeneratorObj.validateHeaderRow(otherHeaderSheet8Data, "Other_Enhancement_V3", "OTHER", "Other_Enhancement_V3.csv") must be (14)
     }
     "validate Other_Sold_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(otherHeaderSheet9Data, "Other_Sold_V3") must be (14)
+      dataGeneratorObj.validateHeaderRow(otherHeaderSheet9Data, "Other_Sold_V3", "OTHER", "Other_Sold_V3.csv") must be (14)
     }
 
     "identifyAndDefineSheet with correct scheme type" in  {
@@ -126,7 +126,7 @@ class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFuture
       val invalidSheet = intercept[ERSFileProcessingException]{
         dataGeneratorObj.identifyAndDefineSheet("CSOP_OptionsExercised_V3","2")(hc,Fixtures.buildFakeRequestWithSessionId("GET"))
       }
-      invalidSheet.message mustBe Messages("ers.exceptions.dataParser.incorrectSchemeType","csop","emi")
+      invalidSheet.message mustBe Messages("ers.exceptions.dataParser.incorrectSchemeType","a CSOP", "an EMI", "CSOP_OptionsExercised_V3")
     }
 
     "isBlankRow" in {

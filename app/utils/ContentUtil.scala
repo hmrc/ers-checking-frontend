@@ -31,4 +31,14 @@ trait ContentUtil {
       case _ => ("","")
     }
   }
+
+  def withArticle(data: String): String = {
+    val vocals: List[Char] = List('a', 'o', 'e', 'u', 'i', 'y')
+    if(vocals.contains(data.charAt(0).toLower)) {
+      "an " + data
+    }
+    else {
+      "a " + data
+    }
+  }
 }
