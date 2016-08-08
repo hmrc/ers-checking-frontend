@@ -87,7 +87,7 @@ trait CsvFileProcessor extends DataGenerator {
 
   def checkFileType(filename:String) = {
     if (!UploadedFileUtil.checkCSVFileType(filename)) {
-      throw ERSFileProcessingException(Messages("ers_check_csv_file.file_type_error"), Messages("ers_check_csv_file.file_type_error"))
+      throw ERSFileProcessingException(Messages("ers_check_csv_file.file_type_error", filename), Messages("ers_check_csv_file.file_type_error", filename))
     }
   }
 
