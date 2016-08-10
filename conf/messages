@@ -180,6 +180,7 @@ ers.exceptions.dataParser.headersDontMatch = Header doesn''t match
 ers.exceptions.dataParser.fileInvalid = File Invalid, formatting errors present
 ers.exceptions.dataParser.validationFailure = Validation Failure
 ers.exceptions.dataParser.configFailure = It has not been possible to check this file.
+ers.exceptions.dataParser.noData = The file that you chose doesn’t have any data after row 9. The reportable events data must start in cell A10.<br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the ERS guidance documents</a> to help you create error-free files.
 
 ers.exceptions.applicationConfig.missingKey = Missing key: {0}
 
