@@ -168,7 +168,9 @@ trait DataGenerator extends DataParser with Metrics{
       }
     }
     checkForMissingHeaders(rowNum, sheetName)
-
+    if(rowsWithData == 0) {
+      throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.noData"),Messages("ers.exceptions.dataParser.noData"))
+    }
     deliverDataIteratorMetrics(startTime)
     AuditEvents.numRowsInSchemeData(scheme, rowsWithData)(authContext,hc,request)
     Logger.debug("The SchemeData that GetData finally returns: " + schemeErrors)
