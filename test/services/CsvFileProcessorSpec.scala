@@ -21,6 +21,7 @@ import java.nio.file.Files
 
 import com.typesafe.config.ConfigFactory
 import controllers.Fixtures
+import models.ERSFileProcessingException
 import org.scalatest.mock.MockitoSugar
 import play.api.i18n.Messages
 import play.api.libs.Files.TemporaryFile
@@ -78,6 +79,16 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with WithFakeAppli
       result.getMessage shouldEqual  Messages("ers.exceptions.dataParser.fileParsingError", "Other_Grants_V3.csv")
     }
 
+    "throw correct exception if an empty csv is given" in {
+      val result = intercept[ERSFileProcessingException] {
+        val file = new File(System.getProperty("user.dir") + "/test/resources/Other_Acquisition_V3.csv")
+        Files.copy(file.toPath,new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/Other_Acquisition_V3.csv").toPath)
+        val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Acquisition_V3.csv")
+        CsvFileProcessor.validateFile(fileCopied,"Other_Acquisition_V3.csv",ErsValidator.validateRow)(DataValidator(ConfigFactory.load.getConfig("ers-other-acquisition-validation-config")))
+      }
+      result.getMessage shouldEqual Messages("ers_check_csv_file.noData", "Other_Acquisition_V3.csv")
+    }
+
   }
 
   "converter should split by comma" in {
@@ -86,8 +97,9 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with WithFakeAppli
 
   def getMockFileCSV = {
     val userDirectory = System.getProperty("user.dir")
-    val tempFile = TemporaryFile(new java.io.File(userDirectory+"/test/resources/copy/Other_Grants_V3").toString, ".csv")
-    //val tempFile = TemporaryFile(new java.io.File("/test/the.csv"))
+    val fileTest = new File(System.getProperty("user.dir") + "/test/resources/test1.csv")
+    Files.copy(fileTest.toPath, new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/test2.csv").toPath)
+    val tempFile = TemporaryFile(new java.io.File(userDirectory+"/test/resources/copy/test2.csv"))
     val part = FilePart[TemporaryFile](key = "fileParam", filename = "Other_Grants_V3.csv", contentType = Some("Content-Type: multipart/form-data"), ref = tempFile)
     val file = MultipartFormData(dataParts = Map(), files = Seq(part), badParts = Seq(), missingFileParts = Seq())
     file
