@@ -100,6 +100,12 @@ trait DataGenerator extends DataParser with Metrics{
 
     val startTime = System.currentTimeMillis()
 
+    def checkForMissingHeaders(rowNum: Int, sheetName: String) = {
+      if(rowNum > 0 && rowNum < 9) {
+        throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName),Messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName))
+      }
+    }
+
     while(iterator.hasNext){
 
       val row = iterator.next()
@@ -108,6 +114,7 @@ trait DataGenerator extends DataParser with Metrics{
       Logger.debug(" parsed data ---> " + rowData + " -- cursor --> " + rowNum)
       rowData.isLeft match {
         case true => {
+          checkForMissingHeaders(rowNum, sheetName)
           Logger.debug("data from the left --->" + rowData.left.get)
           sheetName = identifyAndDefineSheet(rowData.left.get,scheme)
           Logger.debug("Sheetname = " + sheetName + "******")
@@ -160,6 +167,8 @@ trait DataGenerator extends DataParser with Metrics{
         }
       }
     }
+    checkForMissingHeaders(rowNum, sheetName)
+
     deliverDataIteratorMetrics(startTime)
     AuditEvents.numRowsInSchemeData(scheme, rowsWithData)(authContext,hc,request)
     Logger.debug("The SchemeData that GetData finally returns: " + schemeErrors)
