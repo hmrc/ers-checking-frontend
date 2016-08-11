@@ -29,7 +29,7 @@ import services.validation.ErsValidator
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.services.validation.{ValidationError,DataValidator}
-import utils.ContentUtil
+import utils.{ParserUtil, ContentUtil}
 
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
@@ -138,21 +138,13 @@ trait DataGenerator extends DataParser with Metrics{
             val foundData = rowData.right.get
             rowCount = rowData.right.get.size
 
-            val data = if(foundData.size < sheetColSize) {
-              Logger.warn(s"Difference between amount of columns ${foundData.size} and amount of headers ${sheetColSize}")
-              val additionalEmptyCells: Seq[String] = List.fill(sheetColSize - foundData.size)("")
-              (foundData ++ additionalEmptyCells).take(sheetColSize)
-            }
-            else {
-              foundData.take(sheetColSize)
-            }
-
+            val data = ParserUtil.formatDataToValidate(foundData, sheetName)
             if(!isBlankRow(data)){
               rowsWithData+=1
               ErsValidator.validateRow(data,rowNum,validator) match {
                 case errors:Option[List[ValidationError]] if errors.isDefined => {
                   Logger.debug("Error while Validating File + Formatting errors present " + errors.toString)
-                  implicit val hc:HeaderCarrier = new HeaderCarrier()
+                  //implicit val hc:HeaderCarrier = new HeaderCarrier()
                   //                  errors.map{
                   //                    AuditEvents.validationErrorAudit(_,SchemeData(schemeInfo,sheetName,new List[ValidationError]))
                   //                  }
