@@ -67,19 +67,19 @@ trait ERSValidationOTHERGrantsTestData {
   def getExpectedResults: List[Option[List[ValidationErrorData]]] = {
     val expectedResults = List(
       None,
-      Some(List(ValidationErrorData("error.1","001","Enter a date that matches the yyyy-mm-dd pattern."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter a date that matches the yyyy-mm-dd pattern."))),
+      Some(List(ValidationErrorData("error.1","001","Enter a date that matches the yyyy-mm-dd pattern"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter a date that matches the yyyy-mm-dd pattern"))),
       None,
-      Some(List(ValidationErrorData("error.2","002","Must be a whole number and be less than 1,000,000."))),
-      Some(List(ValidationErrorData("error.2","002","Must be a whole number and be less than 1,000,000."))),
+      Some(List(ValidationErrorData("error.2","002","Must be a whole number and be less than 1,000,000"))),
+      Some(List(ValidationErrorData("error.2","002","Must be a whole number and be less than 1,000,000"))),
       None,
-      Some(List(ValidationErrorData("error.3","003","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.3","003","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.3","003","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.3","003","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.3","003","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.3","003","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       None,
-      Some(List(ValidationErrorData("error.4","004","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.4","004","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.4","004","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it).")))
+      Some(List(ValidationErrorData("error.4","004","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.4","004","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.4","004","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)")))
     )
     expectedResults
   }

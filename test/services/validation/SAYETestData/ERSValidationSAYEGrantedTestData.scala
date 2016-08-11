@@ -90,36 +90,36 @@ trait ERSValidationSAYEGrantedTestData {
   def getExpectedResults : List[Option[List[ValidationErrorData]]] = List(
     //A
     None,
-    Some(List(ValidationErrorData("error.1", "001", "Enter a date that matches the yyyy-mm-dd pattern."))),
-    Some(List(ValidationErrorData("MANDATORY", "100", "Enter a date that matches the yyyy-mm-dd pattern."))),
+    Some(List(ValidationErrorData("error.1", "001", "Enter a date that matches the yyyy-mm-dd pattern"))),
+    Some(List(ValidationErrorData("MANDATORY", "100", "Enter a date that matches the yyyy-mm-dd pattern"))),
     //B
     None,
-    Some(List(ValidationErrorData("error.2", "002", "Must be a whole number and be less than 1,000,000."))),
-    Some(List(ValidationErrorData("error.2", "002", "Must be a whole number and be less than 1,000,000."))),
+    Some(List(ValidationErrorData("error.2", "002", "Must be a whole number and be less than 1,000,000"))),
+    Some(List(ValidationErrorData("error.2", "002", "Must be a whole number and be less than 1,000,000"))),
     //C
     None,
-    Some(List(ValidationErrorData("error.3", "003", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
-    Some(List(ValidationErrorData("error.3", "003", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
-    Some(List(ValidationErrorData("error.3", "003", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
+    Some(List(ValidationErrorData("error.3", "003", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)"))),
+    Some(List(ValidationErrorData("error.3", "003", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)"))),
+    Some(List(ValidationErrorData("error.3", "003", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)"))),
     //D
     None,
-    Some(List(ValidationErrorData("error.4", "004", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-    Some(List(ValidationErrorData("error.4", "004", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-    Some(List(ValidationErrorData("error.4", "004", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+    Some(List(ValidationErrorData("error.4", "004", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
+    Some(List(ValidationErrorData("error.4", "004", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
+    Some(List(ValidationErrorData("error.4", "004", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
     //E
     None,
-    Some(List(ValidationErrorData("error.5", "005", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-    Some(List(ValidationErrorData("error.5", "005", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-    Some(List(ValidationErrorData("error.5", "005", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+    Some(List(ValidationErrorData("error.5", "005", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
+    Some(List(ValidationErrorData("error.5", "005", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
+    Some(List(ValidationErrorData("error.5", "005", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
     //F
     None,
-    Some(List(ValidationErrorData("error.6","006","Enter 'yes' or 'no'."))),
-    Some(List(ValidationErrorData("MANDATORY", "100", "Enter 'yes' or 'no'."))),
+    Some(List(ValidationErrorData("error.6","006","Enter 'yes' or 'no'"))),
+    Some(List(ValidationErrorData("MANDATORY", "100", "Enter 'yes' or 'no'"))),
     //G
     None,
-    Some(List(ValidationErrorData("error.7","007","Enter 'yes' or 'no'."))),
+    Some(List(ValidationErrorData("error.7","007","Enter 'yes' or 'no'"))),
     //H
     None,
-    Some(List(ValidationErrorData("error.8","008", "Enter the HMRC reference (must be less than 11 characters).")))
+    Some(List(ValidationErrorData("error.8","008", "Enter the HMRC reference (must be less than 11 characters)")))
   )
 }

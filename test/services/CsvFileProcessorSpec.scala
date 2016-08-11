@@ -84,7 +84,7 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with WithFakeAppli
         val file = new File(System.getProperty("user.dir") + "/test/resources/Other_Acquisition_V3.csv")
         Files.copy(file.toPath,new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/Other_Acquisition_V3.csv").toPath)
         val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Acquisition_V3.csv")
-        CsvFileProcessor.validateFile(fileCopied,"Other_Acquisition_V3.csv",ErsValidator.validateRow)(DataValidator(ConfigFactory.load.getConfig("ers-other-acquisition-validation-config")))
+        CsvFileProcessor.validateFile(fileCopied,"Other_Acquisition_V3",ErsValidator.validateRow)(DataValidator(ConfigFactory.load.getConfig("ers-other-acquisition-validation-config")))
       }
       result.getMessage shouldEqual Messages("ers_check_csv_file.noData", "Other_Acquisition_V3.csv")
     }
