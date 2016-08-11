@@ -98,10 +98,12 @@ trait CsvFileProcessor extends DataGenerator {
     val errorsList: ListBuffer[ValidationError] = new ListBuffer()
 
     try {
+      var rowsWithData = 0
       while (iterator.hasNext) {
         rowCount = rowCount+1
         val rowData: Array[String] = iterator.nextLine().split(",")
         if(!isBlankRow(rowData)){
+          rowsWithData += 1
           val sheetColSize = ERSTemplatesInfo.ersSheets(sheetName.replace(".csv", "")).headerRow.size
           val dataToValidate = if(rowData.size < sheetColSize) {
             Logger.warn(s"Difference between amount of columns ${rowData.size} and amount of headers ${sheetColSize}")
@@ -122,9 +124,15 @@ trait CsvFileProcessor extends DataGenerator {
           }
         }
       }
+      if(rowsWithData == 0) {
+        throw ERSFileProcessingException(Messages("ers_check_csv_file.noData", sheetName + ".csv"), Messages("ers_check_csv_file.noData"))
+      }
       errorsList
     }
     catch {
+      case ex: ERSFileProcessingException => {
+        throw ex
+      }
       case ex:Throwable => {
         UploadedFileUtil.deleteFile(file: File)
         throw new ERSFileProcessingException(Messages("ers.exceptions.dataParser.fileParsingError", sheetName) ,Messages("ers.exceptions.dataParser.parsingOfFileData"))

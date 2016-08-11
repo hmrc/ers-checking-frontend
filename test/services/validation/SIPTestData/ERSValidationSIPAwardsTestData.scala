@@ -164,76 +164,76 @@ trait ERSValidationSIPAwardsTestData {
     val expectedResults = List(
       //column A
       None,
-      Some(List(ValidationErrorData("error.1", "001", "Enter a date that matches the yyyy-mm-dd pattern."))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "Enter a date that matches the yyyy-mm-dd pattern."))),
+      Some(List(ValidationErrorData("error.1", "001", "Enter a date that matches the yyyy-mm-dd pattern"))),
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter a date that matches the yyyy-mm-dd pattern"))),
       //column B
       None,
-      Some(List(ValidationErrorData("error.2", "002", "Must be a whole number and be less than 1,000,000."))),
+      Some(List(ValidationErrorData("error.2", "002", "Must be a whole number and be less than 1,000,000"))),
       Some(List(
-        ValidationErrorData("error.2", "002", "Must be a whole number and be less than 1,000,000."))
+        ValidationErrorData("error.2", "002", "Must be a whole number and be less than 1,000,000"))
       ),
       //column C
       None,
-      Some(List(ValidationErrorData("error.3", "003", "Enter '1', '2', '3' or '4'."))),
-      Some(List(ValidationErrorData("error.3", "003", "Enter '1', '2', '3' or '4'."))),
-      Some(List(ValidationErrorData("error.3", "003", "Enter '1', '2', '3' or '4'."))),
-      Some(List(ValidationErrorData("error.3", "003", "Enter '1', '2', '3' or '4'."))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "Enter '1', '2', '3' or '4'."))),
+      Some(List(ValidationErrorData("error.3", "003", "Enter '1', '2', '3' or '4'"))),
+      Some(List(ValidationErrorData("error.3", "003", "Enter '1', '2', '3' or '4'"))),
+      Some(List(ValidationErrorData("error.3", "003", "Enter '1', '2', '3' or '4'"))),
+      Some(List(ValidationErrorData("error.3", "003", "Enter '1', '2', '3' or '4'"))),
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter '1', '2', '3' or '4'"))),
       //column D
       None,
-      Some(List(ValidationErrorData("error.4", "004", "Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.4", "004", "Enter 'yes' or 'no'"))),
       //column E
       None,
-      Some(List(ValidationErrorData("error.5", "005", "Enter the ratio of the matching shares (numbers must be separated by a ':' or '/', for example, 2:1 or 2/1)."))),
+      Some(List(ValidationErrorData("error.5", "005", "Enter the ratio of the matching shares (numbers must be separated by a ':' or '/', for example, 2:1 or 2/1)"))),
       //column F
       None,
-      Some(List(ValidationErrorData("error.6", "006", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.6", "006", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.6", "006", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.6", "006", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.6", "006", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.6", "006", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       //column G
       None,
-      Some(List(ValidationErrorData("error.7", "007", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.7", "007", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.7", "007", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.7", "007", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.7", "007", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.7", "007", "Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)"))),
       //column H
       None,
-      Some(List(ValidationErrorData("error.8", "008", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.8", "008", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.8", "008", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.8", "008", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.8", "008", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.8", "008", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       //column I
       None,
-      Some(List(ValidationErrorData("error.9", "009", "It should be a whole number that has no more than 11 digits."))),
-      Some(List(ValidationErrorData("error.9", "009", "It should be a whole number that has no more than 11 digits."))),
+      Some(List(ValidationErrorData("error.9", "009", "It should be a whole number that has no more than 11 digits"))),
+      Some(List(ValidationErrorData("error.9", "009", "It should be a whole number that has no more than 11 digits"))),
       //column J
       None,
-      Some(List(ValidationErrorData("error.10", "010", "It should be a whole number that has no more than 11 digits."))),
-      Some(List(ValidationErrorData("error.10", "010", "It should be a whole number that has no more than 11 digits."))),
+      Some(List(ValidationErrorData("error.10", "010", "It should be a whole number that has no more than 11 digits"))),
+      Some(List(ValidationErrorData("error.10", "010", "It should be a whole number that has no more than 11 digits"))),
       //column K
       None,
-      Some(List(ValidationErrorData("error.11", "011", "It should be a whole number that has no more than 11 digits."))),
-      Some(List(ValidationErrorData("error.11", "011", "It should be a whole number that has no more than 11 digits."))),
+      Some(List(ValidationErrorData("error.11", "011", "It should be a whole number that has no more than 11 digits"))),
+      Some(List(ValidationErrorData("error.11", "011", "It should be a whole number that has no more than 11 digits"))),
       //column L
       None,
-      Some(List(ValidationErrorData("error.12", "012", "It should be a whole number that has no more than 11 digits."))),
-      Some(List(ValidationErrorData("error.12", "012", "It should be a whole number that has no more than 11 digits."))),
+      Some(List(ValidationErrorData("error.12", "012", "It should be a whole number that has no more than 11 digits"))),
+      Some(List(ValidationErrorData("error.12", "012", "It should be a whole number that has no more than 11 digits"))),
       //column M
       None,
-      Some(List(ValidationErrorData("error.13", "013", "It should be a whole number that has no more than 11 digits."))),
-      Some(List(ValidationErrorData("error.13", "013", "It should be a whole number that has no more than 11 digits."))),
+      Some(List(ValidationErrorData("error.13", "013", "It should be a whole number that has no more than 11 digits"))),
+      Some(List(ValidationErrorData("error.13", "013", "It should be a whole number that has no more than 11 digits"))),
       //column N
       None,
-      Some(List(ValidationErrorData("error.14", "014", "It should be a whole number that has no more than 11 digits."))),
-      Some(List(ValidationErrorData("error.14", "014", "It should be a whole number that has no more than 11 digits."))),
+      Some(List(ValidationErrorData("error.14", "014", "It should be a whole number that has no more than 11 digits"))),
+      Some(List(ValidationErrorData("error.14", "014", "It should be a whole number that has no more than 11 digits"))),
       //column O
       None,
-      Some(List(ValidationErrorData("error.15", "015", "Enter 'yes' or 'no'."))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.15", "015", "Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter 'yes' or 'no'"))),
       //column P
       None,
-      Some(List(ValidationErrorData("error.16", "016", "Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.16", "016", "Enter 'yes' or 'no'"))),
       //column Q
       None,
-      Some(List(ValidationErrorData("error.17", "017", "Enter the HMRC reference (must be less than 11 characters).")))
+      Some(List(ValidationErrorData("error.17", "017", "Enter the HMRC reference (must be less than 11 characters)")))
     )
     expectedResults
   }
