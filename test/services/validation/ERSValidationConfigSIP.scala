@@ -34,7 +34,7 @@ class SIPAwardsV3ValidationTest extends PlaySpec with ERSValidationSIPAwardsTest
       val row = Row(1,Seq(cellD,cellC))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellD,"mandatoryD","D01","Enter 'yes' or 'no'.")
+        ValidationError(cellD,"mandatoryD","D01","Enter 'yes' or 'no'")
       ))
     }
 
@@ -44,7 +44,7 @@ class SIPAwardsV3ValidationTest extends PlaySpec with ERSValidationSIPAwardsTest
       val row = Row(1, Seq(cellE, cellC))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellE, "mandatoryE", "E01", "Enter the ratio of the matching shares (numbers must be separated by a ':' or '/', for example, 2:1 or 2/1).")
+        ValidationError(cellE, "mandatoryE", "E01", "Enter the ratio of the matching shares (numbers must be separated by a ':' or '/', for example, 2:1 or 2/1)")
       ))
     }
 
@@ -54,7 +54,7 @@ class SIPAwardsV3ValidationTest extends PlaySpec with ERSValidationSIPAwardsTest
       val row = Row(1, Seq(cellP, cellO))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellP, "mandatoryP", "P01", "Enter 'yes' or 'no'.")
+        ValidationError(cellP, "mandatoryP", "P01", "Enter 'yes' or 'no'")
       ))
     }
 
@@ -64,7 +64,7 @@ class SIPAwardsV3ValidationTest extends PlaySpec with ERSValidationSIPAwardsTest
       val row = Row(1, Seq(cellQ, cellP))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellQ, "mandatoryQ", "Q01", "Enter the HMRC reference (must be less than 11 characters).")
+        ValidationError(cellQ, "mandatoryQ", "Q01", "Enter the HMRC reference (must be less than 11 characters)")
       ))
     }
 
@@ -98,7 +98,7 @@ class SIPOutV3ValidationTest extends PlaySpec with ERSValidationSIPOutTestData w
     val row = Row(1, Seq(cellP, cellO))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
     resOpt mustBe Some(List(
-      ValidationError(cellP, "mandatoryP", "P01", "Enter 'yes' or 'no'.")
+      ValidationError(cellP, "mandatoryP", "P01", "Enter 'yes' or 'no'")
     ))
   }
 
@@ -108,7 +108,7 @@ class SIPOutV3ValidationTest extends PlaySpec with ERSValidationSIPOutTestData w
     val row = Row(1, Seq(cellQ, cellP))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
     resOpt mustBe Some(List(
-      ValidationError(cellQ, "mandatoryQ", "Q01", "Enter 'yes' or 'no'.")
+      ValidationError(cellQ, "mandatoryQ", "Q01", "Enter 'yes' or 'no'")
     ))
   }
 

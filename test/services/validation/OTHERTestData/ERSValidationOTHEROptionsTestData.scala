@@ -289,149 +289,149 @@ trait ERSValidationOTHEROptionsTestData {
     val expectedResults = List(
       //Column A
       None,
-      Some(List(ValidationErrorData("error.1","001","Enter a date that matches the yyyy-mm-dd pattern."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter a date that matches the yyyy-mm-dd pattern."))),
+      Some(List(ValidationErrorData("error.1","001","Enter a date that matches the yyyy-mm-dd pattern"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter a date that matches the yyyy-mm-dd pattern"))),
       //Column B
       None,
-      Some(List(ValidationErrorData("error.2","002","Enter 'yes' or 'no'."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.2","002","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'"))),
       //Column C
       None,
-      Some(List(ValidationErrorData("error.3","003","Enter the scheme reference number (it should be an 8 digit number)."))),
+      Some(List(ValidationErrorData("error.3","003","Enter the scheme reference number (it should be an 8 digit number)"))),
       //Column D
       None,
-      Some(List(ValidationErrorData("error.4","004","Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
+      Some(List(ValidationErrorData("error.4","004","Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)"))),
       //Column E
       None,
-      Some(List(ValidationErrorData("error.5","005","Must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes."))),
+      Some(List(ValidationErrorData("error.5","005","Must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes"))),
       //Column F
       None,
-      Some(List(ValidationErrorData("error.6","006","Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
+      Some(List(ValidationErrorData("error.6","006","Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)"))),
       //Column G
       None,
-      Some(List(ValidationErrorData("error.7","007","National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter."))),
+      Some(List(ValidationErrorData("error.7","007","National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter"))),
       //Column H
       None,
-      Some(List(ValidationErrorData("error.8","008","PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters."))),
+      Some(List(ValidationErrorData("error.8","008","PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters"))),
       //Column I
       None,
-      Some(List(ValidationErrorData("error.9","009","Enter a date that matches the yyyy-mm-dd pattern."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter a date that matches the yyyy-mm-dd pattern."))),
+      Some(List(ValidationErrorData("error.9","009","Enter a date that matches the yyyy-mm-dd pattern"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter a date that matches the yyyy-mm-dd pattern"))),
       //Column J
       None,
-      Some(List(ValidationErrorData("error.10","010","Enter the company name (must be less than 121 characters and can only have letters, numbers, hyphens or apostrophes)."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter the company name (must be less than 121 characters and can only have letters, numbers, hyphens or apostrophes)."))),
+      Some(List(ValidationErrorData("error.10","010","Enter the company name (must be less than 121 characters and can only have letters, numbers, hyphens or apostrophes)"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter the company name (must be less than 121 characters and can only have letters, numbers, hyphens or apostrophes)"))),
       //Column K
       None,
-      Some(List(ValidationErrorData("error.11","011","Enter the first line of the address (must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands)."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter the first line of the address (must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands)."))),
+      Some(List(ValidationErrorData("error.11","011","Enter the first line of the address (must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands)"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter the first line of the address (must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands)"))),
       //Column L
       None,
-      Some(List(ValidationErrorData("error.12","012","Must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands." ))),
+      Some(List(ValidationErrorData("error.12","012","Must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands" ))),
       //Column M
       None,
-      Some(List(ValidationErrorData("error.13","013","Must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands." ))),
+      Some(List(ValidationErrorData("error.13","013","Must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands" ))),
       //Column N
       None,
-      Some(List(ValidationErrorData("error.14","014","Must be less than 19 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands."))),
+      Some(List(ValidationErrorData("error.14","014","Must be less than 19 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands"))),
       //Column O
       None,
-      Some(List(ValidationErrorData("error.15","015","Must be less than 19 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands."))),
+      Some(List(ValidationErrorData("error.15","015","Must be less than 19 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands"))),
       //Column P
       None,
-      Some(List(ValidationErrorData("error.16","016","Must be 6 to 8 characters and only have capital letters."))),
+      Some(List(ValidationErrorData("error.16","016","Must be 6 to 8 characters and only have capital letters"))),
       //Column Q
       None,
-      Some(List(ValidationErrorData("error.17","017","Company Reference Number must be less than 11 characters (numbers and letters)."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Company Reference Number must be less than 11 characters (numbers and letters)."))),
+      Some(List(ValidationErrorData("error.17","017","Company Reference Number must be less than 11 characters (numbers and letters)"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Company Reference Number must be less than 11 characters (numbers and letters)"))),
       //Column R
       None,
-      Some(List(ValidationErrorData("error.18","018","Corporation Tax reference must be a 10 digit number."))),
+      Some(List(ValidationErrorData("error.18","018","Corporation Tax reference must be a 10 digit number"))),
       //Column S
       None,
-      Some(List(ValidationErrorData("error.19","019","PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters."))),
+      Some(List(ValidationErrorData("error.19","019","PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters"))),
       //Column T
       None,
-      Some(List(ValidationErrorData("error.20","020","Enter the company name (must be less than 121 characters and can only have letters, numbers, hyphens or apostrophes)."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter the company name (must be less than 121 characters and can only have letters, numbers, hyphens or apostrophes)."))),
+      Some(List(ValidationErrorData("error.20","020","Enter the company name (must be less than 121 characters and can only have letters, numbers, hyphens or apostrophes)"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter the company name (must be less than 121 characters and can only have letters, numbers, hyphens or apostrophes)"))),
       //Column U
       None,
-      Some(List(ValidationErrorData("error.21","021","Enter the first line of the address (must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands)."))),
+      Some(List(ValidationErrorData("error.21","021","Enter the first line of the address (must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands)"))),
       //Column V
       None,
-      Some(List(ValidationErrorData("error.22","022","Must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands." ))),
+      Some(List(ValidationErrorData("error.22","022","Must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands" ))),
       //Column W
       None,
-      Some(List(ValidationErrorData("error.23","023","Must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands." ))),
+      Some(List(ValidationErrorData("error.23","023","Must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands" ))),
       //Column X
       None,
-      Some(List(ValidationErrorData("error.24","024","Must be less than 19 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands."))),
+      Some(List(ValidationErrorData("error.24","024","Must be less than 19 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands"))),
       //Column Y
       None,
-      Some(List(ValidationErrorData("error.25","025","Must be less than 19 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands."))),
+      Some(List(ValidationErrorData("error.25","025","Must be less than 19 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands"))),
       //Column Z
       None,
-      Some(List(ValidationErrorData("error.26","026","Must be 6 to 8 characters and only have capital letters."))),
+      Some(List(ValidationErrorData("error.26","026","Must be 6 to 8 characters and only have capital letters"))),
       //Column AA
       None,
-      Some(List(ValidationErrorData("error.27","027","Company Reference Number must be less than 11 characters (numbers and letters)."))),
+      Some(List(ValidationErrorData("error.27","027","Company Reference Number must be less than 11 characters (numbers and letters)"))),
       //Column AB
       None,
-      Some(List(ValidationErrorData("error.28","028","Corporation Tax reference must be a 10 digit number."))),
+      Some(List(ValidationErrorData("error.28","028","Corporation Tax reference must be a 10 digit number"))),
       //Column AC
       None,
-      Some(List(ValidationErrorData("error.29","029","PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters."))),
+      Some(List(ValidationErrorData("error.29","029","PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters"))),
       //Column AD
       None,
-      Some(List(ValidationErrorData("error.30","030","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.30","030","Enter 'yes' or 'no'"))),
       //Column AE
       None,
-      Some(List(ValidationErrorData("error.31","031","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.31","031","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.31","031","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.31","031","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.31","031","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.31","031","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)"))),
       //Column AF
       None,
-      Some(List(ValidationErrorData("error.32","032","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.32","032","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.32","032","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.32","032","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.32","032","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.32","032","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       //Column AG
       None,
-      Some(List(ValidationErrorData("error.33","033","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.33","033","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.33","033","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.33","033","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.33","033","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.33","033","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       //Column AH
       None,
-      Some(List(ValidationErrorData("error.34","034","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.34","034","Enter 'yes' or 'no'"))),
       //Column AI
       None,
-      Some(List(ValidationErrorData("error.35","035","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.35","035","Enter 'yes' or 'no'"))),
       //Column AJ
       None,
-      Some(List(ValidationErrorData("error.36","036","Enter the HMRC reference (must be less than 11 characters)."))),
+      Some(List(ValidationErrorData("error.36","036","Enter the HMRC reference (must be less than 11 characters)"))),
       //Column AK
       None,
-      Some(List(ValidationErrorData("error.37","037","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.37","037","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.37","037","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.37","037","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.37","037","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.37","037","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       //Column AL
       None,
-      Some(List(ValidationErrorData("error.38","038","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.38","038","Enter 'yes' or 'no'"))),
       //Column AM
       None,
-      Some(List(ValidationErrorData("error.39","039","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.39","039","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
-      Some(List(ValidationErrorData("error.39","039","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.39","039","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.39","039","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
+      Some(List(ValidationErrorData("error.39","039","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       //Column AN
       None,
-      Some(List(ValidationErrorData("error.40","040","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.40","040","Enter 'yes' or 'no'"))),
       //Column AO
       None,
-      Some(List(ValidationErrorData("error.41","041","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.41","041","Enter 'yes' or 'no'"))),
       //Column AP
       None,
-      Some(List(ValidationErrorData("error.42","042","Enter 'yes' or 'no'.")))
+      Some(List(ValidationErrorData("error.42","042","Enter 'yes' or 'no'")))
     )
     expectedResults
   }
