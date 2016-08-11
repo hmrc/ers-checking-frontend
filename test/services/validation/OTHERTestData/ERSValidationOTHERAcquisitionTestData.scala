@@ -267,141 +267,141 @@ trait ERSValidationOTHERAcquisitionTestData {
     val expectedResults = List(
       //A
       None,
-      Some(List(ValidationErrorData("error.1","001","Enter a date that matches the yyyy-mm-dd pattern."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter a date that matches the yyyy-mm-dd pattern."))),
+      Some(List(ValidationErrorData("error.1","001","Enter a date that matches the yyyy-mm-dd pattern"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter a date that matches the yyyy-mm-dd pattern"))),
       //B
       None,
-      Some(List(ValidationErrorData("error.2","002","Enter 'yes' or 'no'."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.2","002","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'"))),
       //C
       None,
-      Some(List(ValidationErrorData("error.3","003","Enter the scheme reference number (it should be an 8 digit number)."))),
+      Some(List(ValidationErrorData("error.3","003","Enter the scheme reference number (it should be an 8 digit number)"))),
       //D
       None,
-      Some(List(ValidationErrorData("error.4","004","Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
+      Some(List(ValidationErrorData("error.4","004","Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)"))),
       //E
       None,
-      Some(List(ValidationErrorData("error.5","005","Must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes."))),
+      Some(List(ValidationErrorData("error.5","005","Must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes"))),
       //F
       None,
-      Some(List(ValidationErrorData("error.6","006","Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)."))),
+      Some(List(ValidationErrorData("error.6","006","Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)"))),
       //G
       None,
-      Some(List(ValidationErrorData("error.7","007","National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter."))),
+      Some(List(ValidationErrorData("error.7","007","National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter"))),
       //H
       None,
-      Some(List(ValidationErrorData("error.8","008","PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters."))),
+      Some(List(ValidationErrorData("error.8","008","PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters"))),
       //I
       None,
-      Some(List(ValidationErrorData("error.9","009","Enter the company name (must be less than 121 characters and can only have letters, numbers, hyphens or apostrophes)."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter the company name (must be less than 121 characters and can only have letters, numbers, hyphens or apostrophes)."))),
+      Some(List(ValidationErrorData("error.9","009","Enter the company name (must be less than 121 characters and can only have letters, numbers, hyphens or apostrophes)"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter the company name (must be less than 121 characters and can only have letters, numbers, hyphens or apostrophes)"))),
       //J
       None,
-      Some(List(ValidationErrorData("error.10","010","Enter the first line of the address (must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands)."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter the first line of the address (must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands)."))),
+      Some(List(ValidationErrorData("error.10","010","Enter the first line of the address (must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands)"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter the first line of the address (must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands)"))),
       //K
       None,
-      Some(List(ValidationErrorData("error.11","011","Must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands." ))),
+      Some(List(ValidationErrorData("error.11","011","Must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands" ))),
       //L
       None,
-      Some(List(ValidationErrorData("error.12","012","Must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands." ))),
+      Some(List(ValidationErrorData("error.12","012","Must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands" ))),
       //M
       None,
-      Some(List(ValidationErrorData("error.13","013","Must be less than 19 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands."))),
+      Some(List(ValidationErrorData("error.13","013","Must be less than 19 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands"))),
       //N
       None,
-      Some(List(ValidationErrorData("error.14","014","Must be less than 19 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands."))),
+      Some(List(ValidationErrorData("error.14","014","Must be less than 19 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands"))),
       //O
       None,
-      Some(List(ValidationErrorData("error.15","015","Must be 6 to 8 characters and only have capital letters."))),
+      Some(List(ValidationErrorData("error.15","015","Must be 6 to 8 characters and only have capital letters"))),
       //P
       None,
-      Some(List(ValidationErrorData("error.16","016","Company Reference Number must be less than 11 characters (numbers and letters)."))),
+      Some(List(ValidationErrorData("error.16","016","Company Reference Number must be less than 11 characters (numbers and letters)"))),
       //Q
       None,
-      Some(List(ValidationErrorData("error.17","017","Corporation Tax reference must be a 10 digit number."))),
+      Some(List(ValidationErrorData("error.17","017","Corporation Tax reference must be a 10 digit number"))),
       //R
       None,
-      Some(List(ValidationErrorData("error.18","018","PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters."))),
+      Some(List(ValidationErrorData("error.18","018","PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters"))),
       //S
       None,
-      Some(List(ValidationErrorData("error.19","019","Enter '1', '2', '3', '4', '5', '6', '7', '8' or '9'."))),
-      Some(List(ValidationErrorData("error.19","019","Enter '1', '2', '3', '4', '5', '6', '7', '8' or '9'."))),
-      Some(List(ValidationErrorData("error.19","019","Enter '1', '2', '3', '4', '5', '6', '7', '8' or '9'."))),
-      Some(List(ValidationErrorData("error.19","019","Enter '1', '2', '3', '4', '5', '6', '7', '8' or '9'."))),
-      Some(List(ValidationErrorData("error.19","019","Enter '1', '2', '3', '4', '5', '6', '7', '8' or '9'."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter '1', '2', '3', '4', '5', '6', '7', '8' or '9'."))),
+      Some(List(ValidationErrorData("error.19","019","Enter '1', '2', '3', '4', '5', '6', '7', '8' or '9'"))),
+      Some(List(ValidationErrorData("error.19","019","Enter '1', '2', '3', '4', '5', '6', '7', '8' or '9'"))),
+      Some(List(ValidationErrorData("error.19","019","Enter '1', '2', '3', '4', '5', '6', '7', '8' or '9'"))),
+      Some(List(ValidationErrorData("error.19","019","Enter '1', '2', '3', '4', '5', '6', '7', '8' or '9'"))),
+      Some(List(ValidationErrorData("error.19","019","Enter '1', '2', '3', '4', '5', '6', '7', '8' or '9'"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter '1', '2', '3', '4', '5', '6', '7', '8' or '9'"))),
       //T
       None,
-      Some(List(ValidationErrorData("error.20","020","Enter 'yes' or 'no'."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.20","020","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'"))),
       //U
       None,
-      Some(List(ValidationErrorData("error.21","021","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.21","021","Enter 'yes' or 'no'"))),
       //V
       None,
-      Some(List(ValidationErrorData("error.22","022","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.22","022","Enter 'yes' or 'no'"))),
       //W
       None,
-      Some(List(ValidationErrorData("error.23","023","Enter the HMRC reference (must be less than 11 characters)."))),
+      Some(List(ValidationErrorData("error.23","023","Enter the HMRC reference (must be less than 11 characters)"))),
       //X
       None,
-      Some(List(ValidationErrorData("error.24","024","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.24","024","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)"))),
       //Y
       None,
-      Some(List(ValidationErrorData("error.25","025","Enter '1', '2' or '3'."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter '1', '2' or '3'."))),
+      Some(List(ValidationErrorData("error.25","025","Enter '1', '2' or '3'"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter '1', '2' or '3'"))),
       //Z
       None,
-      Some(List(ValidationErrorData("error.26","026","Enter '1', '2' or '3'."))),
+      Some(List(ValidationErrorData("error.26","026","Enter '1', '2' or '3'"))),
       //AA
       None,
-      Some(List(ValidationErrorData("error.27","027","Must be a number (whole numbers must have no more than 13 digits; decimals must have no more than 13 digits before the decimal point and no more than 4 digits after it)."))),
+      Some(List(ValidationErrorData("error.27","027","Must be a number (whole numbers must have no more than 13 digits; decimals must have no more than 13 digits before the decimal point and no more than 4 digits after it)"))),
       //AB
       None,
-      Some(List(ValidationErrorData("error.28","028", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.28","028", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       //AC
       None,
-      Some(List(ValidationErrorData("error.29","029","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.29","029","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       //AD
       None,
-      Some(List(ValidationErrorData("error.30","030","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.30","030","Enter 'yes' or 'no'"))),
       //AE
       None,
-      Some(List(ValidationErrorData("error.31","031","Enter 'all' or 'some'."))),
+      Some(List(ValidationErrorData("error.31","031","Enter 'all' or 'some'"))),
       //AF
       None,
-      Some(List(ValidationErrorData("error.32","032","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.32","032","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       //AG
       None,
-      Some(List(ValidationErrorData("error.33","033","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)."))),
+      Some(List(ValidationErrorData("error.33","033","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       //AH
       None,
-      Some(List(ValidationErrorData("error.34","034","Enter 'yes' or 'no'."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.34","034","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'"))),
       //AI
       None,
-      Some(List(ValidationErrorData("error.35","035","Enter 'yes' or 'no'."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.35","035","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'"))),
       //AJ
       None,
-      Some(List(ValidationErrorData("error.36","036", "Enter '1', '2' or '3'."))),
+      Some(List(ValidationErrorData("error.36","036", "Enter '1', '2' or '3'"))),
       //AK
       None,
-      Some(List(ValidationErrorData("error.37","037","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.37","037","Enter 'yes' or 'no'"))),
       //AL
       None,
-      Some(List(ValidationErrorData("error.38","038","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.38","038","Enter 'yes' or 'no'"))),
       //AM
       None,
-      Some(List(ValidationErrorData("error.39","039","Enter 'yes' or 'no'."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'."))),
+      Some(List(ValidationErrorData("error.39","039","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'"))),
       //AN
       None,
-      Some(List(ValidationErrorData("error.40","040","Enter 'yes' or 'no'."))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'.")))
+      Some(List(ValidationErrorData("error.40","040","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'")))
     )
     expectedResults
   }

@@ -34,7 +34,7 @@ class EMIAdjustmentsV3ValidationTest extends PlaySpec with ERSValidationEMIAdjus
       val row = Row(1,Seq(cellB,cellA))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellB,"mandatoryB","B01","Enter 'yes' or 'no'.")
+        ValidationError(cellB,"mandatoryB","B01","Enter 'yes' or 'no'")
       ))
     }
 
@@ -44,7 +44,7 @@ class EMIAdjustmentsV3ValidationTest extends PlaySpec with ERSValidationEMIAdjus
       val row = Row(1,Seq(cellC,cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellC,"mandatoryC","C01","Enter 'yes' or 'no'.")
+        ValidationError(cellC,"mandatoryC","C01","Enter 'yes' or 'no'")
       ))
     }
 
@@ -54,7 +54,7 @@ class EMIAdjustmentsV3ValidationTest extends PlaySpec with ERSValidationEMIAdjus
       val row = Row(1,Seq(cellD,cellC))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellD,"mandatoryD","D01","Enter '1', '2', '3', '4', '5', '6', '7' or '8'.")
+        ValidationError(cellD,"mandatoryD","D01","Enter '1', '2', '3', '4', '5', '6', '7' or '8'")
       ))
     }
 
@@ -95,7 +95,7 @@ class EMIRLCV3ValidationTest extends PlaySpec with ERSValidationEMIRLCTestData w
       val row = Row(1, Seq(cellC, cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellC, "mandatoryC", "C01", "Enter '1', '2', '3', '4', '5', '6', '7' or '8'.")
+        ValidationError(cellC, "mandatoryC", "C01", "Enter '1', '2', '3', '4', '5', '6', '7' or '8'")
       ))
     }
     "when Column J is answered yes, column K is a mandatory field" in {
@@ -104,7 +104,7 @@ class EMIRLCV3ValidationTest extends PlaySpec with ERSValidationEMIRLCTestData w
       val row = Row(1, Seq(cellK, cellJ))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellK, "mandatoryK", "K01", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it).")
+        ValidationError(cellK, "mandatoryK", "K01", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)")
       ))
     }
     "when Column K is answered, column L is a mandatory field" in {
@@ -113,7 +113,7 @@ class EMIRLCV3ValidationTest extends PlaySpec with ERSValidationEMIRLCTestData w
       val row = Row(1, Seq(cellL, cellK))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellL, "mandatoryL", "L01", "Enter 'yes' or 'no'.")
+        ValidationError(cellL, "mandatoryL", "L01", "Enter 'yes' or 'no'")
       ))
     }
   }
@@ -132,7 +132,7 @@ class EMINonTaxableV3ValidationTest extends PlaySpec with ERSValidationEMINonTax
       val row = Row(1,Seq(cellL,cellK))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellL,"mandatoryL","L01","Enter 'yes' or 'no'.")
+        ValidationError(cellL,"mandatoryL","L01","Enter 'yes' or 'no'")
       ))
     }
 
@@ -142,7 +142,7 @@ class EMINonTaxableV3ValidationTest extends PlaySpec with ERSValidationEMINonTax
       val row = Row(1,Seq(cellM,cellL))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellM,"mandatoryM","M01","Enter the HMRC reference (must be less than 11 characters).")
+        ValidationError(cellM,"mandatoryM","M01","Enter the HMRC reference (must be less than 11 characters)")
       ))
     }
 
@@ -176,7 +176,7 @@ class EMITaxableV3ValidationTest extends PlaySpec with ERSValidationEMITaxableTe
       val row = Row(1,Seq(cellC,cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellC,"mandatoryC","C01","Enter '1', '2', '3', '4', '5', '6', '7' or '8'.")
+        ValidationError(cellC,"mandatoryC","C01","Enter '1', '2', '3', '4', '5', '6', '7' or '8'")
       ))
     }
 
@@ -186,7 +186,7 @@ class EMITaxableV3ValidationTest extends PlaySpec with ERSValidationEMITaxableTe
       val row = Row(1,Seq(cellP,cellO))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellP,"mandatoryP","P01","Enter 'yes' or 'no'.")
+        ValidationError(cellP,"mandatoryP","P01","Enter 'yes' or 'no'")
       ))
     }
 
@@ -196,7 +196,7 @@ class EMITaxableV3ValidationTest extends PlaySpec with ERSValidationEMITaxableTe
       val row = Row(1,Seq(cellQ,cellP))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt mustBe Some(List(
-        ValidationError(cellQ,"mandatoryQ","Q01","Enter the HMRC reference (must be less than 11 characters).")
+        ValidationError(cellQ,"mandatoryQ","Q01","Enter the HMRC reference (must be less than 11 characters)")
       ))
     }
 
