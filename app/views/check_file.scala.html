@@ -10,7 +10,7 @@
 	<script src='@routes.AssetsController.at("javascripts/ers_ods_scripts.js")'> </script>
 }
 
-@ers_main(title = Messages("ers.app_title"), scripts) {
+@ers_main(title = Messages("ers.upload_ods.page_title"), scripts) {
 	<p class="font-xsmall"><a href="@routes.CheckingServiceController.checkFileTypePage()" class="link-back">@Html(Messages("ers.back"))</a></p>
 	@header(Messages("ers_check_file.title"))
 	<div class="validation-summary visibility" role="group" aria-labelledby="error-summary-heading" tabindex="-1">

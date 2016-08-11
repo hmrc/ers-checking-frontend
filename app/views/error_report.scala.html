@@ -4,7 +4,7 @@
 @import views.html.templates._
 @import utils.PageBuilder._
 
-@ers_main(title = Messages("ers.app_title")) {
+@ers_main(title = Messages("ers.error_report.page_title")) {
 	<p class="font-xsmall"><a href="@getPageBackLink(fileType)" class="link-back">@Html(Messages("ers.back"))</a></p>
 	@header(Messages("ers_error_report.page_title", schemeName, schemeNameShort))
 		<div class="panel-indent">
