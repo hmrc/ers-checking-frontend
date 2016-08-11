@@ -4,7 +4,7 @@
 @import views.html.templates._
 @import utils.PageBuilder._
 @import views.html.helpers.error_overview
-@ers_main(title = Messages("ers.app_title")) {
+@ers_main(title = Messages("ers.file_type.page_title")) {
 
 
 		<p class="font-xsmall"><a href="@routes.CheckingServiceController.schemeTypePage()" class="link-back">@Html(Messages("ers.back"))</a></p>
@@ -18,7 +18,7 @@
 					<span class="visuallyhidden">@Html(Messages("ers_check_file_type.title"))</span>
 					@if(flash.get("check-file-type-not-selected-error").isDefined) {
 					<div aria-labelledby="error-heading" class="validation-message" id="error-summary" role="alert" tabindex="-1">
-						<span id="error-heading">@flash.get("check-file-type-not-selected-error").</span>
+						<span id="error-heading">@flash.get("check-file-type-not-selected-error")</span>
 					</div>
 					}
 				</legend>
