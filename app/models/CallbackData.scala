@@ -24,8 +24,9 @@ import scala.collection.mutable.ListBuffer
 case class FileInfo(errorMessage: String, fileName: String, fileID: String, fileType: String)
 
 case class ERSFileProcessingException(message: String,
-                                context: String,
-                                jsonSize: Option[Int] = None) extends Exception(message)
+                                      context: String,
+                                      jsonSize: Option[Int] = None,
+                                      needsExtendedInstructions: Boolean = false) extends Exception(message)
 
 case class CallbackData(collection: String, id: String, length: Long, name: Option[String], contentType: Option[String], customMetadata: Option[JsObject])
 

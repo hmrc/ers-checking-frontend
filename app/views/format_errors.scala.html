@@ -1,4 +1,4 @@
-@(fileType: String, schemeName: String, schemeNameShort: String, errorMsg: String)(implicit request: Request[AnyRef], flash: Flash)
+@(fileType: String, schemeName: String, schemeNameShort: String, errorMsg: String, showExtendedInstructions: Boolean)(implicit request: Request[AnyRef], flash: Flash)
 @* check return file Template *@
 
 @import views.html.templates._
@@ -12,5 +12,11 @@
     </div>
     <div class="bottom-grey"></div>
     <h2 class="heading-medium">@Html(Messages("ers_format_errors.sub_heading"))</h2>
-    <p><a href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@Html(Messages("ers_format_errors.instructions"))</a></p>
+    <p>
+        @if(showExtendedInstructions == true) {
+            @Html(Messages("ers_error_report.instructions1")) <a href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@Html(Messages("ers_error_report.instructions2"))</a>.
+        } else {
+            <a href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@Html(Messages("ers_format_errors.instructions"))</a>
+        }
+    </p>
 }
