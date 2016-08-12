@@ -40,6 +40,7 @@ trait CacheUtil {
   val ERROR_LIST_CACHE: String = "error-list"
   val ERROR_SUMMARY_CACHE: String = "error-summary"
   val FORMAT_ERROR_CACHE: String = "format_error"
+  val FORMAT_ERROR_EXTENDED_CACHE: String = "format_extended_error"
   val FILE_NAME_CACHE: String = "file-name"
     
   private val sourceId : String = "ers-eoy"
