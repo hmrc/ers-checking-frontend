@@ -19,12 +19,12 @@ package utils
 import models.SheetErrors
 import org.scalatest.mock.MockitoSugar
 import services.ProcessODSService
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
 import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 
 import scala.collection.mutable.ListBuffer
 
-class ParserUtilSpec extends UnitSpec with MockitoSugar {
+class ParserUtilSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   "getDataToValidate" must {
 
