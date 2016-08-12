@@ -27,7 +27,7 @@ import services.validation.ErsValidator
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.services.validation.{DataValidator, ValidationError}
-import utils.{CacheUtil, UploadedFileUtil}
+import utils.{ParserUtil, CacheUtil, UploadedFileUtil}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -57,22 +57,7 @@ trait CsvFileProcessor extends DataGenerator {
   def processCsvUpload(scheme:String)(implicit request: Request[AnyContent], authContext : AuthContext, hc : HeaderCarrier) =
   {
     val errors = validateCsvFiles(scheme)
-    val isFileValid: Boolean = ProcessODSService.isValid(errors)
-    if (!isFileValid) {
-      cacheUtil.cache[Long](CacheUtil.SCHEME_ERROR_COUNT_CACHE, ProcessODSService.getTotalErrorCount(errors)).recover {
-        case e: Exception => {
-          Logger.error("performCSVUpload: Unable to save total scheme error count. Error: " + e.getMessage)
-          throw e
-        }
-      }
-      cacheUtil.cache[ListBuffer[SheetErrors]](CacheUtil.ERROR_LIST_CACHE, ProcessODSService.getSheetErrors(errors)).recover {
-        case e: Exception => {
-          Logger.error("performCSVUpload: Unable to save error list. Error: " + e.getMessage)
-          throw e
-        }
-      }
-    }
-    isFileValid
+    ParserUtil.isFileValid(errors, "performCSVUpload")
   }
 
   def validateCsvFiles(scheme:String)(implicit request: Request[AnyContent], authContext : AuthContext, hc : HeaderCarrier) = {
@@ -104,15 +89,7 @@ trait CsvFileProcessor extends DataGenerator {
         val rowData: Array[String] = iterator.nextLine().split(",")
         if(!isBlankRow(rowData)){
           rowsWithData += 1
-          val sheetColSize = ERSTemplatesInfo.ersSheets(sheetName.replace(".csv", "")).headerRow.size
-          val dataToValidate = if(rowData.size < sheetColSize) {
-            Logger.warn(s"Difference between amount of columns ${rowData.size} and amount of headers ${sheetColSize}")
-            val additionalEmptyCells: Seq[String] = List.fill(sheetColSize - rowData.size)("")
-            (rowData ++ additionalEmptyCells).take(sheetColSize)
-          }
-          else {
-            rowData.take(sheetColSize)
-          }
+          val dataToValidate = ParserUtil.formatDataToValidate(rowData, sheetName)
           Logger.debug("Row Num :- "+ rowCount +  " -- Data retrieved:-" + dataToValidate.mkString)
           validator(dataToValidate, rowCount, dataValidator) match {
             case errors:Option[List[ValidationError]] if errors.isDefined => {

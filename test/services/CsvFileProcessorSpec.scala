@@ -46,6 +46,16 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with WithFakeAppli
   val file = new File(System.getProperty("user.dir") + "/test/resources/Other_Grants_V3.csv")
   Files.copy(file.toPath,new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv").toPath)
 
+  def getMockFileCSV = {
+    val userDirectory = System.getProperty("user.dir")
+    val fileTest = new File(System.getProperty("user.dir") + "/test/resources/test1.csv")
+    Files.copy(fileTest.toPath, new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/test2.csv").toPath)
+    val tempFile = TemporaryFile(new java.io.File(userDirectory+"/test/resources/copy/test2.csv"))
+    val part = FilePart[TemporaryFile](key = "fileParam", filename = "Other_Grants_V3.csv", contentType = Some("Content-Type: multipart/form-data"), ref = tempFile)
+    val file = MultipartFormData(dataParts = Map(), files = Seq(part), badParts = Seq(), missingFileParts = Seq())
+    file
+  }
+
   "The CsvFileProcessor service " must {
 
     "validate file data and return errors" in {
@@ -95,13 +105,4 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with WithFakeAppli
     CsvFileProcessor.converter("a,b,c") shouldBe Array("a","b","c")
   }
 
-  def getMockFileCSV = {
-    val userDirectory = System.getProperty("user.dir")
-    val fileTest = new File(System.getProperty("user.dir") + "/test/resources/test1.csv")
-    Files.copy(fileTest.toPath, new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/test2.csv").toPath)
-    val tempFile = TemporaryFile(new java.io.File(userDirectory+"/test/resources/copy/test2.csv"))
-    val part = FilePart[TemporaryFile](key = "fileParam", filename = "Other_Grants_V3.csv", contentType = Some("Content-Type: multipart/form-data"), ref = tempFile)
-    val file = MultipartFormData(dataParts = Map(), files = Seq(part), badParts = Seq(), missingFileParts = Seq())
-    file
-  }
 }

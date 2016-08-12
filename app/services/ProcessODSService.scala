@@ -16,10 +16,9 @@
 
 package services
 
-import java.io.{FileInputStream, File, InputStream}
+import java.io.{File, InputStream}
 import java.util.ArrayList
-import java.util.zip.{ZipInputStream, ZipFile}
-
+import java.util.zip.ZipFile
 import models.{ERSFileProcessingException, SheetErrors}
 import play.api.{Logger, Play}
 import models.FileObject
@@ -32,6 +31,7 @@ import uk.gov.hmrc.play.frontend.auth.AuthContext
 import utils.{CacheUtil, UploadedFileUtil}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.mutable.ListBuffer
+import utils.ParserUtil
 
 object ProcessODSService extends ProcessODSService {
   override val uploadedFileUtil: UploadedFileUtil = UploadedFileUtil
@@ -46,7 +46,6 @@ trait ProcessODSService {
     val spreadSheetFile = request.body.asMultipartFormData.get.file("fileUpload")
     spreadSheetFile.map { file =>
       val errorList: ListBuffer[SheetErrors] = checkFileType(file)(scheme, authContext,hc ,request)
-      val isFileValid: Boolean = isValid(errorList)
       val fileName: String = request.body.asMultipartFormData.get.file("fileUpload").get.filename
       cacheUtil.cache[String](CacheUtil.FILE_NAME_CACHE, fileName).recover {
         case e: Exception => {
@@ -54,21 +53,7 @@ trait ProcessODSService {
           throw e
         }
       }
-      if (!isFileValid) {
-        cacheUtil.cache[Long](CacheUtil.SCHEME_ERROR_COUNT_CACHE, getTotalErrorCount(errorList)).recover {
-          case e: Exception => {
-            Logger.error("performODSUpload: Unable to save total scheme error count. Error: " + e.getMessage)
-            throw e
-          }
-        }
-        cacheUtil.cache[ListBuffer[SheetErrors]](CacheUtil.ERROR_LIST_CACHE, getSheetErrors(errorList)).recover {
-          case e: Exception => {
-            Logger.error("performODSUpload: Unable to save error list. Error: " + e.getMessage)
-            throw e
-          }
-        }
-      }
-      isFileValid
+      ParserUtil.isFileValid(errorList, "performODSUpload")
     }.getOrElse {
       throw ERSFileProcessingException(Messages("ers_check_file.no_file_error"),Messages("ers_check_file.no_file_error"))
     }
@@ -108,29 +93,6 @@ trait ProcessODSService {
     val result = DataGenerator.getErrors(processor, scheme, uploadedFileName)
     zipFile.close()
     result
-  }
-
-  def getSheetErrors(schemeErrors:ListBuffer[SheetErrors]):ListBuffer[SheetErrors] = {
-    val errorCount:Int = Play.configuration.getInt(s"errorDisplayCount").getOrElse(100)
-    schemeErrors.map{ schemeError =>
-      SheetErrors(schemeError.sheetName,schemeError.errors.take(errorCount))
-    }
-  }
-
-  def isValid(schemeErrors:ListBuffer[SheetErrors]):Boolean = {
-    for(sheet <- schemeErrors) {
-      for(errors <- sheet.errors){
-        return false
-      }
-    }
-    true
-  }
-
-  def getTotalErrorCount(schemeErrors:ListBuffer[SheetErrors]):Long = {
-    var totalErrors = 0
-      if(totalErrors != schemeErrors.size)
-        for(i <- 0 to schemeErrors.size-1) totalErrors += schemeErrors(i).errors.length
-    totalErrors
   }
 
 }
