@@ -3,17 +3,17 @@
 
 @import views.html.templates._
 
-@ers_main(title = Messages("ers.app_title")) {
-				@header(Messages("ers_start.page_title"))
-			    <p class="font-medium">@Html(Messages("ers_start.intro_para_1"))</p>
-				<h2 class="heading-medium">@Html(Messages("ers_start.sub_title"))</h2>
-				<p>@Html(Messages("ers_start.intro_para_3"))</p>
-				<p>@Html(Messages("ers_start.intro_para_4"))</p>
-			    <p>@Html(Messages("ers_start.intro_para_5"))</p>
-				<div class="panel-indent">
-					<p>@Html(Messages("ers_start.ers_help"))</p>
-				</div>
-				<div class="form-group">
-					<a role="button" href="@routes.CheckingServiceController.schemeTypePage()" class="button button-get-started" id="start-now-button">@Html(Messages("ers_start.start_now_button"))</a>
-				</div>
+@ers_main(title = Messages("ers.start.page_title")) {
+	@header(Messages("ers_start.page_title"))
+	<p class="font-medium">@Html(Messages("ers_start.intro_para_1"))</p>
+	<h2 class="heading-medium">@Html(Messages("ers_start.sub_title"))</h2>
+	<p>@Html(Messages("ers_start.intro_para_3"))</p>
+	<p>@Html(Messages("ers_start.intro_para_4"))</p>
+	<p>@Html(Messages("ers_start.intro_para_5"))</p>
+	<div class="panel-indent">
+		<p>@Html(Messages("ers_start.ers_help"))</p>
+	</div>
+	<div class="form-group">
+		<a role="button" href="@routes.CheckingServiceController.schemeTypePage()" class="button button-get-started" id="start-now-button">@Html(Messages("ers_start.start_now_button"))</a>
+	</div>
 }
