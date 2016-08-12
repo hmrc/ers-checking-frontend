@@ -11,6 +11,14 @@ ers.signout=Sign out
 ers.continue=Continue
 ers.back=Back
 
+ers.start.page_title=Check your ERS files
+ers.scheme_types.page_title=Choose scheme or arrangement type
+ers.file_type.page_title=Choose file type
+ers.upload_csv.page_title=Choose and check the .csv files
+ers.upload_ods.page_title=Choose and check the .ods file
+ers.error_report.page_title=Error report
+ers.confirmation.page_title=Confirmation
+
 ers_start.page_title=Check your ERS files
 ers_start.intro_para_1=Use this service to check for errors in the files you need to upload as part of your Employment Related Securities (ERS) annual return.
 ers_start.sub_title=Before you start
@@ -33,7 +41,7 @@ ers_scheme_type.back=Back
 ers_scheme_type.select_scheme_type=Select the type of ERS scheme or arrangement
 ers_scheme_type.err.message=Select the type of ERS scheme or arrangement
 
-ers_check_file_type.title=What type of file do you want to check?
+ers_check_file_type.title=Which type of file do you want to check?
 ers_check_file_type.option_1=Comma separated values (.csv)
 ers_check_file_type.option_2=OpenDocument Spreadsheet (.ods)
 ers_check_file_type.alert=Choose the type of file you want to check
@@ -83,7 +91,7 @@ ers_check_csv_file.other.file8=Securities sold for more than market value post a
 
 
 
-ers_check_file.title=Choose and check your file
+ers_check_file.title=Choose the .ods file that you want to check for errors
 ers_check_file.instruction=Choose the OpenDocument Spreadsheet (.ods) file that you want to check for errors.
 ers_check_file.file_upload_label=Select the file to upload.
 ers_check_file.formatting_errors_link=What are formatting errors?
