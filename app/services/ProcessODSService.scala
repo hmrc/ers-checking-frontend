@@ -55,7 +55,7 @@ trait ProcessODSService {
       }
       ParserUtil.isFileValid(errorList, "performODSUpload")
     }.getOrElse {
-      throw ERSFileProcessingException(Messages("ers_check_file.no_file_error"),Messages("ers_check_file.no_file_error"))
+      throw ERSFileProcessingException(Messages("ers_check_file.no_file_error"),Messages("ers_check_file.no_file_error"), needsExtendedInstructions = true)
     }
   }
 

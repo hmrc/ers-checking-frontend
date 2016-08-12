@@ -102,7 +102,7 @@ trait CsvFileProcessor extends DataGenerator {
         }
       }
       if(rowsWithData == 0) {
-        throw ERSFileProcessingException(Messages("ers_check_csv_file.noData", sheetName + ".csv"), Messages("ers_check_csv_file.noData"))
+        throw ERSFileProcessingException(Messages("ers_check_csv_file.noData", sheetName + ".csv"), Messages("ers_check_csv_file.noData"), needsExtendedInstructions = true)
       }
       errorsList
     }
