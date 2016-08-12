@@ -201,8 +201,10 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   def showFormatErrorsPage(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
     cacheUtil.fetch[String](CacheUtil.FILE_TYPE_CACHE).flatMap { fileType =>
       cacheUtil.fetch[String](CacheUtil.SCHEME_CACHE).flatMap { schemeName =>
-        cacheUtil.fetch[String](CacheUtil.FORMAT_ERROR_CACHE).map { errorMsg =>
-          Ok(views.html.format_errors(fileType, ContentUtil.getSchemeName(schemeName)._1, ContentUtil.getSchemeName(schemeName)._2,  errorMsg))
+        cacheUtil.fetch[Boolean](CacheUtil.FORMAT_ERROR_EXTENDED_CACHE).flatMap { extendedInstructions =>
+          cacheUtil.fetch[String](CacheUtil.FORMAT_ERROR_CACHE).map { errorMsg =>
+            Ok(views.html.format_errors(fileType, ContentUtil.getSchemeName(schemeName)._1, ContentUtil.getSchemeName(schemeName)._2, errorMsg, extendedInstructions))
+          }
         }
       }
     } recover {

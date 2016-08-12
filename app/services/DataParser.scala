@@ -102,7 +102,7 @@ trait DataGenerator extends DataParser with Metrics{
 
     def checkForMissingHeaders(rowNum: Int, sheetName: String) = {
       if(rowNum > 0 && rowNum < 9) {
-        throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName),Messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName))
+        throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName),Messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName), needsExtendedInstructions = true)
       }
     }
 
@@ -161,7 +161,7 @@ trait DataGenerator extends DataParser with Metrics{
     }
     checkForMissingHeaders(rowNum, sheetName)
     if(rowsWithData == 0) {
-      throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.noData"),Messages("ers.exceptions.dataParser.noData"))
+      throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.noData"),Messages("ers.exceptions.dataParser.noData"), needsExtendedInstructions = true)
     }
     deliverDataIteratorMetrics(startTime)
     AuditEvents.numRowsInSchemeData(scheme, rowsWithData)(authContext,hc,request)
@@ -204,7 +204,7 @@ trait DataGenerator extends DataParser with Metrics{
     //  AuditEvents.fileProcessingErrorAudit(schemeInfo, sheetName, "Could not set the validator")
       Logger.warn(Messages("ers.exceptions.dataParser.unidentifiableSheetName") + sheetName)
       val schemeName = ContentUtil.getSchemeName(scheme)._2
-      throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectSheetName", sheetName, schemeName), Messages("ers.exceptions.dataParser.unidentifiableSheetName") + " " +sheetName)
+      throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectSheetName", sheetName, schemeName), Messages("ers.exceptions.dataParser.unidentifiableSheetName") + " " +sheetName, needsExtendedInstructions = true)
     })
   }
 
@@ -223,7 +223,7 @@ trait DataGenerator extends DataParser with Metrics{
         implicit val hc:HeaderCarrier = new HeaderCarrier()
      //   AuditEvents.fileProcessingErrorAudit(schemeInfo,sheetName,"Header row invalid")
         Logger.warn("Error while reading File + Incorrect ERS Template")
-        throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName),Messages("ers.exceptions.dataParser.headersDontMatch"))
+        throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName),Messages("ers.exceptions.dataParser.headersDontMatch"), needsExtendedInstructions = true)
       }
     }
   }

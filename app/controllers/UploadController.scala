@@ -52,8 +52,10 @@ trait UploadController extends ERSCheckingBaseController {
 						case false => Future(Redirect(routes.HtmlReportController.htmlErrorReportPage))
 					}
 				} catch {
-					case e:  ERSFileProcessingException => cacheUtil.cache[String](CacheUtil.FORMAT_ERROR_CACHE, e.message).map { res =>
-						Redirect(routes.CheckingServiceController.formatErrorsPage())
+					case e:  ERSFileProcessingException => cacheUtil.cache[String](CacheUtil.FORMAT_ERROR_CACHE, e.message).flatMap { res =>
+						cacheUtil.cache[Boolean](CacheUtil.FORMAT_ERROR_EXTENDED_CACHE, e.needsExtendedInstructions).map { r =>
+							Redirect(routes.CheckingServiceController.formatErrorsPage())
+						}
 					}
 				}
 	}
@@ -73,8 +75,10 @@ trait UploadController extends ERSCheckingBaseController {
 			}
 		} catch {
 			case e: ERSFileProcessingException =>
-				cacheUtil.cache[String](CacheUtil.FORMAT_ERROR_CACHE, e.message).map { res =>
-					Redirect(routes.CheckingServiceController.formatErrorsPage())
+				cacheUtil.cache[String](CacheUtil.FORMAT_ERROR_CACHE, e.message).flatMap { res =>
+					cacheUtil.cache[Boolean](CacheUtil.FORMAT_ERROR_EXTENDED_CACHE, e.needsExtendedInstructions).map { r =>
+						Redirect(routes.CheckingServiceController.formatErrorsPage())
+					}
 				}
 		}
 	}
