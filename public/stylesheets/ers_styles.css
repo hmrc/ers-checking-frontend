@@ -2,6 +2,20 @@
 /* ERS Global Styles         */
 /*****************************/
 
+@media screen and (min-width: 641px) {
+
+  .grid-layout__column--1-3 {
+    float: left;
+    width: 33.33333%;
+  }
+
+  .grid-layout__column--2-3 {
+    float: left;
+    width: 66.66667%;
+  }
+
+}
+
 #upload-file-form {clear:both;}
 
 .hidden {display:none;}
