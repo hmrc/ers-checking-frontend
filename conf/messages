@@ -11,13 +11,13 @@ ers.signout=Sign out
 ers.continue=Continue
 ers.back=Back
 
-ers.start.page_title=Check your ERS files
-ers.scheme_types.page_title=Choose scheme or arrangement type
-ers.file_type.page_title=Choose file type
-ers.upload_csv.page_title=Choose and check the .csv files
-ers.upload_ods.page_title=Choose and check the .ods file
-ers.error_report.page_title=Error report
-ers.confirmation.page_title=Confirmation
+ers.start.page_title=Check your ERS files – Employment Related Securities – GOV.UK
+ers.scheme_types.page_title=Choose scheme or arrangement type – Employment Related Securities – GOV.UK
+ers.file_type.page_title=Choose file type – Employment Related Securities – GOV.UK
+ers.upload_csv.page_title=Choose and check the .csv files – Employment Related Securities – GOV.UK
+ers.upload_ods.page_title=Choose and check the .ods file – Employment Related Securities – GOV.UK
+ers.error_report.page_title=Error report – Employment Related Securities – GOV.UK
+ers.confirmation.page_title=Confirmation – Employment Related Securities – GOV.UK
 
 ers_start.page_title=Check your ERS files
 ers_start.intro_para_1=Use this service to check for errors in the files you need to upload as part of your Employment Related Securities (ERS) annual return.
