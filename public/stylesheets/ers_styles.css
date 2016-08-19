@@ -234,6 +234,10 @@ article #html-error-report table td, article #html-error-report table th {border
 #html-error-report #errors-by-sheet {margin-top:2em; margin-bottom:0;}
 #html-error-report .sheet-title {margin-top:1em; margin-bottom:0.25em;}
 
+.error-table th, .error-table td {
+    font-size: 19px;
+    line-height: 1.31579;
+}
 /*****************************/
 /* spinner                   */
 /*****************************/
