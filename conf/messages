@@ -157,7 +157,7 @@ ers_html_error_report.table_column_names=<tr><th class='column' scope='col'>Colu
 #ers_html_error_report.sheet_name=<h3 class='sheet-title'>{1}: <span class='font-small'>{0}</span></h3>
 ers_html_error_report.sheet_name=<h3 class='sheet-title'><span class='font-small'>{0}</span></h3>
 ers_html_error_report.table_row=<tr><td>{0}</td><td>{1}</td><td class='errorMsg'>{2}</td></tr>
-ers_html_error_report.sheet={0}<table id={3}>{1}{2}</table>
+ers_html_error_report.sheet={0}<table id={3} class="error-table">{1}{2}</table>
 ers_html_error_report.finish=Finish
 ers_html_error_report.following_pages=<div class='following-pages'>For a more detailed summary of your errors, continue to next page.</div>
 
