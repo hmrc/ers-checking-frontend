@@ -6,19 +6,18 @@
 
 @scripts = {
 	<script>var INVALID_CHARACTERS=/@Html(invalidChars)/</script>
-	<script src='@routes.AssetsController.at("javascripts/ers_scripts.js")'> </script>
 	<script src='@routes.AssetsController.at("javascripts/ers_ods_scripts.js")'> </script>
 }
 
 @ers_main(title = Messages("ers.upload_ods.page_title"), scripts) {
 	<p class="font-xsmall"><a href="@routes.CheckingServiceController.checkFileTypePage()" class="link-back">@Html(Messages("ers.back"))</a></p>
 	@header(Messages("ers_check_file.title"))
-	<div class="validation-summary visibility" role="group" aria-labelledby="error-summary-heading" tabindex="-1">
+	<div id="errors" class="validation-summary visibility" role="group" aria-labelledby="error-summary-heading" tabindex="-1">
 		<h1 class="heading-medium error-summary-heading" id="error-summary-heading">
 			@Html(Messages("validation.summary.heading"))
 		</h1>
 		<ul class="error-summary-list">
-			<li class="validation-summary-message"><a href="#error-summary">@Html(Messages("ods_file_upload.summary_error"))</a></li>
+			<li class="validation-summary-message"><a href="#error-summary" data-focuses="error-summary">@Html(Messages("ods_file_upload.summary_error"))</a></li>
 		</ul>
 	</div>
 	<div id="file-wrapper">

@@ -81,29 +81,37 @@
 	    $("#file-wrapper").before("<div id='error-summary' class='validation-message' tabindex'-1' role='alert' aria-labelledby='error-heading'>"+msg+"</div>")					
 	}	
 
-	/*
-	if (ie<11) {
-		$("#choose-file-button").hide();
-		$("#file-name").hide();
-	} else {
-		$("#choose-file-button").show();
-		$("#file-name").show();
-		$("#input-file-name").hide();		
-	}	*/
 
-	/* Spinner */	
-	if (ie) {
-		$("#check-file-button").on("click", function (e) {
-			var temp = $("#progress-spinner-img").attr("src");
-			$("#progress-spinner").show();
-			$("#progress-spinner-img").attr("src",temp);
+	$(document).ready(function () {
+
+		/* Spinner */
+		if (ie) {
+			$("#check-file-button").on("click", function (e) {
+				var temp = $("#progress-spinner-img").attr("src");
+				$("#progress-spinner").show();
+				$("#progress-spinner-img").attr("src",temp);
+			});
+		} else {
+			$("#check-file-button").on("click", function (e) {
+				$("#progress-spinner").show();
+			});
+		}
+
+		$('.validation-summary-message a').on('click', function(e){
+			e.preventDefault();
+				var focusId = $(this).attr('data-focuses'),
+				thingToFocus = $("#"+focusId);
+			$('html, body').animate({
+				scrollTop: thingToFocus.parent().offset().top
+			}, 500);
+			thingToFocus.parent().find('#error-summary').parent().find("input").focus();
+			thingToFocus.parent().find('#fileToUpload').first().focus();
+			thingToFocus.parent().find('.block-label').first().focus();
+			thingToFocus.parent().find('.form-control').first().focus();
 		});
-	} else {
-		$("#check-file-button").on("click", function (e) {
-			$("#progress-spinner").show();
-		});	 		
-	}
-	
-	
+
+		$('#errors').focus();
+
+	});
 	
 	    
