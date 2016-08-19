@@ -269,5 +269,6 @@ article #html-error-report table td, article #html-error-report table th {border
     margin-bottom:0;
 }
 
+#errors:focus, #fileToUpload:focus {outline: 3px solid #ffbf47;}
 
 
