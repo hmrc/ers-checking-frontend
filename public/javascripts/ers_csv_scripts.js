@@ -54,6 +54,7 @@
     	$("#check-file-button").attr("disabled",true);
 	    $(e).before("<p id='error-summary' class='field-error clear' tabindex'-1' role='alert' aria-labelledby='error-heading'>"+msg+".</p>")
 	    $(".validation-summary-message a").html(msg)
+	    $("#errors").focus();
 	}
 		
 	function validateFile(fileName, fileSize, e) {		
