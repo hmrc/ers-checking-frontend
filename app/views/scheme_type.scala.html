@@ -16,12 +16,12 @@
 		    <fieldset>
 		    	<legend class="title-with-error">
 					<span class="visuallyhidden">@Html(Messages("ers_scheme_type.page_title"))</span>
-					@if(flash.get("scheme-not-selected-error").isDefined) {
-						<div aria-labelledby="error-heading" class="validation-message" id="error-summary" role="alert" tabindex="-1">
-							<span id="error-heading">@flash.get("scheme-not-selected-error")</span>
-						</div>
-					}
 				</legend>
+				@if(flash.get("scheme-not-selected-error").isDefined) {
+					<div aria-labelledby="error-heading" class="validation-message" id="error-summary" role="alert" tabindex="-1">
+						<span id="error-heading">@flash.get("scheme-not-selected-error")</span>
+					</div>
+				}
 		    	<div class="form-field @if(flash.get("scheme-not-selected-error").isDefined) {error}">
 		    		<label for="csop-radio-button" class="block-label @(if(param == "1") "selected")">
 		    			<input id="csop-radio-button" type="radio" name="schemeType" value="1" @(if(param == "1") "checked" else "")>
