@@ -26,9 +26,9 @@ object ExternalUrls extends RunMode {
   val companyAuthHost = s"${Play.configuration.getString(s"govuk-tax.$env.auth.company-auth.host").getOrElse("")}"
   val loginCallback = Play.configuration.getString(s"govuk-tax.$env.auth.login-callback.url").getOrElse(routes.CheckingServiceController.startPage().url)
   val loginPath = s"${Play.configuration.getString(s"govuk-tax.$env.auth.login_path").getOrElse("sign-in")}"
-  val signIn = s"$companyAuthHost/account/$loginPath?continue=$loginCallback"
-  val ytaUrl = s"${Play.configuration.getString(s"govuk-tax.$env.yta.url").getOrElse("/account")}"
-  val signOut = s"$companyAuthHost/account/sign-out"
+  val signIn = s"$companyAuthHost/gg/$loginPath?continue=$loginCallback"
+  val ytaUrl = s"${Play.configuration.getString(s"govuk-tax.$env.yta.url").getOrElse("/gg")}"
+  val signOut = s"$companyAuthHost/gg/sign-out"
 
   val betaFeedbackUrl = s"/contact/beta-feedback"
   val betaFeedbackUnauthenticatedUrl = s"/contact/beta-feedback-unauthenticated"
