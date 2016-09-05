@@ -85,7 +85,6 @@ trait ERSValidationOTHEROptionsTestData {
         //Column Q
         "validate grantorCompany\\companyCRN without ValidationErrors for valid data",
         "validate grantorCompany\\companyCRN with ValidationErrors for invalid data",
-        "validate grantorCompany\\companyCRN with ValidationErrors for an empty field",
         //Column R
         "validate grantorCompany\\companyCTRef without ValidationErrors for valid data",
         "validate grantorCompany\\companyCTRef with ValidationErrors for invalid data",
@@ -219,7 +218,6 @@ trait ERSValidationOTHEROptionsTestData {
       Cell("P",rowNumber,"abc"),
       Cell("Q",rowNumber,"AC097609"),
       Cell("Q",rowNumber,"abv%"),
-      Cell("Q",rowNumber,""),
       Cell("R",rowNumber,"1234567800"),
       Cell("R",rowNumber,"abv"),
       Cell("S",rowNumber,"123/XZ55555555"),
@@ -345,7 +343,6 @@ trait ERSValidationOTHEROptionsTestData {
       //Column Q
       None,
       Some(List(ValidationErrorData("error.17","017","Company Reference Number must be less than 11 characters (numbers and letters)"))),
-      Some(List(ValidationErrorData("MANDATORY","100","Company Reference Number must be less than 11 characters (numbers and letters)"))),
       //Column R
       None,
       Some(List(ValidationErrorData("error.18","018","Corporation Tax reference must be a 10 digit number"))),
