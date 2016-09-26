@@ -32,7 +32,7 @@ import scala.concurrent.duration._
 
 object Fixtures {
 
-  def buildFakeAuthority = Authority("/auth/oid/krogers", Accounts(None), None, None, CredentialStrength.Strong, L0)
+  def buildFakeAuthority = Authority("/auth/oid/krogers", Accounts(None), None, None, CredentialStrength.Strong, L0, None, None)
   def buildFakeUser = AuthContext(buildFakeAuthority)
 
   def buildFakeRequestWithSessionId(method: String) = FakeRequest(method, "").withSession("sessionId" -> "FAKE_SESSION_ID")
