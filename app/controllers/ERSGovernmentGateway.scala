@@ -24,7 +24,8 @@ import scala.concurrent.Future
 import play.api.mvc.Results.Redirect
 
 object ERSGovernmentGateway extends GovernmentGateway {
-  override val login = ExternalUrls.signIn
+  override def loginURL = ExternalUrls.signIn
+  override def continueURL = ExternalUrls.loginCallback
 }
 
 // $COVERAGE-OFF$
