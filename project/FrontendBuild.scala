@@ -11,16 +11,15 @@ private object AppDependencies {
   import play.core.PlayVersion
 
   private val playHealthVersion = "1.1.0"
-  private val frontendBootstrapVersion = "6.4.0"
+  private val frontendBootstrapVersion = "6.7.0"
   private val govukTemplateVersion =  "4.0.0"
   private val playUiVersion = "4.10.0"
-  private val playAuthFrontendVersion = "4.7.0"
+  private val playAuthFrontendVersion = "5.5.0"
   private val playConfigVersion = "2.0.1"
   private val metricsPlayVersion = "0.2.1"
   private val metricsGraphiteVersion = "3.0.2"
-  private val httpCachingVersion = "5.3.0"
-  private val httpHerbsVersion = "3.3.0"
-  private val playPartialVersion = "4.2.0"
+  private val httpCachingVersion = "5.6.0"
+  private val playPartialVersion = "4.5.0"
   private val jsonLoggerVersion = "2.1.1"
  // private val urlBuilderVersion =  "1.0.0"
 
@@ -28,7 +27,6 @@ private object AppDependencies {
     ws,
     "uk.gov.hmrc" %% "play-partials" % playPartialVersion,
     "uk.gov.hmrc" %% "frontend-bootstrap" % frontendBootstrapVersion,
-    "uk.gov.hmrc" %% "http-verbs" % httpHerbsVersion,
     "uk.gov.hmrc" %% "play-health" % playHealthVersion,
     "uk.gov.hmrc" %% "play-ui" % playUiVersion,
     "uk.gov.hmrc" %% "play-config" % playConfigVersion,
