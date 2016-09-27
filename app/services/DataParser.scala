@@ -41,7 +41,7 @@ trait DataParser {
   def validateSpecialCharacters(xmlRowData : String )={
     if(xmlRowData.contains("&")){
       Logger.debug("Found invalid xml in Data Parser, throwing exception")
-      throw new ERSFileProcessingException(Messages("ers.exceptions.dataParser.configFailure"), Messages("ers.exceptions.dataParser.parsingOfFileData"))
+      throw new ERSFileProcessingException(Messages("ers.exceptions.dataParser.ampersand"), Messages("ers.exceptions.dataParser.parsingOfFileData"))
     }
   }
 
