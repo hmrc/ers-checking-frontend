@@ -16,10 +16,12 @@
 
 package controllers
 
+import config.{ErsContext, ErsContextImpl}
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L50
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.frontend.auth.{IdentityConfidencePredicate, Actions}
+import uk.gov.hmrc.play.frontend.auth.{Actions, IdentityConfidencePredicate}
+
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import playconfig.ERSAuthConnector
@@ -29,4 +31,5 @@ trait ERSCheckingBaseController extends FrontendController  with Actions {
 	override lazy val authConnector = ERSAuthConnector
 	val maxTimeOut = 90 seconds
 	val pageVisibilityPredicate = new IdentityConfidencePredicate(L50, Future.successful(Forbidden))
+	implicit val context: ErsContext = ErsContextImpl
 }
