@@ -1,4 +1,8 @@
-@(schemeName: String, sheets: String, schemeNameShort: String, errorListCount: Long, schemeErrorCount: Long)(implicit request: Request[AnyRef])
+@(schemeName: String,
+  sheets: String,
+  schemeNameShort: String,
+  errorListCount: Long,
+  schemeErrorCount: Long)(implicit request: Request[AnyRef], context: config.ErsContext)
 @* HTML Error Report Template *@
 
 @import utils.PageBuilder

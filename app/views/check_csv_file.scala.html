@@ -1,4 +1,4 @@
-@(scheme: String, invalidChars: String)(implicit request: Request[AnyRef], flash: Flash)
+@(scheme: String, invalidChars: String)(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext)
 @* check return file Template *@
 
 @import _root_.views.html.templates._

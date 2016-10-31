@@ -16,14 +16,15 @@
 
 package controllers
 
+import config.{ErsContext, ErsContextImpl}
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L50
 
 import scala.concurrent.Future
+import uk.gov.hmrc.play.frontend.controller.{FrontendController, UnauthorisedAction}
 
-import uk.gov.hmrc.play.frontend.controller.{UnauthorisedAction, FrontendController}
 import scala.concurrent.Future
 import connectors.AuthenticationConnector
-import uk.gov.hmrc.play.frontend.auth.{IdentityConfidencePredicate, Actions}
+import uk.gov.hmrc.play.frontend.auth.{Actions, IdentityConfidencePredicate}
 import utils.ExternalUrls
 
 // $COVERAGE-OFF$
@@ -34,10 +35,12 @@ with Actions
 with AuthenticationConnector {
 
   val pageVisibilityPredicate = new IdentityConfidencePredicate(L50, Future.successful(Forbidden))
+  implicit val context: ErsContext = ErsContextImpl
 
   def notAuthorised = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
-    implicit authContext => implicit request =>
-      Future.successful(Ok(views.html.not_authorised.render(request)))
+    implicit authContext =>
+      implicit request =>
+      Future.successful(Ok(views.html.not_authorised.render(request, context)))
   }
 
 }

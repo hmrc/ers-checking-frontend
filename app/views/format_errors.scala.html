@@ -1,4 +1,8 @@
-@(fileType: String, schemeName: String, schemeNameShort: String, errorMsg: String, showExtendedInstructions: Boolean)(implicit request: Request[AnyRef], flash: Flash)
+@(fileType: String,
+  schemeName: String,
+  schemeNameShort: String,
+  errorMsg: String,
+  showExtendedInstructions: Boolean)(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext)
 @* check return file Template *@
 
 @import views.html.templates._
