@@ -16,15 +16,18 @@
 
 package controllers
 
-import uk.gov.hmrc.play.frontend.auth.{TaxRegime, GovernmentGateway}
+import config.ApplicationConfig
+import uk.gov.hmrc.play.frontend.auth.{GovernmentGateway, TaxRegime}
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
 import utils.ExternalUrls
 import play.api.mvc.{AnyContent, Request, Result}
+
 import scala.concurrent.Future
 import play.api.mvc.Results.Redirect
 
 object ERSGovernmentGateway extends GovernmentGateway {
-  override def loginURL = ExternalUrls.signIn
+  //override def loginURL = ExternalUrls.signIn
+  override def loginURL = ApplicationConfig.ggSignInUrl
   override def continueURL = ExternalUrls.loginCallback
 }
 
