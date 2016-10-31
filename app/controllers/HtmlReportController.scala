@@ -57,7 +57,7 @@ trait HtmlReportController extends ERSCheckingBaseController {
         }
       }
       val sheets: String = HtmlCreator.getSheets(schemeErrors)
-      Ok(views.html.html_error_report(schemeName, sheets, schemeNameShort, totalErrors, schemeErrorCount)(request))
+      Ok(views.html.html_error_report(schemeName, sheets, schemeNameShort, totalErrors, schemeErrorCount)(request, context))
     }recover {
       case e: NoSuchElementException => {
         Logger.error("Unable to display error report in HtmlReportController.showHtmlErrorReportPage. Error: " + e.getMessage)

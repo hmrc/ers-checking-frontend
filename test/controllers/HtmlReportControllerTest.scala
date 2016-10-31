@@ -18,6 +18,7 @@ package controllers
 
 import java.util.NoSuchElementException
 import java.util.concurrent.TimeoutException
+
 import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 import models.SheetErrors
 import org.mockito.Matchers._
@@ -27,13 +28,14 @@ import play.api.http.Status
 import play.api.libs.json
 import play.api.mvc.Request
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http.cache.client.{ShortLivedCache, CacheMap, SessionCache}
+import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache, ShortLivedCache}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.http.{HttpGet, HttpPut, NotFoundException}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.{CacheUtil, PageBuilder}
+
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.{Await, Future, ExecutionContext}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.libs.json._
 import play.api.libs.json.JsValue
@@ -164,7 +166,7 @@ class HtmlReportControllerTest extends UnitSpec with ERSFakeApplication with Moc
       controllerUnderTest.fetchAllMapVal = "withErrorListSchemeTypeFileTypeZeroErrorCountSummary"
       val result = controllerUnderTest.showHtmlErrorReportPage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"),hc)
       status(result) shouldBe Status.OK
-//      result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkingSuccessPage.toString()
+      // result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkingSuccessPage.toString()
     }
   }
 }

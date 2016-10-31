@@ -26,8 +26,6 @@ trait ApplicationConfig {
   val assetsPrefix: String
   val analyticsToken: Option[String]
   val analyticsHost: String
-  val reportAProblemPartialUrl: String
-  val reportAProblemNonJSUrl: String
 
   val startElement: String
   val endElement: String
@@ -47,8 +45,6 @@ object ApplicationConfig extends ApplicationConfig with ServicesConfig {
   override lazy val assetsPrefix = loadConfig(s"govuk-tax.$env.assets.url") + loadConfig(s"govuk-tax.$env.assets.version")
   override lazy val analyticsToken: Option[String] = configuration.getString(s"govuk-tax.$env.google-analytics.token")
   override lazy val analyticsHost: String = configuration.getString(s"govuk-tax.$env.google-analytics.host").getOrElse("service.gov.uk")
-  override lazy val reportAProblemPartialUrl = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
-  override lazy val reportAProblemNonJSUrl = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
 
   override lazy val startElement: String = "<table:table-row"
   override lazy val endElement: String = "</table:table-row>"

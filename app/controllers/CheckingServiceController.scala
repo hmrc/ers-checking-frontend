@@ -44,7 +44,7 @@ trait CheckingServiceController extends ERSCheckingBaseController {
         showStartPage(authContext, request)
   }
 
-  def showStartPage(implicit authContext: AuthContext, request: Request[AnyRef]): Future[Result] = Future.successful(Ok(views.html.start.render(request)))
+  def showStartPage(implicit authContext: AuthContext, request: Request[AnyRef]): Future[Result] = Future.successful(Ok(views.html.start.render(request, context)))
 
   def schemeTypePage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
     implicit authContext =>
@@ -133,7 +133,7 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   def showCheckCSVFilePage(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
     cacheUtil.fetch[String](CacheUtil.SCHEME_CACHE).map { scheme =>
         val invalidChars: String = "[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]"
-        Ok(views.html.check_csv_file(scheme, invalidChars)(request, request.flash))
+        Ok(views.html.check_csv_file(scheme, invalidChars)(request, request.flash, context))
     } recover {
       case e: Exception => {
         Logger.error("showCheckCSVFilePage: Unable to fetch scheme. Error: " + e.getMessage)
@@ -152,7 +152,7 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   def showCheckODSFilePage(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
     cacheUtil.fetch[String](CacheUtil.SCHEME_CACHE).map { scheme =>
       val invalidChars: String = "[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]"
-      Ok(views.html.check_file(scheme, invalidChars)(request, request.flash))
+      Ok(views.html.check_file(scheme, invalidChars)(request, request.flash, context))
     } recover {
       case e: Exception => {
         Logger.error("showCheckFilePage: Unable to fetch scheme. Error: " + e.getMessage)
@@ -168,7 +168,7 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   }
 
   def showCheckingSuccessPage(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
-    Future.successful(Ok(views.html.checking_success.render(request)))
+    Future.successful(Ok(views.html.checking_success.render(request, context)))
   }
 
   def checkingErrorsPage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {

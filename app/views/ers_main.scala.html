@@ -1,4 +1,4 @@
-@(title: String, scripts: Html = Html(""), showSignOutLink: Boolean = false)(mainContent: Html)(implicit request: Request[AnyRef])
+@(title: String, scripts: Html = Html(""), showSignOutLink: Boolean = false)(mainContent: Html)(implicit request: Request[AnyRef], context: config.ErsContext)
 
 @import play.api.Play.current
 @import play.api.Play
