@@ -16,6 +16,7 @@
 
 package utils
 
+import play.api.i18n.Messages.Implicits._
 import play.api.i18n.Messages
 import controllers.routes
 import play.api.mvc.Call
@@ -64,7 +65,7 @@ trait PageBuilder {
   val SIP_CSV_FILES: Int = 2
   val OTHER_CSV_FILES: Int = 9
 
-  def getGlobalPageElement(scheme: String, element: String) : String = {
+  def getGlobalPageElement(scheme: String, element: String)(implicit messages: Messages) : String = {
     val pageElement: String = scheme match {
       case SCHEME_CSOP => Messages(MSG_ERS + MSG_CSOP + element)
       case SCHEME_EMI => Messages(MSG_ERS + MSG_EMI + element)
@@ -76,7 +77,7 @@ trait PageBuilder {
     pageElement
   }
 
-  def getPageElement(scheme: String, pageId: String, element: String, para: String = "") : String = {
+  def getPageElement(scheme: String, pageId: String, element: String, para: String = "")(implicit messages: Messages): String = {
     val pageElement: String = scheme match {
       case SCHEME_CSOP => Messages(pageId + MSG_CSOP + element, para)
       case SCHEME_EMI => Messages(pageId + MSG_EMI + element, para)

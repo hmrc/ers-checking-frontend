@@ -27,7 +27,7 @@ trait HtmlCreator {
 
 	var uploadedFileUtil = UploadedFileUtil
 
-	def getSheets(schemeErrors: ListBuffer[SheetErrors]): String = {
+	def getSheets(schemeErrors: ListBuffer[SheetErrors])(implicit messages: Messages): String = {
 		var sheets: String = "";
 		var errorListCount: Long = 0;
 		val htmlTableColHeaders: String = Messages("ers_html_error_report.table_column_names")

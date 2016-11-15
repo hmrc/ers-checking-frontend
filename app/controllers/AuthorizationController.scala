@@ -26,7 +26,8 @@ import scala.concurrent.Future
 import connectors.AuthenticationConnector
 import uk.gov.hmrc.play.frontend.auth.{Actions, IdentityConfidencePredicate}
 import utils.ExternalUrls
-
+import play.api.i18n.Messages.Implicits._
+import play.api.Play.current
 // $COVERAGE-OFF$
 object AuthorizationController extends AuthorizationController
 
@@ -34,13 +35,14 @@ trait AuthorizationController extends FrontendController
 with Actions
 with AuthenticationConnector {
 
+  val messages = applicationMessages
   val pageVisibilityPredicate = new IdentityConfidencePredicate(L50, Future.successful(Forbidden))
   implicit val context: ErsContext = ErsContextImpl
 
   def notAuthorised = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
     implicit authContext =>
       implicit request =>
-      Future.successful(Ok(views.html.not_authorised.render(request, context)))
+      Future.successful(Ok(views.html.not_authorised.render(request, context, messages)))
   }
 
 }

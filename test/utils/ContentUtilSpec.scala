@@ -18,10 +18,15 @@ package utils
 
 import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.play.test.UnitSpec
+import play.api.i18n.Messages.Implicits._
+import play.api.Play.current
 
 class ContentUtilSpec  extends UnitSpec with MockitoSugar {
 
   "ContentUtil" should {
+
+    implicit val messages = applicationMessages
+
     val data = List(
       ("1","csop", "Company Share Option Plan"),
       ("2","emi", "Enterprise Management Incentives"),
@@ -31,7 +36,8 @@ class ContentUtilSpec  extends UnitSpec with MockitoSugar {
     )
     for(schemeType <- data) {
       s"return scheme name and abbreviation for ${schemeType._2}" in {
-        ContentUtil.getSchemeName(schemeType._1)._2 shouldBe schemeType._2.toUpperCase
+
+        ContentUtil.getSchemeName(schemeType._1)(messages)._2 shouldBe schemeType._2.toUpperCase
       }
     }
   }

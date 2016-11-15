@@ -31,7 +31,8 @@ import utils.{ParserUtil, CacheUtil, UploadedFileUtil}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
-
+import play.api.i18n.Messages.Implicits._
+import play.api.Play.current
 
 object CsvFileProcessor extends CsvFileProcessor
 {
@@ -50,7 +51,7 @@ trait CsvFileProcessor extends DataGenerator {
 
     implicit val validator = setValidator(sheetName)
     Logger.debug("validator set " + validator.toString)
-    SheetErrors(sheetName, validateFile(file:File, sheetName, ErsValidator.validateRow))
+    SheetErrors(sheetName, validateFile(file:File, sheetName, ErsValidator.validateRow)(validator, applicationMessages))
 
   }
 
@@ -76,7 +77,7 @@ trait CsvFileProcessor extends DataGenerator {
     }
   }
 
-  def validateFile(file:File, sheetName:String, validator:(Seq[String],Int,DataValidator) => Option[List[ValidationError]])(implicit dataValidator:DataValidator): ListBuffer[ValidationError]= {
+  def validateFile(file:File, sheetName:String, validator:(Seq[String],Int,DataValidator) => Option[List[ValidationError]])(implicit dataValidator:DataValidator, messages: Messages): ListBuffer[ValidationError]= {
     val iterator:LineIterator = FileUtils.lineIterator(file, "UTF-8")
 
     var rowCount = 0
@@ -102,7 +103,7 @@ trait CsvFileProcessor extends DataGenerator {
         }
       }
       if(rowsWithData == 0) {
-        throw ERSFileProcessingException(Messages("ers_check_csv_file.noData", sheetName + ".csv"), Messages("ers_check_csv_file.noData"), needsExtendedInstructions = true)
+        throw ERSFileProcessingException(messages("ers_check_csv_file.noData", sheetName + ".csv"), messages("ers_check_csv_file.noData"), needsExtendedInstructions = true)
       }
       errorsList
     }
@@ -112,7 +113,7 @@ trait CsvFileProcessor extends DataGenerator {
       }
       case ex:Throwable => {
         UploadedFileUtil.deleteFile(file: File)
-        throw new ERSFileProcessingException(Messages("ers.exceptions.dataParser.fileParsingError", sheetName) ,Messages("ers.exceptions.dataParser.parsingOfFileData"))
+        throw new ERSFileProcessingException(messages("ers.exceptions.dataParser.fileParsingError", sheetName) ,messages("ers.exceptions.dataParser.parsingOfFileData"))
       }
     }
     finally {

@@ -20,7 +20,7 @@ import java.io.File
 
 import uk.gov.hmrc.services.validation._
 import models.SheetErrors
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.Files
@@ -65,11 +65,11 @@ class ProcessODSServiceSpec extends UnitSpec with MockitoSugar with WithFakeAppl
 
   def getMockFile(isEmpty: Boolean): MultipartFormData[Files.TemporaryFile] = {
     if(isEmpty) {
-      MultipartFormData(dataParts = Map(), files = Seq(), badParts = Seq(), missingFileParts = Seq())
+      MultipartFormData(dataParts = Map(), files = Seq(), badParts = Seq()/*, missingFileParts = Seq()*/)
     }
     else {
       val part = FilePart[TemporaryFile](key = "fileUpload", filename = "EMI_template_V3.ods", contentType = Some("Content-Type: multipart/form-data"), ref = mockTempFile)
-      MultipartFormData(dataParts = Map(), files = Seq(part), badParts = Seq(), missingFileParts = Seq())
+      MultipartFormData(dataParts = Map(), files = Seq(part), badParts = Seq()/*, missingFileParts = Seq()*/)
     }
   }
 

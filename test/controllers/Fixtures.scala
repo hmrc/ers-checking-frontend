@@ -16,9 +16,10 @@
 
 package controllers
 
+import play.test.WithApplication
 import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 import models.SheetErrors
-import play.api.test.{FakeRequest, FakeApplication, WithApplication}
+import play.api.test.{FakeRequest, FakeApplication}
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L0
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.frontend.auth.AuthContext
@@ -32,7 +33,7 @@ import scala.concurrent.duration._
 
 object Fixtures {
 
-  def buildFakeAuthority = Authority("/auth/oid/krogers", Accounts(None), None, None, CredentialStrength.Strong, L0, None, None)
+  def buildFakeAuthority = Authority("/auth/oid/krogers", Accounts(None), None, None, CredentialStrength.Strong, L0, None, None, None, "")
   def buildFakeUser = AuthContext(buildFakeAuthority)
 
   def buildFakeRequestWithSessionId(method: String) = FakeRequest(method, "").withSession("sessionId" -> "FAKE_SESSION_ID")
@@ -78,10 +79,10 @@ object Fixtures {
 }
 
 
-abstract class WithErsSetup extends WithApplication(FakeApplication(additionalConfiguration = Map(
+abstract class WithErsSetup extends WithApplication/*(FakeApplication(additionalConfiguration = Map(
   "application.secret" -> "test",
   "govuk-tax.Test.login-callback.url" -> "test"
-))) {
+))) */{
   implicit val hc = HeaderCarrier()
 }
 

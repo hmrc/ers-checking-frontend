@@ -32,6 +32,7 @@ import utils.{CacheUtil, UploadedFileUtil}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.mutable.ListBuffer
 import utils.ParserUtil
+import play.api.i18n.Messages.Implicits._
 
 object ProcessODSService extends ProcessODSService {
   override val uploadedFileUtil: UploadedFileUtil = UploadedFileUtil
@@ -42,10 +43,10 @@ trait ProcessODSService {
   val uploadedFileUtil: UploadedFileUtil
   val cacheUtil:CacheUtil
 
-  def performODSUpload()(implicit request: Request[AnyContent],scheme:String, authContext : AuthContext, hc : HeaderCarrier):Boolean = {
+  def performODSUpload()(implicit request: Request[AnyContent],scheme:String, authContext : AuthContext, hc : HeaderCarrier, messages: Messages):Boolean = {
     val spreadSheetFile = request.body.asMultipartFormData.get.file("fileUpload")
     spreadSheetFile.map { file =>
-      val errorList: ListBuffer[SheetErrors] = checkFileType(file)(scheme, authContext,hc ,request)
+      val errorList: ListBuffer[SheetErrors] = checkFileType(file)(scheme, authContext,hc ,request, messages)
       val fileName: String = request.body.asMultipartFormData.get.file("fileUpload").get.filename
       cacheUtil.cache[String](CacheUtil.FILE_NAME_CACHE, fileName).recover {
         case e: Exception => {
@@ -55,7 +56,7 @@ trait ProcessODSService {
       }
       ParserUtil.isFileValid(errorList, "performODSUpload")
     }.getOrElse {
-      throw ERSFileProcessingException(Messages("ers_check_file.no_file_error"),Messages("ers_check_file.no_file_error"), needsExtendedInstructions = true)
+      throw ERSFileProcessingException(messages("ers_check_file.no_file_error"),messages("ers_check_file.no_file_error"), needsExtendedInstructions = true)
     }
   }
 
@@ -76,9 +77,9 @@ trait ProcessODSService {
     (validFileExtn, fileObjectList)
   }
 
-  def checkFileType(uploadedFile: MultipartFormData.FilePart[Files.TemporaryFile])(implicit scheme:String, authContext: AuthContext,hc: HeaderCarrier, request: Request[_]):ListBuffer[SheetErrors] = {
+  def checkFileType(uploadedFile: MultipartFormData.FilePart[Files.TemporaryFile])(implicit scheme:String, authContext: AuthContext,hc: HeaderCarrier, request: Request[_], messages: Messages):ListBuffer[SheetErrors] = {
     if (!uploadedFileUtil.checkODSFileType(uploadedFile.filename)) {
-      throw ERSFileProcessingException(Messages("ers_check_file.file_type_error", uploadedFile.filename), Messages("ers_check_file.file_type_error", uploadedFile.filename))
+      throw ERSFileProcessingException(messages("ers_check_file.file_type_error", uploadedFile.filename), messages("ers_check_file.file_type_error", uploadedFile.filename))
     }
     val res = parseOdsContent(uploadedFile.ref.file.getAbsolutePath, uploadedFile.filename)(scheme, authContext, hc, request)
     UploadedFileUtil.deleteFile(uploadedFile.ref.file)
@@ -90,7 +91,7 @@ trait ProcessODSService {
     val zipFile: ZipFile = new ZipFile(fileName)
     val content: InputStream = zipFile.getInputStream(zipFile.getEntry("content.xml"))
     val processor = new StaxProcessor(content)
-    val result = DataGenerator.getErrors(processor, scheme, uploadedFileName)
+    val result = DataGenerator.getErrors(processor, scheme, uploadedFileName)(authContext, hc, request, applicationMessages)
     zipFile.close()
     result
   }

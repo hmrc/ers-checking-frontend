@@ -25,23 +25,23 @@ import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
 import play.api.i18n.Messages
 import services.XMLTestData._
 import uk.gov.hmrc.play.http.HeaderCarrier
-/**
- * Created by raghu on 26/01/16.
- */
+import play.api.i18n.Messages.Implicits._
+import play.api.Play.current
+
 class ParserTest extends PlaySpec with OneServerPerSuite with ScalaFutures with MockitoSugar with BeforeAndAfter{
 
-
+  implicit val messages = applicationMessages
   object TestDataParser extends DataParser
   object TestDataGenerator extends DataGenerator
 
   "parse row with duplicate column data 1" in {
-    val result = TestDataParser.parse(emiAdjustmentsXMLRow1.toString,"")
+    val result = TestDataParser.parse(emiAdjustmentsXMLRow1.toString,"")(messages)
     result.right.get.size must equal(17)
   }
 
   besParserTests.foreach( rec => {
     rec._1 in {
-      val result = TestDataParser.parse(rec._2.toString,"")
+      val result = TestDataParser.parse(rec._2.toString,"")(messages)
       result.right.get.toList.take(rec._3.size) must be (rec._3)
     }
   })
@@ -60,14 +60,14 @@ class ParserTest extends PlaySpec with OneServerPerSuite with ScalaFutures with 
         }
       }
     }
-    exceptionMessage mustBe Messages("ers.exceptions.dataParser.incorrectSheetName", "EMI40_Taxable", "EMI")
+    exceptionMessage mustBe messages("ers.exceptions.dataParser.incorrectSheetName", "EMI40_Taxable", "EMI")
   }
 
   "display incorrectHeader exception in validateHeaderRow method" in {
     def exceptionMessage: String = {
       try {
         val data: Seq[String] = Seq("","")
-        val result = TestDataGenerator.validateHeaderRow(data, "CSOP_OptionsRCL_V3", "CSOP", "CSOP_OptionsRCL_V3.csv")
+        val result = TestDataGenerator.validateHeaderRow(data, "CSOP_OptionsRCL_V3", "CSOP", "CSOP_OptionsRCL_V3.csv")(messages)
         result.toString()
       }
       catch {
@@ -76,38 +76,38 @@ class ParserTest extends PlaySpec with OneServerPerSuite with ScalaFutures with 
         }
       }
     }
-    exceptionMessage mustBe Messages("ers.exceptions.dataParser.incorrectHeader", "CSOP_OptionsRCL_V3", "CSOP_OptionsRCL_V3.csv")
+    exceptionMessage mustBe messages("ers.exceptions.dataParser.incorrectHeader", "CSOP_OptionsRCL_V3", "CSOP_OptionsRCL_V3.csv")
   }
 
   "return sheetInfo given a valid sheet name" in {
-    val sheet = TestDataGenerator.getSheet(ERSTemplatesInfo.emiSheet5Name, "EMI")
+    val sheet = TestDataGenerator.getSheet(ERSTemplatesInfo.emiSheet5Name, "EMI")(messages)
     sheet.schemeType mustBe "EMI"
     sheet.sheetId mustBe 5
   }
 
   "return sheetInfo for CSOP_OptionsGranted_V3" in {
-    val sheet = TestDataGenerator.getSheet(ERSTemplatesInfo.csopSheet1Name, "CSOP")
+    val sheet = TestDataGenerator.getSheet(ERSTemplatesInfo.csopSheet1Name, "CSOP")(messages)
     sheet.schemeType mustBe "CSOP"
     sheet.sheetId mustBe 1
   }
 
   "return sheetInfo for CSOP_OptionsRCL_V3" in {
-    val sheet = TestDataGenerator.getSheet(ERSTemplatesInfo.csopSheet2Name, "CSOP")
+    val sheet = TestDataGenerator.getSheet(ERSTemplatesInfo.csopSheet2Name, "CSOP")(messages)
     sheet.schemeType mustBe "CSOP"
     sheet.sheetId mustBe 2
   }
 
   "return sheetInfo for CSOP_OptionsExercised_V3" in {
-    val sheet = TestDataGenerator.getSheet(ERSTemplatesInfo.csopSheet3Name, "CSOP")
+    val sheet = TestDataGenerator.getSheet(ERSTemplatesInfo.csopSheet3Name, "CSOP")(messages)
     sheet.schemeType mustBe "CSOP"
     sheet.sheetId mustBe 3
   }
 
   "throw an exception for an invalid sheetName" in {
     val result = intercept[ERSFileProcessingException]{
-      TestDataGenerator.getSheet("abc", "1")
+      TestDataGenerator.getSheet("abc", "1")(messages)
     }
-    result.message mustBe Messages("ers.exceptions.dataParser.incorrectSheetName", "abc", "CSOP")
+    result.message mustBe messages("ers.exceptions.dataParser.incorrectSheetName", "abc", "CSOP")
   }
 
 }

@@ -17,7 +17,7 @@
 package controllers
 
 import models.ERSFileProcessingException
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.http.Status
@@ -37,7 +37,7 @@ class UploadControllerTest extends UnitSpec with ERSFakeApplication with Mockito
 		override val csvFileProcessor:CsvFileProcessor = mockCsvFileProcessor
 		override val processODSService: ProcessODSService = mockProcessODSService
 		when(
-			mockProcessODSService.performODSUpload()(any(),any(),any(),any())
+			mockProcessODSService.performODSUpload()(any(),any(),any(),any(),any())
 		).thenReturn(
 				proccessFile match {
 				case true => Future.successful(uploadRes)

@@ -30,6 +30,10 @@ import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
 import uk.gov.hmrc.play.frontend.bootstrap.{DefaultFrontendGlobal, ShowErrorPage}
 import net.ceedubs.ficus.Ficus._
 import uk.gov.hmrc.play.http.logging.filters.FrontendLoggingFilter
+import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
+import play.api.i18n.Messages.Implicits._
+import play.api.Play.current
+
 
 object ApplicationGlobal extends DefaultFrontendGlobal with RunMode with ShowErrorPage {
   override val auditConnector = ERSAuditConnector
@@ -43,7 +47,7 @@ object ApplicationGlobal extends DefaultFrontendGlobal with RunMode with ShowErr
   }
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): Html =
-    views.html.global_error(pageTitle, heading, message)
+    views.html.global_error(pageTitle, heading, message)(applicationMessages)
 
   override def microserviceMetricsConfig(implicit app: Application): Option[Configuration] = app.configuration.getConfig(s"Dev.microservice.metrics")
 
@@ -53,11 +57,11 @@ object ControllerConfiguration extends ControllerConfig {
   lazy val controllerConfigs = Play.current.configuration.underlying.as[Config]("controllers")
 }
 
-object ERSLoggingFilter extends FrontendLoggingFilter {
+object ERSLoggingFilter extends FrontendLoggingFilter with MicroserviceFilterSupport{
   override def controllerNeedsLogging(controllerName: String) = ControllerConfiguration.paramsForController(controllerName).needsLogging
 }
 
-object ERSFrontendAuditFilter extends FrontendAuditFilter with RunMode with AppName {
+object ERSFrontendAuditFilter extends FrontendAuditFilter with RunMode with AppName with MicroserviceFilterSupport{
 
   override lazy val maskedFormFields = Seq("password")
 

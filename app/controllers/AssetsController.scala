@@ -16,5 +16,10 @@
 
 package controllers
 
+import play.api.http.HttpErrorHandler
+import javax.inject._
+
+
 // $COVERAGE-OFF$
-object AssetsController extends AssetsBuilder
+object AssertsController
+class AssetsController @Inject()(errorHandler: HttpErrorHandler) extends AssetsBuilder(errorHandler)

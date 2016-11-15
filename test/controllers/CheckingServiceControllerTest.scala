@@ -18,8 +18,7 @@ package controllers
 
 import models.CSformMappings
 import org.jsoup.Jsoup
-import org.mockito.Matchers._
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers._
 import org.scalatest.mock.MockitoSugar
 import play.api.http.Status
 import play.api.test.FakeRequest

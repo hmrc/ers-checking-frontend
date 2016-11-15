@@ -27,6 +27,8 @@ import uk.gov.hmrc.services.validation.ValidationError
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
+import play.api.i18n.Messages.Implicits._
+import play.api.Play.current
 
 object HtmlReportController extends HtmlReportController {
   override val cacheUtil: CacheUtil = CacheUtil
@@ -36,6 +38,7 @@ trait HtmlReportController extends ERSCheckingBaseController {
 
   var jsonParser = JsonParser
   val cacheUtil: CacheUtil
+  val messages = applicationMessages
 
   def htmlErrorReportPage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
     implicit authContext =>
@@ -57,7 +60,7 @@ trait HtmlReportController extends ERSCheckingBaseController {
         }
       }
       val sheets: String = HtmlCreator.getSheets(schemeErrors)
-      Ok(views.html.html_error_report(schemeName, sheets, schemeNameShort, totalErrors, schemeErrorCount)(request, context))
+      Ok(views.html.html_error_report(schemeName, sheets, schemeNameShort, totalErrors, schemeErrorCount)(request, context, messages))
     }recover {
       case e: NoSuchElementException => {
         Logger.error("Unable to display error report in HtmlReportController.showHtmlErrorReportPage. Error: " + e.getMessage)
@@ -66,6 +69,6 @@ trait HtmlReportController extends ERSCheckingBaseController {
     }
   }
 
-  def getGlobalErrorPage = Ok(views.html.global_error(Messages("ers.global_errors.title"), Messages("ers.global_errors.heading"), Messages("ers.global_errors.message")))
+  def getGlobalErrorPage = Ok(views.html.global_error(messages("ers.global_errors.title"), messages("ers.global_errors.heading"), messages("ers.global_errors.message")))
 
 }
