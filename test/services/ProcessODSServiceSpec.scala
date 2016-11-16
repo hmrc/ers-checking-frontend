@@ -18,6 +18,7 @@ package services
 
 import java.io.File
 
+import play.api.i18n.Messages
 import uk.gov.hmrc.services.validation._
 import models.SheetErrors
 import org.mockito.ArgumentMatchers._
@@ -79,7 +80,7 @@ class ProcessODSServiceSpec extends UnitSpec with MockitoSugar with WithFakeAppl
     def buildProcessODSService() = new ProcessODSService {
       override val uploadedFileUtil: UploadedFileUtil = mock[UploadedFileUtil]
       override val cacheUtil:CacheUtil = mock[CacheUtil]
-      override def checkFileType(uploadedFile: MultipartFormData.FilePart[Files.TemporaryFile])(implicit scheme:String, authContext: AuthContext, hc: HeaderCarrier,request: Request[_]):ListBuffer[SheetErrors] = new ListBuffer
+      override def checkFileType(uploadedFile: MultipartFormData.FilePart[Files.TemporaryFile])(implicit scheme:String, authContext: AuthContext, hc: HeaderCarrier,request: Request[_], messages: Messages):ListBuffer[SheetErrors] = new ListBuffer
     }
 
     //    "return (false, ers_check_file.no_file_error) if there isn't uploaded file" in {

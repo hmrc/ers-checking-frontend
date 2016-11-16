@@ -18,20 +18,24 @@ package utils
 
 import models.SheetErrors
 import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.play.OneAppPerTest
+import play.api.test.Helpers
 import services.ProcessODSService
 import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
 import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 
 import scala.collection.mutable.ListBuffer
 
-class ParserUtilSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
+class ParserUtilSpec extends UnitSpec with MockitoSugar /*with WithFakeApplication*/ with OneAppPerTest{
 
   "getDataToValidate" must {
 
     "truncate array depending on number of columns in given sheet" in {
+      Helpers.running(app){
       val rowData: Array[String] = Array.fill(50)("")
       val result = ParserUtil.formatDataToValidate(rowData, "Other_Grants_V3")
       result.length shouldBe 4
+    }
     }
 
     "add empty strings to match number of columns in given sheet" in {

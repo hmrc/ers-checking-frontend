@@ -51,14 +51,14 @@ private object AppDependencies {
     lazy val test : Seq[ModuleID] = ???
   }
 
-  private val scalatestPlusPlayVersion = "1.2.0"
+  private val scalatestPlusPlayVersion = "1.5.1"
 
   object Test {
     def apply() = new TestDependencies {
       override lazy val test = Seq(
         "uk.gov.hmrc" %% "hmrctest" % "1.7.0" % scope,
         "org.scalatest" %% "scalatest" % "2.2.2" % scope,
-        "org.scalatestplus" %% "play" % scalatestPlusPlayVersion % scope,
+        //"org.scalatestplus" %% "play" % scalatestPlusPlayVersion % scope,
         "org.pegdown" % "pegdown" % "1.4.2" % scope,
         "org.jsoup" % "jsoup" % "1.7.3" % scope,
         "org.mockito" % "mockito-core" % "2.2.16" % scope,
