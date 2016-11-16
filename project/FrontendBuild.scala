@@ -63,7 +63,8 @@ private object AppDependencies {
         "org.jsoup" % "jsoup" % "1.7.3" % scope,
         "org.mockito" % "mockito-core" % "2.2.16" % scope,
       //  "uk.gov.hmrc" %% "url-builder" % urlBuilderVersion,
-        "com.typesafe.play" %% "play-test" % PlayVersion.current % scope
+        "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
+        "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % scope
       )
     }.test
   }

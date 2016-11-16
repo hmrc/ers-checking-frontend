@@ -32,7 +32,7 @@ trait MicroService {
       parallelExecution in Test := false
     )
   }
-
+  import play.sbt.routes.RoutesCompiler.autoImport._
   lazy val microservice = Project(appName, file("."))
     .enablePlugins(plugins: _*)
     .enablePlugins(SbtAutoBuildPlugin, SbtGitVersioning)
@@ -46,8 +46,8 @@ trait MicroService {
       libraryDependencies ++= appDependencies,
       parallelExecution in Test := false,
       fork in Test := false,
-      retrieveManaged := true//,
-      //routesGenerator := StaticRoutesGenerator
+      retrieveManaged := true,
+      routesGenerator := StaticRoutesGenerator
     )
     .settings(Repositories.playPublishingSettings: _*)
     .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
