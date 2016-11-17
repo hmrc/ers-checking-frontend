@@ -20,15 +20,17 @@ import models.ERSFileProcessingException
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.play.OneAppPerSuite
 import play.api.http.Status
 import play.api.test.FakeRequest
 import services.{CsvFileProcessor, ProcessODSService}
+import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CacheUtil
 
 import scala.concurrent.{Await, Future}
 
-class UploadControllerTest extends UnitSpec with ERSFakeApplication with MockitoSugar {
+class UploadControllerTest extends UnitSpec /*with ERSFakeApplication*/with OneAppPerSuite with MockitoSugar {
 
   def buildFakeUploadController(uploadRes: Boolean = true, proccessFile: Boolean = true, formatRes: Boolean = true) = new UploadController {
 
@@ -83,6 +85,7 @@ class UploadControllerTest extends UnitSpec with ERSFakeApplication with Mockito
 
 		"give a redirect status to checkingSuccessPage if no formating or structural errors" in {
 			val controllerUnderTest = buildFakeUploadController()
+			implicit val hc = new HeaderCarrier
 			val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
 			status(result) shouldBe Status.SEE_OTHER
 			result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkingSuccessPage.toString()
@@ -90,6 +93,7 @@ class UploadControllerTest extends UnitSpec with ERSFakeApplication with Mockito
 
 		"give a redirect status to checkingSuccessPage if formating errors" in {
 			val controllerUnderTest = buildFakeUploadController(uploadRes = false)
+			implicit val hc = new HeaderCarrier
 			val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
 			status(result) shouldBe Status.SEE_OTHER
 			result.header.headers.get("Location").get shouldBe routes.HtmlReportController.htmlErrorReportPage.toString()
@@ -114,6 +118,7 @@ class UploadControllerTest extends UnitSpec with ERSFakeApplication with Mockito
 
 		"give a redirect status to checkingSuccessPage if no formating or structural errors" in {
 			val controllerUnderTest = buildFakeUploadController()
+			implicit val hc = new HeaderCarrier
 			val result = controllerUnderTest.showuploadCSVFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
 			status(result) shouldBe Status.SEE_OTHER
 			result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkingSuccessPage.toString()
@@ -121,6 +126,7 @@ class UploadControllerTest extends UnitSpec with ERSFakeApplication with Mockito
 
 		"give a redirect status to checkingSuccessPage if formating errors" in {
 			val controllerUnderTest = buildFakeUploadController(uploadRes = false)
+			implicit val hc = new HeaderCarrier
 			val result = controllerUnderTest.showuploadCSVFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
 			status(result) shouldBe Status.SEE_OTHER
 			result.header.headers.get("Location").get shouldBe routes.HtmlReportController.htmlErrorReportPage.toString()

@@ -30,6 +30,6 @@ trait WithFakeApplication extends BeforeAndAfterAll {
 
   override def afterAll() {
     super.afterAll()
-    Play.stop(fakeApplication)
+    //Play.stop(fakeApplication)
   }
 }

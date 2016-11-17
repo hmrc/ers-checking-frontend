@@ -18,7 +18,7 @@ private object AppDependencies {
   private val playConfigVersion = "3.0.0"
   //private val metricsPlayVersion = "2.4.0_0.4.1"
   private val metricsGraphiteVersion = "3.0.2"
-  private val httpCachingVersion = "6.0.0"
+  private val httpCachingVersion = "6.1.0"
   private val playPartialVersion = "5.2.0"
   private val jsonLoggerVersion = "3.0.0"
  // private val urlBuilderVersion =  "1.0.0"

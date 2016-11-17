@@ -21,16 +21,19 @@ import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.play.OneAppPerSuite
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CacheUtil
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
 
-class CheckingServiceControllerTest extends UnitSpec with ERSFakeApplication with MockitoSugar {
+class CheckingServiceControllerTest extends UnitSpec /*with ERSFakeApplication*/with OneAppPerSuite with MockitoSugar {
 
+  implicit val hc = new HeaderCarrier
 
   "start Page GET" should {
 

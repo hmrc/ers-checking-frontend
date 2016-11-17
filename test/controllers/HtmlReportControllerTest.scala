@@ -19,6 +19,8 @@ package controllers
 import java.util.NoSuchElementException
 import java.util.concurrent.TimeoutException
 
+import org.mockito.Mock
+import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 import models.SheetErrors
 import org.mockito.ArgumentMatchers._
@@ -42,7 +44,7 @@ import play.api.libs.json.JsValue
 import play.mvc.Result
 import play.api.test.Helpers._
 
-class HtmlReportControllerTest extends UnitSpec with ERSFakeApplication with MockitoSugar {
+class HtmlReportControllerTest extends UnitSpec /*with ERSFakeApplication*/with OneAppPerSuite with MockitoSugar {
 
 
   "html Error Report Page GET" should {
@@ -156,6 +158,7 @@ class HtmlReportControllerTest extends UnitSpec with ERSFakeApplication with Moc
   "Calling HtmlReportController.showHtmlErrorReportPage with authentication, and nothing in cache" should {
     "throw exception" in {
       val controllerUnderTest = buildFakeHtmlReportController
+      implicit val hc = new HeaderCarrier
       contentAsString(await(controllerUnderTest.showHtmlErrorReportPage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage)
     }
   }
@@ -163,6 +166,7 @@ class HtmlReportControllerTest extends UnitSpec with ERSFakeApplication with Moc
   "Calling HtmlReportController.showHtmlErrorReportPage with authentication, and error count > 0" should {
     "give a status OK and show error report" in {
       val controllerUnderTest = buildFakeHtmlReportController
+      implicit val hc = new HeaderCarrier
       controllerUnderTest.fetchAllMapVal = "withErrorListSchemeTypeFileTypeZeroErrorCountSummary"
       val result = controllerUnderTest.showHtmlErrorReportPage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"),hc)
       status(result) shouldBe Status.OK

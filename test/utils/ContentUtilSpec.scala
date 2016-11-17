@@ -17,11 +17,11 @@
 package utils
 
 import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.play.test.UnitSpec
 import play.api.i18n.Messages.Implicits._
-import play.api.Play.current
 
-class ContentUtilSpec  extends UnitSpec with MockitoSugar {
+class ContentUtilSpec  extends UnitSpec with MockitoSugar with OneAppPerSuite{
 
   "ContentUtil" should {
 
