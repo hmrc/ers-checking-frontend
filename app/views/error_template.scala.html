@@ -8,7 +8,6 @@
 @import layouts.{govuk_template => hmrcGovUkTemplate}
 @import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
 @import utils.ExternalUrls
-@import config.ApplicationConfig.assetsPrefix
 
 @contentHeader = {
 <h1>@heading</h1>
@@ -20,7 +19,6 @@
 
 @head = {
 @uiLayouts.head(
-assetsPrefix = assetsPrefix,
 linkElem = None,
 headScripts = None)
 <meta name="format-detection" content="telephone=no" />
@@ -53,7 +51,6 @@ mainContentHeader = contentHeader)
 @uiLayouts.footer(
 analyticsToken = Play.configuration.getString(s"govuk-tax.$env.google-analytics.token"),
 analyticsHost = Play.configuration.getString(s"govuk-tax.$env.google-analytics.host").getOrElse("service.gov.uk"),
-assetsPrefix = assetsPrefix,
 ssoUrl = None,
 scriptElem = None,
 gaCalls = None)

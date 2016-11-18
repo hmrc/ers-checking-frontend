@@ -44,7 +44,7 @@ object ApplicationConfig extends ApplicationConfig with ServicesConfig {
 
   override lazy val betaFeedbackUrl = s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier"
   override lazy val betaFeedbackUnauthenticatedUrl = s"$contactHost/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
-  override lazy val assetsPrefix = loadConfig(s"govuk-tax.$env.assets.url") + loadConfig(s"govuk-tax.$env.assets.version")
+  override lazy val assetsPrefix = loadConfig(s"govuk-tax.assets.url") + loadConfig(s"govuk-tax.assets.version")
   override lazy val analyticsToken: Option[String] = configuration.getString(s"govuk-tax.$env.google-analytics.token")
   override lazy val analyticsHost: String = configuration.getString(s"govuk-tax.$env.google-analytics.host").getOrElse("service.gov.uk")
 
