@@ -10,6 +10,7 @@ private object AppDependencies {
   import play.sbt.PlayImport._
   import play.core.PlayVersion
 
+
   private val playHealthVersion = "2.0.0"
   private val frontendBootstrapVersion = "7.10.0"
   private val govukTemplateVersion =  "5.0.0"
