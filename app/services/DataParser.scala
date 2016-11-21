@@ -166,7 +166,7 @@ trait DataGenerator extends DataParser /*with Metrics*/{
     if(rowsWithData == 0) {
       throw ERSFileProcessingException(messages("ers.exceptions.dataParser.noData"),messages("ers.exceptions.dataParser.noData"), needsExtendedInstructions = true)
     }
-    //deliverDataIteratorMetrics(startTime)
+    deliverDataIteratorMetrics(startTime)
     AuditEvents.numRowsInSchemeData(scheme, rowsWithData)(authContext,hc,request)
     Logger.debug("The SchemeData that GetData finally returns: " + schemeErrors)
     schemeErrors
@@ -235,7 +235,7 @@ trait DataGenerator extends DataParser /*with Metrics*/{
 
   def isBlankRow(data :Seq[String]) = data.mkString("").trim.length == 0
 
-//  def deliverDataIteratorMetrics(startTime:Long) =
-//    metrics.dataIteratorTimer(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
+  def deliverDataIteratorMetrics(startTime:Long) =
+    metrics.ERSMetrics.dataIteratorTimer(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
 
 }
