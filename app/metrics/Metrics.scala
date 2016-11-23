@@ -32,11 +32,6 @@
 
 package metrics
 
-import com.codahale.metrics._
-import com.kenshoo.play.metrics._
-import com.kenshoo.play.metrics.Metrics
-
-
 import java.util.concurrent.TimeUnit
 
 trait ERSMetrics {

@@ -19,13 +19,11 @@ package controllers
 import config.{ErsContext, ErsContextImpl}
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L50
 
-import scala.concurrent.Future
-import uk.gov.hmrc.play.frontend.controller.{FrontendController, UnauthorisedAction}
+import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 import connectors.AuthenticationConnector
 import uk.gov.hmrc.play.frontend.auth.{Actions, IdentityConfidencePredicate}
-import utils.ExternalUrls
 import play.api.i18n.Messages.Implicits._
 import play.api.Play.current
 // $COVERAGE-OFF$

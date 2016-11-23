@@ -15,7 +15,6 @@
  */
 
 package services.audit
-//import models.SchemeInfo
 
 import play.api.mvc.Request
 import uk.gov.hmrc.play.frontend.auth.AuthContext

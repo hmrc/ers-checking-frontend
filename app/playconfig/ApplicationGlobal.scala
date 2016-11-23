@@ -16,16 +16,13 @@
 
 package playconfig
 
-import java.io.File
 
 import com.typesafe.config.Config
 import play.api.{Play, Application, Configuration}
-import play.api.Mode._
 import play.api.mvc.Request
 import play.twirl.api.Html
 import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.play.audit.filters.FrontendAuditFilter
-import uk.gov.hmrc.play.breadcrumb.model.{Breadcrumb, BreadcrumbItem}
 import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
 import uk.gov.hmrc.play.frontend.bootstrap.{DefaultFrontendGlobal, ShowErrorPage}
 import net.ceedubs.ficus.Ficus._

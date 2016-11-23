@@ -18,7 +18,6 @@ package services
 
 import java.util.concurrent.TimeUnit
 
-//import metrics.Metrics
 import models._
 import play.api.Logger
 import play.api.i18n.Messages

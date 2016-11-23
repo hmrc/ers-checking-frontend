@@ -30,7 +30,6 @@ import uk.gov.hmrc.services.validation.{DataValidator, ValidationError}
 import utils.{ParserUtil, CacheUtil, UploadedFileUtil}
 
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.i18n.Messages.Implicits._
 import play.api.Play.current
 
