@@ -11,4 +11,5 @@ cache:
 branches:
   except:
     - master
-    
+script:
+  - 'sbt -Dlogger.resource=logback-test.xml test'
