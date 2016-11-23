@@ -24,17 +24,16 @@ import controllers.Fixtures
 import models.ERSFileProcessingException
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.{OneAppPerSuite}
-import play.api.i18n.Messages
 import play.api.libs.Files.TemporaryFile
 import play.api.mvc.MultipartFormData
 import play.api.mvc.MultipartFormData.FilePart
 import services.validation.ErsValidator
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.{DataValidator, ValidationError}
 import play.api.i18n.Messages.Implicits._
 
-class CsvFileProcessorSpec extends UnitSpec with MockitoSugar /*with WithFakeApplication*/ with OneAppPerSuite{
+class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with OneAppPerSuite{
 
   implicit val messages = applicationMessages
 

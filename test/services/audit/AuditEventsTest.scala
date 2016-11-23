@@ -15,7 +15,6 @@
  */
 
 package services
-//import models.{SchemeInfo, ValidationErrorData}
 
 import controllers.Fixtures
 import org.scalatest.{Matchers, WordSpec}

@@ -20,9 +20,6 @@ import uk.gov.hmrc.services.validation.Cell
 import models.ValidationErrorData
 import org.apache.commons.lang3.StringUtils
 
-/**
- * Created by darryl on 26/01/16.
- */
 trait ERSValidationEMITaxableTestData {
 
   val rowNumber:Int = 1

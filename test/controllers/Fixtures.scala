@@ -26,7 +26,7 @@ import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.test.WithFakeApplication
 import play.api.libs.json._
 import org.scalatest.Suite
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.{CredentialStrength, PayeAccount, Accounts, Authority}
+import uk.gov.hmrc.play.frontend.auth.connectors.domain.{CredentialStrength, Accounts, Authority}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration._

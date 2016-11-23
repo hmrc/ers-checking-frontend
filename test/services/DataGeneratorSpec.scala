@@ -22,7 +22,6 @@ import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
-import play.api.i18n.Messages
 import services.headers.HeaderData
 import uk.gov.hmrc.play.http.HeaderCarrier
 

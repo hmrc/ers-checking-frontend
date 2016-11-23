@@ -16,7 +16,4 @@
 
 package services.headers
 
-/**
- * Created by matt on 12/02/16.
- */
 trait HeaderData extends OtherHeaders with SAYEHeaders with SIPHeaders with EMIHeaders with CSOPHeaders

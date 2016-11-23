@@ -23,9 +23,6 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import scala.xml.Elem
 
-/**
- * Created by raghu on 21/01/16.
- */
 object XMLTestData extends BESIntegrationTestData with HeaderData{
 
   val besIntegrationTests : ListBuffer[(String,Elem,Elem)] = ListBuffer()

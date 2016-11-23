@@ -18,9 +18,6 @@ package services.besIntegrationTestData
 
 import scala.xml.Elem
 
-/**
- * Created by matt on 22/01/16.
- */
 trait OtherBESIntegrationTestData extends OtherGrants with OtherOptions with OtherAcquisitions with OtherRestricted with OtherBenefits with OtherConvertible with OtherNotional with OtherEnhancement with OtherSold
 
 trait OtherGrants {

@@ -27,10 +27,9 @@ import services.{CsvFileProcessor, ProcessODSService}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CacheUtil
+import scala.concurrent.Future
 
-import scala.concurrent.{Await, Future}
-
-class UploadControllerTest extends UnitSpec /*with ERSFakeApplication*/with OneAppPerSuite with MockitoSugar {
+class UploadControllerTest extends UnitSpec with OneAppPerSuite with MockitoSugar {
 
   def buildFakeUploadController(uploadRes: Boolean = true, proccessFile: Boolean = true, formatRes: Boolean = true) = new UploadController {
 

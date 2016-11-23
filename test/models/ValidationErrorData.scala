@@ -16,7 +16,5 @@
 
 package models
 
-/**
- * Created by darryl on 19/01/16.
- */
+
 case class ValidationErrorData(id:String, errorId:String, errorMsg:String)

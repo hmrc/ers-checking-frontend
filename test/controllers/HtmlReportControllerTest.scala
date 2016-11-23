@@ -32,7 +32,6 @@ import play.api.mvc.Request
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache, ShortLivedCache}
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.http.{HttpGet, HttpPut, NotFoundException}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.{CacheUtil, PageBuilder}
 
@@ -40,11 +39,9 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.libs.json._
-import play.api.libs.json.JsValue
-import play.mvc.Result
 import play.api.test.Helpers._
 
-class HtmlReportControllerTest extends UnitSpec /*with ERSFakeApplication*/with OneAppPerSuite with MockitoSugar {
+class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with MockitoSugar {
 
 
   "html Error Report Page GET" should {

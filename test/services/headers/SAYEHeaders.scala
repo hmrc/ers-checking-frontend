@@ -16,9 +16,6 @@
 
 package services.headers
 
-/**
- * Created by matt on 12/02/16.
- */
 trait SAYEHeaders {
 
   /**SAYE Granted*/
