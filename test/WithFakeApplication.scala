@@ -15,17 +15,22 @@
  */
 
 import org.scalatest.{Suite, BeforeAndAfterAll}
-import play.api.Play
-import play.api.test.FakeApplication
+import play.api.{Play, Application}
+import play.api.inject.guice.GuiceApplicationBuilder
 
 trait WithFakeApplication extends BeforeAndAfterAll {
   this: Suite =>
 
-  lazy val fakeApplication = FakeApplication()
+  //lazy val fakeApplication = FakeApplication()
+
+  implicit val app: Application = new GuiceApplicationBuilder().build()
+    //.configure(additionalConfiguration)
+    //.bindings(bindModules:_*).in(Mode.Test)
+
 
   override def beforeAll() {
     super.beforeAll()
-    Play.start(fakeApplication)
+    Play.start(app)
   }
 
   override def afterAll() {
