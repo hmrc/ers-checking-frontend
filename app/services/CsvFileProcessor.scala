@@ -21,7 +21,6 @@ import java.io.File
 import models.{ERSFileProcessingException, SheetErrors}
 import org.apache.commons.io.{FileUtils, LineIterator}
 import play.api.Logger
-import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Request}
 import services.validation.ErsValidator
 import uk.gov.hmrc.play.frontend.auth.AuthContext
@@ -42,6 +41,8 @@ object CsvFileProcessor extends CsvFileProcessor
 trait CsvFileProcessor extends DataGenerator {
   val cacheUtil:CacheUtil
 
+  val messages = applicationMessages
+
   val converter: (String) => Array[String] = _.split(",")
 
   def readCSVFile(filename:String,file: File,scheme:String)(implicit request: Request[AnyContent], hc : HeaderCarrier) = {
@@ -50,7 +51,7 @@ trait CsvFileProcessor extends DataGenerator {
 
     implicit val validator = setValidator(sheetName)
     Logger.debug("validator set " + validator.toString)
-    SheetErrors(sheetName, validateFile(file:File, sheetName, ErsValidator.validateRow)(validator, applicationMessages))
+    SheetErrors(sheetName, validateFile(file:File, sheetName, ErsValidator.validateRow)(validator))
 
   }
 
@@ -72,11 +73,11 @@ trait CsvFileProcessor extends DataGenerator {
 
   def checkFileType(filename:String) = {
     if (!UploadedFileUtil.checkCSVFileType(filename)) {
-      throw ERSFileProcessingException(Messages("ers_check_csv_file.file_type_error", filename), Messages("ers_check_csv_file.file_type_error", filename))
+      throw ERSFileProcessingException(messages("ers_check_csv_file.file_type_error", filename), messages("ers_check_csv_file.file_type_error", filename))
     }
   }
 
-  def validateFile(file:File, sheetName:String, validator:(Seq[String],Int,DataValidator) => Option[List[ValidationError]])(implicit dataValidator:DataValidator, messages: Messages): ListBuffer[ValidationError]= {
+  def validateFile(file:File, sheetName:String, validator:(Seq[String],Int,DataValidator) => Option[List[ValidationError]])(implicit dataValidator:DataValidator): ListBuffer[ValidationError]= {
     val iterator:LineIterator = FileUtils.lineIterator(file, "UTF-8")
 
     var rowCount = 0

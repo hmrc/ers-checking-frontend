@@ -62,7 +62,7 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with OneAppPerSuit
 
     "validate file data and return errors" in {
       val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv")
-      val result = CsvFileProcessor.validateFile(fileCopied,"Other_Grants_V3.csv",ErsValidator.validateRow)(DataValidator(ConfigFactory.load.getConfig("ers-other-grants-validation-config")), messages)
+      val result = CsvFileProcessor.validateFile(fileCopied,"Other_Grants_V3.csv",ErsValidator.validateRow)(DataValidator(ConfigFactory.load.getConfig("ers-other-grants-validation-config")))
     //  Thread.sleep(2000)
       result.size shouldBe 4
     }
@@ -86,7 +86,7 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with OneAppPerSuit
         def validator(rowData:Seq[String],rowCount:Int,dataValidator:DataValidator): Option[List[ValidationError]] = throw new Exception
         Files.copy(file.toPath,new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv").toPath)
         val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv")
-        CsvFileProcessor.validateFile(fileCopied, "Other_Grants_V3.csv", validator)(mock[DataValidator], messages)
+        CsvFileProcessor.validateFile(fileCopied, "Other_Grants_V3.csv", validator)(mock[DataValidator])
       }
       result.getMessage shouldEqual  messages("ers.exceptions.dataParser.fileParsingError", "Other_Grants_V3.csv")
     }
@@ -96,7 +96,7 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with OneAppPerSuit
         val file = new File(System.getProperty("user.dir") + "/test/resources/Other_Acquisition_V3.csv")
         Files.copy(file.toPath,new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/Other_Acquisition_V3.csv").toPath)
         val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Acquisition_V3.csv")
-        CsvFileProcessor.validateFile(fileCopied,"Other_Acquisition_V3",ErsValidator.validateRow)(DataValidator(ConfigFactory.load.getConfig("ers-other-acquisition-validation-config")), messages)
+        CsvFileProcessor.validateFile(fileCopied,"Other_Acquisition_V3",ErsValidator.validateRow)(DataValidator(ConfigFactory.load.getConfig("ers-other-acquisition-validation-config")))
       }
       result.getMessage shouldEqual messages("ers_check_csv_file.noData", "Other_Acquisition_V3.csv")
     }
