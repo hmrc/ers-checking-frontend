@@ -41,7 +41,7 @@ object CsvFileProcessor extends CsvFileProcessor
 trait CsvFileProcessor extends DataGenerator {
   val cacheUtil:CacheUtil
 
-  val messages = applicationMessages
+ // val messages = applicationMessages
 
   val converter: (String) => Array[String] = _.split(",")
 

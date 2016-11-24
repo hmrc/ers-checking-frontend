@@ -91,7 +91,7 @@ trait ProcessODSService {
     val zipFile: ZipFile = new ZipFile(fileName)
     val content: InputStream = zipFile.getInputStream(zipFile.getEntry("content.xml"))
     val processor = new StaxProcessor(content)
-    val result = DataGenerator.getErrors(processor, scheme, uploadedFileName)(authContext, hc, request, applicationMessages)
+    val result = DataGenerator.getErrors(processor, scheme, uploadedFileName)(authContext, hc, request)
     zipFile.close()
     result
   }

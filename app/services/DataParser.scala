@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit
 
 import models._
 import play.api.Logger
-import play.api.i18n.Messages
 import play.api.mvc.Request
 import services.ERSTemplatesInfo._
 import services.audit.AuditEvents
@@ -39,15 +38,17 @@ import play.api.Play.current
 
 trait DataParser {
 
+  val messages = applicationMessages
+
   val repeatAttr = "table:number-columns-repeated"
-  def validateSpecialCharacters(xmlRowData : String )(implicit messages: Messages) = {
+  def validateSpecialCharacters(xmlRowData : String ) = {
     if(xmlRowData.contains("&")){
       Logger.debug("Found invalid xml in Data Parser, throwing exception")
       throw new ERSFileProcessingException(messages("ers.exceptions.dataParser.ampersand"), messages("ers.exceptions.dataParser.parsingOfFileData"))
     }
   }
 
-  def parse(row:String, fileName : String)(implicit messages: Messages) = {
+  def parse(row:String, fileName : String) = {
     Logger.debug("DataParser: Parse: About to parse row: " + row)
 
     val xmlRow = Try(Option(XML.loadString(row))).getOrElse(None)
@@ -56,7 +57,7 @@ trait DataParser {
     xmlRow match {
       case None => {
         Logger.debug("3.1 Parse row left ")
-        validateSpecialCharacters(row)(messages)
+        validateSpecialCharacters(row)
         Left(row)
       }
       case elem:Option[Elem] => Logger.debug("3.2 Parse row right ")
@@ -88,7 +89,7 @@ object DataGenerator extends DataGenerator
 
 trait DataGenerator extends DataParser /*with Metrics*/{
 
-  def getErrors(iterator:Iterator[String], scheme:String, fileName : String)(implicit authContext: AuthContext, hc: HeaderCarrier, request: Request[_], messages: Messages) =
+  def getErrors(iterator:Iterator[String], scheme:String, fileName : String)(implicit authContext: AuthContext, hc: HeaderCarrier, request: Request[_]) =
   {
     var rowNum = 0
     implicit var sheetName :String = ""
@@ -112,7 +113,7 @@ trait DataGenerator extends DataParser /*with Metrics*/{
 
       val row = iterator.next()
       //Logger.debug(" Data before  parsing ---> " + row)
-      val rowData = parse(row, fileName)(messages)
+      val rowData = parse(row, fileName)
       Logger.debug(" parsed data ---> " + rowData + " -- cursor --> " + rowNum)
       rowData.isLeft match {
         case true => {
@@ -133,7 +134,7 @@ trait DataGenerator extends DataParser /*with Metrics*/{
           case 9 => {
             Logger.debug("GetData: incRowNum if  9: " + rowNum + "sheetColSize: " + sheetColSize )
             Logger.debug("sheetName--->" + sheetName)
-            sheetColSize = validateHeaderRow(rowData.right.get, sheetName, scheme, fileName)(messages)
+            sheetColSize = validateHeaderRow(rowData.right.get, sheetName, scheme, fileName)
             incRowNum()
           }
           case _ => {
@@ -193,7 +194,6 @@ trait DataGenerator extends DataParser /*with Metrics*/{
         Logger.debug("****5.1.1  data contains data:  *****" + data)
         data }
       case _ => {
-        implicit val messages = applicationMessages
         AuditEvents.fileProcessingErrorAudit(res.schemeType, res.sheetName, s"${res.schemeType.toLowerCase} is not equal to ${schemeName.toLowerCase}")
         Logger.warn(messages("ers.exceptions.dataParser.incorrectSchemeType", res.schemeType.toUpperCase, schemeName.toUpperCase))
         throw ERSFileProcessingException(messages("ers.exceptions.dataParser.incorrectSchemeType", ContentUtil.withArticle(res.schemeType.toUpperCase), ContentUtil.withArticle(schemeName.toUpperCase), res.sheetName), messages ("ers.exceptions.dataParser.incorrectSchemeType", res.schemeType.toLowerCase, schemeName.toLowerCase))
@@ -201,7 +201,7 @@ trait DataGenerator extends DataParser /*with Metrics*/{
     }
   }
 
-  def getSheet(sheetName:String, scheme:String)(implicit messages: Messages) = {
+  def getSheet(sheetName:String, scheme:String) = {
     Logger.info(s"Looking for sheetName: ${sheetName}")
     ersSheets.getOrElse(sheetName, {
      //  implicit val hc:HeaderCarrier = new HeaderCarrier()
@@ -212,11 +212,11 @@ trait DataGenerator extends DataParser /*with Metrics*/{
     })
   }
 
-  def validateHeaderRow(rowData:Seq[String], sheetName:String, scheme:String, fileName: String)(implicit messages: Messages) =
+  def validateHeaderRow(rowData:Seq[String], sheetName:String, scheme:String, fileName: String)=
   {
     val headerFormat = "[^a-zA-Z0-9]"
 
-    val header = getSheet(sheetName, scheme)(messages).headerRow.map(_.replaceAll(headerFormat,""))
+    val header = getSheet(sheetName, scheme).headerRow.map(_.replaceAll(headerFormat,""))
     val data = rowData.take(header.size)
     val dataTrim = data.map(_.replaceAll(headerFormat,""))
 
