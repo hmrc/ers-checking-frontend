@@ -37,7 +37,7 @@ class ContentUtilSpec  extends UnitSpec with MockitoSugar with OneAppPerSuite{
     for(schemeType <- data) {
       s"return scheme name and abbreviation for ${schemeType._2}" in {
 
-        ContentUtil.getSchemeName(schemeType._1)(messages)._2 shouldBe schemeType._2.toUpperCase
+        ContentUtil.getSchemeName(schemeType._1)._2 shouldBe schemeType._2.toUpperCase
       }
     }
   }

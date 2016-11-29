@@ -186,6 +186,7 @@ trait DataGenerator extends DataParser /*with Metrics*/{
   }
 
   def identifyAndDefineSheet(data:String,scheme:String)(implicit headerCarrier: HeaderCarrier, request: Request[_]) = {
+    println(s"\n\n ************ \n identifyAndDefineSheet: ${data}, \n ${scheme}\n **************")
     Logger.debug("5.1  case 0 identifyAndDefineSheet  " )
     val res = getSheet(data, scheme)
     val schemeName = ContentUtil.getSchemeName(scheme)._2
@@ -207,7 +208,7 @@ trait DataGenerator extends DataParser /*with Metrics*/{
      //  implicit val hc:HeaderCarrier = new HeaderCarrier()
     //  AuditEvents.fileProcessingErrorAudit(schemeInfo, sheetName, "Could not set the validator")
       Logger.warn(messages("ers.exceptions.dataParser.unidentifiableSheetName") + sheetName)
-      val schemeName = ContentUtil.getSchemeName(scheme)(messages)._2
+      val schemeName = ContentUtil.getSchemeName(scheme)._2
       throw ERSFileProcessingException(messages("ers.exceptions.dataParser.incorrectSheetName", sheetName, schemeName), messages("ers.exceptions.dataParser.unidentifiableSheetName") + " " +sheetName, needsExtendedInstructions = true)
     })
   }

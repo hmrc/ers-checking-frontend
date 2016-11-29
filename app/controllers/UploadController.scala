@@ -47,6 +47,7 @@ trait UploadController extends ERSCheckingBaseController {
 
 	def showuploadCSVFile(scheme: String)(implicit authContext: AuthContext, request: Request[AnyContent], hc: HeaderCarrier): Future[Result] = {
 				try {
+					println(s"\n *********** \n showuploadCSVFile: ${request.body.asMultipartFormData.get.files} \n ************* \n ")
 					val result = csvFileProcessor.processCsvUpload(scheme)(request,authContext, hc)
 					result match {
 						case true => Future(Redirect(routes.CheckingServiceController.checkingSuccessPage))

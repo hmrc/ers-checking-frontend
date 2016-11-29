@@ -47,34 +47,50 @@ trait CsvFileProcessor extends DataGenerator {
 
   def readCSVFile(filename:String,file: File,scheme:String)(implicit request: Request[AnyContent], hc : HeaderCarrier) = {
     Logger.debug("file.getName" + filename)
+    println(s"\n\n ******* \n Got CSV File: ${filename} \n about to call 'identifyAndDefineSheet'\n")
     val sheetName = identifyAndDefineSheet(filename,scheme )
-
+    println("\n **************\n about to set validator \n*************\n")
     implicit val validator = setValidator(sheetName)
     Logger.debug("validator set " + validator.toString)
     SheetErrors(sheetName, validateFile(file:File, sheetName, ErsValidator.validateRow)(validator))
 
   }
 
-  def processCsvUpload(scheme:String)(implicit request: Request[AnyContent], authContext : AuthContext, hc : HeaderCarrier) =
-  {
+  def processCsvUpload(scheme:String)(implicit request: Request[AnyContent], authContext : AuthContext, hc : HeaderCarrier) = {
+    println(s"\n\n **********\n processCsvUpload: ${scheme}\n ********** \n")
     val errors = validateCsvFiles(scheme)
     ParserUtil.isFileValid(errors, "performCSVUpload")
   }
 
   def validateCsvFiles(scheme:String)(implicit request: Request[AnyContent], authContext : AuthContext, hc : HeaderCarrier) = {
-   val files = request.body.asMultipartFormData.get.files
+    println("\n\n ********* \n validateCsvFiles \n ************ \n ")
+    val files = request.body.asMultipartFormData.get.files
     val filesErrors: ListBuffer[SheetErrors] = new ListBuffer()
     files.map(file => {
-          checkFileType(file.filename)
+      println(s"\n\n ********* \n validateCsvFiles: filename = ${file.filename} \n ************ \n ")
+      println(s"\n\n ********* \n validateCsvFiles: file = ${file} \n ************ \n ")
+      println(s"\n\n ********* \n validateCsvFiles: files = ${files} \n ************ \n ")
+
+      checkFileType(file.filename)
           filesErrors += readCSVFile(file.filename.dropRight(4),file.ref.file,scheme)
     })
-      filesErrors
+    println("\n\n ********* \n print some errors....\n ************ \n ")
+
+    println(s"\n\n ********* \n ${filesErrors.toString}\n ************ \n ")
+
+    filesErrors
   }
 
   def checkFileType(filename:String) = {
-    if (!UploadedFileUtil.checkCSVFileType(filename)) {
+    println(s"\n\n ********* \n checking file type: filename - ${filename}\n ************ \n ")
+
+    val x = if (!UploadedFileUtil.checkCSVFileType(filename)) {
+      println("\n\n ********* \n checking file type: exception\n ************ \n ")
       throw ERSFileProcessingException(messages("ers_check_csv_file.file_type_error", filename), messages("ers_check_csv_file.file_type_error", filename))
     }
+    println("\n\n ********* \n checking file type: everything ok\n ************ \n ")
+
+    x
   }
 
   def validateFile(file:File, sheetName:String, validator:(Seq[String],Int,DataValidator) => Option[List[ValidationError]])(implicit dataValidator:DataValidator): ListBuffer[ValidationError]= {

@@ -45,6 +45,9 @@
 
     <logger name="uk.gov" level="DEBUG"/>
 
+    <logger name="play.core" level="OFF"/>
+    <logger name="org.asynchttpclient" level="OFF"/>
+
     <logger name="application" level="DEBUG"/>
 
     <logger name="connector" level="TRACE">
