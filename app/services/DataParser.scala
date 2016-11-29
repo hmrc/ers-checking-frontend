@@ -186,7 +186,6 @@ trait DataGenerator extends DataParser /*with Metrics*/{
   }
 
   def identifyAndDefineSheet(data:String,scheme:String)(implicit headerCarrier: HeaderCarrier, request: Request[_]) = {
-    println(s"\n\n ************ \n identifyAndDefineSheet: ${data}, \n ${scheme}\n **************")
     Logger.debug("5.1  case 0 identifyAndDefineSheet  " )
     val res = getSheet(data, scheme)
     val schemeName = ContentUtil.getSchemeName(scheme)._2

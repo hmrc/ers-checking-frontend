@@ -23,7 +23,7 @@ trait WithFakeApplication extends BeforeAndAfterAll {
 
   //lazy val fakeApplication = FakeApplication()
 
-  implicit def app: Application = new GuiceApplicationBuilder().build()
+  implicit val app: Application = new GuiceApplicationBuilder().build()
     //.configure(additionalConfiguration)
     //.bindings(bindModules:_*).in(Mode.Test)
 

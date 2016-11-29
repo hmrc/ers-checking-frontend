@@ -32,17 +32,12 @@ trait UploadedFileUtil {
 	}
 
 	def checkCSVFileType(fileName: String): Boolean = {
-		println(s"\n\n ********* \n checkCSVFileType: filename = ${fileName}\n ************ \n ")
-
 		val delimiter: Char = '.'
 		val stringTokens: Array[String] = fileName.split(delimiter)
-		val y = stringTokens(stringTokens.length - 1) match {
+		stringTokens(stringTokens.length - 1) match {
 			case "csv" => true
 			case _ => false
 		}
-		println(s"\n\n ********* \n checkCSVFileType: result =  ${y}\n ************ \n ")
-
-		y
 	}
 
 	def deleteFile(file: File): Unit = {
