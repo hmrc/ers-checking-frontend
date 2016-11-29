@@ -70,9 +70,10 @@ trait CsvFileProcessor extends DataGenerator {
       println(s"\n\n ********* \n validateCsvFiles: filename = ${file.filename} \n ************ \n ")
       println(s"\n\n ********* \n validateCsvFiles: file = ${file} \n ************ \n ")
       println(s"\n\n ********* \n validateCsvFiles: files = ${files} \n ************ \n ")
-
-      checkFileType(file.filename)
-          filesErrors += readCSVFile(file.filename.dropRight(4),file.ref.file,scheme)
+      if(!file.filename.isEmpty) {
+        checkFileType(file.filename)
+        filesErrors += readCSVFile(file.filename.dropRight(4), file.ref.file, scheme)
+      }
     })
     println("\n\n ********* \n print some errors....\n ************ \n ")
 
