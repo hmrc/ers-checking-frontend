@@ -16,6 +16,8 @@
 
 package controllers
 
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.test.WithApplication
 import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 import models.SheetErrors
@@ -25,7 +27,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.test.WithFakeApplication
 import play.api.libs.json._
-import org.scalatest.Suite
+import org.scalatest.{BeforeAndAfterAll, Suite}
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.{CredentialStrength, Accounts, Authority}
 
 import scala.collection.mutable.ListBuffer
@@ -86,7 +88,7 @@ abstract class WithErsSetup extends WithApplication/*(FakeApplication(additional
   implicit val hc = HeaderCarrier()
 }
 
-trait ERSFakeApplication extends WithFakeApplication {
+trait ERSFakeApplication extends BeforeAndAfterAll {
   this: Suite =>
 
   implicit val hc = HeaderCarrier()
@@ -97,6 +99,6 @@ trait ERSFakeApplication extends WithFakeApplication {
     "contact-frontend.port" -> "9250",
     "metrics.enabled" -> "false")
 
-  override lazy val fakeApplication  = FakeApplication(additionalConfiguration = config)
+   lazy val fakeApplication = new GuiceApplicationBuilder().build()
 
 }

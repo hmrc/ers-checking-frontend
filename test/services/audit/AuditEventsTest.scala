@@ -16,23 +16,23 @@
 
 package services
 
-import controllers.Fixtures
+import controllers.{ERSFakeApplication, Fixtures}
 import org.scalatest.{Matchers, WordSpec}
 import play.api.Play
 import play.api.test.{FakeApplication, FakeRequest}
 import services.audit.{AuditEvents, AuditService, AuditServiceConnector}
 import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.test.WithFakeApplication
 
 import scala.collection.mutable.ListBuffer
 
-class AuditEventsTest    extends WordSpec with Matchers {
+class AuditEventsTest extends WordSpec with Matchers with ERSFakeApplication{
 
-  val fakeApplication = FakeApplication()
   Play.start(fakeApplication)
 
   implicit val request = FakeRequest()
-  implicit var hc = new HeaderCarrier()
+  //implicit var hc = new HeaderCarrier()
   implicit val authContext = Fixtures.buildFakeUser
   val sheetName = "sheetName"
 
