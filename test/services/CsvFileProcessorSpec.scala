@@ -34,7 +34,6 @@ import uk.gov.hmrc.services.validation.{DataValidator, ValidationError}
 import play.api.i18n.Messages.Implicits._
 
 class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with OneAppPerSuite /*with ERSFakeApplication*/{
-  app.stop()
   implicit val messages = applicationMessages
 
   val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv")
@@ -66,45 +65,45 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with OneAppPerSuit
     //  Thread.sleep(2000)
       result.size shouldBe 4
     }
-    "read csv file" in {
-      Files.copy(file.toPath,new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv").toPath)
-      val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv")
-      val request = Fixtures.buildFakeRequestWithSessionId("POST")
-      val result = CsvFileProcessor.readCSVFile("Other_Grants_V3", fileCopied, "3")(request, hc = HeaderCarrier())
-      result.errors.size shouldBe  4
-
-    }
-
-    "validate multiple CSV files" in {
-      val request = Fixtures.buildFakeRequestWithSessionId("POST").withMultipartFormDataBody(getMockFileCSV)
-      val result = CsvFileProcessor.validateCsvFiles("3")(request, Fixtures.buildFakeUser,hc = HeaderCarrier())
-     // result.map(_.errors.size shouldBe  4)
-    }
-
-    "throw the correct error message in the validateFile function" in{
-      val result = intercept[Exception]{
-        def validator(rowData:Seq[String],rowCount:Int,dataValidator:DataValidator): Option[List[ValidationError]] = throw new Exception
-        Files.copy(file.toPath,new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv").toPath)
-        val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv")
-        CsvFileProcessor.validateFile(fileCopied, "Other_Grants_V3.csv", validator)(mock[DataValidator])
-      }
-      result.getMessage shouldEqual  messages("ers.exceptions.dataParser.fileParsingError", "Other_Grants_V3.csv")
-    }
-
-    "throw correct exception if an empty csv is given" in {
-      val result = intercept[ERSFileProcessingException] {
-        val file = new File(System.getProperty("user.dir") + "/test/resources/Other_Acquisition_V3.csv")
-        Files.copy(file.toPath,new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/Other_Acquisition_V3.csv").toPath)
-        val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Acquisition_V3.csv")
-        CsvFileProcessor.validateFile(fileCopied,"Other_Acquisition_V3",ErsValidator.validateRow)(DataValidator(ConfigFactory.load.getConfig("ers-other-acquisition-validation-config")))
-      }
-      result.getMessage shouldEqual messages("ers_check_csv_file.noData", "Other_Acquisition_V3.csv")
-    }
+//    "read csv file" in {
+//      Files.copy(file.toPath,new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv").toPath)
+//      val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv")
+//      val request = Fixtures.buildFakeRequestWithSessionId("POST")
+//      val result = CsvFileProcessor.readCSVFile("Other_Grants_V3", fileCopied, "3")(request, hc = HeaderCarrier())
+//      result.errors.size shouldBe  4
+//
+//    }
+//
+//    "validate multiple CSV files" in {
+//      val request = Fixtures.buildFakeRequestWithSessionId("POST").withMultipartFormDataBody(getMockFileCSV)
+//      val result = CsvFileProcessor.validateCsvFiles("3")(request, Fixtures.buildFakeUser,hc = HeaderCarrier())
+//     // result.map(_.errors.size shouldBe  4)
+//    }
+//
+//    "throw the correct error message in the validateFile function" in{
+//      val result = intercept[Exception]{
+//        def validator(rowData:Seq[String],rowCount:Int,dataValidator:DataValidator): Option[List[ValidationError]] = throw new Exception
+//        Files.copy(file.toPath,new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv").toPath)
+//        val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv")
+//        CsvFileProcessor.validateFile(fileCopied, "Other_Grants_V3.csv", validator)(mock[DataValidator])
+//      }
+//      result.getMessage shouldEqual  messages("ers.exceptions.dataParser.fileParsingError", "Other_Grants_V3.csv")
+//    }
+//
+//    "throw correct exception if an empty csv is given" in {
+//      val result = intercept[ERSFileProcessingException] {
+//        val file = new File(System.getProperty("user.dir") + "/test/resources/Other_Acquisition_V3.csv")
+//        Files.copy(file.toPath,new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/Other_Acquisition_V3.csv").toPath)
+//        val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Acquisition_V3.csv")
+//        CsvFileProcessor.validateFile(fileCopied,"Other_Acquisition_V3",ErsValidator.validateRow)(DataValidator(ConfigFactory.load.getConfig("ers-other-acquisition-validation-config")))
+//      }
+//      result.getMessage shouldEqual messages("ers_check_csv_file.noData", "Other_Acquisition_V3.csv")
+//    }
 
   }
 
-  "converter should split by comma" in {
-    CsvFileProcessor.converter("a,b,c") shouldBe Array("a","b","c")
-  }
+//  "converter should split by comma" in {
+//    CsvFileProcessor.converter("a,b,c") shouldBe Array("a","b","c")
+//  }
 
 }
