@@ -20,7 +20,7 @@ import java.io.File
 import java.nio.file.Files
 
 import com.typesafe.config.ConfigFactory
-import controllers.Fixtures
+import controllers.{ERSFakeApplication, Fixtures}
 import models.ERSFileProcessingException
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.{OneAppPerSuite}
@@ -33,8 +33,8 @@ import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.{DataValidator, ValidationError}
 import play.api.i18n.Messages.Implicits._
 
-class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with OneAppPerSuite{
-
+class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with OneAppPerSuite /*with ERSFakeApplication*/{
+  app.stop()
   implicit val messages = applicationMessages
 
   val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv")

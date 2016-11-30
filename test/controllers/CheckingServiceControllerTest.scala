@@ -31,7 +31,7 @@ import utils.CacheUtil
 import scala.concurrent.Future
 
 
-class CheckingServiceControllerTest extends UnitSpec /*with ERSFakeApplication*/with OneAppPerSuite with MockitoSugar {
+class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with MockitoSugar {
 
   implicit val hc = new HeaderCarrier
 
