@@ -2,25 +2,25 @@
   schemeName: String,
   schemeNameShort: String,
   errorMsg: String,
-  showExtendedInstructions: Boolean)(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext)
+  showExtendedInstructions: Boolean)(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext, messages: Messages)
 @* check return file Template *@
 
 @import views.html.templates._
 @import utils.PageBuilder._
 
-@ers_main(title = Messages("ers.error_report.page_title")) {
-<p class="font-xsmall"><a href="@getPageBackLink(fileType)" class="link-back">@Html(Messages("ers.back"))</a></p>
-@header(Messages("ers_format_errors.page_title", schemeName, schemeNameShort))
+@ers_main(title = message("ers.error_report.page_title")) {
+<p class="font-xsmall"><a href="@getPageBackLink(fileType)" class="link-back">@Html(message("ers.back"))</a></p>
+@header(message("ers_format_errors.page_title", schemeName, schemeNameShort))
     <div class="panel-indent">
         <p>@Html(errorMsg)</p>
     </div>
     <div class="bottom-grey"></div>
-    <h2 class="heading-medium">@Html(Messages("ers_format_errors.sub_heading"))</h2>
+    <h2 class="heading-medium">@Html(message("ers_format_errors.sub_heading"))</h2>
     <p>
         @if(showExtendedInstructions == true) {
-            @Html(Messages("ers_error_report.instructions1")) <a href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@Html(Messages("ers_error_report.instructions2"))</a>.
+            @Html(message("ers_error_report.instructions1")) <a href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@Html(message("ers_error_report.instructions2"))</a>.
         } else {
-            <a href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@Html(Messages("ers_format_errors.instructions"))</a>
+            <a href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@Html(message("ers_format_errors.instructions"))</a>
         }
     </p>
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.File
 import models.{ERSFileProcessingException, SheetErrors}
 import org.apache.commons.io.{FileUtils, LineIterator}
 import play.api.Logger
-import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Request}
 import services.validation.ErsValidator
 import uk.gov.hmrc.play.frontend.auth.AuthContext
@@ -30,8 +29,8 @@ import uk.gov.hmrc.services.validation.{DataValidator, ValidationError}
 import utils.{ParserUtil, CacheUtil, UploadedFileUtil}
 
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
-
+import play.api.i18n.Messages.Implicits._
+import play.api.Play.current
 
 object CsvFileProcessor extends CsvFileProcessor
 {
@@ -42,37 +41,39 @@ object CsvFileProcessor extends CsvFileProcessor
 trait CsvFileProcessor extends DataGenerator {
   val cacheUtil:CacheUtil
 
+ // val messages = applicationMessages
+
   val converter: (String) => Array[String] = _.split(",")
 
   def readCSVFile(filename:String,file: File,scheme:String)(implicit request: Request[AnyContent], hc : HeaderCarrier) = {
     Logger.debug("file.getName" + filename)
     val sheetName = identifyAndDefineSheet(filename,scheme )
-
     implicit val validator = setValidator(sheetName)
     Logger.debug("validator set " + validator.toString)
-    SheetErrors(sheetName, validateFile(file:File, sheetName, ErsValidator.validateRow))
+    SheetErrors(sheetName, validateFile(file:File, sheetName, ErsValidator.validateRow)(validator))
 
   }
 
-  def processCsvUpload(scheme:String)(implicit request: Request[AnyContent], authContext : AuthContext, hc : HeaderCarrier) =
-  {
+  def processCsvUpload(scheme:String)(implicit request: Request[AnyContent], authContext : AuthContext, hc : HeaderCarrier) = {
     val errors = validateCsvFiles(scheme)
     ParserUtil.isFileValid(errors, "performCSVUpload")
   }
 
   def validateCsvFiles(scheme:String)(implicit request: Request[AnyContent], authContext : AuthContext, hc : HeaderCarrier) = {
-   val files = request.body.asMultipartFormData.get.files
+    val files = request.body.asMultipartFormData.get.files
     val filesErrors: ListBuffer[SheetErrors] = new ListBuffer()
     files.map(file => {
-          checkFileType(file.filename)
-          filesErrors += readCSVFile(file.filename.dropRight(4),file.ref.file,scheme)
+      if(!file.filename.isEmpty) {
+        checkFileType(file.filename)
+        filesErrors += readCSVFile(file.filename.dropRight(4), file.ref.file, scheme)
+      }
     })
-      filesErrors
+    filesErrors
   }
 
   def checkFileType(filename:String) = {
     if (!UploadedFileUtil.checkCSVFileType(filename)) {
-      throw ERSFileProcessingException(Messages("ers_check_csv_file.file_type_error", filename), Messages("ers_check_csv_file.file_type_error", filename))
+      throw ERSFileProcessingException(messages("ers_check_csv_file.file_type_error", filename), messages("ers_check_csv_file.file_type_error", filename))
     }
   }
 
@@ -102,7 +103,7 @@ trait CsvFileProcessor extends DataGenerator {
         }
       }
       if(rowsWithData == 0) {
-        throw ERSFileProcessingException(Messages("ers_check_csv_file.noData", sheetName + ".csv"), Messages("ers_check_csv_file.noData"), needsExtendedInstructions = true)
+        throw ERSFileProcessingException(messages("ers_check_csv_file.noData", sheetName + ".csv"), messages("ers_check_csv_file.noData"), needsExtendedInstructions = true)
       }
       errorsList
     }
@@ -112,7 +113,7 @@ trait CsvFileProcessor extends DataGenerator {
       }
       case ex:Throwable => {
         UploadedFileUtil.deleteFile(file: File)
-        throw new ERSFileProcessingException(Messages("ers.exceptions.dataParser.fileParsingError", sheetName) ,Messages("ers.exceptions.dataParser.parsingOfFileData"))
+        throw new ERSFileProcessingException(messages("ers.exceptions.dataParser.fileParsingError", sheetName) ,messages("ers.exceptions.dataParser.parsingOfFileData"))
       }
     }
     finally {

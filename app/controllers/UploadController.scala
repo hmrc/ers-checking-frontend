@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.CacheUtil
 import play.api.mvc.{AnyContent, Request,Result}
-
+import play.api.i18n.Messages.Implicits._
+import play.api.Play.current
 import scala.concurrent.Future
 
 object UploadController extends UploadController {
@@ -68,7 +69,7 @@ trait UploadController extends ERSCheckingBaseController {
 
 	def showuploadODSFile(scheme: String)(implicit authContext: AuthContext, request: Request[AnyContent], hc: HeaderCarrier): Future[Result] = {
 		try {
-			val result = processODSService.performODSUpload()(request, scheme, authContext, hc)
+			val result = processODSService.performODSUpload()(request, scheme, authContext, hc,applicationMessages)
 			result match {
 				case true => Future(Redirect(routes.CheckingServiceController.checkingSuccessPage))
 				case false => Future(Redirect(routes.HtmlReportController.htmlErrorReportPage))

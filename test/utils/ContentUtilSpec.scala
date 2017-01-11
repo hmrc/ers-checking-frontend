@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,16 @@
 package utils
 
 import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.play.test.UnitSpec
+import play.api.i18n.Messages.Implicits._
 
-class ContentUtilSpec  extends UnitSpec with MockitoSugar {
+class ContentUtilSpec  extends UnitSpec with MockitoSugar with OneAppPerSuite{
 
   "ContentUtil" should {
+
+    implicit val messages = applicationMessages
+
     val data = List(
       ("1","csop", "Company Share Option Plan"),
       ("2","emi", "Enterprise Management Incentives"),
@@ -31,6 +36,7 @@ class ContentUtilSpec  extends UnitSpec with MockitoSugar {
     )
     for(schemeType <- data) {
       s"return scheme name and abbreviation for ${schemeType._2}" in {
+
         ContentUtil.getSchemeName(schemeType._1)._2 shouldBe schemeType._2.toUpperCase
       }
     }

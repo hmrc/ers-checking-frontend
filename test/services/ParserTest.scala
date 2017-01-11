@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,13 @@ import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
-import play.api.i18n.Messages
 import services.XMLTestData._
 import uk.gov.hmrc.play.http.HeaderCarrier
-/**
- * Created by raghu on 26/01/16.
- */
+import play.api.i18n.Messages.Implicits._
+
 class ParserTest extends PlaySpec with OneServerPerSuite with ScalaFutures with MockitoSugar with BeforeAndAfter{
 
-
+  implicit val messages = applicationMessages
   object TestDataParser extends DataParser
   object TestDataGenerator extends DataGenerator
 
@@ -60,7 +58,7 @@ class ParserTest extends PlaySpec with OneServerPerSuite with ScalaFutures with 
         }
       }
     }
-    exceptionMessage mustBe Messages("ers.exceptions.dataParser.incorrectSheetName", "EMI40_Taxable", "EMI")
+    exceptionMessage mustBe messages("ers.exceptions.dataParser.incorrectSheetName", "EMI40_Taxable", "EMI")
   }
 
   "display incorrectHeader exception in validateHeaderRow method" in {
@@ -76,7 +74,7 @@ class ParserTest extends PlaySpec with OneServerPerSuite with ScalaFutures with 
         }
       }
     }
-    exceptionMessage mustBe Messages("ers.exceptions.dataParser.incorrectHeader", "CSOP_OptionsRCL_V3", "CSOP_OptionsRCL_V3.csv")
+    exceptionMessage mustBe messages("ers.exceptions.dataParser.incorrectHeader", "CSOP_OptionsRCL_V3", "CSOP_OptionsRCL_V3.csv")
   }
 
   "return sheetInfo given a valid sheet name" in {
@@ -107,7 +105,7 @@ class ParserTest extends PlaySpec with OneServerPerSuite with ScalaFutures with 
     val result = intercept[ERSFileProcessingException]{
       TestDataGenerator.getSheet("abc", "1")
     }
-    result.message mustBe Messages("ers.exceptions.dataParser.incorrectSheetName", "abc", "CSOP")
+    result.message mustBe messages("ers.exceptions.dataParser.incorrectSheetName", "abc", "CSOP")
   }
 
 }

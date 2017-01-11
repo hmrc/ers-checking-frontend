@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,6 @@ import config.ApplicationConfig
 import uk.gov.hmrc.play.frontend.auth.{GovernmentGateway, TaxRegime}
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
 import utils.ExternalUrls
-import play.api.mvc.{AnyContent, Request, Result}
-
-import scala.concurrent.Future
-import play.api.mvc.Results.Redirect
 
 object ERSGovernmentGateway extends GovernmentGateway {
   //override def loginURL = ExternalUrls.signIn

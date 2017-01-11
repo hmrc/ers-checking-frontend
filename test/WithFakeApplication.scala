@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,25 @@
  */
 
 import org.scalatest.{Suite, BeforeAndAfterAll}
-import play.api.Play
-import play.api.test.FakeApplication
+import play.api.{Play, Application}
+import play.api.inject.guice.GuiceApplicationBuilder
 
 trait WithFakeApplication extends BeforeAndAfterAll {
   this: Suite =>
 
-  lazy val fakeApplication = FakeApplication()
+  //lazy val fakeApplication = FakeApplication()
+
+  implicit val app: Application = new GuiceApplicationBuilder().build()
+    //.configure(additionalConfiguration)
+    //.bindings(bindModules:_*).in(Mode.Test)
+
 
   override def beforeAll() {
     super.beforeAll()
-    Play.start(fakeApplication)
+    Play.start(app)
   }
 
   override def afterAll() {
     super.afterAll()
-    Play.stop()
   }
 }

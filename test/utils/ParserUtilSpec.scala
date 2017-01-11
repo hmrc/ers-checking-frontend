@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,24 @@ package utils
 
 import models.SheetErrors
 import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.play.OneAppPerTest
+import play.api.test.Helpers
 import services.ProcessODSService
-import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
+import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 
 import scala.collection.mutable.ListBuffer
 
-class ParserUtilSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
+class ParserUtilSpec extends UnitSpec with MockitoSugar with OneAppPerTest{
 
   "getDataToValidate" must {
 
     "truncate array depending on number of columns in given sheet" in {
+      Helpers.running(app){
       val rowData: Array[String] = Array.fill(50)("")
       val result = ParserUtil.formatDataToValidate(rowData, "Other_Grants_V3")
       result.length shouldBe 4
+    }
     }
 
     "add empty strings to match number of columns in given sheet" in {

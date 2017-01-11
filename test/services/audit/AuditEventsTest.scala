@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,24 @@
  */
 
 package services
-//import models.{SchemeInfo, ValidationErrorData}
 
-import controllers.Fixtures
+import controllers.{ERSFakeApplication, Fixtures}
 import org.scalatest.{Matchers, WordSpec}
 import play.api.Play
 import play.api.test.{FakeApplication, FakeRequest}
 import services.audit.{AuditEvents, AuditService, AuditServiceConnector}
 import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.test.WithFakeApplication
 
 import scala.collection.mutable.ListBuffer
 
-class AuditEventsTest    extends WordSpec with Matchers {
+class AuditEventsTest extends WordSpec with Matchers with ERSFakeApplication{
 
-  val fakeApplication = FakeApplication()
   Play.start(fakeApplication)
 
   implicit val request = FakeRequest()
-  implicit var hc = new HeaderCarrier()
+  //implicit var hc = new HeaderCarrier()
   implicit val authContext = Fixtures.buildFakeUser
   val sheetName = "sheetName"
 

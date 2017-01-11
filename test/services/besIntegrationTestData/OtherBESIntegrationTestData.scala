@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,6 @@ package services.besIntegrationTestData
 
 import scala.xml.Elem
 
-/**
- * Created by matt on 22/01/16.
- */
 trait OtherBESIntegrationTestData extends OtherGrants with OtherOptions with OtherAcquisitions with OtherRestricted with OtherBenefits with OtherConvertible with OtherNotional with OtherEnhancement with OtherSold
 
 trait OtherGrants {

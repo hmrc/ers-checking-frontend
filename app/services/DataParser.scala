@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,8 @@ package services
 
 import java.util.concurrent.TimeUnit
 
-import metrics.Metrics
 import models._
 import play.api.Logger
-import play.api.i18n.Messages
 import play.api.mvc.Request
 import services.ERSTemplatesInfo._
 import services.audit.AuditEvents
@@ -34,14 +32,19 @@ import utils.{ParserUtil, ContentUtil}
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
 import scala.xml._
+import play.api.i18n.Messages.Implicits._
+import play.api.Play.current
+
 
 trait DataParser {
 
+  val messages = applicationMessages
+
   val repeatAttr = "table:number-columns-repeated"
-  def validateSpecialCharacters(xmlRowData : String )={
+  def validateSpecialCharacters(xmlRowData : String ) = {
     if(xmlRowData.contains("&")){
       Logger.debug("Found invalid xml in Data Parser, throwing exception")
-      throw new ERSFileProcessingException(Messages("ers.exceptions.dataParser.ampersand"), Messages("ers.exceptions.dataParser.parsingOfFileData"))
+      throw new ERSFileProcessingException(messages("ers.exceptions.dataParser.ampersand"), messages("ers.exceptions.dataParser.parsingOfFileData"))
     }
   }
 
@@ -59,12 +62,12 @@ trait DataParser {
       }
       case elem:Option[Elem] => Logger.debug("3.2 Parse row right ")
         Try( Right(xmlRow.get.child.flatMap( parseColumn(_)))).getOrElse{
-          Logger.warn(Messages("ers.exceptions.dataParser.fileRetrievalFailed", fileName))
-          throw ERSFileProcessingException (Messages("ers.exceptions.dataParser.fileRetrievalFailed", fileName), Messages("ers.exceptions.dataParser.parserFailure", fileName))
+          Logger.warn(messages("ers.exceptions.dataParser.fileRetrievalFailed", fileName))
+          throw ERSFileProcessingException (messages("ers.exceptions.dataParser.fileRetrievalFailed", fileName), messages("ers.exceptions.dataParser.parserFailure", fileName))
         }
       case _  => {
-        Logger.warn(Messages("ers.exceptions.dataParser.fileParsingError", fileName))
-        throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.fileParsingError", fileName), Messages("ers.exceptions.dataParser.parsingOfFileData"))
+        Logger.warn(messages("ers.exceptions.dataParser.fileParsingError", fileName))
+        throw ERSFileProcessingException(messages("ers.exceptions.dataParser.fileParsingError", fileName), messages("ers.exceptions.dataParser.parsingOfFileData"))
       }
     }
   }
@@ -84,7 +87,7 @@ trait DataParser {
 
 object DataGenerator extends DataGenerator
 
-trait DataGenerator extends DataParser with Metrics{
+trait DataGenerator extends DataParser /*with Metrics*/{
 
   def getErrors(iterator:Iterator[String], scheme:String, fileName : String)(implicit authContext: AuthContext, hc: HeaderCarrier, request: Request[_]) =
   {
@@ -102,7 +105,7 @@ trait DataGenerator extends DataParser with Metrics{
 
     def checkForMissingHeaders(rowNum: Int, sheetName: String) = {
       if(rowNum > 0 && rowNum < 9) {
-        throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName),Messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName), needsExtendedInstructions = true)
+        throw ERSFileProcessingException(messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName),messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName), needsExtendedInstructions = true)
       }
     }
 
@@ -161,7 +164,7 @@ trait DataGenerator extends DataParser with Metrics{
     }
     checkForMissingHeaders(rowNum, sheetName)
     if(rowsWithData == 0) {
-      throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.noData"),Messages("ers.exceptions.dataParser.noData"), needsExtendedInstructions = true)
+      throw ERSFileProcessingException(messages("ers.exceptions.dataParser.noData"),messages("ers.exceptions.dataParser.noData"), needsExtendedInstructions = true)
     }
     deliverDataIteratorMetrics(startTime)
     AuditEvents.numRowsInSchemeData(scheme, rowsWithData)(authContext,hc,request)
@@ -174,9 +177,10 @@ trait DataGenerator extends DataParser with Metrics{
       ERSValidationConfigs.getValidator(ersSheets(sheetName).configFileName)
     }catch{
       case e:Exception => {
+        implicit val messages = applicationMessages
         AuditEvents.auditRunTimeError(e,"Could not set the validator",sheetName)(hc,request)
         Logger.error("setValidator has thrown an exception, SheetName: " + sheetName + " Exception message: " + e.getMessage)
-        throw new ERSFileProcessingException(Messages("ers.exceptions.dataParser.configFailure", sheetName), "Could not set the validator ")
+        throw new ERSFileProcessingException(messages("ers.exceptions.dataParser.configFailure", sheetName), "Could not set the validator ")
       }
     }
   }
@@ -191,8 +195,8 @@ trait DataGenerator extends DataParser with Metrics{
         data }
       case _ => {
         AuditEvents.fileProcessingErrorAudit(res.schemeType, res.sheetName, s"${res.schemeType.toLowerCase} is not equal to ${schemeName.toLowerCase}")
-        Logger.warn(Messages("ers.exceptions.dataParser.incorrectSchemeType", res.schemeType.toUpperCase, schemeName.toUpperCase))
-        throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectSchemeType", ContentUtil.withArticle(res.schemeType.toUpperCase), ContentUtil.withArticle(schemeName.toUpperCase), res.sheetName), Messages("ers.exceptions.dataParser.incorrectSchemeType", res.schemeType.toLowerCase, schemeName.toLowerCase))
+        Logger.warn(messages("ers.exceptions.dataParser.incorrectSchemeType", res.schemeType.toUpperCase, schemeName.toUpperCase))
+        throw ERSFileProcessingException(messages("ers.exceptions.dataParser.incorrectSchemeType", ContentUtil.withArticle(res.schemeType.toUpperCase), ContentUtil.withArticle(schemeName.toUpperCase), res.sheetName), messages ("ers.exceptions.dataParser.incorrectSchemeType", res.schemeType.toLowerCase, schemeName.toLowerCase))
       }
     }
   }
@@ -202,13 +206,13 @@ trait DataGenerator extends DataParser with Metrics{
     ersSheets.getOrElse(sheetName, {
      //  implicit val hc:HeaderCarrier = new HeaderCarrier()
     //  AuditEvents.fileProcessingErrorAudit(schemeInfo, sheetName, "Could not set the validator")
-      Logger.warn(Messages("ers.exceptions.dataParser.unidentifiableSheetName") + sheetName)
+      Logger.warn(messages("ers.exceptions.dataParser.unidentifiableSheetName") + sheetName)
       val schemeName = ContentUtil.getSchemeName(scheme)._2
-      throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectSheetName", sheetName, schemeName), Messages("ers.exceptions.dataParser.unidentifiableSheetName") + " " +sheetName, needsExtendedInstructions = true)
+      throw ERSFileProcessingException(messages("ers.exceptions.dataParser.incorrectSheetName", sheetName, schemeName), messages("ers.exceptions.dataParser.unidentifiableSheetName") + " " +sheetName, needsExtendedInstructions = true)
     })
   }
 
-  def validateHeaderRow(rowData:Seq[String], sheetName:String, scheme:String, fileName: String) =
+  def validateHeaderRow(rowData:Seq[String], sheetName:String, scheme:String, fileName: String)=
   {
     val headerFormat = "[^a-zA-Z0-9]"
 
@@ -223,7 +227,7 @@ trait DataGenerator extends DataParser with Metrics{
         implicit val hc:HeaderCarrier = new HeaderCarrier()
      //   AuditEvents.fileProcessingErrorAudit(schemeInfo,sheetName,"Header row invalid")
         Logger.warn("Error while reading File + Incorrect ERS Template")
-        throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName),Messages("ers.exceptions.dataParser.headersDontMatch"), needsExtendedInstructions = true)
+        throw ERSFileProcessingException(messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName),messages("ers.exceptions.dataParser.headersDontMatch"), needsExtendedInstructions = true)
       }
     }
   }
@@ -231,6 +235,6 @@ trait DataGenerator extends DataParser with Metrics{
   def isBlankRow(data :Seq[String]) = data.mkString("").trim.length == 0
 
   def deliverDataIteratorMetrics(startTime:Long) =
-    metrics.dataIteratorTimer(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
+    metrics.ERSMetrics.dataIteratorTimer(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
 
 }

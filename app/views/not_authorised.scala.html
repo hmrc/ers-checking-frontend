@@ -1,5 +1,5 @@
 @* not_authorised Template File *@
-@(implicit request: Request[AnyRef], context: config.ErsContext)
+@(implicit request: Request[AnyRef], context: config.ErsContext, messages: Messages)
 
 @ers_main(title = Messages("ers.start.page_title")) {
 <header id="page-header">

@@ -1,33 +1,32 @@
-@(scheme: String, invalidChars: String)(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext)
+@(scheme: String, invalidChars: String)(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext, messages: Messages)
 @* check return file Template *@
 
 @import _root_.views.html.templates._
 @import uk.gov.hmrc.play.views.html.helpers
 @import utils.PageBuilder._
-@import utils.ContentUtil._
 
 @scripts = {
 	<script>var INVALID_CHARACTERS=/@Html(invalidChars)/</script>
 	<script src='@routes.AssetsController.at("javascripts/ers_csv_scripts.js")'> </script>
 }
 
-@ers_main(title = Messages("ers.upload_csv.page_title"), scripts) {
+@ers_main(title = message("ers.upload_csv.page_title"), scripts) {
 
 	<div id="file-wrapper">
-		<p class="font-xsmall"><a href="@routes.CheckingServiceController.checkFileTypePage()" class="link-back">@Html(Messages("ers.back"))</a></p>
-		@header(Messages("ers_check_csv_file.title"))
+		<p class="font-xsmall"><a href="@routes.CheckingServiceController.checkFileTypePage()" class="link-back">@Html(message("ers.back"))</a></p>
+		@header(message("ers_check_csv_file.title"))
 		<div id="errors" class="validation-summary visibility" role="group" aria-labelledby="error-summary-heading" tabindex="-1">
 			<h1 class="heading-medium error-summary-heading" id="error-summary-heading">
-				@Html(Messages("validation.summary.heading"))
+				@Html(message("validation.summary.heading"))
 			</h1>
 			<ul class="error-summary-list">
-				<li class="validation-summary-message"><a href="#error-summary" data-focuses="error-summary">@Html(Messages("csv_file_upload.summary_error"))</a></li>
+				<li class="validation-summary-message"><a href="#error-summary" data-focuses="error-summary">@Html(message("csv_file_upload.summary_error"))</a></li>
 			</ul>
 		</div>
 		@helpers.form(action = routes.UploadController.uploadCSVFile(scheme), 'id -> "upload-file-form", 'enctype -> "multipart/form-data") {
 			@for(a <- 0 to getNumberOfBrowseButtons(scheme)-1) {
 				<div class="form-field">
-					<label class="input-csv-file-name-heading" for="fileUpload[@a]">@Messages(getPageElement(scheme,PAGE_CHECK_CSV_FILE,"file"+a))</label>
+					<label class="input-csv-file-name-heading" for="fileUpload[@a]">@message(getPageElement(scheme,PAGE_CHECK_CSV_FILE,"file"+a))</label>
 					<input id="fileUpload[@a]" class="input-csv-file-name" type="file" name="fileUpload[@a]" accept=".csv" size="40"/>
 				</div>
 			}
@@ -36,9 +35,9 @@
 				@flash.get("filetype-error")
 				</div>
 			}
-			<!--<div id="remove-csv-files-link-container"><a href="@routes.CheckingServiceController.checkCSVFilePage()" id="remove-csv-file-link">@Html(Messages("ers_check_csv_file.clear_all_link"))</a></div>-->
+			<!--<div id="remove-csv-files-link-container"><a href="@routes.CheckingServiceController.checkCSVFilePage()" id="remove-csv-file-link">@Html(message("ers_check_csv_file.clear_all_link"))</a></div>-->
 			<div id="csv-files-button">
-				<button role="button" id="check-file-button" class="button" type="submit" value="@Html(Messages("ers_check_csv_file.check_file_button"))">@Html(Messages("ers_check_csv_file.check_file_button"))</button>
+				<button role="button" id="check-file-button" class="button" type="submit" value="@Html(message("ers_check_csv_file.check_file_button"))">@Html(message("ers_check_csv_file.check_file_button"))</button>
 				@spinner()
 			</div>
 		}

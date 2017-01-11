@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 
 package utils
 
-import play.api.i18n.Messages
+import play.api.i18n.Messages.Implicits._
+import play.api.Play.current
 import controllers.routes
 import play.api.mvc.Call
 
 object PageBuilder extends PageBuilder
 trait PageBuilder {
+
+  val message = applicationMessages
 
   val DEFAULT = ""
 
@@ -64,25 +67,25 @@ trait PageBuilder {
   val SIP_CSV_FILES: Int = 2
   val OTHER_CSV_FILES: Int = 9
 
-  def getGlobalPageElement(scheme: String, element: String) : String = {
+  def getGlobalPageElement(scheme: String, element: String): String = {
     val pageElement: String = scheme match {
-      case SCHEME_CSOP => Messages(MSG_ERS + MSG_CSOP + element)
-      case SCHEME_EMI => Messages(MSG_ERS + MSG_EMI + element)
-      case SCHEME_SAYE => Messages(MSG_ERS + MSG_SAYE + element)
-      case SCHEME_SIP => Messages(MSG_ERS + MSG_SIP + element)
-      case SCHEME_OTHER => Messages(MSG_ERS + MSG_OTHER + element)
+      case SCHEME_CSOP => message(MSG_ERS + MSG_CSOP + element)
+      case SCHEME_EMI => message(MSG_ERS + MSG_EMI + element)
+      case SCHEME_SAYE => message(MSG_ERS + MSG_SAYE + element)
+      case SCHEME_SIP => message(MSG_ERS + MSG_SIP + element)
+      case SCHEME_OTHER => message(MSG_ERS + MSG_OTHER + element)
       case _ => DEFAULT
     }
     pageElement
   }
 
-  def getPageElement(scheme: String, pageId: String, element: String, para: String = "") : String = {
+  def getPageElement(scheme: String, pageId: String, element: String, para: String = ""): String = {
     val pageElement: String = scheme match {
-      case SCHEME_CSOP => Messages(pageId + MSG_CSOP + element, para)
-      case SCHEME_EMI => Messages(pageId + MSG_EMI + element, para)
-      case SCHEME_SAYE => Messages(pageId + MSG_SAYE + element, para)
-      case SCHEME_SIP => Messages(pageId + MSG_SIP + element, para)
-      case SCHEME_OTHER => Messages(pageId + MSG_OTHER + element, para)
+      case SCHEME_CSOP => message(pageId + MSG_CSOP + element, para)
+      case SCHEME_EMI => message(pageId + MSG_EMI + element, para)
+      case SCHEME_SAYE => message(pageId + MSG_SAYE + element, para)
+      case SCHEME_SIP => message(pageId + MSG_SIP + element, para)
+      case SCHEME_OTHER => message(pageId + MSG_OTHER + element, para)
       case _ => DEFAULT
     }
     pageElement

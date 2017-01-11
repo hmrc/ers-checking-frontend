@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ trait HtmlCreator {
 
 	var uploadedFileUtil = UploadedFileUtil
 
-	def getSheets(schemeErrors: ListBuffer[SheetErrors]): String = {
+	def getSheets(schemeErrors: ListBuffer[SheetErrors])(implicit messages: Messages): String = {
 		var sheets: String = "";
 		var errorListCount: Long = 0;
 		val htmlTableColHeaders: String = Messages("ers_html_error_report.table_column_names")

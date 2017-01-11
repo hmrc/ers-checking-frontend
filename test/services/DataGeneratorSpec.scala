@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,18 +22,17 @@ import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
-import play.api.i18n.Messages
 import services.headers.HeaderData
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.util.Try
+import play.api.i18n.Messages.Implicits._
 
-/**
- * Created by raghu on 03/02/16.
- */
 class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFutures with MockitoSugar with BeforeAndAfter with HeaderData{
 
   object dataGeneratorObj extends DataGenerator
+
+  implicit val messages = applicationMessages
 
   val testAct = List("","","","")
   "The File Processing Service" must {
@@ -54,7 +53,7 @@ class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFuture
     }
 
     "validate CSOP_OptionsGranted_V3 headerRow as valid" in {
-      dataGeneratorObj.validateHeaderRow(csopHeaderSheet1Data, "CSOP_OptionsGranted_V3", "CSOP", "CSOP_OptionsGranted_V3.csv") must be (9)
+      dataGeneratorObj.validateHeaderRow(csopHeaderSheet1Data, "CSOP_OptionsGranted_V3", "CSOP", "CSOP_OptionsGranted_V3.csv")must be (9)
     }
     "validate CSOP_OptionsRCL_V3 headerRow as valid" in {
       dataGeneratorObj.validateHeaderRow(csopHeaderSheet2Data, "CSOP_OptionsRCL_V3", "CSOP", "CSOP_OptionsRCL_V3.csv") must be (9)
@@ -126,7 +125,7 @@ class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFuture
       val invalidSheet = intercept[ERSFileProcessingException]{
         dataGeneratorObj.identifyAndDefineSheet("CSOP_OptionsExercised_V3","2")(hc,Fixtures.buildFakeRequestWithSessionId("GET"))
       }
-      invalidSheet.message mustBe Messages("ers.exceptions.dataParser.incorrectSchemeType","a CSOP", "an EMI", "CSOP_OptionsExercised_V3")
+      invalidSheet.message mustBe messages("ers.exceptions.dataParser.incorrectSchemeType","a CSOP", "an EMI", "CSOP_OptionsExercised_V3")
     }
 
     "isBlankRow" in {
@@ -140,7 +139,7 @@ class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFuture
       val result = intercept[ERSFileProcessingException] {
         dataGenObj.getErrors(XMLTestData.getInvalidCSOPWithoutHeaders,"1","CSOP.ods")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"))
       }
-      result.message mustBe Messages("ers.exceptions.dataParser.incorrectHeader", "CSOP_OptionsGranted_V3", "CSOP.ods")
+      result.message mustBe messages("ers.exceptions.dataParser.incorrectHeader", "CSOP_OptionsGranted_V3", "CSOP.ods")
     }
 
     "get an exception if ods file has more than 1 sheet but 1 of the sheets has less than 9 rows and doesn't have header data" in {
@@ -148,7 +147,7 @@ class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFuture
       val result = intercept[ERSFileProcessingException] {
         dataGenObj.getErrors(XMLTestData.getInvalidCSOPWith2Sheets1WithoutHeaders,"1","CSOP.ods")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"))
       }
-      result.message mustBe Messages("ers.exceptions.dataParser.incorrectHeader", "CSOP_OptionsGranted_V3", "CSOP.ods")
+      result.message mustBe messages("ers.exceptions.dataParser.incorrectHeader", "CSOP_OptionsGranted_V3", "CSOP.ods")
     }
 
     "get an exception if ods file doesn't contain any data" in {
@@ -156,7 +155,7 @@ class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFuture
       val result = intercept[ERSFileProcessingException] {
         dataGenObj.getErrors(XMLTestData.getCSOPWithoutData,"1","CSOP.ods")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"))
       }
-      result.message mustBe Messages("ers.exceptions.dataParser.noData")
+      result.message mustBe messages("ers.exceptions.dataParser.noData")
     }
 
     "get no errors for EMI" in {
