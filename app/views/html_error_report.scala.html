@@ -2,7 +2,7 @@
   sheets: String,
   schemeNameShort: String,
   errorListCount: Long,
-  schemeErrorCount: Long)(implicit request: Request[AnyRef], context: config.ErsContext)
+  schemeErrorCount: Long)(implicit request: Request[AnyRef], context: config.ErsContext, messages: Messages)
 @* HTML Error Report Template *@
 
 @import utils.PageBuilder
