@@ -5,6 +5,7 @@ import scoverage.ScoverageKeys
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.versioning.SbtGitVersioning
+import play.sbt.routes.RoutesKeys.routesGenerator
 
 trait MicroService {
 
@@ -13,11 +14,12 @@ trait MicroService {
   import uk.gov.hmrc.{SbtBuildInfo, ShellPrompt}
   import TestPhases._
   import sbtbuildinfo.Plugin.buildInfoPackage
+  import uk.gov.hmrc.SbtAutoBuildPlugin
 
   val appName: String
 
   lazy val appDependencies: Seq[ModuleID] = ???
-  lazy val plugins: Seq[Plugins] = Seq(play.PlayScala)
+  lazy val plugins: Seq[Plugins] = Seq(play.sbt.PlayScala)
   lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
   lazy val scoverageSettings = {
@@ -30,7 +32,7 @@ trait MicroService {
       parallelExecution in Test := false
     )
   }
-
+  import play.sbt.routes.RoutesCompiler.autoImport._
   lazy val microservice = Project(appName, file("."))
     .enablePlugins(plugins: _*)
     .enablePlugins(SbtAutoBuildPlugin, SbtGitVersioning)
@@ -44,7 +46,8 @@ trait MicroService {
       libraryDependencies ++= appDependencies,
       parallelExecution in Test := false,
       fork in Test := false,
-      retrieveManaged := true
+      retrieveManaged := true,
+      routesGenerator := StaticRoutesGenerator
     )
     .settings(Repositories.playPublishingSettings: _*)
     .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
@@ -60,7 +63,7 @@ trait MicroService {
       sources in doc in Compile := List(),
       sources in doc in Test := List()
     )
-    .settings(resolvers += Resolver.bintrayRepo("hmrc", "releases"))
+    .settings(resolvers ++= Seq(Resolver.bintrayRepo("hmrc", "releases"), Resolver.jcenterRepo))
     .settings(evictionWarningOptions in update := EvictionWarningOptions.default.withWarnTransitiveEvictions(false).withWarnDirectEvictions(false).withWarnScalaVersionEviction(false))
 }
 

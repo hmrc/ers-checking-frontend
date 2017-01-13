@@ -16,9 +16,10 @@
 
 package utils
 
-import play.api.i18n.Messages
 import controllers.routes
-import play.api.mvc.Call
+import play.api.Play.current
+import play.api.i18n.Messages
+import play.api.i18n.Messages.Implicits._
 
 object PageBuilder extends PageBuilder
 trait PageBuilder {

@@ -16,5 +16,8 @@
 
 package controllers
 
+import com.google.inject.Inject
+import play.api.http.HttpErrorHandler
+
 // $COVERAGE-OFF$
-object AssetsController extends AssetsBuilder
+class AssetsController @Inject() (errorHandler: HttpErrorHandler) extends AssetsBuilder(errorHandler)
