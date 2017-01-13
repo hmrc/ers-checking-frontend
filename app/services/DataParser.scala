@@ -30,7 +30,8 @@ import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.services.validation.{ValidationError,DataValidator}
 import utils.{ParserUtil, ContentUtil}
-
+import play.api.i18n.Messages.Implicits._
+import play.api.Play.current
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
 import scala.xml._

@@ -7,7 +7,7 @@ userLoggedIn: Boolean = false,
 supportLinkEnabled: Boolean = true,
 getHelpForm: Html  = HtmlFormat.empty,
 linkElement : Option[Html] = None,
-scriptElement: Option[Html] = None)(mainContent: Html = HtmlFormat.empty)(implicit request: Request[_], context: config.ErsContext)
+scriptElement: Option[Html] = None)(mainContent: Html = HtmlFormat.empty)(implicit request: Request[_], context: config.ErsContext, messages: Messages)
 
 @import layouts.{govuk_template => hmrcGovUkTemplate}
 @import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
