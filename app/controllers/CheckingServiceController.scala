@@ -16,17 +16,17 @@
 
 package controllers
 
-import models.{CSformMappings}
+import models.CSformMappings
 import play.api.Logger
+import play.api.Play.current
 import play.api.i18n.Messages
+import play.api.i18n.Messages.Implicits._
 import play.api.mvc._
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier
 import utils._
-import play.api.i18n.Messages.Implicits._
-import play.api.Play.current
-import scala.concurrent.Future
 
+import scala.concurrent.Future
 
 object CheckingServiceController extends CheckingServiceController {
   override val cacheUtil: CacheUtil = CacheUtil
@@ -38,6 +38,7 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   val uploadedFileUtil = UploadedFileUtil
   val contentUtil = ContentUtil
   val cacheUtil: CacheUtil
+  val messages = applicationMessages
 
   def startPage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
     implicit authContext =>
@@ -45,7 +46,7 @@ trait CheckingServiceController extends ERSCheckingBaseController {
         showStartPage(authContext, request)
   }
 
-  def showStartPage(implicit authContext: AuthContext, request: Request[AnyRef]): Future[Result] = Future.successful(Ok(views.html.start.render(request, context)))
+  def showStartPage(implicit authContext: AuthContext, request: Request[AnyRef]): Future[Result] = Future.successful(Ok(views.html.start.render(request, context, messages)))
 
   def schemeTypePage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
     implicit authContext =>
@@ -134,7 +135,7 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   def showCheckCSVFilePage(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
     cacheUtil.fetch[String](CacheUtil.SCHEME_CACHE).map { scheme =>
         val invalidChars: String = "[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]"
-        Ok(views.html.check_csv_file(scheme, invalidChars)(request, request.flash, context))
+        Ok(views.html.check_csv_file(scheme, invalidChars)(request, request.flash, context, messages))
     } recover {
       case e: Exception => {
         Logger.error("showCheckCSVFilePage: Unable to fetch scheme. Error: " + e.getMessage)
@@ -153,7 +154,7 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   def showCheckODSFilePage(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
     cacheUtil.fetch[String](CacheUtil.SCHEME_CACHE).map { scheme =>
       val invalidChars: String = "[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]"
-      Ok(views.html.check_file(scheme, invalidChars)(request, request.flash, context))
+      Ok(views.html.check_file(scheme, invalidChars)(request, request.flash, context, messages))
     } recover {
       case e: Exception => {
         Logger.error("showCheckFilePage: Unable to fetch scheme. Error: " + e.getMessage)
@@ -169,7 +170,7 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   }
 
   def showCheckingSuccessPage(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
-    Future.successful(Ok(views.html.checking_success.render(request, context)))
+    Future.successful(Ok(views.html.checking_success.render(request, context, messages)))
   }
 
   def checkingErrorsPage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {

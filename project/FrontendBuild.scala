@@ -50,6 +50,8 @@ private object AppDependencies {
   private val pegdownVersion = "1.6.0"
   private val jsoupVersion = "1.9.2"
   private val hmrcTestVersion = "2.1.0"
+  private val mockitoVersion = "2.2.16"
+
 
   object Test {
     def apply() = new TestDependencies {
@@ -57,6 +59,7 @@ private object AppDependencies {
         "uk.gov.hmrc" %% "hmrctest" % hmrcTestVersion % scope,
         "org.scalatest" %% "scalatest" % scalatestVersion % scope,
         "org.scalatestplus.play" %% "scalatestplus-play" % scalatestPlusPlayVersion % scope,
+        "org.mockito" % "mockito-core" % mockitoVersion % scope,
         "org.pegdown" % "pegdown" % "1.4.2" % scope,
         "org.jsoup" % "jsoup" % "1.7.3" % scope,
       //  "uk.gov.hmrc" %% "url-builder" % urlBuilderVersion,

@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-import org.scalatest.{Suite, BeforeAndAfterAll}
-import play.api.Play
-import play.api.test.FakeApplication
+import org.scalatest.{BeforeAndAfterAll, Suite}
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.{Application, Play}
 
 trait WithFakeApplication extends BeforeAndAfterAll {
   this: Suite =>
 
-  lazy val fakeApplication = FakeApplication()
+  implicit val app: Application = new GuiceApplicationBuilder().build()
 
   override def beforeAll() {
     super.beforeAll()
-    Play.start(fakeApplication)
+    Play.start(app)
   }
 
   override def afterAll() {
     super.afterAll()
-    Play.stop(fakeApplication)
   }
 }
