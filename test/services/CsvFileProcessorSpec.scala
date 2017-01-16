@@ -23,17 +23,18 @@ import com.typesafe.config.ConfigFactory
 import controllers.Fixtures
 import models.ERSFileProcessingException
 import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.play.OneAppPerSuite
 import play.api.i18n.Messages
 import play.api.libs.Files.TemporaryFile
 import play.api.mvc.MultipartFormData
 import play.api.mvc.MultipartFormData.FilePart
 import services.validation.ErsValidator
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.{DataValidator, ValidationError}
+import play.api.i18n.Messages.Implicits._
 
-
-class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
+class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with OneAppPerSuite {
 
   val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv")
   if(fileCopied.exists)
@@ -52,7 +53,7 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with WithFakeAppli
     Files.copy(fileTest.toPath, new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/test2.csv").toPath)
     val tempFile = TemporaryFile(new java.io.File(userDirectory+"/test/resources/copy/test2.csv"))
     val part = FilePart[TemporaryFile](key = "fileParam", filename = "Other_Grants_V3.csv", contentType = Some("Content-Type: multipart/form-data"), ref = tempFile)
-    val file = MultipartFormData(dataParts = Map(), files = Seq(part), badParts = Seq(), missingFileParts = Seq())
+    val file = MultipartFormData(dataParts = Map(), files = Seq(part), badParts = Seq())
     file
   }
 
