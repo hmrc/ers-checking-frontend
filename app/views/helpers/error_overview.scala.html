@@ -1,5 +1,6 @@
 @(form: Option[String], errorLink: String, OptionalErrMsg:Option[String] = None)
-
+@import play.api.i18n.Messages.Implicits._
+@import play.api.Play.current
 
         <div id="errors" class="validation-summary" role="group" aria-labelledby="summary-heading" tabindex="-1">
             <h1 id="summary-heading" class="heading-medium error-summary-heading">@Messages("validation.summary.heading")</h1>

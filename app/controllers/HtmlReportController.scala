@@ -37,6 +37,7 @@ trait HtmlReportController extends ERSCheckingBaseController {
 
   var jsonParser = JsonParser
   val cacheUtil: CacheUtil
+  val messages = applicationMessages
 
   def htmlErrorReportPage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
     implicit authContext =>
@@ -58,7 +59,7 @@ trait HtmlReportController extends ERSCheckingBaseController {
         }
       }
       val sheets: String = HtmlCreator.getSheets(schemeErrors)
-      Ok(views.html.html_error_report(schemeName, sheets, schemeNameShort, totalErrors, schemeErrorCount)(request, context))
+      Ok(views.html.html_error_report(schemeName, sheets, schemeNameShort, totalErrors, schemeErrorCount)(request, context, messages))
     }recover {
       case e: NoSuchElementException => {
         Logger.error("Unable to display error report in HtmlReportController.showHtmlErrorReportPage. Error: " + e.getMessage)

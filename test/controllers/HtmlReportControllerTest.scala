@@ -17,30 +17,26 @@
 package controllers
 
 import java.util.NoSuchElementException
-import java.util.concurrent.TimeoutException
 
-import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 import models.SheetErrors
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.http.Status
 import play.api.libs.json
+import play.api.libs.json._
 import play.api.mvc.Request
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache, ShortLivedCache}
+import play.api.test.Helpers._
+import uk.gov.hmrc.http.cache.client.{CacheMap, ShortLivedCache}
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.http.{HttpGet, HttpPut, NotFoundException}
 import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 import utils.{CacheUtil, PageBuilder}
 
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
-import play.api.libs.json._
-import play.api.libs.json.JsValue
-import play.mvc.Result
-import play.api.test.Helpers._
+import scala.concurrent.{ExecutionContext, Future}
 
 class HtmlReportControllerTest extends UnitSpec with ERSFakeApplication with MockitoSugar {
 

@@ -28,9 +28,6 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.util.Try
 
-/**
- * Created by raghu on 03/02/16.
- */
 class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFutures with MockitoSugar with BeforeAndAfter with HeaderData{
 
   object dataGeneratorObj extends DataGenerator
