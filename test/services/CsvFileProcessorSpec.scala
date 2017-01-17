@@ -24,6 +24,7 @@ import controllers.Fixtures
 import models.ERSFileProcessingException
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
+import play.api.Application
 import play.api.i18n.Messages
 import play.api.libs.Files.TemporaryFile
 import play.api.mvc.MultipartFormData
@@ -33,8 +34,20 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.{DataValidator, ValidationError}
 import play.api.i18n.Messages.Implicits._
+import play.api.inject.guice.GuiceApplicationBuilder
 
 class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with OneAppPerSuite {
+
+
+  val config = Map("application.secret" -> "test",
+    "login-callback.url" -> "test",
+    "contact-frontend.host" -> "localhost",
+    "contact-frontend.port" -> "9250",
+    "metrics.enabled" -> false)
+
+  implicit val hc = HeaderCarrier()
+
+  override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
 
   val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv")
   if(fileCopied.exists)

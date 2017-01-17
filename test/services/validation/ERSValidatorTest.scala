@@ -20,13 +20,25 @@ import com.typesafe.config.ConfigFactory
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
 import services.validation.EMITestData.ERSValidationEMIAdjustmentsTestData
+import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.services.validation.DataValidator
 
-/**
- * Created by darryl on 28/01/16.
- */
+
 class ERSValidatorTest extends PlaySpec with OneServerPerSuite with ScalaFutures with MockitoSugar with ERSValidationEMIAdjustmentsTestData {
+
+  val config = Map("application.secret" -> "test",
+    "login-callback.url" -> "test",
+    "contact-frontend.host" -> "localhost",
+    "contact-frontend.port" -> "9250",
+    "metrics.enabled" -> false)
+
+  implicit val hc = HeaderCarrier()
+
+  override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
+
   val validator = DataValidator(ConfigFactory.load.getConfig("ers-emi-adjustments-validation-config"))
 
   val testData =  Seq("yes", "yes", "yes", "4", "2011-10-13", "Mia", "Iam", "Aim", "AB123456C", "123/XZ55555555", "10.1234", "10.14", "10.1324", "10.1244")

@@ -42,6 +42,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with MockitoSugar {
+
   val config = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
     "contact-frontend.host" -> "localhost",

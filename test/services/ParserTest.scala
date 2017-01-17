@@ -22,8 +22,10 @@ import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
+import play.api.Application
 import play.api.i18n.Messages
 import play.api.i18n.Messages.Implicits._
+import play.api.inject.guice.GuiceApplicationBuilder
 import services.XMLTestData._
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -32,6 +34,16 @@ class ParserTest extends PlaySpec with OneAppPerSuite with ScalaFutures with Moc
 
   object TestDataParser extends DataParser
   object TestDataGenerator extends DataGenerator
+
+  val config = Map("application.secret" -> "test",
+    "login-callback.url" -> "test",
+    "contact-frontend.host" -> "localhost",
+    "contact-frontend.port" -> "9250",
+    "metrics.enabled" -> false)
+
+  implicit val hc = HeaderCarrier()
+
+  override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
 
   "parse row with duplicate column data 1" in {
     val result = TestDataParser.parse(emiAdjustmentsXMLRow1.toString,"")
