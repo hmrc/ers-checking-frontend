@@ -21,6 +21,8 @@ import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{BadGatewayException, HeaderCarrier, HttpGet, HttpResponse}
@@ -29,7 +31,6 @@ import scala.concurrent.Future
 
 class ContactFrontendConnectorSpec extends PlaySpec with OneAppPerSuite with MockitoSugar with BeforeAndAfterEach with ServicesConfig {
 
-  //implicit override lazy val app: Application = new GuiceApplicationBuilder()
   implicit val headerCarrier = HeaderCarrier()
 
   object TestConnector extends ContactFrontendConnector {
@@ -39,6 +40,10 @@ class ContactFrontendConnectorSpec extends PlaySpec with OneAppPerSuite with Moc
   override def beforeEach() = {
     reset(TestConnector.http)
   }
+
+  override implicit lazy val app: Application = GuiceApplicationBuilder()
+    .configure(Map("metrics.enabled" -> false))
+    .build()
 
   "ContactFrontendConnector" must {
 
