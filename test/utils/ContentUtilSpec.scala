@@ -17,9 +17,23 @@
 package utils
 
 import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.play.OneAppPerSuite
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
+import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
-class ContentUtilSpec  extends UnitSpec with MockitoSugar {
+class ContentUtilSpec  extends UnitSpec with MockitoSugar with OneAppPerSuite{
+
+  val config = Map("application.secret" -> "test",
+    "login-callback.url" -> "test",
+    "contact-frontend.host" -> "localhost",
+    "contact-frontend.port" -> "9250",
+    "metrics.enabled" -> false)
+
+  implicit val hc = HeaderCarrier()
+
+  override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
 
   "ContentUtil" should {
     val data = List(
