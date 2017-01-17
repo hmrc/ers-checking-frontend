@@ -27,6 +27,7 @@ import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L0
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.{Accounts, Authority, CredentialStrength}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.services.validation.{Cell, ValidationError}
+
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration._
 
@@ -94,8 +95,7 @@ trait ERSFakeApplication extends BeforeAndAfterAll {
     "login-callback.url" -> "test",
     "contact-frontend.host" -> "localhost",
     "contact-frontend.port" -> "9250",
-    "metrics.enabled" -> "false")
+    "metrics.enabled" -> false)
 
    lazy val fakeApplication = new GuiceApplicationBuilder().build()
-
 }

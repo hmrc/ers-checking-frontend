@@ -1,3 +1,4 @@
+import play.routes.compiler.StaticRoutesGenerator
 import sbt.Keys._
 import sbt.Tests.{Group, SubProcess}
 import sbt._
@@ -6,6 +7,7 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.versioning.SbtGitVersioning
 import play.sbt.routes.RoutesKeys.routesGenerator
+import play.sbt.routes.RoutesCompiler.autoImport._
 
 trait MicroService {
 
@@ -32,7 +34,6 @@ trait MicroService {
       parallelExecution in Test := false
     )
   }
-  import play.sbt.routes.RoutesCompiler.autoImport._
   lazy val microservice = Project(appName, file("."))
     .enablePlugins(plugins: _*)
     .enablePlugins(SbtAutoBuildPlugin, SbtGitVersioning)
