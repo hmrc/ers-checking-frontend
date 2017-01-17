@@ -40,10 +40,13 @@ class ContactFrontendConnectorSpec extends PlaySpec with OneAppPerSuite with Moc
   override def beforeEach() = {
     reset(TestConnector.http)
   }
+  val config = Map("application.secret" -> "test",
+    "login-callback.url" -> "test",
+    "contact-frontend.host" -> "localhost",
+    "contact-frontend.port" -> "9250",
+    "metrics.enabled" -> false)
 
-  override implicit lazy val app: Application = GuiceApplicationBuilder()
-    .configure(Map("metrics.enabled" -> false))
-    .build()
+  override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
 
   "ContactFrontendConnector" must {
 

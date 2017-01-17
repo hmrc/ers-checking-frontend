@@ -22,7 +22,10 @@ import models.SheetErrors
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.play.OneAppPerSuite
+import play.api.Application
 import play.api.http.Status
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json
 import play.api.libs.json._
 import play.api.mvc.Request
@@ -38,8 +41,16 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class HtmlReportControllerTest extends UnitSpec with ERSFakeApplication with MockitoSugar {
+class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with MockitoSugar {
+  val config = Map("application.secret" -> "test",
+    "login-callback.url" -> "test",
+    "contact-frontend.host" -> "localhost",
+    "contact-frontend.port" -> "9250",
+    "metrics.enabled" -> false)
 
+  implicit val hc = HeaderCarrier()
+
+  override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
 
   "html Error Report Page GET" should {
 
@@ -82,6 +93,8 @@ class HtmlReportControllerTest extends UnitSpec with ERSFakeApplication with Moc
     //    }
 
   }
+
+
 
   def buildFakeHtmlReportController() = new HtmlReportController {
 
