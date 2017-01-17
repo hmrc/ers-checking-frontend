@@ -89,7 +89,6 @@ abstract class WithErsSetup extends WithApplication/*(FakeApplication(additional
 trait ERSFakeApplication extends BeforeAndAfterAll {
   this: Suite =>
 
-  implicit val hc = HeaderCarrier()
 
   val config = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
