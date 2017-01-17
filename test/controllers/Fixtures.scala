@@ -97,5 +97,5 @@ trait ERSFakeApplication extends BeforeAndAfterAll {
     "contact-frontend.port" -> "9250",
     "metrics.enabled" -> false)
 
-   lazy val fakeApplication = new GuiceApplicationBuilder().build()
+   lazy val fakeApplication = new GuiceApplicationBuilder().configure(config).build()
 }
