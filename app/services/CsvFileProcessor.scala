@@ -65,8 +65,10 @@ trait CsvFileProcessor extends DataGenerator {
    val files = request.body.asMultipartFormData.get.files
     val filesErrors: ListBuffer[SheetErrors] = new ListBuffer()
     files.map(file => {
+        if(!file.filename.isEmpty) {
           checkFileType(file.filename)
-          filesErrors += readCSVFile(file.filename.dropRight(4),file.ref.file,scheme)
+          filesErrors += readCSVFile(file.filename.dropRight(4), file.ref.file, scheme)
+        }
     })
       filesErrors
   }
