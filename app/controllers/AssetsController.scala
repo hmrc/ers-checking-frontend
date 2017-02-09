@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,5 +16,8 @@
 
 package controllers
 
+import com.google.inject.Inject
+import play.api.http.HttpErrorHandler
+
 // $COVERAGE-OFF$
-object AssetsController extends AssetsBuilder
+class AssetsController @Inject() (errorHandler: HttpErrorHandler) extends AssetsBuilder(errorHandler)

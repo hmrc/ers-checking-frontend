@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,19 @@ package utils
 
 import models.SheetErrors
 import org.scalatest.mock.MockitoSugar
-import services.ProcessODSService
-import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
+import org.scalatestplus.play.OneAppPerSuite
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
+import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 
 import scala.collection.mutable.ListBuffer
 
-class ParserUtilSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
+class ParserUtilSpec extends UnitSpec with MockitoSugar with OneAppPerSuite{
+
+  override implicit lazy val app: Application = GuiceApplicationBuilder()
+    .configure(Map("metrics.enabled" -> false))
+    .build()
 
   "getDataToValidate" must {
 

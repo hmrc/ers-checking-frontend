@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,8 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.{CacheUtil, ContentUtil, HtmlCreator, JsonParser}
 import models.SheetErrors
 import uk.gov.hmrc.services.validation.ValidationError
-
+import play.api.i18n.Messages.Implicits._
+import play.api.Play.current
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
@@ -36,6 +37,7 @@ trait HtmlReportController extends ERSCheckingBaseController {
 
   var jsonParser = JsonParser
   val cacheUtil: CacheUtil
+  val messages = applicationMessages
 
   def htmlErrorReportPage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
     implicit authContext =>
@@ -57,7 +59,7 @@ trait HtmlReportController extends ERSCheckingBaseController {
         }
       }
       val sheets: String = HtmlCreator.getSheets(schemeErrors)
-      Ok(views.html.html_error_report(schemeName, sheets, schemeNameShort, totalErrors, schemeErrorCount)(request, context))
+      Ok(views.html.html_error_report(schemeName, sheets, schemeNameShort, totalErrors, schemeErrorCount)(request, context, messages))
     }recover {
       case e: NoSuchElementException => {
         Logger.error("Unable to display error report in HtmlReportController.showHtmlErrorReportPage. Error: " + e.getMessage)

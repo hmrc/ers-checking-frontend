@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,18 @@ package services
 
 import java.io.File
 
-import uk.gov.hmrc.services.validation._
 import models.SheetErrors
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.Files
 import play.api.libs.Files.TemporaryFile
-import play.api.mvc.{Request, MultipartFormData}
 import play.api.mvc.MultipartFormData.FilePart
+import play.api.mvc.{MultipartFormData, Request}
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier
-import utils.CacheUtil
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import utils.UploadedFileUtil
+import utils.{CacheUtil, UploadedFileUtil}
 
 import scala.collection.mutable.ListBuffer
 
@@ -65,11 +63,11 @@ class ProcessODSServiceSpec extends UnitSpec with MockitoSugar with WithFakeAppl
 
   def getMockFile(isEmpty: Boolean): MultipartFormData[Files.TemporaryFile] = {
     if(isEmpty) {
-      MultipartFormData(dataParts = Map(), files = Seq(), badParts = Seq(), missingFileParts = Seq())
+      MultipartFormData(dataParts = Map(), files = Seq(), badParts = Seq())
     }
     else {
       val part = FilePart[TemporaryFile](key = "fileUpload", filename = "EMI_template_V3.ods", contentType = Some("Content-Type: multipart/form-data"), ref = mockTempFile)
-      MultipartFormData(dataParts = Map(), files = Seq(part), badParts = Seq(), missingFileParts = Seq())
+      MultipartFormData(dataParts = Map(), files = Seq(part), badParts = Seq())
     }
   }
 

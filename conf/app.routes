@@ -1,6 +1,6 @@
 GET /								            controllers.CheckingServiceController.startPage()
 
-GET /assets/*file					            controllers.AssetsController.at(path="/public", file)
+GET /assets/*file					            @controllers.AssetsController.at(path="/public", file)
 
 GET /start							            controllers.CheckingServiceController.startPage()
 

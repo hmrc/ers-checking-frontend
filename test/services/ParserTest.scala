@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +21,29 @@ import models.ERSFileProcessingException
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
+import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
+import play.api.Application
 import play.api.i18n.Messages
+import play.api.i18n.Messages.Implicits._
+import play.api.inject.guice.GuiceApplicationBuilder
 import services.XMLTestData._
 import uk.gov.hmrc.play.http.HeaderCarrier
-/**
- * Created by raghu on 26/01/16.
- */
-class ParserTest extends PlaySpec with OneServerPerSuite with ScalaFutures with MockitoSugar with BeforeAndAfter{
+
+class ParserTest extends PlaySpec with OneAppPerSuite with ScalaFutures with MockitoSugar with BeforeAndAfter{
 
 
   object TestDataParser extends DataParser
   object TestDataGenerator extends DataGenerator
+
+  val config = Map("application.secret" -> "test",
+    "login-callback.url" -> "test",
+    "contact-frontend.host" -> "localhost",
+    "contact-frontend.port" -> "9250",
+    "metrics.enabled" -> false)
+
+  implicit val hc = HeaderCarrier()
+
+  override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
 
   "parse row with duplicate column data 1" in {
     val result = TestDataParser.parse(emiAdjustmentsXMLRow1.toString,"")
