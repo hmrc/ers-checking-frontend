@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,24 @@
 
 package controllers
 
-import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 import models.SheetErrors
-import play.api.test.{FakeRequest, FakeApplication, WithApplication}
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L0
-import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.test.WithFakeApplication
+import org.scalatest.{BeforeAndAfterAll, Suite}
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json._
-import org.scalatest.Suite
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.{CredentialStrength, PayeAccount, Accounts, Authority}
+import play.api.test.FakeRequest
+import play.test.WithApplication
+import uk.gov.hmrc.play.frontend.auth.AuthContext
+import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L0
+import uk.gov.hmrc.play.frontend.auth.connectors.domain.{Accounts, Authority, CredentialStrength}
+import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration._
 
 object Fixtures {
 
-  def buildFakeAuthority = Authority("/auth/oid/krogers", Accounts(None), None, None, CredentialStrength.Strong, L0, None, None)
+  def buildFakeAuthority = Authority("/auth/oid/krogers", Accounts(None), None, None, CredentialStrength.Strong, L0, None, None, None, "")
   def buildFakeUser = AuthContext(buildFakeAuthority)
 
   def buildFakeRequestWithSessionId(method: String) = FakeRequest(method, "").withSession("sessionId" -> "FAKE_SESSION_ID")
@@ -78,24 +79,22 @@ object Fixtures {
 }
 
 
-abstract class WithErsSetup extends WithApplication(FakeApplication(additionalConfiguration = Map(
+abstract class WithErsSetup extends WithApplication/*(FakeApplication(additionalConfiguration = Map(
   "application.secret" -> "test",
   "govuk-tax.Test.login-callback.url" -> "test"
-))) {
+))) */{
   implicit val hc = HeaderCarrier()
 }
 
-trait ERSFakeApplication extends WithFakeApplication {
+trait ERSFakeApplication extends BeforeAndAfterAll {
   this: Suite =>
 
-  implicit val hc = HeaderCarrier()
 
   val config = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
     "contact-frontend.host" -> "localhost",
     "contact-frontend.port" -> "9250",
-    "metrics.enabled" -> "false")
+    "metrics.enabled" -> false)
 
-  override lazy val fakeApplication  = FakeApplication(additionalConfiguration = config)
-
+   lazy val fakeApplication = new GuiceApplicationBuilder().configure(config).build()
 }

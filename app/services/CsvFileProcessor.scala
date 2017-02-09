@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,17 @@ import java.io.File
 import models.{ERSFileProcessingException, SheetErrors}
 import org.apache.commons.io.{FileUtils, LineIterator}
 import play.api.Logger
+import play.api.Play.current
 import play.api.i18n.Messages
+import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{AnyContent, Request}
 import services.validation.ErsValidator
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.services.validation.{DataValidator, ValidationError}
-import utils.{ParserUtil, CacheUtil, UploadedFileUtil}
+import utils.{CacheUtil, ParserUtil, UploadedFileUtil}
 
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
 
 
 object CsvFileProcessor extends CsvFileProcessor
@@ -64,8 +65,10 @@ trait CsvFileProcessor extends DataGenerator {
    val files = request.body.asMultipartFormData.get.files
     val filesErrors: ListBuffer[SheetErrors] = new ListBuffer()
     files.map(file => {
+        if(!file.filename.isEmpty) {
           checkFileType(file.filename)
-          filesErrors += readCSVFile(file.filename.dropRight(4),file.ref.file,scheme)
+          filesErrors += readCSVFile(file.filename.dropRight(4), file.ref.file, scheme)
+        }
     })
       filesErrors
   }

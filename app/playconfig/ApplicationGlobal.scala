@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,18 @@
 
 package playconfig
 
-import java.io.File
-
 import com.typesafe.config.Config
-import play.api.{Play, Application, Configuration}
-import play.api.Mode._
+import net.ceedubs.ficus.Ficus._
+import play.api.Play.current
+import play.api.i18n.Messages.Implicits._
 import play.api.mvc.Request
+import play.api.{Application, Configuration, Play}
 import play.twirl.api.Html
 import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.play.audit.filters.FrontendAuditFilter
-import uk.gov.hmrc.play.breadcrumb.model.{Breadcrumb, BreadcrumbItem}
 import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
+import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.frontend.bootstrap.{DefaultFrontendGlobal, ShowErrorPage}
-import net.ceedubs.ficus.Ficus._
 import uk.gov.hmrc.play.http.logging.filters.FrontendLoggingFilter
 
 object ApplicationGlobal extends DefaultFrontendGlobal with RunMode with ShowErrorPage {
@@ -43,7 +42,7 @@ object ApplicationGlobal extends DefaultFrontendGlobal with RunMode with ShowErr
   }
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): Html =
-    views.html.global_error(pageTitle, heading, message)
+    views.html.global_error(pageTitle, heading, message)(applicationMessages)
 
   override def microserviceMetricsConfig(implicit app: Application): Option[Configuration] = app.configuration.getConfig(s"Dev.microservice.metrics")
 
@@ -53,11 +52,11 @@ object ControllerConfiguration extends ControllerConfig {
   lazy val controllerConfigs = Play.current.configuration.underlying.as[Config]("controllers")
 }
 
-object ERSLoggingFilter extends FrontendLoggingFilter {
+object ERSLoggingFilter extends FrontendLoggingFilter with MicroserviceFilterSupport{
   override def controllerNeedsLogging(controllerName: String) = ControllerConfiguration.paramsForController(controllerName).needsLogging
 }
 
-object ERSFrontendAuditFilter extends FrontendAuditFilter with RunMode with AppName {
+object ERSFrontendAuditFilter extends FrontendAuditFilter with RunMode with AppName with MicroserviceFilterSupport{
 
   override lazy val maskedFormFields = Seq("password")
 
