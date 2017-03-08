@@ -2,9 +2,9 @@
 
 @import play.api.Play.current
 @import play.api.Play
-@import uk.gov.hmrc.play.config.RunMode._
 
 @import config.ApplicationConfig
+@import utils.ERSRunMode
 @import layouts.{govuk_template => hmrcGovUkTemplate}
 @import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
 @import utils.ExternalUrls
@@ -49,8 +49,8 @@ mainContentHeader = contentHeader)
 
 @bodyEnd = {
 @uiLayouts.footer(
-analyticsToken = Play.configuration.getString(s"govuk-tax.$env.google-analytics.token"),
-analyticsHost = Play.configuration.getString(s"govuk-tax.$env.google-analytics.host").getOrElse("service.gov.uk"),
+analyticsToken = Play.configuration.getString(s"govuk-tax.${ERSRunMode.env}.google-analytics.token"),
+analyticsHost = Play.configuration.getString(s"govuk-tax.${ERSRunMode.env}.google-analytics.host").getOrElse("service.gov.uk"),
 ssoUrl = None,
 scriptElem = None,
 gaCalls = None)
