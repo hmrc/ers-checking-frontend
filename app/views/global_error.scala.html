@@ -1,7 +1,8 @@
 @(pageTitle: String, heading: String, message: String, applicationConfig: config.ApplicationConfig = config.ApplicationConfig)(implicit messages: Messages)
 
 @import play.api.Play.current
-@import uk.gov.hmrc.play.config.RunMode._
+
+@import utils.ERSRunMode
 
 @import layouts.{govuk_template => hmrcGovUkTemplate}
 @import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}

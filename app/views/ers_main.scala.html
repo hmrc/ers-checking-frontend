@@ -2,7 +2,7 @@
 
 @import play.api.Play.current
 @import play.api.Play
-@import uk.gov.hmrc.play.config.RunMode._
+@import utils.ERSRunMode
 
 @commonLinkElement = {
     <link rel="stylesheet" href='@routes.AssetsController.at("stylesheets/ers_styles.css")' />
@@ -12,14 +12,14 @@
 }
 
 @commonScriptElement = {
-	@Play.configuration.getString(s"govuk-tax.$env.google-analytics.token") match {
+	@Play.configuration.getString(s"govuk-tax.${ERSRunMode.env}.google-analytics.token") match {
 		case Some(token) => {
 			<script type="text/javascript">
 				(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 				})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-				ga('create', '@Play.configuration.getString(s"govuk-tax.$env.google-analytics.token")', 'auto');
+				ga('create', '@Play.configuration.getString(s"govuk-tax.${ERSRunMode.env}.google-analytics.token")', 'auto');
 				ga('send', 'pageview', { 'anonymizeIp': true });
 			</script>
 		}

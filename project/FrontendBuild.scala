@@ -13,9 +13,8 @@ private object AppDependencies {
   private val frontendBootstrapVersion = "7.14.0"
   private val govukTemplateVersion =  "5.1.0"
   private val playUiVersion = "5.2.0"
+  private val playConfigVersion = "4.2.0"
   private val playAuthFrontendVersion = "6.3.0"
-  private val playConfigVersion = "3.0.0"
-  //private val metricsPlayVersion = "0.2.1"
   private val metricsGraphiteVersion = "3.0.2"
   private val httpCachingVersion = "6.2.0"
   private val playPartialVersion = "5.3.0"
@@ -31,7 +30,6 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "govuk-template" % govukTemplateVersion,
     "uk.gov.hmrc" %% "play-authorised-frontend" % playAuthFrontendVersion,
     "uk.gov.hmrc" %% "http-caching-client" % httpCachingVersion,
-    //"com.kenshoo" %% "metrics-play" % metricsPlayVersion,
     "com.codahale.metrics" % "metrics-graphite" % metricsGraphiteVersion,
     "uk.gov.hmrc" %% "logback-json-logger" % logbackJsonLoggerVersion,
     "uk.gov.hmrc" %% "play-breadcrumb" % "0.1.1",
@@ -62,7 +60,6 @@ private object AppDependencies {
         "org.mockito" % "mockito-core" % mockitoVersion % scope,
         "org.pegdown" % "pegdown" % "1.4.2" % scope,
         "org.jsoup" % "jsoup" % "1.7.3" % scope,
-      //  "uk.gov.hmrc" %% "url-builder" % urlBuilderVersion,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope
       )
     }.test
