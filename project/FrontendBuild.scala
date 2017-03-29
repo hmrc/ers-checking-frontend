@@ -10,7 +10,7 @@ private object AppDependencies {
   import play.sbt.PlayImport._
 
   private val playHealthVersion = "2.1.0"
-  private val frontendBootstrapVersion = "7.17.0"
+  private val frontendBootstrapVersion = "7.22.0"
   private val govukTemplateVersion =  "5.1.0"
   private val playUiVersion = "5.2.0"
   private val playAuthFrontendVersion = "6.3.0"
@@ -49,7 +49,7 @@ private object AppDependencies {
   private val scalatestPlusPlayVersion = "1.5.1"
   private val pegdownVersion = "1.6.0"
   private val jsoupVersion = "1.9.2"
-  private val hmrcTestVersion = "2.1.0"
+  private val hmrcTestVersion = "2.3.0"
   private val mockitoVersion = "2.2.16"
 
 
