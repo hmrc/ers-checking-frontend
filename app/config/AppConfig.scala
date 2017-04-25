@@ -51,5 +51,5 @@ object ApplicationConfig extends ApplicationConfig with ServicesConfig {
   override lazy val startElement: String = "<table:table-row"
   override lazy val endElement: String = "</table:table-row>"
 
-  override val ggSignInUrl: String = configuration.getString(s"$env.government-gateway-sign-in.host").getOrElse("")
+  override val ggSignInUrl: String = configuration.getString(s"govuk-tax.$env.government-gateway-sign-in.host").getOrElse("")
 }
