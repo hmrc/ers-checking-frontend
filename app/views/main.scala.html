@@ -50,25 +50,6 @@ scriptElement: Option[Html] = None)(mainContent: Html = HtmlFormat.empty)(implic
 @footerTop = {}
 @footerLinks = {}
 
-
-@betaBanner = {
-    @uiLayouts.betaBanner(
-        userLoggedIn = userLoggedIn,
-        betaFeedbackUrl = applicationConfig.betaFeedbackUrl,
-        betaFeedbackUnauthenticatedUrl = applicationConfig.betaFeedbackUnauthenticatedUrl,
-        showFeedbackLinkInBetaBanner = true)
-}
-
-@serviceInfo = {
-    @uiLayouts.serviceInfo(
-        betaBanner = betaBanner,
-        includeGridWrapper = false,
-        serviceInfoContent = None,
-        includeHMRCBranding = false
-    )
-}
-
-
 @mainContentHeader = {
     @contentHeader.map { contentHeaderVal =>
         @uiLayouts.main_content_header(contentHeader = contentHeaderVal)
@@ -82,9 +63,6 @@ scriptElement: Option[Html] = None)(mainContent: Html = HtmlFormat.empty)(implic
 @content = {
 <main id="wrapper" role="main">
     <div id="content">
-        <div class="ers-service-info">
-            @betaBanner
-        </div>
         <div class="grid-layout grid-layout--stacked">
             <div class="grid-layout__column grid-layout__column--2-3">
                 @mainContent

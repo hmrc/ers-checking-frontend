@@ -21,26 +21,9 @@ headScripts = None)
 <meta name="format-detection" content="telephone=no" />
 }
 
-@betaBanner = {
-@uiLayouts.betaBanner(
-userLoggedIn = false,
-applicationConfig.betaFeedbackUrl,
-applicationConfig.betaFeedbackUnauthenticatedUrl,
-showFeedbackLinkInBetaBanner = true)
-}
-
-@serviceInfo = {
-@uiLayouts.serviceInfo(
-betaBanner = betaBanner,
-includeGridWrapper = false,
-serviceInfoContent = None)
-}
-
-
 @content = {
 @uiLayouts.main_content(
 article = uiLayouts.article(mainContent),
-serviceInfo = serviceInfo,
 mainContentHeader = contentHeader)
 }
 
