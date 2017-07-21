@@ -1,5 +1,7 @@
+#********************************************************************
+# General messages
+#********************************************************************
 
-ers.app_title=Checking Service - HMRC
 ers.csop=Company Share Option Plan
 ers.emi=Enterprise Management Incentives
 ers.saye=Save As You Earn
@@ -19,16 +21,22 @@ ers.upload_ods.page_title=Choose and check the .ods file – Employment Related 
 ers.error_report.page_title=Error report – Employment Related Securities – GOV.UK
 ers.confirmation.page_title=Confirmation – Employment Related Securities – GOV.UK
 
+#********************************************************************
+# Start page messages
+#********************************************************************
+
 ers_start.page_title=Check your ERS files
 ers_start.intro_para_1=Use this service to check for errors in the files you need to upload as part of your Employment Related Securities (ERS) annual return.
 ers_start.sub_title=Before you start
-ers_start.intro_para_3=You''ll need to know which type of ERS scheme or arrangement the file is for.
+ers_start.intro_para_3=You’ll need to know which type of ERS scheme or arrangement the file is for.
 ers_start.intro_para_4=If you are checking a spreadsheet it needs to be an OpenDocument Spreadsheet (.ods) file. You can also check comma separated values (.csv) files.
 ers_start.intro_para_5=The time it takes to check a file depends on the speed of your internet connection and the size of your spreadsheet or .csv file.
 ers_start.ers_help=<a href="https://www.gov.uk/government/collections/employment-related-securities" id="ers-help-link">Use the ERS guidance documents</a> to help you create error-free files.
 ers_start.start_now_button=Start now
-ers_start.subsection_title=ERS annual return
-ers_start.subsection_link_1=End of year returns service preview
+
+#********************************************************************
+# Scheme type messages
+#********************************************************************
 
 ers_scheme_type.page_title=Which type of ERS scheme or arrangement is this file for?
 ers_scheme_type.csop=Company Share Option Plan (CSOP - Form 35)
@@ -37,9 +45,12 @@ ers_scheme_type.saye=Save As You Earn (SAYE - Form 34)
 ers_scheme_type.sip=Share Incentive Plan (SIP - Form 39)
 ers_scheme_type.other=Other (Form 42)
 ers_scheme_type.continue=Continue
-ers_scheme_type.back=Back
 ers_scheme_type.select_scheme_type=Select the type of ERS scheme or arrangement
-ers_scheme_type.err.message=Select the type of ERS scheme or arrangement
+
+
+#********************************************************************
+# File type messages
+#********************************************************************
 
 ers_check_file_type.title=Which type of file do you want to check?
 ers_check_file_type.option_1=Comma separated values (.csv)
@@ -80,54 +91,26 @@ ers_check_csv_file.other.file6=Discharge of notional loans post-acquisition
 ers_check_csv_file.other.file7=Artificial enhancement of market value. Value of securities post acquisition
 ers_check_csv_file.other.file8=Securities sold for more than market value post acquisition
 
-
-
-
-
-
-
-
-
-
-
-
 ers_check_file.title=Choose the .ods file that you want to check for errors
-ers_check_file.instruction=Choose the OpenDocument Spreadsheet (.ods) file that you want to check for errors.
 ers_check_file.file_upload_label=Select the file to upload.
-ers_check_file.formatting_errors_link=What are formatting errors?
-ers_check_file.formatting_errors_help=Errors are created when information isn''t entered correctly or unexpected structural changes are made. For example, a number is found where a word is needed or an expected column is missing.
-ers_check_file.file_header_bar=File name
-ers_check_file.choose_file_button=Choose your file
-ers_check_file.file_name=No file selected.
-ers_check_file.remove_file_link=Remove file
 ers_check_file.check_file_button=Check for errors
-ers_check_file.back=Back
 ers_check_file.file_type_error=You chose to check an ODS file, but {0} is not an ODS file.
 ers_check_file.no_file_error=No file selected. Please choose your file.
 
+#********************************************************************
+# Error messages
+#********************************************************************
 
 ers_error_report.page_title= {0} ({1}) error report
 ers_error_report.alert=The file that you chose to check seems to be damaged.
-ers_error_report.alert_2=You won''t be able to upload {0} as part of your annual return.
-ers_error_report.download_error_report=View error report (PDF, {0}k)
-ers_error_report.intro_para=View and then save your copy of the error report PDF.
+ers_error_report.alert_2=You won’t be able to upload {0} as part of your annual return.
 ers_error_report.sub_heading=What happens next
-ers_error_report.view_as_html1=You can also
 ers_error_report.view_as_html2=View this error report as a web page
 ers_error_report.instructions1=Fix the errors before you use this service again or
 ers_error_report.instructions2=choose a different file to check
 
-
 ers_format_errors.page_title=Error report
-ers_format_errors.alert=An error has been found.
-ers_format_errors.download_error_report=View error report (PDF, {0}k)
-ers_format_errors.intro_para=View and then save your copy of the error report PDF.
 ers_format_errors.sub_heading=What happens next
-ers_format_errors.view_as_html1=You can also
-ers_format_errors.view_as_html2=View this error report as a web page
-ers_format_errors.instructions1=Fix the error before you use this service again or
-ers_format_errors.instructions2=choose a different file to check
-
 
 ers_file_format_successful.page_title= Check complete
 ers_file_format_successful.sub_heading=What happens next
@@ -137,44 +120,26 @@ ers_file_format_successful.banner=No errors were found.
 ers_file_format_successful.feedback=What did you think of this service?
 ers_file_format_successful.feedback_time=(takes 30 seconds)
 
-
 ers_service_unavailable.page_title=Check your ERS files
 ers_service_unavailable.para1=The Checking Service is currently unavailable, please try again later
 
 ers_not_authorised.page_title=Check your ERS files
 ers_not_authorised.para1=You are not authorised to access ERS checking service
 
-ers_html_error_report.styles=<div></div>
-ers_html_error_report.styles2=<style>article table td, article table th '{'background:none; padding:10px 20px 10px 0'}' article table td, article table th '{'border:none;'}' article table td, article table th '{'border-bottom: 1px solid #BFC1C3;'}' .column, .row '{'width:10%'}' .report-title '{'text-align:right; margin-top:0; margin-bottom:0;'}'</style>
 ers_html_error_report.report_title={0} ({1}) error report
 ers_html_error_report.number_of_errors_sing=Showing {0} of {1} error found.
 ers_html_error_report.number_of_errors=Showing {0} of {1} errors found.
-ers_html_error_report.formatting_errors=<p id='summary' class='heading-medium'>Your spreadsheet contains {0} formatting errors.</p>
-ers_html_error_report.formatting_errors_singular=<p id='summary' class='heading-medium'>Your spreadsheet contains 1 formatting error.</p>
-ers_html_error_report.summary_title=<h3 class='heading-small'>Summary of errors</h3>
 ers_html_error_report.errors_title=Errors by {0} name (title)
 ers_html_error_report.table_column_names=<tr><th class='column' scope='col'>Column</th><th class='row' scope='col'>Row</th><th class='errorTitle' scope='col'>Error</th></tr>
-#ers_html_error_report.sheet_name=<h3 class='sheet-title'>{1}: <span class='font-small'>{0}</span></h3>
 ers_html_error_report.sheet_name=<h3 class='sheet-title'><span class='font-small'>{0}</span></h3>
 ers_html_error_report.table_row=<tr><td>{0}</td><td>{1}</td><td class='errorMsg'>{2}</td></tr>
 ers_html_error_report.sheet={0}<table id={3} class="error-table">{1}{2}</table>
-ers_html_error_report.finish=Finish
-ers_html_error_report.following_pages=<div class='following-pages'>For a more detailed summary of your errors, continue to next page.</div>
 
 ers_pdf_error_report.csop=Company Share Option Plan
 ers_pdf_error_report.emi=Enterprise Management Incentives 
 ers_pdf_error_report.saye=Save As You Earn
 ers_pdf_error_report.sip=Share Incentive Plan
 ers_pdf_error_report.other=Other
-
-ers.exceptions.fileProcessingService.failedStream = Failed to stream the data from file
-ers.exceptions.fileProcessingService.bulkEntity = Exception bulk entity streaming
-ers.exceptions.fileValidatorConnector.failedSendingData = Failed sending data
-ers.exceptions.fileValidatorConnector.notFound = Submissions Service Not Found
-ers.exceptions.fileValidatorConnector.badRequest = Submissions Service Bad Request
-ers.exceptions.fileValidatorConnector.serviceUnavailable = Submissions Service Service Unavailable
-ers.exceptions.fileValidatorConnector.sendSubmissions = Send submissions
-ers.exceptions.wiring.noConfig = Could not find config ''cachable.session-cache.domain''
 
 ers_format_errors.instructions = Choose a different file to check
 ers.exceptions.dataParser.fileRetrievalFailed = The file that you chose seems to be damaged.<br/><br/>You won’t be able to upload {0} as part of your annual return.
@@ -183,16 +148,12 @@ ers.exceptions.dataParser.fileParsingError = The file that you chose to check se
 ers.exceptions.dataParser.parsingOfFileData = Parsing of File Data
 ers.exceptions.dataParser.incorrectSheetName = {0} is not a sheet name (title) that can be used in {1} files.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the ERS guidance documents</a> to help you create error-free files.
 ers.exceptions.dataParser.incorrectSchemeType = You chose to check {1} file, but {2} is {0} file.
-ers.exceptions.dataParser.unidentifiableSheetName = Couldn''t identify SheetName
+ers.exceptions.dataParser.unidentifiableSheetName = Couldn’t identify SheetName
 ers.exceptions.dataParser.incorrectHeader = The headers on {0} in {1} are not right.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the ERS guidance documents</a> to make sure they are as required.
-ers.exceptions.dataParser.headersDontMatch = Header doesn''t match
-ers.exceptions.dataParser.fileInvalid = File Invalid, formatting errors present
-ers.exceptions.dataParser.validationFailure = Validation Failure
+ers.exceptions.dataParser.headersDontMatch = Header doesn’t match
 ers.exceptions.dataParser.configFailure = It has not been possible to check this file.
 ers.exceptions.dataParser.ampersand = Must not contain ampersands.
 ers.exceptions.dataParser.noData = The file that you chose doesn’t have any data after row 9. The reportable events data must start in cell A10.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the ERS guidance documents</a> to help you create error-free files.
-
-ers.exceptions.applicationConfig.missingKey = Missing key: {0}
 
 ers.global_errors.message=Sorry, we'’re experiencing technical difficulties
 ers.global_errors.heading=ERS File Upload Failure
