@@ -35,7 +35,7 @@ trait HtmlCreator {
 		for (sheet <- schemeErrors) {
 			val sheetErrors: ListBuffer[ValidationError] = sheet.errors
 			if (sheet.errors.nonEmpty) {
-				val htmlTableHead = Messages("ers_html_error_report.sheet_name", sheet.sheetName, "Sheet")
+				val htmlTableHead = Messages("ers_html_error_report.sheet_name", sheet.sheetName)
 				var htmlTableRows: String = ""
 				for (errors <- sheetErrors) {
 						htmlTableRows = htmlTableRows + Messages("ers_html_error_report.table_row", errors.cell.column, errors.cell.row, errors.errorMsg)

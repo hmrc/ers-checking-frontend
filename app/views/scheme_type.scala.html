@@ -15,7 +15,7 @@
 		@helpers.form(action = routes.CheckingServiceController.schemeTypeSelected()) {
 		    <fieldset>
 		    	<legend class="title-with-error">
-					<span class="visuallyhidden">@Html(Messages("ers_scheme_type.page_title"))</span>
+					<span class="visuallyhidden">@Messages("ers_scheme_type.page_title")</span>
 				</legend>
 				@if(flash.get("scheme-not-selected-error").isDefined) {
 					<div aria-labelledby="error-heading" class="validation-message" id="error-summary" role="alert" tabindex="-1">

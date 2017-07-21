@@ -14,7 +14,7 @@
 	@header(Messages("ers_check_file.title"))
 	<div id="errors" class="validation-summary visibility" role="group" aria-labelledby="error-summary-heading" tabindex="-1">
 		<h1 class="heading-medium error-summary-heading" id="error-summary-heading">
-			@Html(Messages("validation.summary.heading"))
+			@Messages("validation.summary.heading")
 		</h1>
 		<ul class="error-summary-list">
 			<li class="validation-summary-message"><a href="#error-summary" data-focuses="error-summary">@Html(Messages("ods_file_upload.summary_error"))</a></li>
@@ -31,7 +31,7 @@
 				}
 				<input id="input-file-name" type="file" name="fileUpload" accept=".ods" size="40"/>
 			</div>
-			<button role="button" id="check-file-button" class="button" type="submit" value="@Html(Messages("ers_check_file.check_file_button"))">@Html(Messages("ers_check_file.check_file_button"))</button>
+			<button role="button" id="check-file-button" class="button" type="submit" value="@Messages("ers_check_file.check_file_button")">@Messages("ers_check_file.check_file_button")</button>
 			@spinner()
 		}
 	</div>
