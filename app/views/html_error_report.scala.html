@@ -10,15 +10,15 @@
 @ers_main(title = Messages("ers.error_report.page_title")) {
 
 		<header>
-			<h1 class="heading-xlarge">@Html(Messages("ers_html_error_report.report_title", schemeName, schemeNameShort))</h1>
+			<h1 class="heading-xlarge">@Messages("ers_html_error_report.report_title", schemeName, schemeNameShort)</h1>
 		</header>
 		<div class="panel-indent panel-indent--gutter">
 			<p>
 				@(if(schemeErrorCount == 1) {
-					Html(Messages("ers_html_error_report.number_of_errors_sing",errorListCount, schemeErrorCount))
+					Messages("ers_html_error_report.number_of_errors_sing",errorListCount, schemeErrorCount)
 				}
 				else {
-					Html(Messages("ers_html_error_report.number_of_errors",errorListCount, schemeErrorCount))
+					Messages("ers_html_error_report.number_of_errors",errorListCount, schemeErrorCount)
 				})
 			</p>
 		</div>
