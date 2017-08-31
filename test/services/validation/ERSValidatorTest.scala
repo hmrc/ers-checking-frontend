@@ -48,10 +48,10 @@ class ERSValidatorTest extends PlaySpec with OneServerPerSuite with ScalaFutures
     }
 
     "pass a row of valid EMI adjustments data without failure" in {
-      ErsValidator.validateRow(getValidRowData.map(_.value),10,validator) mustBe None
+      ErsValidator.validateRow(validator)(getValidRowData.map(_.value),10) mustBe None
     }
     "pass a row of invalid EMI adjustments data with failure" in {
-      ErsValidator.validateRow(getInvalidRowData.map(_.value),10,validator).get.size mustBe 14
+      ErsValidator.validateRow(validator)(getInvalidRowData.map(_.value),10).get.size mustBe 14
     }
   }
 
