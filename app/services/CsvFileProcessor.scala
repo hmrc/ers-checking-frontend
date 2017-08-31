@@ -87,7 +87,10 @@ trait CsvFileProcessor extends DataGenerator {
 
   def validateFile(file:File, sheetName:String, validator: RowValidator): List[ValidationError]= {
     val start = System.currentTimeMillis()
-    Logger.debug(s"Validating file ${file.getName}")
+    val chunkSize = current.configuration.getInt("validationChunkSize").getOrElse(10000)
+    val cpus = Runtime.getRuntime().availableProcessors()
+
+    Logger.info(s"Validating file ${file.getName} cpus: $cpus chunkSize: $chunkSize")
 
     try {
       val (rows, rowsWithData) = getRowsFromFile(file, sheetName)
@@ -96,7 +99,6 @@ trait CsvFileProcessor extends DataGenerator {
         case _ =>
       }
 
-      val chunkSize = current.configuration.getInt("validationChunkSize").getOrElse(10000)
       val chunks = numberOfChunks(rows.size, chunkSize)
 
       val submissions = submitChunks(rows, chunks, chunkSize, sheetName, validator)
@@ -108,7 +110,7 @@ trait CsvFileProcessor extends DataGenerator {
       }
 
       val timeTaken = System.currentTimeMillis() - start
-      Logger.info(s"File validation completed in $timeTaken ms")
+      Logger.info(s"Validation of file ${file.getName} completed in $timeTaken ms")
 
       errors
     }
@@ -192,7 +194,7 @@ trait CsvFileProcessor extends DataGenerator {
         case Some(newErrors) if newErrors.nonEmpty =>
           Logger.debug("schemeErrors size is " + errors.size)
           errors ++= newErrors
-        case _ => Logger.debug("No Errors for " + "row " + rowNo)
+        case _ =>
       }
       rowNo += 1
     })
