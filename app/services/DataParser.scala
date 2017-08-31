@@ -142,15 +142,10 @@ trait DataGenerator extends DataParser with Metrics{
             val data = ParserUtil.formatDataToValidate(foundData, sheetName)
             if(!isBlankRow(data)){
               rowsWithData+=1
-              ErsValidator.validateRow(data,rowNum,validator) match {
-                case errors:Option[List[ValidationError]] if errors.isDefined => {
+              ErsValidator.validateRow(validator)(data,rowNum) match {
+                case Some(errors) if errors.nonEmpty => {
                   Logger.debug("Error while Validating File + Formatting errors present " + errors.toString)
-                  //implicit val hc:HeaderCarrier = new HeaderCarrier()
-                  //                  errors.map{
-                  //                    AuditEvents.validationErrorAudit(_,SchemeData(schemeInfo,sheetName,new List[ValidationError]))
-                  //                  }
-                    schemeErrors.last.errors ++= errors.get
-
+                  schemeErrors.last.errors ++= errors
                 }
                 case _ => schemeErrors.last.errors
               }
