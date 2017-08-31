@@ -10,15 +10,15 @@ private object AppDependencies {
   import play.sbt.PlayImport._
 
   private val playHealthVersion = "2.1.0"
-  private val frontendBootstrapVersion = "7.22.0"
-  private val govukTemplateVersion =  "5.1.0"
-  private val playUiVersion = "7.2.1"
-  private val playAuthFrontendVersion = "6.3.0"
+  private val frontendBootstrapVersion = "7.26.0"
+  private val govukTemplateVersion =  "5.3.0"
+  private val playUiVersion = "7.5.0"
+  private val playAuthFrontendVersion = "6.4.0"
   private val playConfigVersion = "4.3.0"
   //private val metricsPlayVersion = "0.2.1"
   private val metricsGraphiteVersion = "3.0.2"
   private val httpCachingVersion = "6.2.0"
-  private val playPartialVersion = "5.3.0"
+  private val playPartialVersion = "5.4.0"
   private val logbackJsonLoggerVersion = "3.1.0"
 
   val compile = Seq(
@@ -34,8 +34,8 @@ private object AppDependencies {
     //"com.kenshoo" %% "metrics-play" % metricsPlayVersion,
     "com.codahale.metrics" % "metrics-graphite" % metricsGraphiteVersion,
     "uk.gov.hmrc" %% "logback-json-logger" % logbackJsonLoggerVersion,
-    "uk.gov.hmrc" %% "play-breadcrumb" % "0.1.1",
-    "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.9",
+    "uk.gov.hmrc" %% "play-breadcrumb" % "1.0.0",
+    "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.21",
     "commons-io" % "commons-io" % "2.5",
     "uk.gov.hmrc" %% "tabular-data-validator" % "1.0.0"
   )
@@ -48,9 +48,9 @@ private object AppDependencies {
   private val scalatestVersion = "2.2.6"
   private val scalatestPlusPlayVersion = "1.5.1"
   private val pegdownVersion = "1.6.0"
-  private val jsoupVersion = "1.9.2"
+  private val jsoupVersion = "1.10.3"
   private val hmrcTestVersion = "2.3.0"
-  private val mockitoVersion = "2.2.16"
+  private val mockitoVersion = "2.8.47"
 
 
   object Test {
