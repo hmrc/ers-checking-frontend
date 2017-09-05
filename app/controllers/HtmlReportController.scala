@@ -47,10 +47,14 @@ trait HtmlReportController extends ERSCheckingBaseController {
 
   def showHtmlErrorReportPage(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
     cacheUtil.fetchAll().map { all =>
-      val schemeName = ContentUtil.getSchemeName(all.getEntry[String](CacheUtil.SCHEME_CACHE).get)._1
-      val schemeErrors: ListBuffer[SheetErrors] = all.getEntry[ListBuffer[SheetErrors]](CacheUtil.ERROR_LIST_CACHE).get
-      val schemeErrorCount: Long = all.getEntry[Long](CacheUtil.SCHEME_ERROR_COUNT_CACHE).get
-      val schemeNameShort = ContentUtil.getSchemeName(all.getEntry[String](CacheUtil.SCHEME_CACHE).get)._2
+      val scheme: (String, String) = all.getEntry[String](CacheUtil.SCHEME_CACHE) match {
+        case Some(name) => ContentUtil.getSchemeName(name)
+        case _ => ("", "")
+      }
+      val schemeName = scheme._1
+      val schemeErrors: ListBuffer[SheetErrors] = all.getEntry[ListBuffer[SheetErrors]](CacheUtil.ERROR_LIST_CACHE).getOrElse(new ListBuffer[SheetErrors]())
+      val schemeErrorCount: Long = all.getEntry[Long](CacheUtil.SCHEME_ERROR_COUNT_CACHE).getOrElse(0)
+      val schemeNameShort = scheme._2
       var totalErrors = 0
       for (sheet <- schemeErrors) {
         val sheetErrors: ListBuffer[ValidationError] = sheet.errors
