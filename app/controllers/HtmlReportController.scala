@@ -62,7 +62,7 @@ trait HtmlReportController extends ERSCheckingBaseController {
       Ok(views.html.html_error_report(schemeName, sheets, schemeNameShort, totalErrors, schemeErrorCount)(request, context, messages))
     }recover {
       case e: NoSuchElementException => {
-        Logger.error("Unable to display error report in HtmlReportController.showHtmlErrorReportPage. Error: " + e.getMessage)
+        Logger.error("Unable to display error report in HtmlReportController.showHtmlErrorReportPage. Error: " + e.getMessage, e)
         getGlobalErrorPage
       }
     }
