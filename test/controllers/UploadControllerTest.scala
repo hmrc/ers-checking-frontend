@@ -29,6 +29,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 import utils.CacheUtil
 
 import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 class UploadControllerTest extends UnitSpec with OneAppPerSuite with MockitoSugar {
 	implicit val hc = new HeaderCarrier
@@ -43,16 +44,16 @@ class UploadControllerTest extends UnitSpec with OneAppPerSuite with MockitoSuga
 			mockProcessODSService.performODSUpload()(any(),any(),any(),any())
 		).thenReturn(
 				proccessFile match {
-				case true => Future.successful(uploadRes)
-				case _ => Future.failed(new ERSFileProcessingException("",""))
+				case true => Future.successful(Success(uploadRes))
+				case _ => Future.successful(Failure(new ERSFileProcessingException("","")))
 			}
 		)
 		when(
 			csvFileProcessor.processCsvUpload(any())(any(),any(),any())
 		).thenReturn(
 				proccessFile match {
-				case true => Future.successful(uploadRes)
-				case _ => Future.failed(new ERSFileProcessingException("",""))
+				case true => Future.successful(Success(uploadRes))
+				case _ => Future.successful(Failure(new ERSFileProcessingException("","")))
 			}
 		)
 
