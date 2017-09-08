@@ -47,6 +47,7 @@ trait CsvFileProcessor extends DataGenerator {
   type RowValidator = (Seq[String], Int) => Option[List[ValidationError]]
 
   val converter: (String) => Array[String] = _.split(",")
+  val defaultChunkSize: Int = 10000
 
   def readCSVFile(filename:String,file: File,scheme:String)(implicit request: Request[AnyContent], hc : HeaderCarrier): SheetErrors = {
     Logger.debug("file.getName" + filename)
@@ -58,10 +59,15 @@ trait CsvFileProcessor extends DataGenerator {
     SheetErrors(sheetName, errors)
   }
 
-  def processCsvUpload(scheme:String)(implicit request: Request[AnyContent], authContext : AuthContext, hc : HeaderCarrier): Boolean =
+  def processCsvUpload(scheme:String)(implicit request: Request[AnyContent], authContext : AuthContext, hc : HeaderCarrier): Future[Try[Boolean]] =
   {
-    val errors = validateCsvFiles(scheme)
-    ParserUtil.isFileValid(errors, "performCSVUpload")
+    try {
+      val errors = validateCsvFiles(scheme)
+      ParserUtil.isFileValid(errors, "performCSVUpload")
+    }
+    catch {
+      case e: ERSFileProcessingException => Future.successful(Failure(e))
+    }
   }
 
   def validateCsvFiles(scheme:String)(implicit request: Request[AnyContent], authContext : AuthContext, hc : HeaderCarrier): ListBuffer[SheetErrors] = {
@@ -87,8 +93,8 @@ trait CsvFileProcessor extends DataGenerator {
 
   def validateFile(file:File, sheetName:String, validator: RowValidator): List[ValidationError]= {
     val start = System.currentTimeMillis()
-    val chunkSize = current.configuration.getInt("validationChunkSize").getOrElse(10000)
-    val cpus = Runtime.getRuntime().availableProcessors()
+    val chunkSize = current.configuration.getInt("validationChunkSize").getOrElse(defaultChunkSize)
+    val cpus = Runtime.getRuntime.availableProcessors()
 
     Logger.info(s"Validating file ${file.getName} cpus: $cpus chunkSize: $chunkSize")
 

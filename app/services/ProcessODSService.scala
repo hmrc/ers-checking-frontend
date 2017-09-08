@@ -17,7 +17,6 @@
 package services
 
 import java.io.{File, InputStream}
-import java.util.ArrayList
 import java.util.zip.ZipFile
 
 import models.{ERSFileProcessingException, FileObject, SheetErrors}
@@ -33,7 +32,8 @@ import utils.{CacheUtil, ParserUtil, UploadedFileUtil}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
-
+import scala.concurrent.Future
+import scala.util.{Failure, Try}
 
 object ProcessODSService extends ProcessODSService {
   override val uploadedFileUtil: UploadedFileUtil = UploadedFileUtil
@@ -44,43 +44,67 @@ trait ProcessODSService {
   val uploadedFileUtil: UploadedFileUtil
   val cacheUtil:CacheUtil
 
-  def performODSUpload()(implicit request: Request[AnyContent],scheme:String, authContext : AuthContext, hc : HeaderCarrier):Boolean = {
+  def performODSUpload()(implicit request: Request[AnyContent],scheme:String, authContext : AuthContext, hc : HeaderCarrier): Future[Try[Boolean]] = {
     val spreadSheetFile = request.body.asMultipartFormData.get.file("fileUpload")
-    spreadSheetFile.map { file =>
-      val errorList: ListBuffer[SheetErrors] = checkFileType(file)(scheme, authContext,hc ,request)
-      val fileName: String = request.body.asMultipartFormData.get.file("fileUpload").get.filename
-      cacheUtil.cache[String](CacheUtil.FILE_NAME_CACHE, fileName).recover {
-        case e: Exception => {
-          Logger.error("ODSSaveFileName: Unable to save File Name. Error: " + e.getMessage)
-          throw e
+    spreadSheetFile.map(file =>
+      try {
+        val errorList: ListBuffer[SheetErrors] = checkFileType(file)(scheme, authContext, hc, request)
+        val fileName: String = request.body.asMultipartFormData.get.file("fileUpload").get.filename
+
+        val cache = cacheUtil.cache[String](CacheUtil.FILE_NAME_CACHE, fileName).recover {
+          case e: Exception =>
+            Logger.error("ODSSaveFileName: Unable to save File Name. Error: " + e.getMessage)
+            throw e
+        }
+
+        val valid = ParserUtil.isFileValid(errorList, "performODSUpload")
+
+        val result = for {
+          _ <- cache
+          v <- valid
+        } yield {
+          v
+        }
+
+        result recover {
+          case ex: Exception => Failure(ex)
         }
       }
-      ParserUtil.isFileValid(errorList, "performODSUpload")
-    }.getOrElse {
-      throw ERSFileProcessingException(Messages("ers_check_file.no_file_error"),Messages("ers_check_file.no_file_error"), needsExtendedInstructions = true)
+      catch {
+        case e: ERSFileProcessingException => Future.successful(Failure(e))
+      }
+    ).getOrElse {
+      Future.successful(Failure(ERSFileProcessingException(
+        Messages("ers_check_file.no_file_error"),
+        Messages("ers_check_file.no_file_error"),
+        needsExtendedInstructions = true)))
     }
   }
 
-  def createFileObject(uploadedFile: Seq[MultipartFormData.FilePart[Files.TemporaryFile]])(implicit request: Request[AnyContent]): (Boolean, ArrayList[FileObject]) = {
+  def createFileObject(uploadedFile: Seq[MultipartFormData.FilePart[Files.TemporaryFile]])
+                      (implicit request: Request[AnyContent]): (Boolean, java.util.ArrayList[FileObject]) = {
     val fileSet = uploadedFile.map(file => file.key)
     val fileSetLength = fileSet.length
-    val fileObjectList = new java.util.ArrayList [FileObject] (fileSetLength)
+    val fileObjectList = new java.util.ArrayList[FileObject](fileSetLength)
     var fileParam:String = ""
     var validFileExtn: Boolean = false
-    for(fileIndex <- 0 to fileSetLength-1){
+    for(fileIndex <- 0 until fileSetLength-1){
       fileParam = fileSet(fileIndex)
-      val file: File = request.body.asMultipartFormData.get.file(fileParam).get.ref.file;
+      val file: File = request.body.asMultipartFormData.get.file(fileParam).get.ref.file
       val fileName: String = request.body.asMultipartFormData.get.file(fileParam).get.filename
       //validFileExtn = uploadedFileUtil.checkCSVFileType(fileName)
-      fileObjectList.add(new FileObject(fileName,file))
+      fileObjectList.add(FileObject(fileName,file))
           }
     validFileExtn = true
     (validFileExtn, fileObjectList)
   }
 
-  def checkFileType(uploadedFile: MultipartFormData.FilePart[Files.TemporaryFile])(implicit scheme:String, authContext: AuthContext,hc: HeaderCarrier, request: Request[_]):ListBuffer[SheetErrors] = {
+  def checkFileType(uploadedFile: MultipartFormData.FilePart[Files.TemporaryFile])
+                   (implicit scheme:String, authContext: AuthContext,hc: HeaderCarrier, request: Request[_]):ListBuffer[SheetErrors] = {
     if (!uploadedFileUtil.checkODSFileType(uploadedFile.filename)) {
-      throw ERSFileProcessingException(Messages("ers_check_file.file_type_error", uploadedFile.filename), Messages("ers_check_file.file_type_error", uploadedFile.filename))
+      throw ERSFileProcessingException(
+        Messages("ers_check_file.file_type_error", uploadedFile.filename),
+        Messages("ers_check_file.file_type_error", uploadedFile.filename))
     }
     val res = parseOdsContent(uploadedFile.ref.file.getAbsolutePath, uploadedFile.filename)(scheme, authContext, hc, request)
     UploadedFileUtil.deleteFile(uploadedFile.ref.file)
