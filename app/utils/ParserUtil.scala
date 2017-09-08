@@ -18,12 +18,14 @@ package utils
 
 import models.SheetErrors
 import play.api.mvc.{AnyContent, Request}
-import play.api.{Play, Logger}
+import play.api.{Logger, Play}
 import services.ERSTemplatesInfo
 import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.collection.mutable.ListBuffer
 import play.api.Play.current
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
 object ParserUtil extends ParserUtil {
   override val cacheUtil: CacheUtil = CacheUtil
@@ -35,7 +37,7 @@ trait ParserUtil {
   def formatDataToValidate(rowData: Seq[String], sheetName: String): Seq[String] = {
     val sheetColSize = ERSTemplatesInfo.ersSheets(sheetName.replace(".csv", "")).headerRow.size
     if(rowData.size < sheetColSize) {
-      Logger.warn(s"Difference between amount of columns ${rowData.size} and amount of headers ${sheetColSize}")
+      Logger.warn(s"Difference between amount of columns ${rowData.size} and amount of headers $sheetColSize")
       val additionalEmptyCells: Seq[String] = Seq.fill(sheetColSize - rowData.size)("")
       (rowData ++ additionalEmptyCells).take(sheetColSize)
     }
@@ -44,28 +46,37 @@ trait ParserUtil {
     }
   }
 
-  def isFileValid(errorList: ListBuffer[SheetErrors], source: String)(implicit request: Request[AnyContent], hc: HeaderCarrier): Boolean = {
-    val isFileValid: Boolean = isValid(errorList)
-    if (!isFileValid) {
-      cacheUtil.cache[Long](CacheUtil.SCHEME_ERROR_COUNT_CACHE, getTotalErrorCount(errorList)).recover {
-        case e: Exception => {
-          Logger.error(source + ": Unable to save total scheme error count. Error: " + e.getMessage)
-          throw e
-        }
+  def isFileValid(errorList: ListBuffer[SheetErrors], source: String)(implicit request: Request[AnyContent], hc: HeaderCarrier): Future[Try[Boolean]] = {
+    if (isValid(errorList)) {
+      Future.successful(Success(true))
+    }
+    else {
+      val cache1 = cacheUtil.cache[Long](CacheUtil.SCHEME_ERROR_COUNT_CACHE, getTotalErrorCount(errorList)) recover {
+        case ex: Exception =>
+          Logger.error("Unable to save total scheme error count.", ex)
+          throw ex
       }
-      cacheUtil.cache[ListBuffer[SheetErrors]](CacheUtil.ERROR_LIST_CACHE, getSheetErrors(errorList)).recover {
-        case e: Exception => {
-          Logger.error(source + ": Unable to save error list. Error: " + e.getMessage)
-          throw e
-        }
+
+      val cache2 = cacheUtil.cache[ListBuffer[SheetErrors]](CacheUtil.ERROR_LIST_CACHE, getSheetErrors(errorList)) recover {
+        case ex: Exception =>
+          Logger.error("Unable to save error list.", ex)
+          throw ex
+      }
+
+      val result = for {
+        _ <- cache1
+        _ <- cache2
+      } yield Success(false)
+
+      result recover {
+        case ex: Exception => Failure(ex)
       }
     }
-    isFileValid
   }
 
   def isValid(schemeErrors:ListBuffer[SheetErrors]):Boolean = {
     for(sheet <- schemeErrors) {
-      for(errors <- sheet.errors){
+      for(_ <- sheet.errors){
         return false
       }
     }
@@ -75,7 +86,7 @@ trait ParserUtil {
   def getTotalErrorCount(schemeErrors: ListBuffer[SheetErrors]): Long = {
     var totalErrors = 0
     if(totalErrors != schemeErrors.size)
-      for(i <- 0 to schemeErrors.size-1) totalErrors += schemeErrors(i).errors.length
+      for(i <- schemeErrors.indices) totalErrors += schemeErrors(i).errors.length
     totalErrors
   }
 

@@ -17,14 +17,14 @@
 package controllers
 
 import services.{CsvFileProcessor, ProcessODSService}
-
 import models.ERSFileProcessingException
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.CacheUtil
-import play.api.mvc.{AnyContent, Request,Result}
+import play.api.mvc.{Action, AnyContent, Request, Result}
 
 import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 object UploadController extends UploadController {
 	override val processODSService: ProcessODSService = ProcessODSService
@@ -38,51 +38,46 @@ trait UploadController extends ERSCheckingBaseController {
 	val cacheUtil: CacheUtil
 	val csvFileProcessor: CsvFileProcessor
 
-	def uploadCSVFile(scheme: String) = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
+	def uploadCSVFile(scheme: String): Action[AnyContent] = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
 		implicit authContext =>
 			implicit request =>
 				showuploadCSVFile(scheme)
 	}
 
 	def showuploadCSVFile(scheme: String)(implicit authContext: AuthContext, request: Request[AnyContent], hc: HeaderCarrier): Future[Result] = {
-				try {
-					val result = csvFileProcessor.processCsvUpload(scheme)(request,authContext, hc)
-					result match {
-						case true => Future(Redirect(routes.CheckingServiceController.checkingSuccessPage))
-						case false => Future(Redirect(routes.HtmlReportController.htmlErrorReportPage))
-					}
-				} catch {
-					case e:  ERSFileProcessingException => cacheUtil.cache[String](CacheUtil.FORMAT_ERROR_CACHE, e.message).flatMap { res =>
-						cacheUtil.cache[Boolean](CacheUtil.FORMAT_ERROR_EXTENDED_CACHE, e.needsExtendedInstructions).map { r =>
-							Redirect(routes.CheckingServiceController.formatErrorsPage())
-						}
-					}
-				}
+		val result = csvFileProcessor.processCsvUpload(scheme)(request,authContext, hc)
+		result.flatMap[Result] {
+			case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
+			case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage()))
+			case Failure(t) => handleException(t)
+		}
 	}
 
-	def uploadODSFile(scheme: String) = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
+	def uploadODSFile(scheme: String): Action[AnyContent] = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
 		implicit authContext =>
 			implicit request =>
 				showuploadODSFile(scheme)
 	}
 
 	def showuploadODSFile(scheme: String)(implicit authContext: AuthContext, request: Request[AnyContent], hc: HeaderCarrier): Future[Result] = {
-		try {
-			val result = processODSService.performODSUpload()(request, scheme, authContext, hc)
-			result match {
-				case true => Future(Redirect(routes.CheckingServiceController.checkingSuccessPage))
-				case false => Future(Redirect(routes.HtmlReportController.htmlErrorReportPage))
-			}
-		} catch {
-			case e: ERSFileProcessingException =>
-				cacheUtil.cache[String](CacheUtil.FORMAT_ERROR_CACHE, e.message).flatMap { res =>
-					cacheUtil.cache[Boolean](CacheUtil.FORMAT_ERROR_EXTENDED_CACHE, e.needsExtendedInstructions).map { r =>
-						Redirect(routes.CheckingServiceController.formatErrorsPage())
-					}
-				}
+		val result = processODSService.performODSUpload()(request, scheme, authContext, hc)
+		result.flatMap[Result] {
+			case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
+			case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage()))
+			case Failure(t) => handleException(t)
 		}
 	}
 
-
+	def handleException(t: Throwable)(implicit request: Request[AnyContent], hc: HeaderCarrier): Future[Result] = {
+		t match {
+			case e: ERSFileProcessingException =>
+				cacheUtil.cache[String](CacheUtil.FORMAT_ERROR_CACHE, e.message).flatMap { _ =>
+					cacheUtil.cache[Boolean](CacheUtil.FORMAT_ERROR_EXTENDED_CACHE, e.needsExtendedInstructions).map { _ =>
+						Redirect(routes.CheckingServiceController.formatErrorsPage())
+					}
+				}
+			case _ => throw t
+		}
+	}
 
 }
