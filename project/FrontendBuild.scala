@@ -15,11 +15,10 @@ private object AppDependencies {
   private val playUiVersion = "7.5.0"
   private val playAuthFrontendVersion = "6.4.0"
   private val playConfigVersion = "4.3.0"
-  //private val metricsPlayVersion = "0.2.1"
-  private val metricsGraphiteVersion = "3.0.2"
   private val httpCachingVersion = "6.2.0"
   private val playPartialVersion = "5.4.0"
   private val logbackJsonLoggerVersion = "3.1.0"
+  private val playGraphiteVersion = "3.3.0"
 
   val compile = Seq(
     ws,
@@ -31,13 +30,12 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "govuk-template" % govukTemplateVersion,
     "uk.gov.hmrc" %% "play-authorised-frontend" % playAuthFrontendVersion,
     "uk.gov.hmrc" %% "http-caching-client" % httpCachingVersion,
-    //"com.kenshoo" %% "metrics-play" % metricsPlayVersion,
-    "com.codahale.metrics" % "metrics-graphite" % metricsGraphiteVersion,
     "uk.gov.hmrc" %% "logback-json-logger" % logbackJsonLoggerVersion,
     "uk.gov.hmrc" %% "play-breadcrumb" % "1.0.0",
     "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.21",
     "commons-io" % "commons-io" % "2.5",
-    "uk.gov.hmrc" %% "tabular-data-validator" % "1.0.0"
+    "uk.gov.hmrc" %% "tabular-data-validator" % "1.0.0",
+    "uk.gov.hmrc" %% "play-graphite" % playGraphiteVersion
   )
 
   trait TestDependencies {
