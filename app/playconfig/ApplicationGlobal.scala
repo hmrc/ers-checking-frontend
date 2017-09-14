@@ -17,7 +17,7 @@
 package playconfig
 
 import com.typesafe.config.Config
-import metrics.ERSMetricsService
+import metrics.ERSMetrics
 import net.ceedubs.ficus.Ficus._
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
@@ -39,7 +39,7 @@ object ApplicationGlobal extends DefaultFrontendGlobal with RunMode with ShowErr
   override def onStart(app: Application) {
     super.onStart(app)
     ApplicationCrypto.verifyConfiguration()
-    ERSMetricsService.touch()
+    ERSMetrics.touch()
   }
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): Html =
