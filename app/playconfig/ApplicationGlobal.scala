@@ -17,6 +17,7 @@
 package playconfig
 
 import com.typesafe.config.Config
+import metrics.ERSMetricsService
 import net.ceedubs.ficus.Ficus._
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
@@ -35,16 +36,16 @@ object ApplicationGlobal extends DefaultFrontendGlobal with RunMode with ShowErr
   override val loggingFilter = ERSLoggingFilter
   override val frontendAuditFilter = ERSFrontendAuditFilter
 
-
   override def onStart(app: Application) {
     super.onStart(app)
     ApplicationCrypto.verifyConfiguration()
+    ERSMetricsService.touch()
   }
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): Html =
     views.html.global_error(pageTitle, heading, message)(applicationMessages)
 
-  override def microserviceMetricsConfig(implicit app: Application): Option[Configuration] = app.configuration.getConfig(s"Dev.microservice.metrics")
+  override def microserviceMetricsConfig(implicit app: Application): Option[Configuration] = app.configuration.getConfig("microservice.metrics")
 
 }
 
