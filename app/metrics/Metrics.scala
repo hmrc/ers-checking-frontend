@@ -20,14 +20,14 @@ import java.util.concurrent.TimeUnit
 import com.codahale.metrics.MetricRegistry
 import uk.gov.hmrc.play.graphite.MicroserviceMetrics
 
-trait ERSMetricsTrait {
+trait ERSMetrics {
   def fileProcessingTimer(diff: Long, unit: TimeUnit): Unit
   def besTimer(diff: Long, unit: TimeUnit): Unit
   def sendToSubmissionsTimer(diff: Long, unit: TimeUnit): Unit
   def dataIteratorTimer(diff: Long, unit: TimeUnit): Unit
 }
 
-object ERSMetrics extends ERSMetricsTrait with MicroserviceMetrics{
+object ERSMetrics extends ERSMetrics with MicroserviceMetrics{
   val registry: MetricRegistry = metrics.defaultRegistry
 
   override def fileProcessingTimer(diff: Long, unit: TimeUnit) = registry.timer("file-processing-time").update(diff, unit)
@@ -37,5 +37,5 @@ object ERSMetrics extends ERSMetricsTrait with MicroserviceMetrics{
 }
 
 trait Metrics {
-  val metrics:ERSMetricsTrait = ERSMetrics
+  val metrics:ERSMetrics = ERSMetrics
 }
