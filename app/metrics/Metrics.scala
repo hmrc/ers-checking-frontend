@@ -20,22 +20,19 @@ import java.util.concurrent.TimeUnit
 import com.codahale.metrics.MetricRegistry
 import uk.gov.hmrc.play.graphite.MicroserviceMetrics
 
-trait ERSMetrics {
-  def fileProcessingTimer(diff: Long, unit: TimeUnit): Unit
-  def besTimer(diff: Long, unit: TimeUnit): Unit
-  def sendToSubmissionsTimer(diff: Long, unit: TimeUnit): Unit
-  def dataIteratorTimer(diff: Long, unit: TimeUnit): Unit
-}
-
-object ERSMetrics extends ERSMetrics with MicroserviceMetrics{
+trait ERSMetrics extends MicroserviceMetrics{
   val registry: MetricRegistry = metrics.defaultRegistry
 
-  override def fileProcessingTimer(diff: Long, unit: TimeUnit) = registry.timer("file-processing-time").update(diff, unit)
-  override def besTimer(diff: Long, unit: TimeUnit) = registry.timer("bes-processing-time").update(diff, unit)
-  override def sendToSubmissionsTimer(diff: Long, unit: TimeUnit) = registry.timer("send-to-submissions-time").update(diff, unit)
-  override def dataIteratorTimer(diff: Long, unit: TimeUnit) = registry.timer("data-iterator-time").update(diff, unit)
+  def fileProcessingTimer(diff: Long, unit: TimeUnit) = registry.timer("file-processing-time").update(diff, unit)
+  def besTimer(diff: Long, unit: TimeUnit) = registry.timer("bes-processing-time").update(diff, unit)
+  def sendToSubmissionsTimer(diff: Long, unit: TimeUnit) = registry.timer("send-to-submissions-time").update(diff, unit)
+  def dataIteratorTimer(diff: Long, unit: TimeUnit) = registry.timer("data-iterator-time").update(diff, unit)
+}
+
+object ERSMetricsService extends ERSMetrics {
+  def touch(): Unit = {Unit}
 }
 
 trait Metrics {
-  val metrics:ERSMetrics = ERSMetrics
+  val metrics:ERSMetrics = ERSMetricsService
 }
