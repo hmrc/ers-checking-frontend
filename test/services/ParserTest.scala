@@ -47,13 +47,13 @@ class ParserTest extends PlaySpec with OneAppPerSuite with ScalaFutures with Moc
 
   "parse row with duplicate column data 1" in {
     val result = TestDataParser.parse(emiAdjustmentsXMLRow1.toString,"")
-    result.right.get.size must equal(17)
+    result.right.get._1.size must equal(17)
   }
 
   besParserTests.foreach( rec => {
     rec._1 in {
       val result = TestDataParser.parse(rec._2.toString,"")
-      result.right.get.toList.take(rec._3.size) must be (rec._3)
+      result.right.get._1.toList.take(rec._3.size) must be (rec._3)
     }
   })
 

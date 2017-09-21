@@ -175,6 +175,13 @@ class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFuture
       result(1).errors.size mustBe 1
     }
 
+    "expand repeated rows and report correct error row" in {
+      object dataGenObj extends DataGenerator
+      val result = dataGenObj.getErrors(XMLTestData.getInvalidEMIWithRepeats,"2","")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"))
+      result(0).errors.size mustBe 1
+      result(0).errors(0).cell.row mustBe 13
+    }
+
   }
 
 }

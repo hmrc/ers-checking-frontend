@@ -28,17 +28,20 @@ import services.audit.AuditEvents
 import services.validation.ErsValidator
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.services.validation.{ValidationError,DataValidator}
-import utils.{ParserUtil, ContentUtil}
+import uk.gov.hmrc.services.validation.DataValidator
+import utils.{ContentUtil, ParserUtil}
 import play.api.i18n.Messages.Implicits._
 import play.api.Play.current
+
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
 import scala.xml._
 
 trait DataParser {
 
-  val repeatAttr = "table:number-columns-repeated"
+  val repeatColumnsAttr = "table:number-columns-repeated"
+  val repeatTableAttr = "table:number-rows-repeated"
+
   def validateSpecialCharacters(xmlRowData : String )={
     if(xmlRowData.contains("&")){
       Logger.debug("Found invalid xml in Data Parser, throwing exception")
@@ -46,7 +49,7 @@ trait DataParser {
     }
   }
 
-  def parse(row:String, fileName : String) = {
+  def parse(row:String, fileName : String): Either[String, (Seq[String], Int)] = {
     Logger.debug("DataParser: Parse: About to parse row: " + row)
 
     val xmlRow = Try(Option(XML.loadString(row))).getOrElse(None)
@@ -59,9 +62,14 @@ trait DataParser {
         Left(row)
       }
       case elem:Option[Elem] => Logger.debug("3.2 Parse row right ")
-        Try( Right(xmlRow.get.child.flatMap( parseColumn(_)))).getOrElse{
+        val cols = Try( Right(xmlRow.get.child.flatMap( parseColumn(_)))).getOrElse{
           Logger.warn(Messages("ers.exceptions.dataParser.fileRetrievalFailed", fileName))
           throw ERSFileProcessingException (Messages("ers.exceptions.dataParser.fileRetrievalFailed", fileName), Messages("ers.exceptions.dataParser.parserFailure", fileName))
+        }
+
+        cols match {
+          case Right(r: Seq[String]) if !isBlankRow(r) => Right(r, repeated(xmlRow))
+          case Right(s: Seq[String]) => Right((s, 1))
         }
       case _  => {
         Logger.warn(Messages("ers.exceptions.dataParser.fileParsingError", fileName))
@@ -70,8 +78,18 @@ trait DataParser {
     }
   }
 
-  def parseColumn(col:scala.xml.Node) = {
-    val colsRepeated =  col.attributes.asAttrMap.get(repeatAttr)
+  def repeated(xmlRow: Option[Elem]): Int = {
+    val rowsRepeated = xmlRow.get.attributes.asAttrMap.get(repeatTableAttr)
+    if (rowsRepeated.isDefined) {
+      rowsRepeated.get.toInt
+    }
+    else {
+      1
+    }
+  }
+
+  def parseColumn(col:scala.xml.Node): Seq[String] = {
+    val colsRepeated =  col.attributes.asAttrMap.get(repeatColumnsAttr)
 
     if(colsRepeated.nonEmpty && colsRepeated.get.toInt < 50) {
       val cols:scala.collection.mutable.MutableList[String]= scala.collection.mutable.MutableList()
@@ -80,6 +98,8 @@ trait DataParser {
     }
     else  Seq(col.text)
   }
+
+  def isBlankRow(data :Seq[String]) = data.mkString("").trim.length == 0
 
 }
 
@@ -108,7 +128,6 @@ trait DataGenerator extends DataParser with Metrics{
     }
 
     while(iterator.hasNext){
-
       val row = iterator.next()
       //Logger.debug(" Data before  parsing ---> " + row)
       val rowData = parse(row, fileName)
@@ -124,37 +143,41 @@ trait DataGenerator extends DataParser with Metrics{
           rowNum = 1
           validator = setValidator(sheetName)
         }
-        case _ => rowNum match {
-          case count if count < 9 => {
-            Logger.debug("GetData: incRowNum if count < 9: " + count + " RowNum: " + rowNum )
-            incRowNum()
-          }
-          case 9 => {
-            Logger.debug("GetData: incRowNum if  9: " + rowNum + "sheetColSize: " + sheetColSize )
-            Logger.debug("sheetName--->" + sheetName)
-            sheetColSize = validateHeaderRow(rowData.right.get, sheetName, scheme, fileName)
-            incRowNum()
-          }
-          case _ => {
-            val foundData = rowData.right.get
-            rowCount = rowData.right.get.size
+        case _ =>
+          for (i <- 1 to rowData.right.get._2) {
+            rowNum match {
+              case count if count < 9 => {
+                Logger.debug("GetData: incRowNum if count < 9: " + count + " RowNum: " + rowNum)
+                incRowNum()
+              }
+              case 9 => {
+                Logger.debug("GetData: incRowNum if  9: " + rowNum + "sheetColSize: " + sheetColSize)
+                Logger.debug("sheetName--->" + sheetName)
+                sheetColSize = validateHeaderRow(rowData.right.get._1, sheetName, scheme, fileName)
+                incRowNum()
+              }
+              case _ => {
+                val foundData = rowData.right.get._1
+                rowCount = rowData.right.get._1.size
 
-            val data = ParserUtil.formatDataToValidate(foundData, sheetName)
-            if(!isBlankRow(data)){
-              rowsWithData+=1
-              ErsValidator.validateRow(validator)(data,rowNum) match {
-                case Some(errors) if errors.nonEmpty => {
-                  Logger.debug("Error while Validating File + Formatting errors present " + errors.toString)
-                  schemeErrors.last.errors ++= errors
+                val data = ParserUtil.formatDataToValidate(foundData, sheetName)
+                if (!isBlankRow(data)) {
+                  rowsWithData += 1
+                  ErsValidator.validateRow(validator)(data, rowNum) match {
+                    case Some(errors) if errors.nonEmpty => {
+                      Logger.debug("Error while Validating File + Formatting errors present " + errors.toString)
+                      schemeErrors.last.errors ++= errors
+                    }
+                    case _ => schemeErrors.last.errors
+                  }
                 }
-                case _ => schemeErrors.last.errors
+                incRowNum()
               }
             }
-            incRowNum()
           }
-        }
       }
     }
+
     checkForMissingHeaders(rowNum, sheetName)
     if(rowsWithData == 0) {
       throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.noData"),Messages("ers.exceptions.dataParser.noData"), needsExtendedInstructions = true)
@@ -223,8 +246,6 @@ trait DataGenerator extends DataParser with Metrics{
       }
     }
   }
-
-  def isBlankRow(data :Seq[String]) = data.mkString("").trim.length == 0
 
   def deliverDataIteratorMetrics(startTime:Long) =
     metrics.dataIteratorTimer(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
