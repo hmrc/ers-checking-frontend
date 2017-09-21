@@ -127,9 +127,6 @@ trait DataGenerator extends DataParser with Metrics{
       }
     }
 
-    var rowNums: ListBuffer[Int] = new ListBuffer()
-    var rows: ListBuffer[String] = new ListBuffer()
-
     while(iterator.hasNext){
       val row = iterator.next()
       //Logger.debug(" Data before  parsing ---> " + row)
@@ -145,29 +142,18 @@ trait DataGenerator extends DataParser with Metrics{
           Logger.debug("SchemeData = " + schemeErrors.size + "******")
           rowNum = 1
           validator = setValidator(sheetName)
-
-          rowNums += rowNum
-          rows += rowData.left.get
         }
         case _ =>
           for (i <- 1 to rowData.right.get._2) {
             rowNum match {
               case count if count < 9 => {
                 Logger.debug("GetData: incRowNum if count < 9: " + count + " RowNum: " + rowNum)
-
-                rowNums += rowNum
-                rows += rowData.right.get._1.mkString(", ")
-
                 incRowNum()
               }
               case 9 => {
                 Logger.debug("GetData: incRowNum if  9: " + rowNum + "sheetColSize: " + sheetColSize)
                 Logger.debug("sheetName--->" + sheetName)
                 sheetColSize = validateHeaderRow(rowData.right.get._1, sheetName, scheme, fileName)
-
-                rowNums += rowNum
-                rows += rowData.right.get._1.mkString(", ")
-
                 incRowNum()
               }
               case _ => {
@@ -185,20 +171,12 @@ trait DataGenerator extends DataParser with Metrics{
                     case _ => schemeErrors.last.errors
                   }
                 }
-
-                rowNums += rowNum
-                rows += rowData.right.get._1.mkString(", ")
-
                 incRowNum()
               }
             }
           }
       }
     }
-
-    rowNums.zip(rows).foreach(
-      row => println("%04d".format(row._1) + " " + row._2)
-    )
 
     checkForMissingHeaders(rowNum, sheetName)
     if(rowsWithData == 0) {
