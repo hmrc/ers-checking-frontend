@@ -18,6 +18,7 @@ package services
 
 import java.io.{File, PrintWriter}
 import java.nio.file.Files
+import java.util.concurrent.atomic.AtomicInteger
 
 import com.typesafe.config.ConfigFactory
 import controllers.Fixtures
@@ -217,9 +218,9 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with OneAppPerSuit
 
     "process all rows" in {
       val fixture = submitChunksFixture
-      var count: Int = 0
+      var count = new AtomicInteger(0)
       val dummyValidator: (Seq[String], Int) => Option[List[ValidationError]] = (_, _) => {
-        count += 1
+        count.incrementAndGet()
         Some(Nil)
       }
 
@@ -228,7 +229,7 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with OneAppPerSuit
       failAfter(awaitTimeout) {
         Await.ready(actual, Duration.Inf)
       }
-      count shouldEqual 5
+      count.get() shouldEqual 5
     }
   }
 
