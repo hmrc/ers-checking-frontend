@@ -19,12 +19,12 @@ package controllers
 import services.{CsvFileProcessor, ProcessODSService}
 import models.ERSFileProcessingException
 import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.CacheUtil
 import play.api.mvc.{Action, AnyContent, Request, Result}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
+import uk.gov.hmrc.http.HeaderCarrier
 
 object UploadController extends UploadController {
 	override val processODSService: ProcessODSService = ProcessODSService

@@ -32,7 +32,6 @@ import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.{CacheMap, ShortLivedCache}
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 import utils.{CacheUtil, PageBuilder}
@@ -40,6 +39,7 @@ import utils.{CacheUtil, PageBuilder}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.http.HeaderCarrier
 
 class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with MockitoSugar {
 

@@ -27,11 +27,11 @@ import play.api.libs.Files.TemporaryFile
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc.{MultipartFormData, Request}
 import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.{CacheUtil, UploadedFileUtil}
 
 import scala.collection.mutable.ListBuffer
+import uk.gov.hmrc.http.HeaderCarrier
 
 class ProcessODSServiceSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 

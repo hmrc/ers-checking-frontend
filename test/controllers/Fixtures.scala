@@ -25,11 +25,11 @@ import play.test.WithApplication
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L0
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.{Accounts, Authority, CredentialStrength}
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration._
+import uk.gov.hmrc.http.HeaderCarrier
 
 object Fixtures {
 
