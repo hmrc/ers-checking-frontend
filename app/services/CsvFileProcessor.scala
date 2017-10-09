@@ -27,7 +27,6 @@ import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{AnyContent, Request}
 import services.validation.ErsValidator
 import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.services.validation.{DataValidator, ValidationError}
 import utils.{CacheUtil, ParserUtil, UploadedFileUtil}
 
@@ -36,6 +35,7 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success, Try}
+import uk.gov.hmrc.http.HeaderCarrier
 
 object CsvFileProcessor extends CsvFileProcessor {
   override val cacheUtil: CacheUtil = CacheUtil

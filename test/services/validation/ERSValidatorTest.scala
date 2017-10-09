@@ -23,8 +23,8 @@ import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.validation.EMITestData.ERSValidationEMIAdjustmentsTestData
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.services.validation.DataValidator
+import uk.gov.hmrc.http.HeaderCarrier
 
 
 class ERSValidatorTest extends PlaySpec with OneServerPerSuite with ScalaFutures with MockitoSugar with ERSValidationEMIAdjustmentsTestData {

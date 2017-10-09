@@ -32,7 +32,6 @@ import play.api.libs.Files.TemporaryFile
 import play.api.mvc.MultipartFormData
 import play.api.mvc.MultipartFormData.FilePart
 import services.validation.ErsValidator
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.{Cell, DataValidator, ValidationError}
 import play.api.i18n.Messages.Implicits._
@@ -42,6 +41,7 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.util.{Failure, Success}
+import uk.gov.hmrc.http.HeaderCarrier
 
 class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with OneAppPerSuite with Timeouts {
 

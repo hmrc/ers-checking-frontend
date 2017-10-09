@@ -16,8 +16,9 @@
 
 package services
 
-import uk.gov.hmrc.play.config.{RunMode, AppName}
+import config.WSHttp
+import uk.gov.hmrc.play.config.{AppName, RunMode}
 
-object AllWsHttp extends WSAllMethods with AppName with RunMode {
-  override val hooks = NoneRequired
+object AllWsHttp extends WSAllMethods with WSHttp with AppName with RunMode {
+  override val hooks = Seq.empty
 }
