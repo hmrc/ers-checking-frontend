@@ -20,12 +20,12 @@ import models.SheetErrors
 import play.api.mvc.{AnyContent, Request}
 import play.api.{Logger, Play}
 import services.ERSTemplatesInfo
-import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.collection.mutable.ListBuffer
 import play.api.Play.current
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
+import uk.gov.hmrc.http.HeaderCarrier
 
 object ParserUtil extends ParserUtil {
   override val cacheUtil: CacheUtil = CacheUtil

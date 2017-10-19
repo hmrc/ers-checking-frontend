@@ -24,12 +24,12 @@ import org.scalatestplus.play.OneAppPerSuite
 import play.api.http.Status
 import play.api.test.FakeRequest
 import services.{CsvFileProcessor, ProcessODSService}
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CacheUtil
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
+import uk.gov.hmrc.http.HeaderCarrier
 
 class UploadControllerTest extends UnitSpec with OneAppPerSuite with MockitoSugar {
 	implicit val hc = new HeaderCarrier

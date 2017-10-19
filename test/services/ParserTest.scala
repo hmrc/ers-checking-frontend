@@ -27,7 +27,7 @@ import play.api.i18n.Messages
 import play.api.i18n.Messages.Implicits._
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.XMLTestData._
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 class ParserTest extends PlaySpec with OneAppPerSuite with ScalaFutures with MockitoSugar with BeforeAndAfter{
 

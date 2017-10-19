@@ -25,10 +25,10 @@ import org.scalatestplus.play.OneAppPerSuite
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CacheUtil
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 
 class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with MockitoSugar {

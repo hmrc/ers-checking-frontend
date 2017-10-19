@@ -19,11 +19,11 @@ package services.audit
 import playconfig.ERSAuditConnector
 import org.joda.time.DateTime
 import play.api.mvc.{Request, Session}
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.model.DataEvent
 
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 trait AuditServiceConnector {
   def auditData(dataEvent : DataEvent)(implicit hc : HeaderCarrier) : Unit

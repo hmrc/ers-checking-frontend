@@ -9,33 +9,20 @@ private object AppDependencies {
   import play.core.PlayVersion
   import play.sbt.PlayImport._
 
-  private val playHealthVersion = "2.1.0"
-  private val frontendBootstrapVersion = "7.26.0"
-  private val govukTemplateVersion =  "5.3.0"
-  private val playUiVersion = "7.5.0"
-  private val playAuthFrontendVersion = "6.4.0"
-  private val playConfigVersion = "4.3.0"
-  private val httpCachingVersion = "6.2.0"
-  private val playPartialVersion = "5.4.0"
-  private val logbackJsonLoggerVersion = "3.1.0"
-  private val playGraphiteVersion = "3.3.0"
+
+  private val frontendBootstrapVersion = "8.8.0"
+  private val httpCachingVersion = "7.0.0"
+  private val playPartialVersion = "6.1.0"
 
   val compile = Seq(
     ws,
     "uk.gov.hmrc" %% "play-partials" % playPartialVersion,
     "uk.gov.hmrc" %% "frontend-bootstrap" % frontendBootstrapVersion,
-    "uk.gov.hmrc" %% "play-health" % playHealthVersion,
-    "uk.gov.hmrc" %% "play-ui" % playUiVersion,
-    "uk.gov.hmrc" %% "play-config" % playConfigVersion,
-    "uk.gov.hmrc" %% "govuk-template" % govukTemplateVersion,
-    "uk.gov.hmrc" %% "play-authorised-frontend" % playAuthFrontendVersion,
     "uk.gov.hmrc" %% "http-caching-client" % httpCachingVersion,
-    "uk.gov.hmrc" %% "logback-json-logger" % logbackJsonLoggerVersion,
     "uk.gov.hmrc" %% "play-breadcrumb" % "1.0.0",
     "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.21",
     "commons-io" % "commons-io" % "2.5",
-    "uk.gov.hmrc" %% "tabular-data-validator" % "1.0.0",
-    "uk.gov.hmrc" %% "play-graphite" % playGraphiteVersion
+    "uk.gov.hmrc" %% "tabular-data-validator" % "1.0.0"
   )
 
   trait TestDependencies {
