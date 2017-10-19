@@ -20,7 +20,6 @@ import play.Logger
 import play.api.i18n.Messages
 import play.api.mvc._
 import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.{CacheUtil, ContentUtil, HtmlCreator, JsonParser}
 import models.SheetErrors
 import uk.gov.hmrc.services.validation.ValidationError
@@ -28,6 +27,7 @@ import play.api.i18n.Messages.Implicits._
 import play.api.Play.current
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 object HtmlReportController extends HtmlReportController {
   override val cacheUtil: CacheUtil = CacheUtil

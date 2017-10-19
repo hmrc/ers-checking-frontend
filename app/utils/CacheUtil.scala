@@ -22,9 +22,9 @@ import play.api.libs.json.JsValue
 import play.api.mvc.Request
 import uk.gov.hmrc.http.cache.client.ShortLivedCache
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext}
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 object CacheUtil extends CacheUtil {
   def shortLivedCache = playconfig.ShortLivedCache

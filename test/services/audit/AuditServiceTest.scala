@@ -19,7 +19,7 @@ package services.audit
 import org.scalatest.{Matchers, WordSpec}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 class AuditServiceTest   extends WordSpec with Matchers {
   "auditer should send message" in {

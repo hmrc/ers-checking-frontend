@@ -24,10 +24,10 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
 import play.api.i18n.Messages
 import services.headers.HeaderData
-import uk.gov.hmrc.play.http.HeaderCarrier
 import play.api.i18n.Messages.Implicits._
 
 import scala.util.Try
+import uk.gov.hmrc.http.HeaderCarrier
 
 class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFutures with MockitoSugar with BeforeAndAfter with HeaderData{
 

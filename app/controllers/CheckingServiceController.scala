@@ -23,10 +23,10 @@ import play.api.i18n.Messages
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc._
 import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.http.HeaderCarrier
 import utils._
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 object CheckingServiceController extends CheckingServiceController {
   override val cacheUtil: CacheUtil = CacheUtil
