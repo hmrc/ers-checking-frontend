@@ -18,6 +18,7 @@ package services
 
 import java.util.concurrent.TimeUnit
 
+import javax.xml.parsers.SAXParserFactory
 import metrics.Metrics
 import models._
 import play.api.Logger
@@ -49,10 +50,19 @@ trait DataParser {
     }
   }
 
+
+  def secureSAXParser = {
+    val saxParserFactory = SAXParserFactory.newInstance()
+    saxParserFactory.setFeature("http://xml.org/sax/features/external-general-entities", false)
+    saxParserFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)
+    saxParserFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
+    saxParserFactory.newSAXParser()
+  }
+
   def parse(row:String, fileName : String): Either[String, (Seq[String], Int)] = {
     Logger.debug("DataParser: Parse: About to parse row: " + row)
 
-    val xmlRow = Try(Option(XML.loadString(row))).getOrElse(None)
+    val xmlRow = Try(Option(XML.withSAXParser(secureSAXParser)loadString(row))).getOrElse(None)
     //    Logger.debug("DataParser: Parse: About to match xmlRow: " + xmlRow)
 
     xmlRow match {
