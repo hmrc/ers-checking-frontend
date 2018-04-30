@@ -24,6 +24,8 @@ import javax.xml.stream.{XMLEventReader, XMLInputFactory}
 class StaxProcessor(inputStream: InputStream)  extends Iterator[String] {
 
   val xif : XMLInputFactory = XMLInputFactory.newInstance();
+  xif.setProperty(XMLInputFactory.SUPPORT_DTD, false)
+  xif.setProperty("javax.xml.stream.isSupportingExternalEntities", false)
   xif.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, false)
   xif.setProperty(XMLInputFactory.IS_VALIDATING, false)
 
