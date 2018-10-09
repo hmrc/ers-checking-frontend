@@ -37,8 +37,8 @@ object ERSAuthConnector extends AuthConnector with ServicesConfig {
   lazy val http = AllWsHttp
 }
 
-object ERSAuditConnector extends Auditing with {
-  override lazy val auditingConfig = LoadAuditingConfig("$auditing")
+object ERSAuditConnector extends Auditing {
+  override lazy val auditingConfig = LoadAuditingConfig("auditing")
 }
 
 object ShortLivedHttpCaching extends ShortLivedHttpCaching with AppName with ServicesConfig {
