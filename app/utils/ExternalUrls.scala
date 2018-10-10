@@ -18,15 +18,14 @@ package utils
 
 import controllers.routes
 import play.api.Play
-import uk.gov.hmrc.play.config.RunMode
 import play.api.Play.current
 
-object ExternalUrls extends RunMode {
+object ExternalUrls extends {
   
-  val companyAuthHost = s"${Play.configuration.getString(s"govuk-tax.$env.auth.company-auth.host").getOrElse("")}"
-  val loginCallback = Play.configuration.getString(s"govuk-tax.$env.auth.login-callback.url").getOrElse(routes.CheckingServiceController.startPage().url)
-  val loginPath = s"${Play.configuration.getString(s"govuk-tax.$env.auth.login_path").getOrElse("sign-in")}"
+  val companyAuthHost = s"${Play.configuration.getString("govuk-tax.auth.company-auth.host").getOrElse("")}"
+  val loginCallback = Play.configuration.getString("govuk-tax.auth.login-callback.url").getOrElse(routes.CheckingServiceController.startPage().url)
+  val loginPath = s"${Play.configuration.getString("govuk-tax.auth.login_path").getOrElse("sign-in")}"
   val signIn = s"$companyAuthHost/gg/$loginPath" // ?continue=$loginCallback"
-  val ytaUrl = s"${Play.configuration.getString(s"govuk-tax.$env.yta.url").getOrElse("/gg")}"
+  val ytaUrl = s"${Play.configuration.getString("govuk-tax.yta.url").getOrElse("/gg")}"
   val signOut = s"$companyAuthHost/gg/sign-out"
 }

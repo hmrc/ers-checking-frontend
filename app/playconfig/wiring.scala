@@ -21,7 +21,7 @@ import services.AllWsHttp
 import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.http.cache.client.{ShortLivedCache, ShortLivedHttpCaching}
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector => Auditing}
-import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
+import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 import uk.gov.hmrc.play.frontend.config.LoadAuditingConfig
@@ -37,8 +37,8 @@ object ERSAuthConnector extends AuthConnector with ServicesConfig {
   lazy val http = AllWsHttp
 }
 
-object ERSAuditConnector extends Auditing with AppName with RunMode {
-  override lazy val auditingConfig = LoadAuditingConfig(s"$env.auditing")
+object ERSAuditConnector extends Auditing {
+  override lazy val auditingConfig = LoadAuditingConfig("auditing")
 }
 
 object ShortLivedHttpCaching extends ShortLivedHttpCaching with AppName with ServicesConfig {

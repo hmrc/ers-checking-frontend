@@ -48,8 +48,8 @@ mainContentHeader = contentHeader)
 
 @bodyEnd = {
 @uiLayouts.footer(
-analyticsToken = Play.configuration.getString(s"govuk-tax.$env.google-analytics.token"),
-analyticsHost = Play.configuration.getString(s"govuk-tax.$env.google-analytics.host").getOrElse("service.gov.uk"),
+analyticsToken = Play.configuration.getString("govuk-tax.google-analytics.token"),
+analyticsHost = Play.configuration.getString("govuk-tax.google-analytics.host").getOrElse("service.gov.uk"),
 ssoUrl = None,
 scriptElem = None,
 gaCalls = None)
