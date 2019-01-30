@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package config
 
 import play.Logger
+import play.api.Play
 import play.api.Play.{configuration, current}
 import uk.gov.hmrc.play.config.ServicesConfig
 
@@ -32,20 +33,22 @@ trait ApplicationConfig {
 }
 
 object ApplicationConfig extends ApplicationConfig with ServicesConfig {
+  protected def mode: play.api.Mode.Mode = Play.current.mode
+  protected def runModeConfiguration: play.api.Configuration = Play.current.configuration
 
-  private def loadConfig(key: String) = configuration.getString(key).getOrElse(throw new Exception(s"Missing key: $key"))
+  private def loadConfig(key: String) = runModeConfiguration.getString(key).getOrElse(throw new Exception(s"Missing key: $key"))
 
   Logger.info("The Getting the contact host")
-  private lazy val contactHost = configuration.getString("external-url.contact-frontend.host").getOrElse("")
+  private lazy val contactHost = runModeConfiguration.getString("external-url.contact-frontend.host").getOrElse("")
   Logger.info("The contact host is " + contactHost)
   private val contactFormServiceIdentifier = "ERS-CHECKING"
 
   override lazy val assetsPrefix = loadConfig(s"govuk-tax.assets.url") + loadConfig(s"govuk-tax.assets.version")
-  override lazy val analyticsToken: Option[String] = configuration.getString("govuk-tax.google-analytics.token")
-  override lazy val analyticsHost: String = configuration.getString("govuk-tax.google-analytics.host").getOrElse("service.gov.uk")
+  override lazy val analyticsToken: Option[String] = runModeConfiguration.getString("govuk-tax.google-analytics.token")
+  override lazy val analyticsHost: String = runModeConfiguration.getString("govuk-tax.google-analytics.host").getOrElse("service.gov.uk")
 
   override lazy val startElement: String = "<table:table-row"
   override lazy val endElement: String = "</table:table-row>"
 
-  override val ggSignInUrl: String = configuration.getString("govuk-tax.government-gateway-sign-in.host").getOrElse("")
+  override val ggSignInUrl: String = runModeConfiguration.getString("govuk-tax.government-gateway-sign-in.host").getOrElse("")
 }
