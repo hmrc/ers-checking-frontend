@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,16 @@ import uk.gov.hmrc.play.frontend.bootstrap.{DefaultFrontendGlobal, ShowErrorPage
 import uk.gov.hmrc.play.frontend.filters.{ FrontendAuditFilter, FrontendLoggingFilter, MicroserviceFilterSupport }
 
 object ApplicationGlobal extends DefaultFrontendGlobal with RunMode with ShowErrorPage {
+  protected def mode: play.api.Mode.Mode = Play.current.mode
+  protected def runModeConfiguration: play.api.Configuration = Play.current.configuration
+
   override val auditConnector = ERSAuditConnector
   override val loggingFilter = ERSLoggingFilter
   override val frontendAuditFilter = ERSFrontendAuditFilter
 
   override def onStart(app: Application) {
     super.onStart(app)
-    ApplicationCrypto.verifyConfiguration()
+    new ApplicationCrypto(Play.current.configuration.underlying).verifyConfiguration()
   }
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): Html =
@@ -54,6 +57,9 @@ object ERSLoggingFilter extends FrontendLoggingFilter with MicroserviceFilterSup
 }
 
 object ERSFrontendAuditFilter extends FrontendAuditFilter with RunMode with AppName with MicroserviceFilterSupport{
+  protected def mode: play.api.Mode.Mode = Play.current.mode
+  protected def runModeConfiguration: play.api.Configuration = Play.current.configuration
+  protected def appNameConfiguration: play.api.Configuration = runModeConfiguration
 
   override lazy val maskedFormFields = Seq("password")
 

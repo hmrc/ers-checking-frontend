@@ -10,9 +10,9 @@ private object AppDependencies {
   import play.sbt.PlayImport._
 
 
-  private val frontendBootstrapVersion = "8.24.0"
-  private val httpCachingVersion = "7.0.0"
-  private val playPartialVersion = "6.1.0"
+  private val frontendBootstrapVersion = "12.2.0"
+  private val httpCachingVersion = "8.0.0"
+  private val playPartialVersion = "6.3.0"
 
   val compile = Seq(
     ws,
@@ -20,8 +20,8 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "frontend-bootstrap" % frontendBootstrapVersion,
     "uk.gov.hmrc" %% "http-caching-client" % httpCachingVersion,
     "uk.gov.hmrc" %% "play-breadcrumb" % "1.0.0",
-    "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.21",
-    "commons-io" % "commons-io" % "2.5",
+    "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.22",
+    "commons-io" % "commons-io" % "2.6",
     "uk.gov.hmrc" %% "tabular-data-validator" % "1.0.0"
   )
 
@@ -30,12 +30,12 @@ private object AppDependencies {
     lazy val test : Seq[ModuleID] = ???
   }
 
-  private val scalatestVersion = "2.2.6"
-  private val scalatestPlusPlayVersion = "1.5.1"
+  private val scalatestVersion = "3.0.5"
+  private val scalatestPlusPlayVersion = "2.0.1"
   private val pegdownVersion = "1.6.0"
   private val jsoupVersion = "1.10.3"
-  private val hmrcTestVersion = "2.3.0"
-  private val mockitoVersion = "2.8.47"
+  private val hmrcTestVersion = "3.4.0-play-25"
+  private val mockitoVersion = "2.23.4"
 
 
   object Test {

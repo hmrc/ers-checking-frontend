@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package playconfig
 
 import play.Logger
+import play.api.Play
 import services.AllWsHttp
 import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.http.cache.client.{ShortLivedCache, ShortLivedHttpCaching}
@@ -31,6 +32,10 @@ object CachedStaticHtmlPartialProvider extends CachedStaticHtmlPartialRetriever 
 }
 
 object ERSAuthConnector extends AuthConnector with ServicesConfig {
+  protected def mode: play.api.Mode.Mode = Play.current.mode
+  protected def runModeConfiguration: play.api.Configuration = Play.current.configuration
+  protected def appNameConfiguration: play.api.Configuration = runModeConfiguration
+
   Logger.info("Getting the authorisation")
   val serviceUrl = baseUrl("auth")
   Logger.info("got the ServiceURL " + serviceUrl)
@@ -42,6 +47,10 @@ object ERSAuditConnector extends Auditing {
 }
 
 object ShortLivedHttpCaching extends ShortLivedHttpCaching with AppName with ServicesConfig {
+  override protected def mode: play.api.Mode.Mode = Play.current.mode
+  override protected def runModeConfiguration: play.api.Configuration = Play.current.configuration
+  override protected def appNameConfiguration: play.api.Configuration = runModeConfiguration
+
   override lazy val http = AllWsHttp
   override lazy val defaultSource = appName
   override lazy val baseUri = baseUrl("cachable.short-lived-cache")
@@ -49,6 +58,6 @@ object ShortLivedHttpCaching extends ShortLivedHttpCaching with AppName with Ser
 }
 
 object ShortLivedCache extends ShortLivedCache {
-  override implicit lazy val crypto = ApplicationCrypto.JsonCrypto
+  override implicit lazy val crypto = new ApplicationCrypto(Play.current.configuration.underlying).JsonCrypto
   override lazy val shortLiveCache = ShortLivedHttpCaching
 }
