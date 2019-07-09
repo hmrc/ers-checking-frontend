@@ -23,3 +23,5 @@ GET /format-errors				                controllers.CheckingServiceController.form
 GET /error-report			    	            controllers.HtmlReportController.htmlErrorReportPage()
 
 GET /not-authorised                             controllers.AuthorizationController.notAuthorised()
+
+GET /language/:lang                             @controllers.LanguageSwitchController.switchToLanguage(lang: String)

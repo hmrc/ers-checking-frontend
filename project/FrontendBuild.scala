@@ -20,6 +20,7 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "frontend-bootstrap" % frontendBootstrapVersion,
     "uk.gov.hmrc" %% "http-caching-client" % httpCachingVersion,
     "uk.gov.hmrc" %% "play-breadcrumb" % "1.0.0",
+    "uk.gov.hmrc" %% "play-language" % "3.4.0",
     "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.22",
     "commons-io" % "commons-io" % "2.6",
     "uk.gov.hmrc" %% "tabular-data-validator" % "1.0.0"
