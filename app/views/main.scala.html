@@ -43,10 +43,10 @@ scriptElement: Option[Html] = None)(mainContent: Html = HtmlFormat.empty)(implic
 @insideHeader = {
     @if(headerNav) {
         @uiLayouts.header_nav(
-            navTitle = headerNav.get.title,
-            navTitleLink = headerNav.get.titleLink,
-            showBetaLink = headerNav.get.showBetaLink,
-            navLinks = headerNav.get.links
+        navTitle = headerNav.get.title,
+        navTitleLink = headerNav.get.titleLink,
+        showBetaLink = headerNav.get.showBetaLink,
+        navLinks = headerNav.get.links
         )
     }
 }
@@ -67,33 +67,30 @@ scriptElement: Option[Html] = None)(mainContent: Html = HtmlFormat.empty)(implic
 @footerLinks = {}
 
 @mainContentHeader = {
-    @contentHeader.map { contentHeaderVal =>
-        @uiLayouts.main_content_header(contentHeader = contentHeaderVal)
+
+@contentHeader.map { contentHeaderVal =>
+    @uiLayouts.main_content_header(contentHeader = contentHeaderVal)
+}
+
+@if(applicationConfig.languageTranslationEnabled) {
+    @views.html.language_selection(
+        applicationConfig.languageMap,
+        applicationConfig.routeToSwitchLanguage,
+        Some("text--right"))
     }
 }
 
 @getHelpForm = {
-@includes.report_problem(supportLinkEnabled)
+    @includes.report_problem(supportLinkEnabled)
 }
 
 @content = {
-<main id="wrapper" role="main">
-    <div id="content">
-        <div class="grid-layout grid-layout--stacked">
-            <div class="grid-layout__column grid-layout__column--2-3">
-                @mainContent
-                @getHelpForm
-            </div>
-            <div class="grid-layout__column grid-layout__column--1-3">
-                @if(sidebar == HtmlFormat.empty) {
-                &nbsp;
-                } else {
-                @sidebar
-                }
-            </div>
-        </div>
-    </div>
-</main>
+    @uiLayouts.main_content(
+        article = mainContent,
+        mainContentHeader = mainContentHeader,
+        getHelpForm = getHelpForm,
+        sidebar = sidebar
+    )
 }
 
 @hmrcGovUkTemplate(Some(title), None)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(uiLayouts.footer_links()), true)(content)
