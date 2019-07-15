@@ -26,9 +26,6 @@ trait ValidationErrorHelper[A] {
 object ValidationErrorHelper {
   def apply[A](implicit sh: ValidationErrorHelper[A]): ValidationErrorHelper[A] = sh
 
-  def withErrorsFromMessages[A: ValidationErrorHelper](a: A)(implicit messages: Messages):Option[List[ValidationError]] =
-    ValidationErrorHelper[A].withErrorsFromMessages(a)
-
   implicit class ErrorFromMessagesOps[A: ValidationErrorHelper](a: A)(implicit messages: Messages) {
     def withErrorsFromMessages: Option[List[ValidationError]] = ValidationErrorHelper[A].withErrorsFromMessages(a)
   }
