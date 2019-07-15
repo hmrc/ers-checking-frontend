@@ -154,9 +154,9 @@ ers.exceptions.dataParser.configFailure = It hasn’t been possible to check thi
 ers.exceptions.dataParser.ampersand = Must not contain ampersands.
 ers.exceptions.dataParser.noData = The file that you chose doesn’t have any data after row 9. The reportable events data must start in cell A10.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the ERS guidance documents</a> to help you create error-free files.
 
-ers.global_errors.message = Sorry, we’re experiencing technical difficulties
-ers.global_errors.heading = ERS File Upload Failure
-ers.global_errors.title = "Ers Error page"
+ers.global_errors.message = Sorry, there is a problem with the service
+ers.global_errors.heading = Check your ERS files – Employment Related Securities
+ers.global_errors.title = "Check your ERS files – Employment Related Securities – GOV.UK"
 
 validation.summary.heading = There’s a problem
 csv_file_upload.summary_error = Choose a different file - it must be a CSV file
