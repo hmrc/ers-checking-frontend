@@ -20,6 +20,8 @@ import com.typesafe.config.ConfigFactory
 import uk.gov.hmrc.services.validation.{Cell, DataValidator, Row, ValidationError}
 import org.scalatestplus.play.PlaySpec
 import services.validation.SIPTestData.{ERSValidationSIPAwardsTestData, ERSValidationSIPOutTestData}
+import play.api.i18n.Messages.Implicits._
+import services.validation.ValidationErrorHelper._
 
 class SIPAwardsV3ValidationTest extends PlaySpec with ERSValidationSIPAwardsTestData with ValidationTestRunner{
 
@@ -33,8 +35,8 @@ class SIPAwardsV3ValidationTest extends PlaySpec with ERSValidationSIPAwardsTest
       val cellC = Cell("C", rowNumber, "2")
       val row = Row(1,Seq(cellD,cellC))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellD,"mandatoryD","D01","Enter 'yes' or 'no'")
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellD,"mandatoryD","D01","Enter ‘yes’ or ‘no’")
       ))
     }
 
@@ -43,8 +45,8 @@ class SIPAwardsV3ValidationTest extends PlaySpec with ERSValidationSIPAwardsTest
       val cellC= Cell("C", rowNumber, "1")
       val row = Row(1, Seq(cellE, cellC))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellE, "mandatoryE", "E01", "Enter the ratio of the matching shares (numbers must be separated by a ':' or '/', for example, 2:1 or 2/1)")
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellE, "mandatoryE", "E01", "Enter the ratio of the matching shares (numbers must be separated by a ‘:’ or ‘/’, for example, 2:1 or 2/1)")
       ))
     }
 
@@ -53,8 +55,8 @@ class SIPAwardsV3ValidationTest extends PlaySpec with ERSValidationSIPAwardsTest
       val cellO= Cell("O", rowNumber, "NO")
       val row = Row(1, Seq(cellP, cellO))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellP, "mandatoryP", "P01", "Enter 'yes' or 'no'")
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellP, "mandatoryP", "P01", "Enter ‘yes’ or ‘no’")
       ))
     }
 
@@ -63,7 +65,7 @@ class SIPAwardsV3ValidationTest extends PlaySpec with ERSValidationSIPAwardsTest
       val cellP= Cell("P", rowNumber, "YES")
       val row = Row(1, Seq(cellQ, cellP))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
+      resOpt.withErrorsFromMessages mustBe Some(List(
         ValidationError(cellQ, "mandatoryQ", "Q01", "Enter the HMRC reference (must be less than 11 characters)")
       ))
     }
@@ -73,7 +75,7 @@ class SIPAwardsV3ValidationTest extends PlaySpec with ERSValidationSIPAwardsTest
   "when a valid row of data is provided, no ValidationErrors should be raised" in {
     val row = Row(1,getValidRowData)
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-    resOpt mustBe None
+    resOpt.withErrorsFromMessages mustBe None
   }
 
   "when a invalid row of data is provided, a list of ValidationErrors should be raised" in {
@@ -97,8 +99,8 @@ class SIPOutV3ValidationTest extends PlaySpec with ERSValidationSIPOutTestData w
     val cellO= Cell("O", rowNumber, "NO")
     val row = Row(1, Seq(cellP, cellO))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-    resOpt mustBe Some(List(
-      ValidationError(cellP, "mandatoryP", "P01", "Enter 'yes' or 'no'")
+    resOpt.withErrorsFromMessages mustBe Some(List(
+      ValidationError(cellP, "mandatoryP", "P01", "Enter ‘yes’ or ‘no’")
     ))
   }
 
@@ -107,15 +109,15 @@ class SIPOutV3ValidationTest extends PlaySpec with ERSValidationSIPOutTestData w
     val cellP= Cell("P", rowNumber, "NO")
     val row = Row(1, Seq(cellQ, cellP))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-    resOpt mustBe Some(List(
-      ValidationError(cellQ, "mandatoryQ", "Q01", "Enter 'yes' or 'no'")
+    resOpt.withErrorsFromMessages mustBe Some(List(
+      ValidationError(cellQ, "mandatoryQ", "Q01", "Enter ‘yes’ or ‘no’")
     ))
   }
 
   "when a valid row of data is provided, no ValidationErrors should be raised" in {
     val row = Row(1,getValidRowData)
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-    resOpt mustBe None
+    resOpt.withErrorsFromMessages mustBe None
   }
 
   "when a invalid row of data is provided, a list of ValidationErrors should be raised" in {

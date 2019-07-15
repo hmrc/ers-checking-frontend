@@ -20,6 +20,8 @@ import com.typesafe.config.ConfigFactory
 import uk.gov.hmrc.services.validation.{Cell, DataValidator, Row, ValidationError}
 import org.scalatestplus.play.PlaySpec
 import services.validation.CSOPTestData.{ERSValidationCSOPExercisedTestData, ERSValidationCSOPRCLTestData, ERSValidationCSOPGrantedTestData}
+import play.api.i18n.Messages.Implicits._
+import services.validation.ValidationErrorHelper._
 
 class CSOPOptionsGrantedV3ValidationCSOPTest extends PlaySpec with ERSValidationCSOPGrantedTestData with ValidationTestRunner{
 
@@ -32,8 +34,8 @@ class CSOPOptionsGrantedV3ValidationCSOPTest extends PlaySpec with ERSValidation
       val cellF = Cell("F", rowNumber, "no")
       val row = Row(1,Seq(cellG,cellF))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellG,"mandatoryG","G01","Enter 'yes' or 'no'")))
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellG,"mandatoryG","G01","Enter ‘yes’ or ‘no’")))
     }
 
     "when sharesListedOnSE is answered yes, hmrcRef is a mandatory field" in {
@@ -41,7 +43,7 @@ class CSOPOptionsGrantedV3ValidationCSOPTest extends PlaySpec with ERSValidation
       val cellG = Cell("G", rowNumber, "yes")
       val row = Row(1,Seq(cellH,cellG))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
+      resOpt.withErrorsFromMessages mustBe Some(List(
         ValidationError(cellH,"mandatoryH","G02","Enter the HMRC reference (must be less than 11 characters)")
       ))
     }
@@ -49,7 +51,7 @@ class CSOPOptionsGrantedV3ValidationCSOPTest extends PlaySpec with ERSValidation
     "when a valid row of data is provided, no ValidationErrors should be raised" in {
       val row = Row(1,getValidRowData)
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe None
+      resOpt.withErrorsFromMessages mustBe None
     }
 
     "when a invalid row of data is provided, a list of ValidationErrors should be raised" in {
@@ -74,7 +76,7 @@ class CSOPOptionsRCLTest extends PlaySpec with ERSValidationCSOPRCLTestData with
       val cellB = Cell("B", rowNumber, "yes")
       val row = Row(1,Seq(cellB,cellC))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
+      resOpt.withErrorsFromMessages mustBe Some(List(
         ValidationError(cellC,"mandatoryC","C01","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)")
       ))
     }
@@ -95,7 +97,7 @@ class CSOPOptionsExercisedTest extends PlaySpec with ERSValidationCSOPExercisedT
       val cellN = Cell("N", rowNumber, "yes")
       val row = Row(1,Seq(cellO,cellN))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
+      resOpt.withErrorsFromMessages mustBe Some(List(
         ValidationError(cellO,"mandatoryO","O01","Enter the HMRC reference (must be less than 11 characters)")
       ))
     }
@@ -105,7 +107,7 @@ class CSOPOptionsExercisedTest extends PlaySpec with ERSValidationCSOPExercisedT
       val cellQ = Cell("Q", rowNumber, "yes")
       val row = Row(1,Seq(cellR,cellQ))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
+      resOpt.withErrorsFromMessages mustBe Some(List(
         ValidationError(cellR,"mandatoryR","R01","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)")
       ))
     }
