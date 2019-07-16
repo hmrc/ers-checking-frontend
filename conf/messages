@@ -156,7 +156,8 @@ ers.exceptions.dataParser.noData = The file that you chose doesn’t have any da
 
 ers.global_errors.message = Sorry, there is a problem with the service
 ers.global_errors.heading = Check your ERS files – Employment Related Securities
-ers.global_errors.title = "Check your ERS files – Employment Related Securities – GOV.UK"
+ers.global_errors.title = Sorry, there is a problem with the service - Check your ERS files – GOV.UK
+ers.global.errors.try.later=Try again later.
 
 validation.summary.heading = There’s a problem
 csv_file_upload.summary_error = Choose a different file - it must be a CSV file
