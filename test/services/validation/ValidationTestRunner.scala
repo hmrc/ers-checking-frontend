@@ -16,14 +16,24 @@
 
 package services.validation
 
-import uk.gov.hmrc.services.validation.{ValidationError, Cell, DataValidator}
+import uk.gov.hmrc.services.validation.{Cell, DataValidator, ValidationError}
 import models.ValidationErrorData
 import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.i18n.MessagesApi
+import play.api.inject.Injector
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.i18n.Messages.Implicits._
+import services.validation.ValidationErrorHelper._
 
 /**
  * Created by matt on 25/01/16.
  */
-trait ValidationTestRunner extends PlaySpec{
+trait ValidationTestRunner extends PlaySpec with GuiceOneAppPerSuite{
+
+  def injector: Injector = app.injector
+  def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
+  override def fakeApplication() = new GuiceApplicationBuilder().configure(Map("play.i18n.langs"->List("en", "cy"))).build()
 
 
   def populateValidationError(expRes: ValidationErrorData)(implicit cell: Cell) = {
@@ -41,7 +51,7 @@ trait ValidationTestRunner extends PlaySpec{
   def runTests(validator:DataValidator, descriptions: List[String], testDatas:List[Cell], expectedResults:List[Option[List[ValidationErrorData]]]) = {
       for (x <- 0 until descriptions.length) {
         descriptions(x) in {
-          validator.validateCell(testDatas(x), Some(ValidationContext)) mustBe resultBuilder(testDatas(x), expectedResults(x))
+          validator.validateCell(testDatas(x), Some(ValidationContext)).withErrorsFromMessages mustBe resultBuilder(testDatas(x), expectedResults(x))
         }
       }
   }

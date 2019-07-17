@@ -32,8 +32,8 @@ trait ERSValidationCSOPRCLTestData {
         "Return The date must match the yyyy-mm-dd pattern. For dateOfEvent when an incorrect date is given",
         //Column B
         "When wasMoneyOrValueGiven is Yes or No then no validation error is raised",
-        "Return This entry must be 'yes' or 'no'. For wasMoneyOrValueGiven when an empty value is given",
-        "Return This entry must be 'yes' or 'no'. For wasMoneyOrValueGiven when any other value is given",
+        "Return This entry must be ‘yes’ or ‘no’. For wasMoneyOrValueGiven when an empty value is given",
+        "Return This entry must be ‘yes’ or ‘no’. For wasMoneyOrValueGiven when any other value is given",
         //Column C
         "When amtOrValue is a correctly formatted number, no validation error should be raised.",
         "Return This entry must be a number with 4 digits after the decimal point. For amtOrValue when an incorrect amount of decimal places have been entered.",
@@ -58,8 +58,8 @@ trait ERSValidationCSOPRCLTestData {
         "Return The PAYE reference must be less than 15 characters. When the submitted text does not match the PAYE format.",
         //Column I
         "When payeOperatedApplied is Yes or No, no validation error should be raised",
-        "Return This entry must be 'yes' or 'no'. When an empty string is given for payeOperatedApplied.",
-        "Return This entry must be 'yes' or 'no'. When the characters entered do not match yes or no for payeOperatedApplied."
+        "Return This entry must be ‘yes’ or ‘no’. When an empty string is given for payeOperatedApplied.",
+        "Return This entry must be ‘yes’ or ‘no’. When the characters entered do not match yes or no for payeOperatedApplied."
       )
     descriptions
   }
@@ -101,8 +101,8 @@ trait ERSValidationCSOPRCLTestData {
       Some(List(ValidationErrorData("MANDATORY", "018", "Enter a date that matches the yyyy-mm-dd pattern"))),
       Some(List(ValidationErrorData("error.1", "001", "Enter a date that matches the yyyy-mm-dd pattern"))),
       None,
-      Some(List(ValidationErrorData("MANDATORY", "018", "Enter 'yes' or 'no'"))),
-      Some(List(ValidationErrorData("error.2", "002", "Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("MANDATORY", "018", "Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("error.2", "002", "Enter ‘yes’ or ‘no’"))),
       None,
       Some(List(ValidationErrorData("error.3", "003", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       Some(List(ValidationErrorData("error.3", "003", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
@@ -120,8 +120,8 @@ trait ERSValidationCSOPRCLTestData {
       None,
       Some(List(ValidationErrorData("error.8", "008", "PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters"))),
       None,
-      Some(List(ValidationErrorData("MANDATORY", "018", "Enter 'yes' or 'no'"))),
-      Some(List(ValidationErrorData("error.9", "009", "Enter 'yes' or 'no'")))
+      Some(List(ValidationErrorData("MANDATORY", "018", "Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("error.9", "009", "Enter ‘yes’ or ‘no’")))
     )
 
     expectedResults

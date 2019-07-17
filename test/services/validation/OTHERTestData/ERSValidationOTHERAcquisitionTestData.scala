@@ -271,8 +271,8 @@ trait ERSValidationOTHERAcquisitionTestData {
       Some(List(ValidationErrorData("MANDATORY","100","Enter a date that matches the yyyy-mm-dd pattern"))),
       //B
       None,
-      Some(List(ValidationErrorData("error.2","002","Enter 'yes' or 'no'"))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.2","002","Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter ‘yes’ or ‘no’"))),
       //C
       None,
       Some(List(ValidationErrorData("error.3","003","Enter the scheme reference number (it should be an 8 digit number)"))),
@@ -327,22 +327,22 @@ trait ERSValidationOTHERAcquisitionTestData {
       Some(List(ValidationErrorData("error.18","018","PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters"))),
       //S
       None,
-      Some(List(ValidationErrorData("error.19","019","Enter '1', '2', '3', '4', '5', '6', '7', '8' or '9'"))),
-      Some(List(ValidationErrorData("error.19","019","Enter '1', '2', '3', '4', '5', '6', '7', '8' or '9'"))),
-      Some(List(ValidationErrorData("error.19","019","Enter '1', '2', '3', '4', '5', '6', '7', '8' or '9'"))),
-      Some(List(ValidationErrorData("error.19","019","Enter '1', '2', '3', '4', '5', '6', '7', '8' or '9'"))),
-      Some(List(ValidationErrorData("error.19","019","Enter '1', '2', '3', '4', '5', '6', '7', '8' or '9'"))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter '1', '2', '3', '4', '5', '6', '7', '8' or '9'"))),
+      Some(List(ValidationErrorData("error.19","019","Enter ‘1’, ‘2’, ‘3’, ‘4’, ‘5’, ‘6’, ‘7’, ‘8’ or ‘9’"))),
+      Some(List(ValidationErrorData("error.19","019","Enter ‘1’, ‘2’, ‘3’, ‘4’, ‘5’, ‘6’, ‘7’, ‘8’ or ‘9’"))),
+      Some(List(ValidationErrorData("error.19","019","Enter ‘1’, ‘2’, ‘3’, ‘4’, ‘5’, ‘6’, ‘7’, ‘8’ or ‘9’"))),
+      Some(List(ValidationErrorData("error.19","019","Enter ‘1’, ‘2’, ‘3’, ‘4’, ‘5’, ‘6’, ‘7’, ‘8’ or ‘9’"))),
+      Some(List(ValidationErrorData("error.19","019","Enter ‘1’, ‘2’, ‘3’, ‘4’, ‘5’, ‘6’, ‘7’, ‘8’ or ‘9’"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter ‘1’, ‘2’, ‘3’, ‘4’, ‘5’, ‘6’, ‘7’, ‘8’ or ‘9’"))),
       //T
       None,
-      Some(List(ValidationErrorData("error.20","020","Enter 'yes' or 'no'"))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.20","020","Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter ‘yes’ or ‘no’"))),
       //U
       None,
-      Some(List(ValidationErrorData("error.21","021","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.21","021","Enter ‘yes’ or ‘no’"))),
       //V
       None,
-      Some(List(ValidationErrorData("error.22","022","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.22","022","Enter ‘yes’ or ‘no’"))),
       //W
       None,
       Some(List(ValidationErrorData("error.23","023","Enter the HMRC reference (must be less than 11 characters)"))),
@@ -351,11 +351,11 @@ trait ERSValidationOTHERAcquisitionTestData {
       Some(List(ValidationErrorData("error.24","024","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)"))),
       //Y
       None,
-      Some(List(ValidationErrorData("error.25","025","Enter '1', '2' or '3'"))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter '1', '2' or '3'"))),
+      Some(List(ValidationErrorData("error.25","025","Enter ‘1’, ‘2’ or ‘3’"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter ‘1’, ‘2’ or ‘3’"))),
       //Z
       None,
-      Some(List(ValidationErrorData("error.26","026","Enter '1', '2' or '3'"))),
+      Some(List(ValidationErrorData("error.26","026","Enter ‘1’, ‘2’ or ‘3’"))),
       //AA
       None,
       Some(List(ValidationErrorData("error.27","027","Must be a number (whole numbers must have no more than 13 digits; decimals must have no more than 13 digits before the decimal point and no more than 4 digits after it)"))),
@@ -367,10 +367,10 @@ trait ERSValidationOTHERAcquisitionTestData {
       Some(List(ValidationErrorData("error.29","029","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       //AD
       None,
-      Some(List(ValidationErrorData("error.30","030","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.30","030","Enter ‘yes’ or ‘no’"))),
       //AE
       None,
-      Some(List(ValidationErrorData("error.31","031","Enter 'all' or 'some'"))),
+      Some(List(ValidationErrorData("error.31","031","Enter ‘all’ or ‘some’"))),
       //AF
       None,
       Some(List(ValidationErrorData("error.32","032","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
@@ -379,29 +379,29 @@ trait ERSValidationOTHERAcquisitionTestData {
       Some(List(ValidationErrorData("error.33","033","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       //AH
       None,
-      Some(List(ValidationErrorData("error.34","034","Enter 'yes' or 'no'"))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.34","034","Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter ‘yes’ or ‘no’"))),
       //AI
       None,
-      Some(List(ValidationErrorData("error.35","035","Enter 'yes' or 'no'"))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.35","035","Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter ‘yes’ or ‘no’"))),
       //AJ
       None,
-      Some(List(ValidationErrorData("error.36","036", "Enter '1', '2' or '3'"))),
+      Some(List(ValidationErrorData("error.36","036", "Enter ‘1’, ‘2’ or ‘3’"))),
       //AK
       None,
-      Some(List(ValidationErrorData("error.37","037","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.37","037","Enter ‘yes’ or ‘no’"))),
       //AL
       None,
-      Some(List(ValidationErrorData("error.38","038","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.38","038","Enter ‘yes’ or ‘no’"))),
       //AM
       None,
-      Some(List(ValidationErrorData("error.39","039","Enter 'yes' or 'no'"))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.39","039","Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter ‘yes’ or ‘no’"))),
       //AN
       None,
-      Some(List(ValidationErrorData("error.40","040","Enter 'yes' or 'no'"))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'")))
+      Some(List(ValidationErrorData("error.40","040","Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter ‘yes’ or ‘no’")))
     )
     expectedResults
   }

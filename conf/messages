@@ -161,3 +161,38 @@ ers.global_errors.title = "Ers Error page"
 validation.summary.heading = There’s a problem
 csv_file_upload.summary_error = Choose a different file - it must be a CSV file
 ods_file_upload.summary_error = Choose a different file - it must be an ODS file
+
+#********************************************************************
+# Upload Error Messages
+#********************************************************************
+
+ers.upload.error.date=Enter a date that matches the yyyy-mm-dd pattern
+ers.upload.error.first-name=Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)
+ers.upload.error.second-name=Must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes
+ers.upload.error.last-name=Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)
+ers.upload.error.nino=National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter
+ers.upload.error.paye=PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters
+ers.upload.error.hmrcRef=Enter the HMRC reference (must be less than 11 characters)
+ers.upload.error.srn=Enter the scheme reference number (it should be an 8 digit number)
+ers.upload.error.digitsUpTo2=It should be a whole number that has no more than 11 digits
+ers.upload.error.digits2=Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)
+ers.upload.error.digitsUpTo4=Must be a number (whole numbers must have no more than 13 digits; decimals must have no more than 13 digits before the decimal point and no more than 4 digits after it)
+ers.upload.error.digits4=Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)
+ers.upload.error.int6=Must be a whole number and be less than 1,000,000
+ers.upload.error.yes-no=Enter ‘yes’ or ‘no’
+ers.upload.error.enum1-3=Enter ‘1’, ‘2’ or ‘3’
+ers.upload.error.enum1-4=Enter ‘1’, ‘2’, ‘3’ or ‘4’
+ers.upload.error.enum1-8=Enter ‘1’, ‘2’, ‘3’, ‘4’, ‘5’, ‘6’, ‘7’ or ‘8’
+ers.upload.error.enum1-9=Enter ‘1’, ‘2’, ‘3’, ‘4’, ‘5’, ‘6’, ‘7’, ‘8’ or ‘9’
+ers.upload.error.enum-all-some=Enter ‘all’ or ‘some’
+ers.upload.error.ratio=Enter the ratio of the matching shares (numbers must be separated by a ‘:’ or ‘/’, for example, 2:1 or 2/1)
+ers.upload.error.company-name=Enter the company name (must be less than 121 characters and can only have letters, numbers, hyphens or apostrophes)
+ers.upload.error.address-line1=Enter the first line of the address (must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands)
+ers.upload.error.address-line2=Must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands
+ers.upload.error.address-line3=Must be less than 28 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands
+ers.upload.error.address-line4=Must be less than 19 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands
+ers.upload.error.address-country=Must be less than 19 characters and can only have letters, numbers, hyphens, apostrophes, forward slashes, commas or ampersands
+ers.upload.error.address-postcode=Must be 6 to 8 characters and only have capital letters
+ers.upload.error.address-postcode-mand=Enter the postcode (must be 6 to 8 characters and only have capital letters)
+ers.upload.error.crn=Company Reference Number must be less than 11 characters (numbers and letters)
+ers.upload.error.ctr=Corporation Tax reference must be a 10 digit number

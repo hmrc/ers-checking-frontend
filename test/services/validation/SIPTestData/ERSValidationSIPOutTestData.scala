@@ -211,14 +211,14 @@ trait ERSValidationSIPOutTestData {
       Some(List(ValidationErrorData("error.14", "014", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       //column O
       None,
-      Some(List(ValidationErrorData("error.15", "015", "Enter 'yes' or 'no'"))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.15", "015", "Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("MANDATORY", "100", "Enter ‘yes’ or ‘no’"))),
       //column P
       None,
-      Some(List(ValidationErrorData("error.16", "016", "Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.16", "016", "Enter ‘yes’ or ‘no’"))),
       //column Q
       None,
-      Some(List(ValidationErrorData("error.17", "017", "Enter 'yes' or 'no'")))
+      Some(List(ValidationErrorData("error.17", "017", "Enter ‘yes’ or ‘no’")))
     )
     expectedResults
   }

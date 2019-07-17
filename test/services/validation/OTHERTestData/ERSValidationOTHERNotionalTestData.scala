@@ -135,8 +135,8 @@ trait ERSValidationOTHERNotionalTestData {
       Some(List(ValidationErrorData("MANDATORY","100","Enter a date that matches the yyyy-mm-dd pattern"))),
       //column B
       None,
-      Some(List(ValidationErrorData("error.2","002","Enter 'yes' or 'no'"))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.2","002","Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter ‘yes’ or ‘no’"))),
       //column C
       None,
       Some(List(ValidationErrorData("error.3","003","Enter the scheme reference number (it should be an 8 digit number)"))),
@@ -173,12 +173,12 @@ trait ERSValidationOTHERNotionalTestData {
       Some(List(ValidationErrorData("error.11","011","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       //column L
       None,
-      Some(List(ValidationErrorData("error.12","012","Enter 'yes' or 'no'"))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.12","012","Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter ‘yes’ or ‘no’"))),
       //column M
       None,
-      Some(List(ValidationErrorData("error.13","013","Enter 'yes' or 'no'"))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'")))
+      Some(List(ValidationErrorData("error.13","013","Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter ‘yes’ or ‘no’")))
     )
     expectedResults
   }

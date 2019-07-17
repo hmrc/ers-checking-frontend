@@ -19,7 +19,8 @@ package services.validation
 import com.typesafe.config.ConfigFactory
 import uk.gov.hmrc.services.validation.{Cell, DataValidator, Row, ValidationError}
 import org.scalatestplus.play.PlaySpec
-
+import play.api.i18n.Messages.Implicits._
+import services.validation.ValidationErrorHelper._
 import services.validation.OTHERTestData._
 
 class OTHERGrantsV3ValidationTest extends PlaySpec with ERSValidationOTHERGrantsTestData with ValidationTestRunner {
@@ -33,7 +34,7 @@ class OTHERGrantsV3ValidationTest extends PlaySpec with ERSValidationOTHERGrants
   "when a valid row of data is provided, no ValidationErrors should be raised" in {
     val row = Row(1,getValidRowData)
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-    resOpt mustBe None
+    resOpt.withErrorsFromMessages mustBe None
   }
 
   "when a invalid row of data is provided, a list of ValidationErrors should be raised" in {
@@ -57,7 +58,7 @@ class OTHEROptionsV3ValidationTest extends PlaySpec with ERSValidationOTHEROptio
     val cellB = Cell("B", rowNumber, "yes")
     val row = Row(1,Seq(cellC,cellB))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-    resOpt mustBe Some(List(
+    resOpt.withErrorsFromMessages mustBe Some(List(
       ValidationError(cellC,"mandatoryC","C01","Enter the scheme reference number (it should be an 8 digit number)")
     ))
   }
@@ -69,7 +70,7 @@ class OTHEROptionsV3ValidationTest extends PlaySpec with ERSValidationOTHEROptio
     val cellAL = Cell("AL", rowNumber, "yes")
     val row = Row(1,Seq(cellAM,cellAL))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-    resOpt mustBe Some(List(
+    resOpt.withErrorsFromMessages mustBe Some(List(
       ValidationError(cellAM,"mandatoryAM","AM01","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)")
     ))
   }
@@ -77,7 +78,7 @@ class OTHEROptionsV3ValidationTest extends PlaySpec with ERSValidationOTHEROptio
   "when a valid row of data is provided, no ValidationErrors should be raised" in {
     val row = Row(1,getValidRowData)
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-    resOpt mustBe None
+    resOpt.withErrorsFromMessages mustBe None
   }
 
   "when a invalid row of data is provided, a list of ValidationErrors should be raised" in {
@@ -100,7 +101,7 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
       val cellB = Cell("B", rowNumber, "yes")
       val row = Row(1,Seq(cellC,cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
+      resOpt.withErrorsFromMessages mustBe Some(List(
         ValidationError(cellC,"mandatoryB","MB","Enter the scheme reference number (it should be an 8 digit number)")
       ))
     }
@@ -110,8 +111,8 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
       val cellT = Cell("T", rowNumber, "yes")
       val row = Row(1,Seq(cellU,cellT))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellU,"mandatoryT","MT","Enter 'yes' or 'no'")
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellU,"mandatoryT","MT","Enter ‘yes’ or ‘no’")
       ))
     }
 
@@ -120,8 +121,8 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
       val cellU = Cell("U", rowNumber, "no")
       val row = Row(1,Seq(cellV,cellU))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellV,"mandatoryU","MU","Enter 'yes' or 'no'")
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellV,"mandatoryU","MU","Enter ‘yes’ or ‘no’")
       ))
     }
 
@@ -130,7 +131,7 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
       val cellV = Cell("V", rowNumber, "yes")
       val row = Row(1,Seq(cellW,cellV))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
+      resOpt.withErrorsFromMessages mustBe Some(List(
         ValidationError(cellW,"mandatoryV","MV","Enter the HMRC reference (must be less than 11 characters)")
       ))
     }
@@ -140,8 +141,8 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
       val cellY = Cell("Y", rowNumber, "1")
       val row = Row(1,Seq(cellZ,cellY))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellZ,"mandatoryY","MY","Enter '1', '2' or '3'")
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellZ,"mandatoryY","MY","Enter ‘1’, ‘2’ or ‘3’")
       ))
     }
 
@@ -150,8 +151,8 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
       val cellY = Cell("Y", rowNumber, "1")
       val row = Row(1,Seq(cellAD,cellY))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellAD,"mandatoryY2","MY2","Enter 'yes' or 'no'")
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellAD,"mandatoryY2","MY2","Enter ‘yes’ or ‘no’")
       ))
     }
 
@@ -160,8 +161,8 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
       val cellAD = Cell("AD", rowNumber, "yes")
       val row = Row(1,Seq(cellAE,cellAD))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellAE,"mandatoryD1","MD1","Enter 'all' or 'some'")
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellAE,"mandatoryD1","MD1","Enter ‘all’ or ‘some’")
       ))
     }
 
@@ -170,8 +171,8 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
       val cellAI = Cell("AI", rowNumber, "yes")
       val row = Row(1,Seq(cellAJ,cellAI))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellAJ,"mandatoryI1","MI1","Enter '1', '2' or '3'")
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellAJ,"mandatoryI1","MI1","Enter ‘1’, ‘2’ or ‘3’")
       ))
     }
 
@@ -180,8 +181,8 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
       val cellAK = Cell("AK", rowNumber, "yes")
       val row = Row(1,Seq(cellAL,cellAK))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellAL,"mandatoryK1","MK1","Enter 'yes' or 'no'")
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellAL,"mandatoryK1","MK1","Enter ‘yes’ or ‘no’")
       ))
     }
 
@@ -201,7 +202,7 @@ class OTHERRestrictedSecuritiesV3_ValidationTest extends PlaySpec with ERSValida
     val cellB = Cell("B", rowNumber, "yes")
     val row = Row(1,Seq(cellC,cellB))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-    resOpt mustBe Some(List(
+    resOpt.withErrorsFromMessages mustBe Some(List(
       ValidationError(cellC,"mandatoryC","C01","Enter the scheme reference number (it should be an 8 digit number)")
     ))
   }
@@ -211,8 +212,8 @@ class OTHERRestrictedSecuritiesV3_ValidationTest extends PlaySpec with ERSValida
     val cellL = Cell("L", rowNumber, "no")
     val row = Row(1,Seq(cellM,cellL))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-    resOpt mustBe Some(List(
-      ValidationError(cellM,"mandatoryM","M01","Enter 'yes' or 'no'")
+    resOpt.withErrorsFromMessages mustBe Some(List(
+      ValidationError(cellM,"mandatoryM","M01","Enter ‘yes’ or ‘no’")
     ))
   }
 
@@ -221,7 +222,7 @@ class OTHERRestrictedSecuritiesV3_ValidationTest extends PlaySpec with ERSValida
     val cellM = Cell("M", rowNumber, "yes")
     val row = Row(1,Seq(cellN,cellM))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-    resOpt mustBe Some(List(
+    resOpt.withErrorsFromMessages mustBe Some(List(
       ValidationError(cellN,"mandatoryN","N01","Enter the HMRC reference (must be less than 11 characters)")
     ))
   }
@@ -229,7 +230,7 @@ class OTHERRestrictedSecuritiesV3_ValidationTest extends PlaySpec with ERSValida
   "when a valid row of data is provided, no ValidationErrors should be raised" in {
     val row = Row(1,getValidRowData)
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-    resOpt mustBe None
+    resOpt.withErrorsFromMessages mustBe None
   }
 
   "when a invalid row of data is provided, a list of ValidationErrors should be raised" in {
@@ -253,7 +254,7 @@ class OTHEROtherBenefitsV3ValidationTest extends PlaySpec with ERSValidationOTHE
     val cellB = Cell("B", rowNumber, "yes")
     val row = Row(1,Seq(cellC,cellB))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-    resOpt mustBe Some(List(
+    resOpt.withErrorsFromMessages mustBe Some(List(
       ValidationError(cellC,"mandatoryB","MB","Enter the scheme reference number (it should be an 8 digit number)")
     ))
   }
@@ -272,7 +273,7 @@ class OTHERConvertibleV3ValidationTest extends PlaySpec with ERSValidationOTHERC
     val cellB = Cell("B", rowNumber, "yes")
     val row = Row(1, Seq(cellC, cellB))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-    resOpt mustBe Some(List(
+    resOpt.withErrorsFromMessages mustBe Some(List(
       ValidationError(cellC, "mandatoryC", "C01", "Enter the scheme reference number (it should be an 8 digit number)")
     ))
   }
@@ -280,7 +281,7 @@ class OTHERConvertibleV3ValidationTest extends PlaySpec with ERSValidationOTHERC
   "when a valid row of data is provided, no ValidationErrors should be raised" in {
     val row = Row(1,getValidRowData)
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-    resOpt mustBe None
+    resOpt.withErrorsFromMessages mustBe None
   }
 
   "when a invalid row of data is provided, a list of ValidationErrors should be raised" in {
@@ -302,7 +303,7 @@ class OTHERNotionalV3ValidationTest extends PlaySpec with ERSValidationOTHERNoti
       val cellB = Cell("B", rowNumber, "yes")
       val row = Row(1, Seq(cellC, cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
+      resOpt.withErrorsFromMessages mustBe Some(List(
         ValidationError(cellC, "mandatoryC", "C01", "Enter the scheme reference number (it should be an 8 digit number)")
       ))
     }
@@ -311,7 +312,7 @@ class OTHERNotionalV3ValidationTest extends PlaySpec with ERSValidationOTHERNoti
   "when a valid row of data is provided, no ValidationErrors should be raised" in {
     val row = Row(1,getValidRowData)
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-    resOpt mustBe None
+    resOpt.withErrorsFromMessages mustBe None
   }
 
   "when a invalid row of data is provided, a list of ValidationErrors should be raised" in {
@@ -334,7 +335,7 @@ class OTHEREnhancementV3ValidationTest extends PlaySpec with ERSValidationOTHERE
       val cellB = Cell("B", rowNumber, "yes")
       val row = Row(1, Seq(cellC, cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
+      resOpt.withErrorsFromMessages mustBe Some(List(
         ValidationError(cellC, "mandatoryC", "C01", "Enter the scheme reference number (it should be an 8 digit number)")
       ))
     }
@@ -343,7 +344,7 @@ class OTHEREnhancementV3ValidationTest extends PlaySpec with ERSValidationOTHERE
   "when a valid row of data is provided, no ValidationErrors should be raised" in {
     val row = Row(1,getValidRowData)
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-    resOpt mustBe None
+    resOpt.withErrorsFromMessages mustBe None
   }
 
   "when a invalid row of data is provided, a list of ValidationErrors should be raised" in {
@@ -366,7 +367,7 @@ class OTHERSoldV3ValidationTest extends PlaySpec with ERSValidationOTHERSoldTest
       val cellB = Cell("B", rowNumber, "yes")
       val row = Row(1, Seq(cellC, cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
+      resOpt.withErrorsFromMessages mustBe Some(List(
         ValidationError(cellC, "mandatoryC", "C01", "Enter the scheme reference number (it should be an 8 digit number)")
       ))
     }
@@ -375,7 +376,7 @@ class OTHERSoldV3ValidationTest extends PlaySpec with ERSValidationOTHERSoldTest
   "when a valid row of data is provided, no ValidationErrors should be raised" in {
     val row = Row(1,getValidRowData)
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-    resOpt mustBe None
+    resOpt.withErrorsFromMessages mustBe None
   }
 
   "when a invalid row of data is provided, a list of ValidationErrors should be raised" in {

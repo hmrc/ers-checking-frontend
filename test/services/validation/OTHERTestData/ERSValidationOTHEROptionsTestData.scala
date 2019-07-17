@@ -291,8 +291,8 @@ trait ERSValidationOTHEROptionsTestData {
       Some(List(ValidationErrorData("MANDATORY","100","Enter a date that matches the yyyy-mm-dd pattern"))),
       //Column B
       None,
-      Some(List(ValidationErrorData("error.2","002","Enter 'yes' or 'no'"))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.2","002","Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter ‘yes’ or ‘no’"))),
       //Column C
       None,
       Some(List(ValidationErrorData("error.3","003","Enter the scheme reference number (it should be an 8 digit number)"))),
@@ -382,7 +382,7 @@ trait ERSValidationOTHEROptionsTestData {
       Some(List(ValidationErrorData("error.29","029","PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters"))),
       //Column AD
       None,
-      Some(List(ValidationErrorData("error.30","030","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.30","030","Enter ‘yes’ or ‘no’"))),
       //Column AE
       None,
       Some(List(ValidationErrorData("error.31","031","Must be a number with 2 digits after the decimal point (and no more than 11 digits in front of it)"))),
@@ -400,10 +400,10 @@ trait ERSValidationOTHEROptionsTestData {
       Some(List(ValidationErrorData("error.33","033","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       //Column AH
       None,
-      Some(List(ValidationErrorData("error.34","034","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.34","034","Enter ‘yes’ or ‘no’"))),
       //Column AI
       None,
-      Some(List(ValidationErrorData("error.35","035","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.35","035","Enter ‘yes’ or ‘no’"))),
       //Column AJ
       None,
       Some(List(ValidationErrorData("error.36","036","Enter the HMRC reference (must be less than 11 characters)"))),
@@ -414,7 +414,7 @@ trait ERSValidationOTHEROptionsTestData {
       Some(List(ValidationErrorData("error.37","037","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       //Column AL
       None,
-      Some(List(ValidationErrorData("error.38","038","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.38","038","Enter ‘yes’ or ‘no’"))),
       //Column AM
       None,
       Some(List(ValidationErrorData("error.39","039","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
@@ -422,13 +422,13 @@ trait ERSValidationOTHEROptionsTestData {
       Some(List(ValidationErrorData("error.39","039","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       //Column AN
       None,
-      Some(List(ValidationErrorData("error.40","040","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.40","040","Enter ‘yes’ or ‘no’"))),
       //Column AO
       None,
-      Some(List(ValidationErrorData("error.41","041","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.41","041","Enter ‘yes’ or ‘no’"))),
       //Column AP
       None,
-      Some(List(ValidationErrorData("error.42","042","Enter 'yes' or 'no'")))
+      Some(List(ValidationErrorData("error.42","042","Enter ‘yes’ or ‘no’")))
     )
     expectedResults
   }

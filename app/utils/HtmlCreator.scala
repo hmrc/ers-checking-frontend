@@ -19,8 +19,6 @@ package utils
 import models.SheetErrors
 import play.api.i18n.Messages
 import uk.gov.hmrc.services.validation.ValidationError
-import play.api.i18n.Messages.Implicits._
-import play.api.Play.current
 import scala.collection.mutable.ListBuffer
 
 object HtmlCreator extends HtmlCreator
@@ -28,7 +26,7 @@ trait HtmlCreator {
 
 	var uploadedFileUtil = UploadedFileUtil
 
-	def getSheets(schemeErrors: ListBuffer[SheetErrors]): String = {
+	def getSheets(schemeErrors: ListBuffer[SheetErrors])(implicit messages: Messages): String = {
 		var sheets: String = "";
 		var errorListCount: Long = 0;
 		val htmlTableColHeaders: String = Messages("ers_html_error_report.table_column_names")
@@ -38,7 +36,7 @@ trait HtmlCreator {
 				val htmlTableHead = Messages("ers_html_error_report.sheet_name", sheet.sheetName)
 				var htmlTableRows: String = ""
 				for (errors <- sheetErrors) {
-						htmlTableRows = htmlTableRows + Messages("ers_html_error_report.table_row", errors.cell.column, errors.cell.row, errors.errorMsg)
+						htmlTableRows = htmlTableRows + Messages("ers_html_error_report.table_row", errors.cell.column, errors.cell.row, Messages(errors.errorMsg))
 						errorListCount = errorListCount + 1
 				}
 				if (errorListCount != 0) {
