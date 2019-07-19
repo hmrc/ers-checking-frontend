@@ -37,5 +37,5 @@ object ERSMetrics extends ERSMetrics with MicroserviceMetrics{
 }
 
 trait Metrics {
-  val metrics:ERSMetrics = ERSMetrics
+  lazy val metrics:ERSMetrics = ERSMetrics
 }

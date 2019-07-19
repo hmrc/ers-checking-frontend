@@ -22,19 +22,25 @@ import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
+import play.api.Application
 import play.api.i18n.Messages
 import services.headers.HeaderData
 import play.api.i18n.Messages.Implicits._
+import play.api.inject.guice.GuiceApplicationBuilder
 
 import scala.util.Try
 import uk.gov.hmrc.http.HeaderCarrier
 
 class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFutures with MockitoSugar with BeforeAndAfter with HeaderData{
 
-  object dataGeneratorObj extends DataGenerator
+  val config = Map("metrics.enabled" -> true)
+
+  override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
 
   val testAct = List("","","","")
   "The File Processing Service" must {
+
+    object dataGeneratorObj extends DataGenerator
 
     "Ensure there are no ampersands in the submitted xml" in {
       val expectedMessage = "Must not contain ampersands."
