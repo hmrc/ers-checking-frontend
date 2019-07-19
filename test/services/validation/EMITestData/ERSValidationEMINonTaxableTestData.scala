@@ -176,10 +176,10 @@ trait ERSValidationEMINonTaxableTestData {
       Some(List(ValidationErrorData("error.10","010","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       Some(List(ValidationErrorData("error.10","010","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       None,
-      Some(List(ValidationErrorData("error.11","011","Enter 'yes' or 'no'"))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.11","011","Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter ‘yes’ or ‘no’"))),
       None,
-      Some(List(ValidationErrorData("error.12","012","Enter 'yes' or 'no'"))),
+      Some(List(ValidationErrorData("error.12","012","Enter ‘yes’ or ‘no’"))),
       None,
       Some(List(ValidationErrorData("error.13","013","Enter the HMRC reference (must be less than 11 characters)"))),
       None,
@@ -187,8 +187,8 @@ trait ERSValidationEMINonTaxableTestData {
       Some(List(ValidationErrorData("error.14","014","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       Some(List(ValidationErrorData("error.14","014","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       None,
-      Some(List(ValidationErrorData("error.15","015","Enter 'yes' or 'no'"))),
-      Some(List(ValidationErrorData("MANDATORY","100","Enter 'yes' or 'no'")))
+      Some(List(ValidationErrorData("error.15","015","Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("MANDATORY","100","Enter ‘yes’ or ‘no’")))
     )
     expectedResults
   }

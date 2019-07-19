@@ -229,8 +229,6 @@ trait DataGenerator extends DataParser with Metrics{
   def getSheet(sheetName:String, scheme:String) = {
     Logger.info(s"Looking for sheetName: ${sheetName}")
     ersSheets.getOrElse(sheetName, {
-     //  implicit val hc:HeaderCarrier = new HeaderCarrier()
-    //  AuditEvents.fileProcessingErrorAudit(schemeInfo, sheetName, "Could not set the validator")
       Logger.warn(Messages("ers.exceptions.dataParser.unidentifiableSheetName") + sheetName)
       val schemeName = ContentUtil.getSchemeName(scheme)._2
       throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectSheetName", sheetName, schemeName), Messages("ers.exceptions.dataParser.unidentifiableSheetName") + " " +sheetName, needsExtendedInstructions = true)

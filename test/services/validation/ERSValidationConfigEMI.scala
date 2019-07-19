@@ -19,6 +19,8 @@ package services.validation
 import com.typesafe.config.ConfigFactory
 import uk.gov.hmrc.services.validation.{Cell, DataValidator, Row, ValidationError}
 import org.scalatestplus.play.PlaySpec
+import play.api.i18n.Messages.Implicits._
+import services.validation.ValidationErrorHelper._
 
 import services.validation.EMITestData.{ERSValidationEMIRLCTestData, ERSValidationEMINonTaxableTestData, ERSValidationEMIReplacedTestData, ERSValidationEMITaxableTestData, ERSValidationEMIAdjustmentsTestData}
 
@@ -33,8 +35,8 @@ class EMIAdjustmentsV3ValidationTest extends PlaySpec with ERSValidationEMIAdjus
       val cellA = Cell("A", rowNumber, "yes")
       val row = Row(1,Seq(cellB,cellA))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellB,"mandatoryB","B01","Enter 'yes' or 'no'")
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellB,"mandatoryB","B01","Enter ‘yes’ or ‘no’")
       ))
     }
 
@@ -43,8 +45,8 @@ class EMIAdjustmentsV3ValidationTest extends PlaySpec with ERSValidationEMIAdjus
       val cellB = Cell("B", rowNumber, "yes")
       val row = Row(1,Seq(cellC,cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellC,"mandatoryC","C01","Enter 'yes' or 'no'")
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellC,"mandatoryC","C01","Enter ‘yes’ or ‘no’")
       ))
     }
 
@@ -53,15 +55,15 @@ class EMIAdjustmentsV3ValidationTest extends PlaySpec with ERSValidationEMIAdjus
       val cellC = Cell("C", rowNumber, "yes")
       val row = Row(1,Seq(cellD,cellC))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellD,"mandatoryD","D01","Enter '1', '2', '3', '4', '5', '6', '7' or '8'")
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellD,"mandatoryD","D01","Enter ‘1’, ‘2’, ‘3’, ‘4’, ‘5’, ‘6’, ‘7’ or ‘8’")
       ))
     }
 
     "when a valid row of data is provided, no ValidationErrors should be raised" in {
       val row = Row(1,getValidRowData)
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe None
+      resOpt.withErrorsFromMessages mustBe None
     }
 
     "when a invalid row of data is provided, a list of ValidationErrors should be raised" in {
@@ -94,8 +96,8 @@ class EMIRLCV3ValidationTest extends PlaySpec with ERSValidationEMIRLCTestData w
       val cellB = Cell("B", rowNumber, "yes")
       val row = Row(1, Seq(cellC, cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellC, "mandatoryC", "C01", "Enter '1', '2', '3', '4', '5', '6', '7' or '8'")
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellC, "mandatoryC", "C01", "Enter ‘1’, ‘2’, ‘3’, ‘4’, ‘5’, ‘6’, ‘7’ or ‘8’")
       ))
     }
     "when Column J is answered yes, column K is a mandatory field" in {
@@ -103,7 +105,7 @@ class EMIRLCV3ValidationTest extends PlaySpec with ERSValidationEMIRLCTestData w
       val cellJ = Cell("J", rowNumber, "yes")
       val row = Row(1, Seq(cellK, cellJ))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
+      resOpt.withErrorsFromMessages mustBe Some(List(
         ValidationError(cellK, "mandatoryK", "K01", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)")
       ))
     }
@@ -112,8 +114,8 @@ class EMIRLCV3ValidationTest extends PlaySpec with ERSValidationEMIRLCTestData w
       val cellK = Cell("K", rowNumber, "10.1234")
       val row = Row(1, Seq(cellL, cellK))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellL, "mandatoryL", "L01", "Enter 'yes' or 'no'")
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellL, "mandatoryL", "L01", "Enter ‘yes’ or ‘no’")
       ))
     }
   }
@@ -131,8 +133,8 @@ class EMINonTaxableV3ValidationTest extends PlaySpec with ERSValidationEMINonTax
       val cellK = Cell("K", rowNumber, "no")
       val row = Row(1,Seq(cellL,cellK))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellL,"mandatoryL","L01","Enter 'yes' or 'no'")
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellL,"mandatoryL","L01","Enter ‘yes’ or ‘no’")
       ))
     }
 
@@ -141,7 +143,7 @@ class EMINonTaxableV3ValidationTest extends PlaySpec with ERSValidationEMINonTax
       val cellL = Cell("L", rowNumber, "yes")
       val row = Row(1,Seq(cellM,cellL))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
+      resOpt.withErrorsFromMessages mustBe Some(List(
         ValidationError(cellM,"mandatoryM","M01","Enter the HMRC reference (must be less than 11 characters)")
       ))
     }
@@ -149,7 +151,7 @@ class EMINonTaxableV3ValidationTest extends PlaySpec with ERSValidationEMINonTax
     "when a valid row of data is provided, no ValidationErrors should be raised" in {
       val row = Row(1,getValidRowData)
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe None
+      resOpt.withErrorsFromMessages mustBe None
     }
 
     "when a invalid row of data is provided, a list of ValidationErrors should be raised" in {
@@ -175,8 +177,8 @@ class EMITaxableV3ValidationTest extends PlaySpec with ERSValidationEMITaxableTe
       val cellB = Cell("B", rowNumber, "yes")
       val row = Row(1,Seq(cellC,cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellC,"mandatoryC","C01","Enter '1', '2', '3', '4', '5', '6', '7' or '8'")
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellC,"mandatoryC","C01","Enter ‘1’, ‘2’, ‘3’, ‘4’, ‘5’, ‘6’, ‘7’ or ‘8’")
       ))
     }
 
@@ -185,8 +187,8 @@ class EMITaxableV3ValidationTest extends PlaySpec with ERSValidationEMITaxableTe
       val cellO = Cell("O", rowNumber, "no")
       val row = Row(1,Seq(cellP,cellO))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
-        ValidationError(cellP,"mandatoryP","P01","Enter 'yes' or 'no'")
+      resOpt.withErrorsFromMessages mustBe Some(List(
+        ValidationError(cellP,"mandatoryP","P01","Enter ‘yes’ or ‘no’")
       ))
     }
 
@@ -195,7 +197,7 @@ class EMITaxableV3ValidationTest extends PlaySpec with ERSValidationEMITaxableTe
       val cellP = Cell("P", rowNumber, "yes")
       val row = Row(1,Seq(cellQ,cellP))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe Some(List(
+      resOpt.withErrorsFromMessages mustBe Some(List(
         ValidationError(cellQ,"mandatoryQ","Q01","Enter the HMRC reference (must be less than 11 characters)")
       ))
     }
@@ -203,7 +205,7 @@ class EMITaxableV3ValidationTest extends PlaySpec with ERSValidationEMITaxableTe
     "when a valid row of data is provided, no ValidationErrors should be raised" in {
       val row = Row(1,getValidRowData)
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
-      resOpt mustBe None
+      resOpt.withErrorsFromMessages mustBe None
     }
 
     "when a invalid row of data is provided, a list of ValidationErrors should be raised" in {

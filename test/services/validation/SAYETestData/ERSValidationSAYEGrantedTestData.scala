@@ -113,11 +113,11 @@ trait ERSValidationSAYEGrantedTestData {
     Some(List(ValidationErrorData("error.5", "005", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
     //F
     None,
-    Some(List(ValidationErrorData("error.6","006","Enter 'yes' or 'no'"))),
-    Some(List(ValidationErrorData("MANDATORY", "100", "Enter 'yes' or 'no'"))),
+    Some(List(ValidationErrorData("error.6","006","Enter ‘yes’ or ‘no’"))),
+    Some(List(ValidationErrorData("MANDATORY", "100", "Enter ‘yes’ or ‘no’"))),
     //G
     None,
-    Some(List(ValidationErrorData("error.7","007","Enter 'yes' or 'no'"))),
+    Some(List(ValidationErrorData("error.7","007","Enter ‘yes’ or ‘no’"))),
     //H
     None,
     Some(List(ValidationErrorData("error.8","008", "Enter the HMRC reference (must be less than 11 characters)")))
