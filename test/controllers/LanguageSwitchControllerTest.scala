@@ -15,7 +15,6 @@
  */
 
 package controllers
-import config.ApplicationConfig
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Configuration
 import play.api.test.Helpers._

@@ -18,10 +18,8 @@ package config
 
 import play.Logger
 import play.api.Play
-import play.api.Play.{configuration, current}
 import uk.gov.hmrc.play.config.ServicesConfig
 import play.api.i18n.Lang
-import play.api.mvc.Call
 import controllers.routes
 
 trait ApplicationConfig {
@@ -35,8 +33,6 @@ trait ApplicationConfig {
   val ggSignInUrl: String
 
   val languageTranslationEnabled: Boolean
-  //def languageMap: Map[String, Lang]
-  //def routeToSwitchLanguage: String => Call
 }
 
 class ApplicationConfigImpl extends ApplicationConfig with ServicesConfig {
