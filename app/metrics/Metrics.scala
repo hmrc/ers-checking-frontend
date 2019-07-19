@@ -17,25 +17,28 @@
 package metrics
 
 import java.util.concurrent.TimeUnit
+
 import com.codahale.metrics.MetricRegistry
+import play.api.Logger
 import uk.gov.hmrc.play.graphite.MicroserviceMetrics
 
 trait ERSMetrics {
-  def fileProcessingTimer(diff: Long, unit: TimeUnit): Unit
-  def besTimer(diff: Long, unit: TimeUnit): Unit
-  def sendToSubmissionsTimer(diff: Long, unit: TimeUnit): Unit
   def dataIteratorTimer(diff: Long, unit: TimeUnit): Unit
 }
 
-object ERSMetrics extends ERSMetrics with MicroserviceMetrics{
-  val registry: MetricRegistry = metrics.defaultRegistry
+object ERSMetrics extends ERSMetrics with MicroserviceMetrics {
 
-  override def fileProcessingTimer(diff: Long, unit: TimeUnit) = registry.timer("file-processing-time").update(diff, unit)
-  override def besTimer(diff: Long, unit: TimeUnit) = registry.timer("bes-processing-time").update(diff, unit)
-  override def sendToSubmissionsTimer(diff: Long, unit: TimeUnit) = registry.timer("send-to-submissions-time").update(diff, unit)
-  override def dataIteratorTimer(diff: Long, unit: TimeUnit) = registry.timer("data-iterator-time").update(diff, unit)
+  val logger = Logger(this.getClass.getCanonicalName)
+  lazy val registry: MetricRegistry = metrics.defaultRegistry
+
+  override def dataIteratorTimer(diff: Long, unit: TimeUnit): Unit =
+    try {
+      registry.timer("data-iterator-time").update(diff, unit)
+    } catch {
+      case t: Throwable => logger.warn("Unable to initialise MetricRegistry, timer will not be created.", t)
+    }
 }
 
 trait Metrics {
-  lazy val metrics:ERSMetrics = ERSMetrics
+  val metrics:ERSMetrics = ERSMetrics
 }
