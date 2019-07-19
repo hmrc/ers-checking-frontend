@@ -37,15 +37,14 @@ trait HtmlReportController extends ERSCheckingBaseController {
 
   var jsonParser = JsonParser
   val cacheUtil: CacheUtil
-  val messages = applicationMessages
 
   def htmlErrorReportPage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
     implicit authContext =>
       implicit request =>
-        showHtmlErrorReportPage(authContext, request, hc)
+        showHtmlErrorReportPage()
   }
 
-  def showHtmlErrorReportPage(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showHtmlErrorReportPage()(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
     cacheUtil.fetchAll().map { all =>
       val scheme: (String, String) = all.getEntry[String](CacheUtil.SCHEME_CACHE) match {
         case Some(name) => ContentUtil.getSchemeName(name)
@@ -62,7 +61,7 @@ trait HtmlReportController extends ERSCheckingBaseController {
             totalErrors += 1
         }
       }
-      val sheets: String = HtmlCreator.getSheets(schemeErrors)
+      val sheets: String = HtmlCreator.getSheets(schemeErrors)(messages)
       Ok(views.html.html_error_report(schemeName, sheets, schemeNameShort, totalErrors, schemeErrorCount)(request, context, messages))
     }recover {
       case e: NoSuchElementException => {

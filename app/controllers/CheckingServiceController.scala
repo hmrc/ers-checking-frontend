@@ -200,15 +200,18 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   }
 
   def showFormatErrorsPage(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
-    cacheUtil.fetch[String](CacheUtil.FILE_TYPE_CACHE).flatMap { fileType =>
-      cacheUtil.fetch[String](CacheUtil.SCHEME_CACHE).flatMap { schemeName =>
-        cacheUtil.fetch[Boolean](CacheUtil.FORMAT_ERROR_EXTENDED_CACHE).flatMap { extendedInstructions =>
-          cacheUtil.fetch[String](CacheUtil.FORMAT_ERROR_CACHE).map { errorMsg =>
-            Ok(views.html.format_errors(fileType, ContentUtil.getSchemeName(schemeName)._1, ContentUtil.getSchemeName(schemeName)._2, errorMsg, extendedInstructions))
-          }
-        }
-      }
-    } recover {
+
+    val future = for {
+      fileType <- cacheUtil.fetch[String](CacheUtil.FILE_TYPE_CACHE)
+      schemeName <- cacheUtil.fetch[String](CacheUtil.SCHEME_CACHE)
+      extendedInstructions <- cacheUtil.fetch[Boolean](CacheUtil.FORMAT_ERROR_EXTENDED_CACHE)
+      errorMsg <- cacheUtil.fetch[String](CacheUtil.FORMAT_ERROR_CACHE)
+      errorParams <- cacheUtil.fetch[Seq[String]](CacheUtil.FORMAT_ERROR_CACHE_PARAMS)
+    } yield {
+      Ok(views.html.format_errors(fileType, ContentUtil.getSchemeName(schemeName)._1, ContentUtil.getSchemeName(schemeName)._2, errorMsg, errorParams, extendedInstructions))
+    }
+
+    future recover {
       case e: Exception => {
         Logger.error("showFormatErrorsPage: Unable to fetch file type. Error: " + e.getMessage)
         getGlobalErrorPage

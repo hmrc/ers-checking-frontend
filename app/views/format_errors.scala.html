@@ -18,6 +18,7 @@
   schemeName: String,
   schemeNameShort: String,
   errorMsg: String,
+  errorMsgParams: Seq[String],
   showExtendedInstructions: Boolean)(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext, messages: Messages)
 @* check return file Template *@
 
@@ -28,7 +29,7 @@
 <p class="font-xsmall"><a href="@getPageBackLink(fileType)" class="link-back">@Html(Messages("ers.back"))</a></p>
 @header(Messages("ers_format_errors.page_title", schemeName, schemeNameShort))
     <div class="panel-indent">
-        <p>@Html(errorMsg)</p>
+        <p>@Html(Messages(errorMsg, errorMsgParams:_*))</p>
     </div>
     <div class="bottom-grey"></div>
     <h2 class="heading-medium">@Html(Messages("ers_format_errors.sub_heading"))</h2>
