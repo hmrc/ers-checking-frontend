@@ -20,29 +20,28 @@ import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, Lang, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Call, Controller}
 import config.ApplicationConfig
-import uk.gov.hmrc.play.language.LanguageUtils
+import play.api.Configuration
+import uk.gov.hmrc.play.language.{LanguageController, LanguageUtils}
 
-class LanguageSwitchController @Inject() (
-                                           appConfig: ApplicationConfig,
-                                           implicit val messagesApi: MessagesApi
-                                         ) extends Controller with I18nSupport {
+class LanguageSwitchController @Inject()(
+                                          configuration: Configuration,
+                                          languageUtils: LanguageUtils,
+                                          val messagesApi: MessagesApi
+                                        ) extends LanguageController(configuration, languageUtils) {
 
-  private def langToCall(lang: String): (String) => Call = appConfig.routeToSwitchLanguage
+  //private def langToCall(lang: String): (String) => Call = appConfig.routeToSwitchLanguage
 
-  private def fallbackURL: String = routes.CheckingServiceController.startPage().url
 
-  private def languageMap: Map[String, Lang] = appConfig.languageMap
+  //private def languageMap: Map[String, Lang] = appConfig.languageMap
 
-  def switchToLanguage(language: String): Action[AnyContent] = Action {
-    implicit request =>
-      val enabled = appConfig.languageTranslationEnabled
-      val lang = if (enabled) {
-        languageMap.getOrElse(language, LanguageUtils.getCurrentLang)
-      } else {
-        Lang("en")
-      }
-      val redirectURL = request.headers.get(REFERER).getOrElse(fallbackURL)
-      Redirect(redirectURL).withLang(Lang.apply(lang.code)).flashing(LanguageUtils.FlashWithSwitchIndicator)
-  }
+  override def languageMap: Map[String, Lang] = Map(
+    "english" -> Lang("en"),
+    "cymraeg" -> Lang("cy")
+  )
+
+  override def fallbackURL: String = routes.CheckingServiceController.startPage().url
+
+
+
 
 }

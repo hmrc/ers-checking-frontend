@@ -16,25 +16,34 @@
 
 package controllers
 import config.ApplicationConfig
-import org.scalatestplus.play.{OneAppPerSuite}
+import org.scalatestplus.play.OneAppPerSuite
+import play.api.Configuration
 import play.api.test.Helpers._
 import play.api.test.FakeRequest
 import play.api.i18n.MessagesApi
+import uk.gov.hmrc.play.language.LanguageUtils
 import uk.gov.hmrc.play.test.UnitSpec
 
 
 class LanguageSwitchControllerTest extends UnitSpec with OneAppPerSuite {
   val messagesApi = app.injector.instanceOf(classOf[MessagesApi])
+  val langUtils : LanguageUtils = app.injector.instanceOf[LanguageUtils]
+  val config: Configuration = app.injector.instanceOf[Configuration]
+
+  object TestLanguageSwitchController extends LanguageSwitchController(
+                                                                        config: Configuration,
+                                                                        langUtils : LanguageUtils,
+                                                                        messagesApi : MessagesApi)
   "Hitting language selection endpoint" must {
     "redirect to Welsh translated start page if Welsh language is selected" in {
       val request = FakeRequest()
-      val result = new LanguageSwitchController(appConfig = ApplicationConfig, messagesApi = messagesApi).switchToLanguage("cymraeg")(request)
+      val result = TestLanguageSwitchController.switchToLanguage("cymraeg")(request)
       header("Set-Cookie",result) shouldBe Some("PLAY_LANG=cy; Path=/;;PLAY_FLASH=switching-language=true; Path=/; HTTPOnly")
     }
 
     "redirect to English translated start page if English language is selected" in {
       val request = FakeRequest()
-      val result = new LanguageSwitchController(appConfig = ApplicationConfig, messagesApi = messagesApi).switchToLanguage("english")(request)
+      val result = TestLanguageSwitchController.switchToLanguage("english")(request)
       header("Set-Cookie",result) shouldBe Some("PLAY_LANG=en; Path=/;;PLAY_FLASH=switching-language=true; Path=/; HTTPOnly")
     }
   }

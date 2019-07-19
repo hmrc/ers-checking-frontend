@@ -35,8 +35,8 @@ trait ApplicationConfig {
   val ggSignInUrl: String
 
   val languageTranslationEnabled: Boolean
-  def languageMap: Map[String, Lang]
-  def routeToSwitchLanguage: String => Call
+  //def languageMap: Map[String, Lang]
+  //def routeToSwitchLanguage: String => Call
 }
 
 class ApplicationConfigImpl extends ApplicationConfig with ServicesConfig {
@@ -64,6 +64,7 @@ class ApplicationConfigImpl extends ApplicationConfig with ServicesConfig {
   def languageMap: Map[String, Lang] = Map(
     "english" -> Lang("en"),
     "cymraeg" -> Lang("cy"))
+
   def routeToSwitchLanguage = (lang: String) => routes.LanguageSwitchController.switchToLanguage(lang)
 }
 
