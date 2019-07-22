@@ -151,6 +151,7 @@ ers.exceptions.dataParser.unidentifiableSheetName = Couldn’t identify SheetNam
 ers.exceptions.dataParser.incorrectHeader = The headers on {0} in {1} aren’t right.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the ERS guidance documents</a> to make sure they’re as required.
 ers.exceptions.dataParser.headersDontMatch = Header doesn’t match
 ers.exceptions.dataParser.configFailure = It hasn’t been possible to check this file.
+ers.exceptions.dataParser.validatorError = Could not set the validator
 ers.exceptions.dataParser.ampersand = Must not contain ampersands.
 ers.exceptions.dataParser.noData = The file that you chose doesn’t have any data after row 9. The reportable events data must start in cell A10.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the ERS guidance documents</a> to help you create error-free files.
 

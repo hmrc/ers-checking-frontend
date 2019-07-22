@@ -70,12 +70,15 @@ trait UploadController extends ERSCheckingBaseController {
 
 	def handleException(t: Throwable)(implicit request: Request[AnyContent], hc: HeaderCarrier): Future[Result] = {
 		t match {
-			case e: ERSFileProcessingException =>
-				cacheUtil.cache[String](CacheUtil.FORMAT_ERROR_CACHE, e.message).flatMap { _ =>
-					cacheUtil.cache[Boolean](CacheUtil.FORMAT_ERROR_EXTENDED_CACHE, e.needsExtendedInstructions).map { _ =>
-						Redirect(routes.CheckingServiceController.formatErrorsPage())
-					}
+			case e: ERSFileProcessingException => {
+				for {
+					_ <- cacheUtil.cache[String](CacheUtil.FORMAT_ERROR_CACHE, e.message)
+					_ <- cacheUtil.cache[Seq[String]](CacheUtil.FORMAT_ERROR_CACHE_PARAMS, e.optionalParams)
+					_ <- cacheUtil.cache[Boolean](CacheUtil.FORMAT_ERROR_EXTENDED_CACHE, e.needsExtendedInstructions)
+				} yield {
+					Redirect(routes.CheckingServiceController.formatErrorsPage())
 				}
+			}
 			case _ => throw t
 		}
 	}

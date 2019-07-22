@@ -37,6 +37,7 @@ trait ApplicationConfig {
   val languageTranslationEnabled: Boolean
   def languageMap: Map[String, Lang]
   def routeToSwitchLanguage: String => Call
+  def reportAProblemPartialUrl: String
 }
 
 class ApplicationConfigImpl extends ApplicationConfig with ServicesConfig {
@@ -65,6 +66,9 @@ class ApplicationConfigImpl extends ApplicationConfig with ServicesConfig {
     "english" -> Lang("en"),
     "cymraeg" -> Lang("cy"))
   def routeToSwitchLanguage = (lang: String) => routes.LanguageSwitchController.switchToLanguage(lang)
+
+  private lazy val _reportAProblemPartialUrl = s"$contactHost/contact/problem_reports?secure=false"
+  override def reportAProblemPartialUrl: String = _reportAProblemPartialUrl
 }
 
 object ApplicationConfig extends ApplicationConfigImpl

@@ -69,27 +69,27 @@
 							// file ok
 							return true;
 						} else {
-							showCSVErrorMsg(e, "Choose a different file &ndash; you've already chosen one with this name");
+							showCSVErrorMsg(e, GOVUK.getLocalisedContent("csv.already.chosen"));
 					    	errors++;
 							return false;
 						}
 					} else {
-						showCSVErrorMsg(e, "Check this file (you can only upload files that are "+(MAX_CSV_FILESIZE/1000000)+"MB or less)");
+						showCSVErrorMsg(e, GOVUK.getLocalisedContent("csv.file.too.large", [MAX_CSV_FILESIZE/1000000]));
 						errors++;
 						return false;
 					}
 				} else {
-					showCSVErrorMsg(e, "Choose a different file &ndash; it must be a CSV file");
+					showCSVErrorMsg(e, GOVUK.getLocalisedContent("csv.file.wrong.type"));
 					errors++;
 					return false;
 				}				
 			} else {
-				showCSVErrorMsg(e, "The filename must contain "+ MAX_FILENAME_LENGTH +" characters or less");
+				showCSVErrorMsg(e, GOVUK.getLocalisedContent("csv.file.name.too.long", [MAX_FILENAME_LENGTH]));
 				errors++;
 				return false;
 			}
 		} else {
-			showCSVErrorMsg(e, "Choose a different file &ndash; the file's name can't contain invalid characters");
+			showCSVErrorMsg(e, GOVUK.getLocalisedContent("csv.file.name.invalid.chars"));
 			errors++;
 			return false;
 		}

@@ -81,7 +81,9 @@ scriptElement: Option[Html] = None)(mainContent: Html = HtmlFormat.empty)(implic
 }
 
 @getHelpForm = {
-    @includes.report_problem(supportLinkEnabled)
+    @if(supportLinkEnabled) {
+        @get_help_form(true, false)
+    }
 }
 
 @content = {
