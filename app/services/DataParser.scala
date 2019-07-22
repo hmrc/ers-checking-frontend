@@ -133,7 +133,12 @@ trait DataGenerator extends DataParser with Metrics{
 
     def checkForMissingHeaders(rowNum: Int, sheetName: String) = {
       if(rowNum > 0 && rowNum < 9) {
-        throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName),Messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName), needsExtendedInstructions = true)
+        throw ERSFileProcessingException(
+          "ers.exceptions.dataParser.incorrectHeader",
+          Messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName),
+          needsExtendedInstructions = true,
+          optionalParams = Seq(sheetName, fileName)
+        )
       }
     }
 
@@ -190,7 +195,10 @@ trait DataGenerator extends DataParser with Metrics{
 
     checkForMissingHeaders(rowNum, sheetName)
     if(rowsWithData == 0) {
-      throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.noData"),Messages("ers.exceptions.dataParser.noData"), needsExtendedInstructions = true)
+      throw ERSFileProcessingException(
+        "ers.exceptions.dataParser.noData",
+        Messages("ers.exceptions.dataParser.noData"),
+        needsExtendedInstructions = true)
     }
     deliverDataIteratorMetrics(startTime)
     AuditEvents.numRowsInSchemeData(scheme, rowsWithData)(authContext,hc,request)
@@ -205,7 +213,11 @@ trait DataGenerator extends DataParser with Metrics{
       case e:Exception => {
         AuditEvents.auditRunTimeError(e,"Could not set the validator",sheetName)(hc,request)
         Logger.error("setValidator has thrown an exception, SheetName: " + sheetName + " Exception message: " + e.getMessage)
-        throw new ERSFileProcessingException(Messages("ers.exceptions.dataParser.configFailure", sheetName), "Could not set the validator ")
+        throw new ERSFileProcessingException(
+          "ers.exceptions.dataParser.configFailure",
+          Messages("ers.exceptions.dataParser.validatorError"),
+          optionalParams = Seq(sheetName)
+        )
       }
     }
   }
@@ -233,7 +245,12 @@ trait DataGenerator extends DataParser with Metrics{
     ersSheets.getOrElse(sheetName, {
       Logger.warn(Messages("ers.exceptions.dataParser.unidentifiableSheetName") + sheetName)
       val schemeName = ContentUtil.getSchemeName(scheme)._2
-      throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectSheetName", sheetName, schemeName), Messages("ers.exceptions.dataParser.unidentifiableSheetName") + " " +sheetName, needsExtendedInstructions = true)
+      throw ERSFileProcessingException(
+        "ers.exceptions.dataParser.incorrectSheetName",
+        Messages("ers.exceptions.dataParser.unidentifiableSheetName") + " " +sheetName,
+        needsExtendedInstructions = true,
+        optionalParams = Seq(sheetName, schemeName)
+      )
     })
   }
 
@@ -252,7 +269,12 @@ trait DataGenerator extends DataParser with Metrics{
         implicit val hc:HeaderCarrier = new HeaderCarrier()
      //   AuditEvents.fileProcessingErrorAudit(schemeInfo,sheetName,"Header row invalid")
         Logger.warn("Error while reading File + Incorrect ERS Template")
-        throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName),Messages("ers.exceptions.dataParser.headersDontMatch"), needsExtendedInstructions = true)
+        throw ERSFileProcessingException(
+          "ers.exceptions.dataParser.incorrectHeader",
+          Messages("ers.exceptions.dataParser.headersDontMatch"),
+          needsExtendedInstructions = true,
+          optionalParams = Seq(sheetName, fileName)
+        )
       }
     }
   }

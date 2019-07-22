@@ -118,13 +118,14 @@ class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFuture
       val result = Try(dataGeneratorObj.identifyAndDefineSheet("EMI40_Adjustments","2")(hc,Fixtures.buildFakeRequestWithSessionId("GET")))
       result.isFailure must be (true)
     }
-
+    
     "raise exception if sheetName cannot be identified" in {
       val hc = HeaderCarrier()
       val invalidSheet = intercept[ERSFileProcessingException]{
         dataGeneratorObj.identifyAndDefineSheet("CSOP_OptionsExercised_V3","2")(hc,Fixtures.buildFakeRequestWithSessionId("GET"))
       }
-      invalidSheet.message mustBe Messages("ers.exceptions.dataParser.incorrectSchemeType","a CSOP", "an EMI", "CSOP_OptionsExercised_V3")
+      invalidSheet.message mustBe "ers.exceptions.dataParser.incorrectSchemeType"
+      invalidSheet.optionalParams mustBe Seq("a CSOP", "an EMI", "CSOP_OptionsExercised_V3")
     }
 
     "isBlankRow" in {
@@ -138,7 +139,8 @@ class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFuture
       val result = intercept[ERSFileProcessingException] {
         dataGenObj.getErrors(XMLTestData.getInvalidCSOPWithoutHeaders,"1","CSOP.ods")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"))
       }
-      result.message mustBe Messages("ers.exceptions.dataParser.incorrectHeader", "CSOP_OptionsGranted_V3", "CSOP.ods")
+      result.message mustBe "ers.exceptions.dataParser.incorrectHeader"
+      result.optionalParams mustBe Seq("CSOP_OptionsGranted_V3", "CSOP.ods")
     }
 
     "get an exception if ods file has more than 1 sheet but 1 of the sheets has less than 9 rows and doesn't have header data" in {
@@ -146,7 +148,8 @@ class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFuture
       val result = intercept[ERSFileProcessingException] {
         dataGenObj.getErrors(XMLTestData.getInvalidCSOPWith2Sheets1WithoutHeaders,"1","CSOP.ods")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"))
       }
-      result.message mustBe Messages("ers.exceptions.dataParser.incorrectHeader", "CSOP_OptionsGranted_V3", "CSOP.ods")
+      result.message mustBe "ers.exceptions.dataParser.incorrectHeader"
+      result.optionalParams mustBe Seq("CSOP_OptionsGranted_V3", "CSOP.ods")
     }
 
     "get an exception if ods file doesn't contain any data" in {
@@ -154,7 +157,8 @@ class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFuture
       val result = intercept[ERSFileProcessingException] {
         dataGenObj.getErrors(XMLTestData.getCSOPWithoutData,"1","CSOP.ods")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"))
       }
-      result.message mustBe Messages("ers.exceptions.dataParser.noData")
+      result.message mustBe "ers.exceptions.dataParser.noData"
+      result.optionalParams mustBe Seq.empty[String]
     }
 
     "get no errors for EMI" in {
