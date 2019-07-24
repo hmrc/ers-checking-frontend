@@ -18,7 +18,6 @@ package config
 
 import play.Logger
 import play.api.Play
-import play.api.Play.{configuration, current}
 import uk.gov.hmrc.play.config.ServicesConfig
 import play.api.i18n.Lang
 import play.api.mvc.Call
@@ -65,6 +64,7 @@ class ApplicationConfigImpl extends ApplicationConfig with ServicesConfig {
   def languageMap: Map[String, Lang] = Map(
     "english" -> Lang("en"),
     "cymraeg" -> Lang("cy"))
+
   def routeToSwitchLanguage = (lang: String) => routes.LanguageSwitchController.switchToLanguage(lang)
 
   private lazy val _reportAProblemPartialUrl = s"$contactHost/contact/problem_reports?secure=false"
