@@ -117,10 +117,10 @@ ers_html_error_report.report_title =Adroddiad o wallau {0} ({1})
 ers_html_error_report.number_of_errors_sing =Dangos {0} o’r {1} gwall a ddarganfuwyd.
 ers_html_error_report.number_of_errors =Dangos {0} o’r {1} o wallau a ddarganfuwyd.
 ers_html_error_report.errors_title =Gwallau yn ôl enw (teitl) {0}
-ers_html_error_report.table_column_names =<tr><th class=’column’ scope=’col’>Colofn</th><th class=’row’ scope=’col’>Rhes</th><th class=’errorTitle’ scope=’col’>Gwall</th></tr>
-ers_html_error_report.sheet_name =<h3 class=’sheet-title’><span class=’font-small’>{0}</span></h3>
-ers_html_error_report.table_row =<tr><td>{0}</td><td>{1}</td><td class=’errorMsg’>{2}</td></tr>
-ers_html_error_report.sheet ={0}<table id={3} class="error-table">{1}{2}</table>
+ers_html_error_report.table_column_names =<tr><th class='column' scope='col'>Colofn</th><th class='row' scope='col'>Rhes</th><th class='errorTitle' scope='col'>Gwall</th></tr>
+ers_html_error_report.sheet_name =<h3 class='sheet-title'><span class='font-small'>{0}</span></h3>
+ers_html_error_report.table_row =<tr><td>{0}</td><td>{1}</td><td class='errorMsg'>{2}</td></tr>
+ers_html_error_report.sheet ={0}<table id={3} class='error-table'>{1}{2}</table>
 ers_pdf_error_report.csop =Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni
 ers_pdf_error_report.emi =Cymhellion Rheoli Mentrau
 ers_pdf_error_report.saye =Cynilo Wrth Ennill
