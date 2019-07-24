@@ -73,10 +73,13 @@ scriptElement: Option[Html] = None)(mainContent: Html = HtmlFormat.empty)(implic
 }
 
 @if(applicationConfig.languageTranslationEnabled) {
-    @views.html.language_selection(
-        applicationConfig.languageMap,
-        applicationConfig.routeToSwitchLanguage,
-        Some("text--right"))
+        "langSelector" -> {
+                Map(
+                "enUrl" -> controllers.routes.LanguageSwitchController.switchToLanguage("english").url,
+                "cyUrl" -> controllers.routes.LanguageSwitchController.switchToLanguage("cymraeg").url
+                )
+                },
+        "isWelsh" -> (messages.lang.code == "cy")
     }
 }
 
@@ -94,5 +97,7 @@ scriptElement: Option[Html] = None)(mainContent: Html = HtmlFormat.empty)(implic
         sidebar = sidebar
     )
 }
+
+
 
 @hmrcGovUkTemplate(Some(title), None)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(uiLayouts.footer_links()), true)(content)
