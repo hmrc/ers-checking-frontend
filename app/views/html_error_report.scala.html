@@ -41,7 +41,7 @@
 
 		<h2 class="heading-medium">
 			@(if(errorListCount != 0) {
-			Html(Messages("ers_html_error_report.errors_title", "sheet"))
+			Html(Messages("ers_html_error_report.errors_title", Messages("ers_html_error_report.errors_sheet")))
 			})</h2>
 			@Html(sheets)
 
