@@ -77,13 +77,13 @@ trait PageBuilder {
     pageElement
   }
 
-  def getPageElement(scheme: String, pageId: String, element: String, para: String = "") : String = {
+  def getPageElement(scheme: String, pageId: String, element: String, para: String = "")(implicit messages: Messages) : String = {
     val pageElement: String = scheme match {
-      case SCHEME_CSOP => Messages(pageId + MSG_CSOP + element, para)
-      case SCHEME_EMI => Messages(pageId + MSG_EMI + element, para)
-      case SCHEME_SAYE => Messages(pageId + MSG_SAYE + element, para)
-      case SCHEME_SIP => Messages(pageId + MSG_SIP + element, para)
-      case SCHEME_OTHER => Messages(pageId + MSG_OTHER + element, para)
+      case SCHEME_CSOP => messages(pageId + MSG_CSOP + element, para)
+      case SCHEME_EMI => messages(pageId + MSG_EMI + element, para)
+      case SCHEME_SAYE => messages(pageId + MSG_SAYE + element, para)
+      case SCHEME_SIP => messages(pageId + MSG_SIP + element, para)
+      case SCHEME_OTHER => messages(pageId + MSG_OTHER + element, para)
       case _ => DEFAULT
     }
     pageElement
