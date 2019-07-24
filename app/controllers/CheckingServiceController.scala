@@ -138,7 +138,7 @@ trait CheckingServiceController extends ERSCheckingBaseController {
     } recover {
       case e: Exception => {
         Logger.error("showCheckCSVFilePage: Unable to fetch scheme. Error: " + e.getMessage)
-        getGlobalErrorPage
+        getGlobalErrorPage()(messages)
       }
     }
   }
@@ -157,7 +157,7 @@ trait CheckingServiceController extends ERSCheckingBaseController {
     } recover {
       case e: Exception => {
         Logger.error("showCheckFilePage: Unable to fetch scheme. Error: " + e.getMessage)
-        getGlobalErrorPage
+        getGlobalErrorPage()(messages)
       }
     }
   }
@@ -219,6 +219,6 @@ trait CheckingServiceController extends ERSCheckingBaseController {
     }
   }
 
-  def getGlobalErrorPage = Ok(views.html.global_error(Messages("ers.global_errors.title"), Messages("ers.global_errors.heading"), Messages("ers.global_errors.message")))
+  def getGlobalErrorPage()(implicit messages: Messages) = Ok(views.html.global_error(messages("ers.global_errors.title"), messages("ers.global_errors.heading"), messages("ers.global_errors.message"))(messages))
 
 }

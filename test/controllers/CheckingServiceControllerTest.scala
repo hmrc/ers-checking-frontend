@@ -22,13 +22,13 @@ import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
-import play.api.i18n.Messages
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CacheUtil
+
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -36,6 +36,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with MockitoSugar {
 
   implicit val hc = new HeaderCarrier
+  implicit lazy val messages: Messages = Messages(Lang("en"), app.injector.instanceOf[MessagesApi])
 
   "start Page GET" should {
 
