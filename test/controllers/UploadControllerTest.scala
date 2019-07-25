@@ -20,7 +20,9 @@ import models.ERSFileProcessingException
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.{OneAppPerSuite, OneAppPerTest}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.inject.Injector
 import play.api.Application
 import play.api.http.Status
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -29,13 +31,14 @@ import services.{CsvFileProcessor, ProcessODSService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CacheUtil
+import play.api.Play.current
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class UploadControllerTest extends UnitSpec with OneAppPerSuite with MockitoSugar {
+class UploadControllerTest extends UnitSpec with MockitoSugar with GuiceOneAppPerSuite with I18nSupport {
 
-  val config = Map("application.secret" -> "test",
+	val config = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
     "contact-frontend.host" -> "localhost",
     "contact-frontend.port" -> "9250",
@@ -44,6 +47,8 @@ class UploadControllerTest extends UnitSpec with OneAppPerSuite with MockitoSuga
 	implicit val hc = new HeaderCarrier
 
 	override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build
+	def injector: Injector = app.injector
+	implicit val messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
 
   def buildFakeUploadController(uploadRes: Boolean = true, proccessFile: Boolean = true, formatRes: Boolean = true) = new UploadController {
 
@@ -52,7 +57,7 @@ class UploadControllerTest extends UnitSpec with OneAppPerSuite with MockitoSuga
 		override val csvFileProcessor:CsvFileProcessor = mockCsvFileProcessor
 		override val processODSService: ProcessODSService = mockProcessODSService
 		when(
-			mockProcessODSService.performODSUpload()(any(),any(),any(),any())
+			mockProcessODSService.performODSUpload()(any(),any(),any(),any(), any())
 		).thenReturn(
 				proccessFile match {
 				case true => Future.successful(Success(uploadRes))
@@ -60,7 +65,7 @@ class UploadControllerTest extends UnitSpec with OneAppPerSuite with MockitoSuga
 			}
 		)
 		when(
-			csvFileProcessor.processCsvUpload(any())(any(),any(),any())
+			csvFileProcessor.processCsvUpload(any())(any(),any(),any(), any())
 		).thenReturn(
 				proccessFile match {
 				case true => Future.successful(Success(uploadRes))
@@ -98,14 +103,14 @@ class UploadControllerTest extends UnitSpec with OneAppPerSuite with MockitoSuga
 
 		"give a redirect status to checkingSuccessPage if no formating or structural errors" in {
 			val controllerUnderTest = buildFakeUploadController()
-			val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+			val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
 			status(result) shouldBe Status.SEE_OTHER
 			result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkingSuccessPage.toString()
 		}
 
 		"give a redirect status to checkingSuccessPage if formating errors" in {
 			val controllerUnderTest = buildFakeUploadController(uploadRes = false)
-			val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+			val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
 			status(result) shouldBe Status.SEE_OTHER
 			result.header.headers.get("Location").get shouldBe routes.HtmlReportController.htmlErrorReportPage.toString()
 		}
@@ -129,14 +134,14 @@ class UploadControllerTest extends UnitSpec with OneAppPerSuite with MockitoSuga
 
 		"give a redirect status to checkingSuccessPage if no formating or structural errors" in {
 			val controllerUnderTest = buildFakeUploadController()
-			val result = controllerUnderTest.showuploadCSVFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+			val result = controllerUnderTest.showuploadCSVFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
 			status(result) shouldBe Status.SEE_OTHER
 			result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkingSuccessPage.toString()
 		}
 
 		"give a redirect status to checkingSuccessPage if formating errors" in {
 			val controllerUnderTest = buildFakeUploadController(uploadRes = false)
-			val result = controllerUnderTest.showuploadCSVFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+			val result = controllerUnderTest.showuploadCSVFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
 			status(result) shouldBe Status.SEE_OTHER
 			result.header.headers.get("Location").get shouldBe routes.HtmlReportController.htmlErrorReportPage.toString()
 		}

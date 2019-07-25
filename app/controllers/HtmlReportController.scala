@@ -47,7 +47,7 @@ trait HtmlReportController extends ERSCheckingBaseController {
   def showHtmlErrorReportPage()(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
     cacheUtil.fetchAll().map { all =>
       val scheme: (String, String) = all.getEntry[String](CacheUtil.SCHEME_CACHE) match {
-        case Some(name) => ContentUtil.getSchemeName(name)
+        case Some(name) => ContentUtil.getSchemeName(name)(messages)
         case _ => ("", "")
       }
       val schemeName = scheme._1

@@ -30,8 +30,6 @@ import services.validation.ErsValidator
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.services.validation.DataValidator
 import utils.{ContentUtil, ParserUtil}
-import play.api.i18n.Messages.Implicits._
-import play.api.Play.current
 
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
@@ -43,7 +41,7 @@ trait DataParser {
   val repeatColumnsAttr = "table:number-columns-repeated"
   val repeatTableAttr = "table:number-rows-repeated"
 
-  def validateSpecialCharacters(xmlRowData : String )={
+  def validateSpecialCharacters(xmlRowData : String )(implicit messages: Messages)={
     if(xmlRowData.contains("&")){
       Logger.debug("Found invalid xml in Data Parser, throwing exception")
       throw new ERSFileProcessingException(Messages("ers.exceptions.dataParser.ampersand"), Messages("ers.exceptions.dataParser.parsingOfFileData"))
@@ -59,7 +57,7 @@ trait DataParser {
     saxParserFactory.newSAXParser()
   }
 
-  def parse(row:String, fileName : String): Either[String, (Seq[String], Int)] = {
+  def parse(row:String, fileName : String)(implicit messages: Messages): Either[String, (Seq[String], Int)] = {
     Logger.debug("DataParser: Parse: About to parse row: " + row)
 
     val xmlRow = Try(Option(XML.withSAXParser(secureSAXParser)loadString(row))).getOrElse(None)
@@ -117,7 +115,7 @@ object DataGenerator extends DataGenerator
 
 trait DataGenerator extends DataParser with Metrics{
 
-  def getErrors(iterator:Iterator[String], scheme:String, fileName : String)(implicit authContext: AuthContext, hc: HeaderCarrier, request: Request[_]) =
+  def getErrors(iterator:Iterator[String], scheme:String, fileName : String)(implicit authContext: AuthContext, hc: HeaderCarrier, request: Request[_], messages: Messages) =
   {
     var rowNum = 0
     implicit var sheetName :String = ""
@@ -131,7 +129,7 @@ trait DataGenerator extends DataParser with Metrics{
 
     val startTime = System.currentTimeMillis()
 
-    def checkForMissingHeaders(rowNum: Int, sheetName: String) = {
+    def checkForMissingHeaders(rowNum: Int, sheetName: String)(implicit messages: Messages) = {
       if(rowNum > 0 && rowNum < 9) {
         throw ERSFileProcessingException(
           "ers.exceptions.dataParser.incorrectHeader",
@@ -206,7 +204,7 @@ trait DataGenerator extends DataParser with Metrics{
     schemeErrors
   }
 
-  def setValidator(sheetName:String)(implicit hc : HeaderCarrier, request: Request[_]) = {
+  def setValidator(sheetName:String)(implicit hc : HeaderCarrier, request: Request[_], messages: Messages) = {
     try {
       ERSValidationConfigs.getValidator(ersSheets(sheetName).configFileName)
     }catch{
@@ -222,7 +220,7 @@ trait DataGenerator extends DataParser with Metrics{
     }
   }
 
-  def identifyAndDefineSheet(data:String,scheme:String)(implicit headerCarrier: HeaderCarrier, request: Request[_]) = {
+  def identifyAndDefineSheet(data:String,scheme:String)(implicit headerCarrier: HeaderCarrier, request: Request[_], messages: Messages) = {
     Logger.debug("5.1  case 0 identifyAndDefineSheet  " )
     val res = getSheet(data, scheme)
     val schemeName = ContentUtil.getSchemeName(scheme)._2
@@ -240,7 +238,7 @@ trait DataGenerator extends DataParser with Metrics{
     }
   }
 
-  def getSheet(sheetName:String, scheme:String) = {
+  def getSheet(sheetName:String, scheme:String)(implicit messages: Messages) = {
     Logger.info(s"Looking for sheetName: ${sheetName}")
     ersSheets.getOrElse(sheetName, {
       Logger.warn(Messages("ers.exceptions.dataParser.unidentifiableSheetName") + sheetName)
@@ -254,7 +252,7 @@ trait DataGenerator extends DataParser with Metrics{
     })
   }
 
-  def validateHeaderRow(rowData:Seq[String], sheetName:String, scheme:String, fileName: String) =
+  def validateHeaderRow(rowData:Seq[String], sheetName:String, scheme:String, fileName: String)(implicit messages: Messages) =
   {
     val headerFormat = "[^a-zA-Z0-9]"
 

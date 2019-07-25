@@ -17,13 +17,11 @@
 package utils
 
 import play.api.i18n.Messages
-import play.api.i18n.Messages.Implicits._
-import play.api.Play.current
 
 object ContentUtil extends ContentUtil
 trait ContentUtil {
 
-  def getSchemeName(schemeType: String) : (String,String) = {
+  def getSchemeName(schemeType: String)(implicit messages: Messages) : (String,String) = {
     schemeType match {
       case "1" => (Messages("ers_pdf_error_report.csop"),"CSOP")
       case "2" => (Messages("ers_pdf_error_report.emi"),"EMI")

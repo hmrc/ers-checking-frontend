@@ -21,17 +21,17 @@ import models.ERSFileProcessingException
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import org.scalatestplus.play.PlaySpec
 import play.api.Application
-import play.api.i18n.Messages
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.inject.Injector
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.XMLTestData._
 import uk.gov.hmrc.http.HeaderCarrier
 
-class ParserTest extends PlaySpec with OneAppPerSuite with ScalaFutures with MockitoSugar with BeforeAndAfter{
-
-
+class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with MockitoSugar with BeforeAndAfter with I18nSupport{
+  
   object TestDataParser extends DataParser
   object TestDataGenerator extends DataGenerator
 
@@ -44,6 +44,8 @@ class ParserTest extends PlaySpec with OneAppPerSuite with ScalaFutures with Moc
   implicit val hc = HeaderCarrier()
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
+  def injector: Injector = app.injector
+  implicit val messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
 
   "parse row with duplicate column data 1" in {
     val result = TestDataParser.parse(emiAdjustmentsXMLRow1.toString,"")
@@ -61,7 +63,7 @@ class ParserTest extends PlaySpec with OneAppPerSuite with ScalaFutures with Moc
   "display incorrectSheetName exception in identifyAndDefineSheet method" in {
 
     val thrown = the[ERSFileProcessingException] thrownBy
-      TestDataGenerator.identifyAndDefineSheet("EMI40_Taxable","2")(hc,Fixtures.buildFakeRequestWithSessionId("GET"))
+      TestDataGenerator.identifyAndDefineSheet("EMI40_Taxable","2")(hc,Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
 
     thrown.getMessage mustBe "ers.exceptions.dataParser.incorrectSheetName"
     thrown.optionalParams mustBe Seq("EMI40_Taxable", "EMI")
