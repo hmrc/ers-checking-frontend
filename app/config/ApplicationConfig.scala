@@ -46,7 +46,7 @@ class ApplicationConfigImpl extends ApplicationConfig with ServicesConfig {
   private def loadConfig(key: String) = runModeConfiguration.getString(key).getOrElse(throw new Exception(s"Missing key: $key"))
 
   Logger.info("The Getting the contact host")
-  private lazy val contactHost = runModeConfiguration.getString("external-url.contact-frontend.host").getOrElse("")
+  private lazy val contactHost = baseUrl("contact-frontend")
   Logger.info("The contact host is " + contactHost)
   private val contactFormServiceIdentifier = "ERS-CHECKING"
 
