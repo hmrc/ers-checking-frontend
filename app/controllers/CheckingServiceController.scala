@@ -38,15 +38,14 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   val uploadedFileUtil = UploadedFileUtil
   val contentUtil = ContentUtil
   val cacheUtil: CacheUtil
-  val messages = applicationMessages
 
   def startPage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
     implicit authContext =>
       implicit request =>
-        showStartPage(authContext, request)
+        showStartPage()
   }
 
-  def showStartPage(implicit authContext: AuthContext, request: Request[AnyRef]): Future[Result] = Future.successful(Ok(views.html.start.render(request, context, messages)))
+  def showStartPage()(implicit authContext: AuthContext, request: Request[AnyRef], messages: Messages): Future[Result] = Future.successful(Ok(views.html.start(request, context, messages)))
 
   def schemeTypePage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
     implicit authContext =>
@@ -129,10 +128,10 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   def checkCSVFilePage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
     implicit authContext =>
       implicit request =>
-        showCheckCSVFilePage(authContext, request, hc)
+        showCheckCSVFilePage()
   }
 
-  def showCheckCSVFilePage(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showCheckCSVFilePage()(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
     cacheUtil.fetch[String](CacheUtil.SCHEME_CACHE).map { scheme =>
         val invalidChars: String = "[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]"
         Ok(views.html.check_csv_file(scheme, invalidChars)(request, request.flash, context, messages))
@@ -148,10 +147,10 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   def checkODSFilePage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
     implicit authContext =>
       implicit request =>
-        showCheckODSFilePage(authContext, request, hc)
+        showCheckODSFilePage()
   }
 
-  def showCheckODSFilePage(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showCheckODSFilePage()(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
     cacheUtil.fetch[String](CacheUtil.SCHEME_CACHE).map { scheme =>
       val invalidChars: String = "[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]"
       Ok(views.html.check_file(scheme, invalidChars)(request, request.flash, context, messages))
@@ -166,10 +165,10 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   def checkingSuccessPage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
     implicit authContext =>
       implicit request =>
-        showCheckingSuccessPage(authContext, request, hc)
+        showCheckingSuccessPage()
   }
 
-  def showCheckingSuccessPage(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showCheckingSuccessPage()(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
     Future.successful(Ok(views.html.checking_success.render(request, context, messages)))
   }
 
@@ -201,15 +200,18 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   }
 
   def showFormatErrorsPage(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
-    cacheUtil.fetch[String](CacheUtil.FILE_TYPE_CACHE).flatMap { fileType =>
-      cacheUtil.fetch[String](CacheUtil.SCHEME_CACHE).flatMap { schemeName =>
-        cacheUtil.fetch[Boolean](CacheUtil.FORMAT_ERROR_EXTENDED_CACHE).flatMap { extendedInstructions =>
-          cacheUtil.fetch[String](CacheUtil.FORMAT_ERROR_CACHE).map { errorMsg =>
-            Ok(views.html.format_errors(fileType, ContentUtil.getSchemeName(schemeName)._1, ContentUtil.getSchemeName(schemeName)._2, errorMsg, extendedInstructions))
-          }
-        }
-      }
-    } recover {
+
+    val future = for {
+      fileType <- cacheUtil.fetch[String](CacheUtil.FILE_TYPE_CACHE)
+      schemeName <- cacheUtil.fetch[String](CacheUtil.SCHEME_CACHE)
+      extendedInstructions <- cacheUtil.fetch[Boolean](CacheUtil.FORMAT_ERROR_EXTENDED_CACHE)
+      errorMsg <- cacheUtil.fetch[String](CacheUtil.FORMAT_ERROR_CACHE)
+      errorParams <- cacheUtil.fetch[Seq[String]](CacheUtil.FORMAT_ERROR_CACHE_PARAMS)
+    } yield {
+      Ok(views.html.format_errors(fileType, ContentUtil.getSchemeName(schemeName)._1, ContentUtil.getSchemeName(schemeName)._2, errorMsg, errorParams, extendedInstructions))
+    }
+
+    future recover {
       case e: Exception => {
         Logger.error("showFormatErrorsPage: Unable to fetch file type. Error: " + e.getMessage)
         getGlobalErrorPage

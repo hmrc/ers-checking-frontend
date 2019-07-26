@@ -129,6 +129,7 @@ ers_html_error_report.report_title = {0} ({1}) error report
 ers_html_error_report.number_of_errors_sing = Showing {0} of {1} error found.
 ers_html_error_report.number_of_errors = Showing {0} of {1} errors found.
 ers_html_error_report.errors_title = Errors by {0} name (title)
+ers_html_error_report.errors_sheet =sheet
 ers_html_error_report.table_column_names = <tr><th class='column' scope='col'>Column</th><th class='row' scope='col'>Row</th><th class='errorTitle' scope='col'>Error</th></tr>
 ers_html_error_report.sheet_name = <h3 class='sheet-title'><span class='font-small'>{0}</span></h3>
 ers_html_error_report.table_row = <tr><td>{0}</td><td>{1}</td><td class='errorMsg'>{2}</td></tr>
@@ -151,6 +152,7 @@ ers.exceptions.dataParser.unidentifiableSheetName = Couldn’t identify SheetNam
 ers.exceptions.dataParser.incorrectHeader = The headers on {0} in {1} aren’t right.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the ERS guidance documents</a> to make sure they’re as required.
 ers.exceptions.dataParser.headersDontMatch = Header doesn’t match
 ers.exceptions.dataParser.configFailure = It hasn’t been possible to check this file.
+ers.exceptions.dataParser.validatorError = Could not set the validator
 ers.exceptions.dataParser.ampersand = Must not contain ampersands.
 ers.exceptions.dataParser.noData = The file that you chose doesn’t have any data after row 9. The reportable events data must start in cell A10.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the ERS guidance documents</a> to help you create error-free files.
 

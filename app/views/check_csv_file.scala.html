@@ -43,7 +43,7 @@
 		@helpers.form(action = routes.UploadController.uploadCSVFile(scheme), 'id -> "upload-file-form", 'enctype -> "multipart/form-data") {
 			@for(a <- 0 to getNumberOfBrowseButtons(scheme)-1) {
 				<div class="form-field">
-					<label class="input-csv-file-name-heading" for="fileUpload[@a]">@Messages(getPageElement(scheme,PAGE_CHECK_CSV_FILE,"file"+a))</label>
+					<label class="input-csv-file-name-heading" for="fileUpload[@a]">@getPageElement(scheme,PAGE_CHECK_CSV_FILE,"file"+a)</label>
 					<input id="fileUpload[@a]" class="input-csv-file-name" type="file" name="fileUpload[@a]" accept=".csv" size="40"/>
 				</div>
 			}

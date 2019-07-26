@@ -16,6 +16,7 @@
 
 package models
 
+import play.api.i18n.Messages
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.services.validation._
 
@@ -26,7 +27,8 @@ case class FileInfo(errorMessage: String, fileName: String, fileID: String, file
 case class ERSFileProcessingException(message: String,
                                       context: String,
                                       jsonSize: Option[Int] = None,
-                                      needsExtendedInstructions: Boolean = false) extends Exception(message)
+                                      needsExtendedInstructions: Boolean = false,
+                                      optionalParams: Seq[String] = Nil) extends Exception(message)
 
 case class CallbackData(collection: String, id: String, length: Long, name: Option[String], contentType: Option[String], customMetadata: Option[JsObject])
 

@@ -21,17 +21,17 @@ import models.ERSFileProcessingException
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import org.scalatestplus.play.PlaySpec
 import play.api.Application
-import play.api.i18n.Messages
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.inject.Injector
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.XMLTestData._
 import uk.gov.hmrc.http.HeaderCarrier
 
-class ParserTest extends PlaySpec with OneAppPerSuite with ScalaFutures with MockitoSugar with BeforeAndAfter{
-
-
+class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with MockitoSugar with BeforeAndAfter with I18nSupport{
+  
   object TestDataParser extends DataParser
   object TestDataGenerator extends DataGenerator
 
@@ -44,6 +44,8 @@ class ParserTest extends PlaySpec with OneAppPerSuite with ScalaFutures with Moc
   implicit val hc = HeaderCarrier()
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
+  def injector: Injector = app.injector
+  implicit val messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
 
   "parse row with duplicate column data 1" in {
     val result = TestDataParser.parse(emiAdjustmentsXMLRow1.toString,"")
@@ -59,35 +61,21 @@ class ParserTest extends PlaySpec with OneAppPerSuite with ScalaFutures with Moc
 
 
   "display incorrectSheetName exception in identifyAndDefineSheet method" in {
-    def exceptionMessage: String = {
-      try {
-        val hc = HeaderCarrier()
-        val result = TestDataGenerator.identifyAndDefineSheet("EMI40_Taxable","2")(hc,Fixtures.buildFakeRequestWithSessionId("GET"))
-        result.toString()
-      }
-      catch {
-        case e: ERSFileProcessingException => {
-          return e.message
-        }
-      }
-    }
-    exceptionMessage mustBe Messages("ers.exceptions.dataParser.incorrectSheetName", "EMI40_Taxable", "EMI")
+
+    val thrown = the[ERSFileProcessingException] thrownBy
+      TestDataGenerator.identifyAndDefineSheet("EMI40_Taxable","2")(hc,Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
+
+    thrown.getMessage mustBe "ers.exceptions.dataParser.incorrectSheetName"
+    thrown.optionalParams mustBe Seq("EMI40_Taxable", "EMI")
   }
 
   "display incorrectHeader exception in validateHeaderRow method" in {
-    def exceptionMessage: String = {
-      try {
-        val data: Seq[String] = Seq("","")
-        val result = TestDataGenerator.validateHeaderRow(data, "CSOP_OptionsRCL_V3", "CSOP", "CSOP_OptionsRCL_V3.csv")
-        result.toString()
-      }
-      catch {
-        case e: ERSFileProcessingException => {
-          return e.message
-        }
-      }
-    }
-    exceptionMessage mustBe Messages("ers.exceptions.dataParser.incorrectHeader", "CSOP_OptionsRCL_V3", "CSOP_OptionsRCL_V3.csv")
+
+    val thrown = the[ERSFileProcessingException] thrownBy
+      TestDataGenerator.validateHeaderRow(Seq("",""), "CSOP_OptionsRCL_V3", "CSOP", "CSOP_OptionsRCL_V3.csv")
+
+    thrown.getMessage mustBe "ers.exceptions.dataParser.incorrectHeader"
+    thrown.optionalParams mustBe Seq("CSOP_OptionsRCL_V3", "CSOP_OptionsRCL_V3.csv")
   }
 
   "return sheetInfo given a valid sheet name" in {
@@ -118,7 +106,8 @@ class ParserTest extends PlaySpec with OneAppPerSuite with ScalaFutures with Moc
     val result = intercept[ERSFileProcessingException]{
       TestDataGenerator.getSheet("abc", "1")
     }
-    result.message mustBe Messages("ers.exceptions.dataParser.incorrectSheetName", "abc", "CSOP")
+    result.message mustBe "ers.exceptions.dataParser.incorrectSheetName"
+    result.optionalParams mustBe Seq("abc", "CSOP")
   }
 
 }

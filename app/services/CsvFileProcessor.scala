@@ -23,7 +23,6 @@ import org.apache.commons.io.{FileUtils, FilenameUtils, LineIterator}
 import play.api.Logger
 import play.api.Play.current
 import play.api.i18n.Messages
-import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{AnyContent, Request}
 import services.validation.ErsValidator
 import uk.gov.hmrc.play.frontend.auth.AuthContext
@@ -49,7 +48,7 @@ trait CsvFileProcessor extends DataGenerator {
   val converter: (String) => Array[String] = _.split(",")
   val defaultChunkSize: Int = 10000
 
-  def readCSVFile(filename:String,file: File,scheme:String)(implicit request: Request[AnyContent], hc : HeaderCarrier): SheetErrors = {
+  def readCSVFile(filename:String,file: File,scheme:String)(implicit request: Request[AnyContent], hc : HeaderCarrier, messages: Messages): SheetErrors = {
     Logger.debug("file.getName" + filename)
     val sheetName = identifyAndDefineSheet(filename,scheme )
 
@@ -59,7 +58,7 @@ trait CsvFileProcessor extends DataGenerator {
     SheetErrors(sheetName, errors)
   }
 
-  def processCsvUpload(scheme:String)(implicit request: Request[AnyContent], authContext : AuthContext, hc : HeaderCarrier): Future[Try[Boolean]] =
+  def processCsvUpload(scheme:String)(implicit request: Request[AnyContent], authContext : AuthContext, hc : HeaderCarrier, messages: Messages): Future[Try[Boolean]] =
   {
     try {
       val errors = validateCsvFiles(scheme)
@@ -70,7 +69,7 @@ trait CsvFileProcessor extends DataGenerator {
     }
   }
 
-  def validateCsvFiles(scheme:String)(implicit request: Request[AnyContent], authContext : AuthContext, hc : HeaderCarrier): ListBuffer[SheetErrors] = {
+  def validateCsvFiles(scheme:String)(implicit request: Request[AnyContent], authContext : AuthContext, hc : HeaderCarrier, messages: Messages): ListBuffer[SheetErrors] = {
    val files = request.body.asMultipartFormData.get.files
     val filesErrors: ListBuffer[SheetErrors] = new ListBuffer()
     files.map(file => {
@@ -83,7 +82,7 @@ trait CsvFileProcessor extends DataGenerator {
     filesErrors
   }
 
-  def checkFileType(filename:String): Unit = {
+  def checkFileType(filename:String)(implicit messages: Messages): Unit = {
     if (!UploadedFileUtil.checkCSVFileType(filename)) {
       throw ERSFileProcessingException(
         Messages("ers_check_csv_file.file_type_error", filename),
@@ -91,7 +90,7 @@ trait CsvFileProcessor extends DataGenerator {
     }
   }
 
-  def validateFile(file:File, sheetName:String, validator: RowValidator): List[ValidationError]= {
+  def validateFile(file:File, sheetName:String, validator: RowValidator)(implicit messages: Messages): List[ValidationError]= {
     val start = System.currentTimeMillis()
     val chunkSize = current.configuration.getInt("validationChunkSize").getOrElse(defaultChunkSize)
     val cpus = Runtime.getRuntime.availableProcessors()
@@ -125,7 +124,7 @@ trait CsvFileProcessor extends DataGenerator {
     }
   }
 
-  def checkRowsExist(rowsWithData: Int, sheetName: String): Try[Boolean] = {
+  def checkRowsExist(rowsWithData: Int, sheetName: String)(implicit messages: Messages): Try[Boolean] = {
     if(rowsWithData > 0) {
       Success(true)
     }
@@ -218,7 +217,7 @@ trait CsvFileProcessor extends DataGenerator {
     result
   }
 
-  def checkResult(result: Future[List[ValidationError]], sheetName: String): Try[List[ValidationError]] = {
+  def checkResult(result: Future[List[ValidationError]], sheetName: String)(implicit messages: Messages): Try[List[ValidationError]] = {
     Await.ready(result, Duration.Inf)
 
     result.value match {

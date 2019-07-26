@@ -39,16 +39,16 @@
 						// file ok
 				    	removeErrorMsg();						
 					} else {
-						showODSErrorMsg("The attached file is to large. We only accept files less than "+(MAX_FILESIZE/1000000)+"MB");
+						showODSErrorMsg(GOVUK.getLocalisedContent("ods.file.too.large", [MAX_CSV_FILESIZE/1000000]));
 					}
 				} else {
-					showODSErrorMsg("Choose a different file &ndash; it must be an ODS file");
+					showODSErrorMsg(GOVUK.getLocalisedContent("ods.file.wrong.type"));
 				}				
 			} else {
-				showODSErrorMsg("Choose a different file &ndash; the file's name must be "+ MAX_FILENAME_LENGTH +" characters or less");
+				showODSErrorMsg(GOVUK.getLocalisedContent("ods.file.name.too.long", [MAX_FILENAME_LENGTH]));
 			}
 		} else {
-			showODSErrorMsg("Choose a different file &ndash; the file's name can't contain invalid characters");
+			showODSErrorMsg(GOVUK.getLocalisedContent("ods.file.name.invalid.chars"));
 		}		
 				
 		// extract filename for display 

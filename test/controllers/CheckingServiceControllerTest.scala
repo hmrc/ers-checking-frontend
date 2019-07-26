@@ -22,6 +22,8 @@ import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
+import play.api.i18n.Messages
+import play.api.i18n.Messages.Implicits._
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -56,7 +58,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
     "give a status OK and shows start page" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.showStartPage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result = controllerUnderTest.showStartPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
       status(result) shouldBe Status.OK
     }
 
@@ -308,13 +310,13 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
     "give a status OK and shows check file page if fetch successful" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = true)
-      val result = controllerUnderTest.showCheckODSFilePage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val result = controllerUnderTest.showCheckODSFilePage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       status(result) shouldBe Status.OK
     }
 
     "direct to ers errors page if fetch fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
-      contentAsString(await( controllerUnderTest.showCheckODSFilePage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage)
+      contentAsString(await( controllerUnderTest.showCheckODSFilePage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages]))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage)
     }
 
   }
@@ -350,13 +352,13 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
     "give a status OK and shows check csv file page if fetch successful" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = true)
-      val result = controllerUnderTest.showCheckCSVFilePage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val result = controllerUnderTest.showCheckCSVFilePage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       status(result) shouldBe Status.OK
     }
 
     "direct to ers errors page if fetch fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
-      contentAsString(await( controllerUnderTest.showCheckCSVFilePage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage)
+      contentAsString(await( controllerUnderTest.showCheckCSVFilePage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages]))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage)
     }
 
   }
@@ -410,7 +412,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
     "give a status OK and shows check success page" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.showCheckingSuccessPage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val result = controllerUnderTest.showCheckingSuccessPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       status(result) shouldBe Status.OK
     }
 

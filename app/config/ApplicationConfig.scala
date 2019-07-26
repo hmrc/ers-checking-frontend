@@ -20,6 +20,7 @@ import play.Logger
 import play.api.Play
 import uk.gov.hmrc.play.config.ServicesConfig
 import play.api.i18n.Lang
+import play.api.mvc.Call
 import controllers.routes
 
 trait ApplicationConfig {
@@ -33,6 +34,9 @@ trait ApplicationConfig {
   val ggSignInUrl: String
 
   val languageTranslationEnabled: Boolean
+  def languageMap: Map[String, Lang]
+  def routeToSwitchLanguage: String => Call
+  def reportAProblemPartialUrl: String
 }
 
 class ApplicationConfigImpl extends ApplicationConfig with ServicesConfig {
@@ -62,6 +66,9 @@ class ApplicationConfigImpl extends ApplicationConfig with ServicesConfig {
     "cymraeg" -> Lang("cy"))
 
   def routeToSwitchLanguage = (lang: String) => routes.LanguageSwitchController.switchToLanguage(lang)
+
+  private lazy val _reportAProblemPartialUrl = s"$contactHost/contact/problem_reports?secure=false"
+  override def reportAProblemPartialUrl: String = _reportAProblemPartialUrl
 }
 
 object ApplicationConfig extends ApplicationConfigImpl
