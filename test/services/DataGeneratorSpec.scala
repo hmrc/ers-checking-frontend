@@ -21,15 +21,21 @@ import models.ERSFileProcessingException
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
-import play.api.i18n.Messages
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import services.headers.HeaderData
-import play.api.i18n.Messages.Implicits._
+import play.api.inject.Injector
+import play.api.inject.guice.GuiceApplicationBuilder
 
 import scala.util.Try
 import uk.gov.hmrc.http.HeaderCarrier
 
-class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFutures with MockitoSugar with BeforeAndAfter with HeaderData{
+class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ScalaFutures with MockitoSugar with BeforeAndAfter with HeaderData with I18nSupport{
+
+  def injector: Injector = app.injector
+  override def fakeApplication() = new GuiceApplicationBuilder().configure(Map("play.i18n.langs"->List("en", "cy"))).build()
+  implicit val messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
 
   object dataGeneratorObj extends DataGenerator
 
@@ -114,15 +120,15 @@ class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFuture
 
     "identifyAndDefineSheet with correct scheme type" in  {
       val hc = HeaderCarrier()
-      dataGeneratorObj.identifyAndDefineSheet("EMI40_Adjustments_V3","2")(hc,Fixtures.buildFakeRequestWithSessionId("GET")) must be ("EMI40_Adjustments_V3")
-      val result = Try(dataGeneratorObj.identifyAndDefineSheet("EMI40_Adjustments","2")(hc,Fixtures.buildFakeRequestWithSessionId("GET")))
+      dataGeneratorObj.identifyAndDefineSheet("EMI40_Adjustments_V3","2")(hc,Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages]) must be ("EMI40_Adjustments_V3")
+      val result = Try(dataGeneratorObj.identifyAndDefineSheet("EMI40_Adjustments","2")(hc,Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages]))
       result.isFailure must be (true)
     }
     
     "raise exception if sheetName cannot be identified" in {
       val hc = HeaderCarrier()
       val invalidSheet = intercept[ERSFileProcessingException]{
-        dataGeneratorObj.identifyAndDefineSheet("CSOP_OptionsExercised_V3","2")(hc,Fixtures.buildFakeRequestWithSessionId("GET"))
+        dataGeneratorObj.identifyAndDefineSheet("CSOP_OptionsExercised_V3","2")(hc,Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
       }
       invalidSheet.message mustBe "ers.exceptions.dataParser.incorrectSchemeType"
       invalidSheet.optionalParams mustBe Seq("a CSOP", "an EMI", "CSOP_OptionsExercised_V3")
@@ -137,7 +143,7 @@ class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFuture
     "get an exception if ods file has less than 9 rows and doesn't have header data" in {
       object dataGenObj extends DataGenerator
       val result = intercept[ERSFileProcessingException] {
-        dataGenObj.getErrors(XMLTestData.getInvalidCSOPWithoutHeaders,"1","CSOP.ods")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"))
+        dataGenObj.getErrors(XMLTestData.getInvalidCSOPWithoutHeaders,"1","CSOP.ods")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
       }
       result.message mustBe "ers.exceptions.dataParser.incorrectHeader"
       result.optionalParams mustBe Seq("CSOP_OptionsGranted_V3", "CSOP.ods")
@@ -146,7 +152,7 @@ class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFuture
     "get an exception if ods file has more than 1 sheet but 1 of the sheets has less than 9 rows and doesn't have header data" in {
       object dataGenObj extends DataGenerator
       val result = intercept[ERSFileProcessingException] {
-        dataGenObj.getErrors(XMLTestData.getInvalidCSOPWith2Sheets1WithoutHeaders,"1","CSOP.ods")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"))
+        dataGenObj.getErrors(XMLTestData.getInvalidCSOPWith2Sheets1WithoutHeaders,"1","CSOP.ods")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
       }
       result.message mustBe "ers.exceptions.dataParser.incorrectHeader"
       result.optionalParams mustBe Seq("CSOP_OptionsGranted_V3", "CSOP.ods")
@@ -155,7 +161,7 @@ class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFuture
     "get an exception if ods file doesn't contain any data" in {
       object dataGenObj extends DataGenerator
       val result = intercept[ERSFileProcessingException] {
-        dataGenObj.getErrors(XMLTestData.getCSOPWithoutData,"1","CSOP.ods")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"))
+        dataGenObj.getErrors(XMLTestData.getCSOPWithoutData,"1","CSOP.ods")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
       }
       result.message mustBe "ers.exceptions.dataParser.noData"
       result.optionalParams mustBe Seq.empty[String]
@@ -163,25 +169,25 @@ class DataGeneratorSpec extends PlaySpec with OneServerPerSuite with ScalaFuture
 
     "get no errors for EMI" in {
       object dataGenObj extends DataGenerator
-      val result = dataGenObj.getErrors(XMLTestData.getEMIAdjustmentsTemplate,"2","")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result = dataGenObj.getErrors(XMLTestData.getEMIAdjustmentsTemplate,"2","")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
       result.foreach(_.errors.size mustBe 0)
     }
 
     "collect errors in the first sheet of EMI" in {
       object dataGenObj extends DataGenerator
-      val result = dataGenObj.getErrors(XMLTestData.getInvalidEMIAdjustmentsTemplate,"2","")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result = dataGenObj.getErrors(XMLTestData.getInvalidEMIAdjustmentsTemplate,"2","")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
       result(0).errors.size mustBe 1
     }
 
     "collect errors in second sheet of EMI" in {
       object dataGenObj extends DataGenerator
-      val result = dataGenObj.getErrors(XMLTestData.getEMIAdjustmentsTemplate ++ XMLTestData.getInvalidEMIReplacedTemplate,"2","")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result = dataGenObj.getErrors(XMLTestData.getEMIAdjustmentsTemplate ++ XMLTestData.getInvalidEMIReplacedTemplate,"2","")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
       result(1).errors.size mustBe 1
     }
 
     "expand repeated rows and report correct error row" in {
       object dataGenObj extends DataGenerator
-      val result = dataGenObj.getErrors(XMLTestData.getInvalidEMIWithRepeats,"2","")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result = dataGenObj.getErrors(XMLTestData.getInvalidEMIWithRepeats,"2","")(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
       result(0).errors.size mustBe 1
       result(0).errors(0).cell.row mustBe 13
     }

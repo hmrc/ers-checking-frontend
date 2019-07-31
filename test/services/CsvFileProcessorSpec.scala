@@ -26,15 +26,16 @@ import models.ERSFileProcessingException
 import org.scalatest.concurrent.Timeouts
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.time.{Millis, Span}
-import org.scalatestplus.play.OneAppPerSuite
-import play.api.i18n.Messages
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.libs.Files.TemporaryFile
 import play.api.mvc.MultipartFormData
 import play.api.mvc.MultipartFormData.FilePart
 import services.validation.ErsValidator
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.{Cell, DataValidator, ValidationError}
-import play.api.i18n.Messages.Implicits._
+import play.api.inject.Injector
+import play.api.inject.guice.GuiceApplicationBuilder
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{Await, Future}
@@ -43,7 +44,11 @@ import scala.concurrent.duration.Duration
 import scala.util.{Failure, Success}
 import uk.gov.hmrc.http.HeaderCarrier
 
-class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with OneAppPerSuite with Timeouts {
+class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with GuiceOneAppPerSuite with Timeouts with I18nSupport {
+
+  def injector: Injector = app.injector
+  override def fakeApplication() = new GuiceApplicationBuilder().configure(Map("play.i18n.langs"->List("en", "cy"))).build()
+  implicit val messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
 
   // This ScalaStyle check prevents "actual should be a [Type]" syntax
   // scalastyle:off no.whitespace.before.left.bracket
@@ -98,14 +103,14 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with OneAppPerSuit
       Files.copy(file.toPath,new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv").toPath)
       val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv")
       val request = Fixtures.buildFakeRequestWithSessionId("POST")
-      val result = CsvFileProcessor.readCSVFile("Other_Grants_V3", fileCopied, "3")(request, hc = HeaderCarrier())
+      val result = CsvFileProcessor.readCSVFile("Other_Grants_V3", fileCopied, "3")(request, hc = HeaderCarrier(), implicitly[Messages])
       result.errors.size shouldBe  4
 
     }
 
     "validate multiple CSV files" in {
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withMultipartFormDataBody(getMockFileCSV)
-      val result = CsvFileProcessor.validateCsvFiles("3")(request, Fixtures.buildFakeUser,hc = HeaderCarrier())
+      val result = CsvFileProcessor.validateCsvFiles("3")(request, Fixtures.buildFakeUser,hc = HeaderCarrier(), implicitly[Messages])
 
       val expected = getMockFileCSV.files.size
       result.size shouldEqual expected

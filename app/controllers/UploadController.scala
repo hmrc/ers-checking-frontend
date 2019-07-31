@@ -18,9 +18,12 @@ package controllers
 
 import services.{CsvFileProcessor, ProcessODSService}
 import models.ERSFileProcessingException
+import play.api.i18n.Messages
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import utils.CacheUtil
 import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.Play.current
+import play.api.i18n.Messages.Implicits._
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -44,8 +47,8 @@ trait UploadController extends ERSCheckingBaseController {
 				showuploadCSVFile(scheme)
 	}
 
-	def showuploadCSVFile(scheme: String)(implicit authContext: AuthContext, request: Request[AnyContent], hc: HeaderCarrier): Future[Result] = {
-		val result = csvFileProcessor.processCsvUpload(scheme)(request,authContext, hc)
+	def showuploadCSVFile(scheme: String)(implicit authContext: AuthContext, request: Request[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
+		val result = csvFileProcessor.processCsvUpload(scheme)(request,authContext, hc, messages)
 		result.flatMap[Result] {
 			case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
 			case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage()))
@@ -59,8 +62,8 @@ trait UploadController extends ERSCheckingBaseController {
 				showuploadODSFile(scheme)
 	}
 
-	def showuploadODSFile(scheme: String)(implicit authContext: AuthContext, request: Request[AnyContent], hc: HeaderCarrier): Future[Result] = {
-		val result = processODSService.performODSUpload()(request, scheme, authContext, hc)
+	def showuploadODSFile(scheme: String)(implicit authContext: AuthContext, request: Request[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
+		val result = processODSService.performODSUpload()(request, scheme, authContext, hc, messages)
 		result.flatMap[Result] {
 			case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
 			case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage()))
