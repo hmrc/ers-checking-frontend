@@ -33,8 +33,7 @@ trait ValidationTestRunner extends PlaySpec with GuiceOneAppPerSuite{
 
   def injector: Injector = app.injector
   def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
-  override def fakeApplication() = new GuiceApplicationBuilder().configure(Map("play.i18n.langs"->List("en", "cy"))).build()
-
+  override def fakeApplication() = new GuiceApplicationBuilder().configure(Map("play.i18n.langs"->List("en", "cy"),"metrics.enabled"-> "false")).build()
 
   def populateValidationError(expRes: ValidationErrorData)(implicit cell: Cell) = {
     ValidationError(cell, expRes.id, expRes.errorId, expRes.errorMsg)

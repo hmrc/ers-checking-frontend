@@ -140,9 +140,12 @@ ers.exceptions.dataParser.headersDontMatch =Nid yw’r pennyn yn cyd-fynd
 ers.exceptions.dataParser.configFailure =Ni fu’n bosibl gwirio’r ffeil hon.
 ers.exceptions.dataParser.ampersand =Rhaid peidio â chynnwys ampersandau.
 ers.exceptions.dataParser.noData =Nid oes unrhyw ddata ar ôl rhes 9 yn y ffeil a ddewisoch. Mae’n rhaid i ddata’r digwyddiadau hysbysadwy ddechrau yng nghell A10.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Defnyddiwch y dogfennau arweiniad ERS</a> i’ch helpu i greu ffeiliau heb wallau.
-ers.global_errors.message =Mae’n ddrwg gennym, mae anawsterau technegol wedi codi.
-ers.global_errors.heading =Methiant wrth uwchlwytho ffeil ERS
-ers.global_errors.title ="Tudalen we ERS"
+
+ers.global_errors.message = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth
+ers.global_errors.heading = Gwirio’ch ffeiliau ERS
+ers.global_errors.title = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth -  Gwirio’ch ffeiliau ERS – Gwarantau ar Sail Cyflogaeth – GOV.UK
+ers.global.errors.try.later = Rhowch gynnig arall arni yn nes ymlaen.
+
 validation.summary.heading =Mae problem wedi codi
 csv_file_upload.summary_error =Dewiswch ffeil wahanol - rhaid iddi fod yn ffeil CSV
 ods_file_upload.summary_error =Dewiswch ffeil wahanol - rhaid iddi fod yn ffeil ODS
