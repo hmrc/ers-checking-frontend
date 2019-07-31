@@ -17,7 +17,7 @@
 @import play.api.Play
 @import play.api.Play.current
 
-@()
+@(scripts: Html = Html(""))
 
 @Play.configuration.getString("govuk-tax.google-analytics.token") match {
 case Some(token) => {
@@ -32,6 +32,6 @@ case Some(token) => {
 }
 case _ => {}
 }
-
+<script src='@routes.AssetsController.at("javascripts/welsh_translation.js")'> </script>
 <script src='@routes.AssetsController.at("javascripts/ers_scripts.js")'> </script>
-<script src='@routes.AssetsController.at("javascripts/ers_scripts.js")'> </script>
+@scripts
