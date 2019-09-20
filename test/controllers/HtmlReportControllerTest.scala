@@ -25,7 +25,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Application
 import play.api.http.Status
-import play.api.i18n.Messages
+import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json
 import play.api.libs.json._
@@ -36,7 +36,6 @@ import uk.gov.hmrc.http.cache.client.{CacheMap, ShortLivedCache}
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 import utils.{CacheUtil, PageBuilder}
-import play.api.i18n.Messages.Implicits._
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -52,6 +51,8 @@ class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with Mockito
     "metrics.enabled" -> false)
 
   implicit val hc = HeaderCarrier()
+  implicit lazy val messages: Messages = Messages(Lang("en"), app.injector.instanceOf[MessagesApi])
+  implicit val request: Request[_] = FakeRequest()
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
 
@@ -169,7 +170,7 @@ class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with Mockito
     "throw exception" in {
       val controllerUnderTest = buildFakeHtmlReportController
       contentAsString(
-        await(controllerUnderTest.showHtmlErrorReportPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages]))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage)
+        await(controllerUnderTest.showHtmlErrorReportPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, messages))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
     }
   }
 
@@ -177,7 +178,7 @@ class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with Mockito
     "give a status OK and show error report" in {
       val controllerUnderTest = buildFakeHtmlReportController
       controllerUnderTest.fetchAllMapVal = "withErrorListSchemeTypeFileTypeZeroErrorCountSummary"
-      val result = controllerUnderTest.showHtmlErrorReportPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"),hc, implicitly[Messages])
+      val result = controllerUnderTest.showHtmlErrorReportPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"),hc, messages)
       status(result) shouldBe Status.OK
       // result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkingSuccessPage.toString()
     }
