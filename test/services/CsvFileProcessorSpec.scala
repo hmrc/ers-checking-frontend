@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import com.typesafe.config.ConfigFactory
 import controllers.Fixtures
 import models.ERSFileProcessingException
-import org.scalatest.concurrent.Timeouts
+import org.scalatest.concurrent.{ScalaFutures, Timeouts}
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.time.{Millis, Span}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -44,7 +44,9 @@ import scala.concurrent.duration.Duration
 import scala.util.{Failure, Success}
 import uk.gov.hmrc.http.HeaderCarrier
 
-class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with GuiceOneAppPerSuite with Timeouts with I18nSupport {
+import scala.collection.mutable
+
+class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with GuiceOneAppPerSuite with Timeouts with I18nSupport with ScalaFutures {
 
   def injector: Injector = app.injector
   override def fakeApplication() = new GuiceApplicationBuilder().configure(Map("play.i18n.langs"->List("en", "cy"))).build()
@@ -221,22 +223,25 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with GuiceOneAppPe
       actual.length shouldEqual 3
     }
 
-    "process all rows" in {
-      val fixture = submitChunksFixture
-      var count = new AtomicInteger(0)
-      val dummyValidator: (Seq[String], Int) => Option[List[ValidationError]] = (_, _) => {
-        count.incrementAndGet()
-        Some(Nil)
-      }
 
-      val actual = CsvFileProcessor.submitChunks(fixture.rows, 3, 2, fixture.sheetName, dummyValidator)
+      "process all rows" in {
 
-      failAfter(awaitTimeout) {
-        Await.ready(actual, Duration.Inf)
+
+        val fixture = submitChunksFixture
+        var count = new AtomicInteger(0)
+        val dummyValidator: (Seq[String], Int) => Option[List[ValidationError]] = (_, _) => {
+          count.incrementAndGet()
+          Some(Nil)
+        }
+
+        val actual: Array[Future[List[ValidationError]]] = CsvFileProcessor.submitChunks(fixture.rows, 3, 2, fixture.sheetName, dummyValidator)
+
+        Future.sequence(actual.toList).futureValue
+
+        count.get() shouldEqual 5
       }
-      count.get() shouldEqual 5
     }
-  }
+
 
   private def processChunkFixture = new {
     val chunk = List(
