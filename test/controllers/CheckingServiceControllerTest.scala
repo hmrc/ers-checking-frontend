@@ -28,6 +28,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CacheUtil
+import play.api.mvc.Request
 
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
@@ -37,6 +38,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
   implicit val hc = new HeaderCarrier
   implicit lazy val messages: Messages = Messages(Lang("en"), app.injector.instanceOf[MessagesApi])
+  implicit val request: Request[_] = FakeRequest()
 
   "start Page GET" should {
 
@@ -144,7 +146,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       val schemeTypeData = Map("schemeType" -> "1")
       val form = CSformMappings.schemeTypeForm.bind(schemeTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      contentAsString(await(controllerUnderTest.showSchemeTypeSelected(Fixtures.buildFakeUser, request))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage)
+      contentAsString(await(controllerUnderTest.showSchemeTypeSelected(Fixtures.buildFakeUser, request))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
     }
 
 //    "give a redirect Status and shows the check file page" in {
@@ -266,7 +268,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       val schemeTypeData = Map("checkFileType" -> "csv")
       val form = CSformMappings.schemeTypeForm.bind(schemeTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      contentAsString(await(controllerUnderTest.showCheckFileTypeSelected(Fixtures.buildFakeUser, request))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage)
+      contentAsString(await(controllerUnderTest.showCheckFileTypeSelected(Fixtures.buildFakeUser, request))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
     }
 
   }
@@ -317,7 +319,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
     "direct to ers errors page if fetch fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
-      contentAsString(await( controllerUnderTest.showCheckODSFilePage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages]))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage)
+      contentAsString(await( controllerUnderTest.showCheckODSFilePage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages]))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
     }
 
   }
@@ -359,7 +361,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
     "direct to ers errors page if fetch fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
-      contentAsString(await( controllerUnderTest.showCheckCSVFilePage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages]))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage)
+      contentAsString(await( controllerUnderTest.showCheckCSVFilePage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages]))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
     }
 
   }
@@ -537,7 +539,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
     "direct to ers errors page if fetch fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
-      contentAsString(await(controllerUnderTest.showFormatErrorsPage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage)
+      contentAsString(await(controllerUnderTest.showFormatErrorsPage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
     }
 
   }

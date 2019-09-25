@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@(pageTitle: String, heading: String, message: String, applicationConfig: config.ApplicationConfig = config.ApplicationConfig)(implicit messages: Messages)
+@(pageTitle: String, heading: String, message: String, applicationConfig: config.ApplicationConfig = config.ApplicationConfig)(implicit request: Request[_], messages: Messages)
 
 @import play.api.Play.current
 @import uk.gov.hmrc.play.config.RunMode._
@@ -53,10 +53,15 @@
      <meta name="format-detection" content="telephone=no" />
 }
 
+@getHelpForm = {
+    @get_help_form(true, false)
+}
+
 @content = {
-  @uiLayouts.main_content(
+    @uiLayouts.main_content(
     article = uiLayouts.article(mainContent),
-    mainContentHeader = contentHeader)
+    mainContentHeader = contentHeader,
+    getHelpForm = getHelpForm)
 }
 
 @bodyEnd = {
