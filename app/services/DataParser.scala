@@ -49,7 +49,7 @@ trait DataParser {
   }
 
 
-  def secureSAXParser = {
+  val secureSAXParser = {
     val saxParserFactory = SAXParserFactory.newInstance()
     saxParserFactory.setFeature("http://xml.org/sax/features/external-general-entities", false)
     saxParserFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)
