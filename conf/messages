@@ -199,3 +199,15 @@ ers.upload.error.address-postcode=Must be 6 to 8 characters and only have capita
 ers.upload.error.address-postcode-mand=Enter the postcode (must be 6 to 8 characters and only have capital letters)
 ers.upload.error.crn=Company Reference Number must be less than 11 characters (numbers and letters)
 ers.upload.error.ctr=Corporation Tax reference must be a 10 digit number
+
+#********************************************************************
+# Page not found
+#********************************************************************
+ers.global.page.not.found.error.title=Page not found – Employment Related Securities – GOV.UK
+ers.global.page.not.found.error.heading=Page not found
+ers.global.page.not.found.error.check.web.address.correct=If you typed the web address, check it is correct.
+ers.global.page.not.found.error.check.web.address.full=If you pasted the web address, check you copied the entire address.
+ers.global.page.not.found.error.contact=If the web address is correct or you selected a link or button,
+ers.global.page.not.found.error.contact.link.text=contact the Employment related securities helpline
+ers.global.page.not.found.error.contact.speakTo=if you need to speak to someone about your annual return.
+ers.global.page.not.found.error.contact.link=https://www.gov.uk/government/organisations/hm-revenue-customs/contact/share-schemes-for-employees

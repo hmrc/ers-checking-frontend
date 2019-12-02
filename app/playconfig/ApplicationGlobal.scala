@@ -17,6 +17,7 @@
 package playconfig
 
 import com.typesafe.config.Config
+import config.ErsContextImpl
 import net.ceedubs.ficus.Ficus._
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
@@ -26,7 +27,8 @@ import play.twirl.api.Html
 import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
 import uk.gov.hmrc.play.frontend.bootstrap.{DefaultFrontendGlobal, ShowErrorPage}
-import uk.gov.hmrc.play.frontend.filters.{ FrontendAuditFilter, FrontendLoggingFilter, MicroserviceFilterSupport }
+import uk.gov.hmrc.play.frontend.filters.{FrontendAuditFilter, FrontendLoggingFilter, MicroserviceFilterSupport}
+import play.api.i18n.Lang
 
 object ApplicationGlobal extends DefaultFrontendGlobal with RunMode with ShowErrorPage {
   protected def mode: play.api.Mode.Mode = Play.current.mode
@@ -35,6 +37,10 @@ object ApplicationGlobal extends DefaultFrontendGlobal with RunMode with ShowErr
   override val auditConnector = ERSAuditConnector
   override val loggingFilter = ERSLoggingFilter
   override val frontendAuditFilter = ERSFrontendAuditFilter
+  implicit lazy val ErsContext = Play.current.injector.instanceOf[config.ErsContext]
+
+  private def lang(implicit request: Request[_]): Lang =
+    Lang(request.cookies.get("PLAY_LANG").map(_.value).getOrElse("en"))
 
   override def onStart(app: Application) {
     super.onStart(app)
@@ -42,7 +48,12 @@ object ApplicationGlobal extends DefaultFrontendGlobal with RunMode with ShowErr
   }
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): Html =
-    views.html.global_error(pageTitle, heading, message)(request, applicationMessages)
+  views.html.global_error(pageTitle, heading, message)(request, applicationMessages)
+
+  override def notFoundTemplate(implicit request: Request[_]): Html = {
+    implicit val _: Lang = lang
+    views.html.global_page_not_found()(request, applicationMessages, ErsContextImpl)
+  }
 
   override def microserviceMetricsConfig(implicit app: Application): Option[Configuration] = app.configuration.getConfig("microservice.metrics")
 
