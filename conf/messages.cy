@@ -195,5 +195,5 @@ ers.global.page.not.found.error.check.web.address.correct=Os gwnaethoch deipio�
 ers.global.page.not.found.error.check.web.address.full=Os gwnaethoch ludo’r cyfeiriad gwe, gwiriwch eich bod wedi copïo’r cyfeiriad yn llawn.
 ers.global.page.not.found.error.contact=Os yw’r cyfeiriad gwe yn gywir neu os ydych wedi dewis cysylltiad neu fotwm,
 ers.global.page.not.found.error.contact.link.text=cysylltwch â Gwasanaeth Cwsmeriaid Cymraeg CThEM
-ers.global.page.not.found.error.contact.speakTo=os oes angen i chi siarad â rhywun am eich ffeil gwarantau ar sail cyflogaeth.
+ers.global.page.not.found.error.contact.speakTo=os oes angen i chi siarad â rhywun am eich datganiad blynyddol.
 ers.global.page.not.found.error.contact.link=https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines
