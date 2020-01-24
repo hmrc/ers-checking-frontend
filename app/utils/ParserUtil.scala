@@ -37,7 +37,7 @@ trait ParserUtil {
   def formatDataToValidate(rowData: Seq[String], sheetName: String): Seq[String] = {
     val sheetColSize = ERSTemplatesInfo.ersSheets(sheetName.replace(".csv", "")).headerRow.size
     if(rowData.size < sheetColSize) {
-      Logger.warn(s"Difference between amount of columns ${rowData.size} and amount of headers $sheetColSize")
+      Logger.debug(s"Difference between amount of columns ${rowData.size} and amount of headers $sheetColSize")
       val additionalEmptyCells: Seq[String] = Seq.fill(sheetColSize - rowData.size)("")
       (rowData ++ additionalEmptyCells).take(sheetColSize)
     }
