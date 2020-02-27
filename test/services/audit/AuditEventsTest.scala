@@ -85,7 +85,7 @@ class AuditEventsTest    extends WordSpec with Matchers {
     val observableAuditConnector = createObservableAuditConnector
     val auditor = createAuditor(observableAuditConnector)
 
-    auditor.numRowsInSchemeData("sheet", 1)(Fixtures.buildFakeUser,hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"))
+    auditor.numRowsInSchemeData("sheet", 1)(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"))
 
     observableAuditConnector.events.length should equal(1)
 

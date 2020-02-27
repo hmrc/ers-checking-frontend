@@ -19,19 +19,19 @@ package playconfig
 import play.Logger
 import play.api.Play
 import services.AllWsHttp
+import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.http.cache.client.{ShortLivedCache, ShortLivedHttpCaching}
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector => Auditing}
 import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 import uk.gov.hmrc.play.frontend.config.LoadAuditingConfig
+import uk.gov.hmrc.play.partials.CachedStaticHtmlPartialRetriever
 
 object CachedStaticHtmlPartialProvider extends CachedStaticHtmlPartialRetriever {
   override val httpGet = AllWsHttp
 }
 
-object ERSAuthConnector extends AuthConnector with ServicesConfig {
+object ERSAuthConnector extends PlayAuthConnector with ServicesConfig {
   protected def mode: play.api.Mode.Mode = Play.current.mode
   protected def runModeConfiguration: play.api.Configuration = Play.current.configuration
   protected def appNameConfiguration: play.api.Configuration = runModeConfiguration

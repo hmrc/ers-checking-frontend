@@ -16,20 +16,21 @@
 
 package controllers
 
+import controllers.auth.AuthAction
 import models.CSformMappings
 import play.api.Logger
 import play.api.Play.current
 import play.api.i18n.Messages
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc._
-import uk.gov.hmrc.play.frontend.auth.AuthContext
+import uk.gov.hmrc.http.HeaderCarrier
 import utils._
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
 object CheckingServiceController extends CheckingServiceController {
   override val cacheUtil: CacheUtil = CacheUtil
+  override val authAction: AuthAction = AuthAction
 }
 
 trait CheckingServiceController extends ERSCheckingBaseController {
@@ -38,33 +39,31 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   val uploadedFileUtil = UploadedFileUtil
   val contentUtil = ContentUtil
   val cacheUtil: CacheUtil
+  val authAction: AuthAction
 
-  def startPage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
-    implicit authContext =>
+  def startPage(): Action[AnyContent] = authAction.async {
       implicit request =>
         showStartPage()
   }
 
-  def showStartPage()(implicit authContext: AuthContext, request: Request[AnyRef], messages: Messages): Future[Result] = Future.successful(Ok(views.html.start(request, context, messages)))
+  def showStartPage()(implicit request: Request[AnyRef], messages: Messages): Future[Result] = Future.successful(Ok(views.html.start(request, context, messages)))
 
-  def schemeTypePage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
-    implicit authContext =>
+  def schemeTypePage(): Action[AnyContent] = authAction.async {
       implicit request =>
-        showSchemeTypePage(authContext, request, hc)
+        showSchemeTypePage(request, hc)
   }
 
-  def showSchemeTypePage(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showSchemeTypePage(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
     val schemeType: String = "0"
     Future(Ok(views.html.scheme_type(schemeType)))
   }
 
-  def schemeTypeSelected() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
-    implicit authContext =>
+  def schemeTypeSelected(): Action[AnyContent] = authAction.async {
       implicit request =>
-        showSchemeTypeSelected(authContext, request)
+        showSchemeTypeSelected(request)
   }
 
-  def showSchemeTypeSelected(implicit authContext: AuthContext, request: Request[AnyRef]): Future[Result] = {
+  def showSchemeTypeSelected(implicit request: Request[AnyRef]): Future[Result] = {
     CSformMappings.schemeTypeForm.bindFromRequest.fold(
       formWithErrors => {
         Future.successful(Redirect(routes.CheckingServiceController.schemeTypePage).flashing("scheme-not-selected-error" -> Messages("ers_scheme_type.select_scheme_type")))
@@ -83,13 +82,12 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   }
 
 
-  def checkFileTypePage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
-    implicit authContext =>
+  def checkFileTypePage(): Action[AnyContent] = authAction.async {
       implicit request =>
-        showCheckFileTypePage(authContext, request, hc)
+        showCheckFileTypePage(request, hc)
   }
 
-  def showCheckFileTypePage(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showCheckFileTypePage(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
     cacheUtil.fetch[String](CacheUtil.FILE_TYPE_CACHE).map { fileType =>
       Ok(views.html.check_file_type(fileType))
     } recover {
@@ -97,13 +95,12 @@ trait CheckingServiceController extends ERSCheckingBaseController {
     }
   }
 
-  def checkFileTypeSelected() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
-    implicit authContext =>
+  def checkFileTypeSelected(): Action[AnyContent] = authAction.async {
       implicit request =>
-        showCheckFileTypeSelected(authContext, request)
+        showCheckFileTypeSelected(request)
   }
 
-  def showCheckFileTypeSelected(implicit authContext: AuthContext, request: Request[AnyRef]): Future[Result] = {
+  def showCheckFileTypeSelected(implicit request: Request[AnyRef]): Future[Result] = {
     CSformMappings.checkFileTypeForm.bindFromRequest.fold(
       formWithErrors => {
         Future.successful(Redirect(routes.CheckingServiceController.checkFileTypePage).flashing("check-file-type-not-selected-error" -> Messages("ers_check_file_type.alert")))
@@ -125,13 +122,12 @@ trait CheckingServiceController extends ERSCheckingBaseController {
     )
   }
 
-  def checkCSVFilePage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
-    implicit authContext =>
+  def checkCSVFilePage(): Action[AnyContent] = authAction.async {
       implicit request =>
         showCheckCSVFilePage()
   }
 
-  def showCheckCSVFilePage()(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
+  def showCheckCSVFilePage()(implicit request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
     cacheUtil.fetch[String](CacheUtil.SCHEME_CACHE).map { scheme =>
         val invalidChars: String = "[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]"
         Ok(views.html.check_csv_file(scheme, invalidChars)(request, request.flash, context, messages))
@@ -144,13 +140,12 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   }
 
 
-  def checkODSFilePage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
-    implicit authContext =>
+  def checkODSFilePage(): Action[AnyContent] = authAction.async {
       implicit request =>
         showCheckODSFilePage()
   }
 
-  def showCheckODSFilePage()(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
+  def showCheckODSFilePage()(implicit request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
     cacheUtil.fetch[String](CacheUtil.SCHEME_CACHE).map { scheme =>
       val invalidChars: String = "[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]"
       Ok(views.html.check_file(scheme, invalidChars)(request, request.flash, context, messages))
@@ -162,23 +157,21 @@ trait CheckingServiceController extends ERSCheckingBaseController {
     }
   }
 
-  def checkingSuccessPage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
-    implicit authContext =>
+  def checkingSuccessPage(): Action[AnyContent] = authAction.async {
       implicit request =>
         showCheckingSuccessPage()
   }
 
-  def showCheckingSuccessPage()(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
+  def showCheckingSuccessPage()(implicit request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
     Future.successful(Ok(views.html.checking_success.render(request, context, messages)))
   }
 
-  def checkingErrorsPage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
-    implicit authContext =>
+  def checkingErrorsPage(): Action[AnyContent] = authAction.async {
       implicit request =>
-        showCheckingErrorsPage(authContext, request, hc)
+        showCheckingErrorsPage(request, hc)
   }
 
-  def showCheckingErrorsPage(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showCheckingErrorsPage(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
     cacheUtil.fetchAll().map { all =>
         val fileType = all.getEntry[String](CacheUtil.FILE_TYPE_CACHE).get
         val schemeName = ContentUtil.getSchemeName(all.getEntry[String](CacheUtil.SCHEME_CACHE).get)._1
@@ -193,13 +186,12 @@ trait CheckingServiceController extends ERSCheckingBaseController {
     }
   }
 
-  def formatErrorsPage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
-    implicit authContext =>
+  def formatErrorsPage(): Action[AnyContent] = authAction.async {
       implicit request =>
-        showFormatErrorsPage(authContext, request, hc)
+        showFormatErrorsPage(request, hc)
   }
 
-  def showFormatErrorsPage(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showFormatErrorsPage(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
 
     val future = for {
       fileType <- cacheUtil.fetch[String](CacheUtil.FILE_TYPE_CACHE)
