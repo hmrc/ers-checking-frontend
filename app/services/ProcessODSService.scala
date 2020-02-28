@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package services
 import java.io.{File, InputStream}
 import java.util.zip.ZipFile
 
+import controllers.auth.RequestWithOptionalEmpRef
 import models.{ERSFileProcessingException, FileObject, SheetErrors}
 import play.api.Logger
 import play.api.i18n.Messages
@@ -42,11 +43,11 @@ trait ProcessODSService {
   val uploadedFileUtil: UploadedFileUtil
   val cacheUtil:CacheUtil
 
-  def performODSUpload()(implicit request: Request[AnyContent],scheme:String, authContext : AuthContext, hc : HeaderCarrier, messages: Messages): Future[Try[Boolean]] = {
+  def performODSUpload()(implicit request: RequestWithOptionalEmpRef[AnyContent], scheme:String, hc : HeaderCarrier, messages: Messages): Future[Try[Boolean]] = {
     val spreadSheetFile = request.body.asMultipartFormData.get.file("fileUpload")
     spreadSheetFile.map(file =>
       try {
-        val errorList: ListBuffer[SheetErrors] = checkFileType(file)(scheme, authContext, hc, request, messages)
+        val errorList: ListBuffer[SheetErrors] = checkFileType(file)(scheme, hc, request, messages)
         val fileName: String = request.body.asMultipartFormData.get.file("fileUpload").get.filename
 
         val cache = cacheUtil.cache[String](CacheUtil.FILE_NAME_CACHE, fileName).recover {
@@ -98,18 +99,18 @@ trait ProcessODSService {
   }
 
   def checkFileType(uploadedFile: MultipartFormData.FilePart[Files.TemporaryFile])
-                   (implicit scheme:String, authContext: AuthContext,hc: HeaderCarrier, request: Request[_], messages: Messages):ListBuffer[SheetErrors] = {
+                   (implicit scheme: String, hc: HeaderCarrier, request: RequestWithOptionalEmpRef[_], messages: Messages):ListBuffer[SheetErrors] = {
     if (!uploadedFileUtil.checkODSFileType(uploadedFile.filename)) {
       throw ERSFileProcessingException(
         Messages("ers_check_file.file_type_error", uploadedFile.filename),
         Messages("ers_check_file.file_type_error", uploadedFile.filename))
     }
-    val res = parseOdsContent(uploadedFile.ref.file.getAbsolutePath, uploadedFile.filename)(scheme, authContext, hc, request, messages)
+    val res = parseOdsContent(uploadedFile.ref.file.getAbsolutePath, uploadedFile.filename)(scheme, hc, request, messages)
     UploadedFileUtil.deleteFile(uploadedFile.ref.file)
     res
   }
 
-  def parseOdsContent(fileName: String, uploadedFileName: String)(implicit scheme:String, authContext: AuthContext, hc : HeaderCarrier, request: Request[_], messages: Messages): ListBuffer[SheetErrors] = {
+  def parseOdsContent(fileName: String, uploadedFileName: String)(implicit scheme: String, hc : HeaderCarrier, request: RequestWithOptionalEmpRef[_], messages: Messages): ListBuffer[SheetErrors] = {
 
     val zipFile: ZipFile = new ZipFile(fileName)
     val content: InputStream = zipFile.getInputStream(zipFile.getEntry("content.xml"))

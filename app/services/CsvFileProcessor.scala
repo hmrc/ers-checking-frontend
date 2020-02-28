@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package services
 
 import java.io.File
 
+import controllers.auth.RequestWithOptionalEmpRef
 import models.{ERSFileProcessingException, SheetErrors}
 import org.apache.commons.io.{FileUtils, FilenameUtils, LineIterator}
 import play.api.Logger
@@ -25,6 +26,7 @@ import play.api.Play.current
 import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Request}
 import services.validation.ErsValidator
+import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.services.validation.{DataValidator, ValidationError}
 import utils.{CacheUtil, ParserUtil, UploadedFileUtil}
@@ -58,7 +60,7 @@ trait CsvFileProcessor extends DataGenerator {
     SheetErrors(sheetName, errors)
   }
 
-  def processCsvUpload(scheme:String)(implicit request: Request[AnyContent], authContext : AuthContext, hc : HeaderCarrier, messages: Messages): Future[Try[Boolean]] =
+  def processCsvUpload(scheme:String)(implicit request: RequestWithOptionalEmpRef[AnyContent], hc : HeaderCarrier, messages: Messages): Future[Try[Boolean]] =
   {
     try {
       val errors = validateCsvFiles(scheme)
@@ -69,7 +71,7 @@ trait CsvFileProcessor extends DataGenerator {
     }
   }
 
-  def validateCsvFiles(scheme:String)(implicit request: Request[AnyContent], authContext : AuthContext, hc : HeaderCarrier, messages: Messages): ListBuffer[SheetErrors] = {
+  def validateCsvFiles(scheme:String)(implicit request: RequestWithOptionalEmpRef[AnyContent], hc : HeaderCarrier, messages: Messages): ListBuffer[SheetErrors] = {
    val files = request.body.asMultipartFormData.get.files
     val filesErrors: ListBuffer[SheetErrors] = new ListBuffer()
     files.map(file => {

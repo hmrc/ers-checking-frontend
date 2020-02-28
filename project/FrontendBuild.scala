@@ -23,7 +23,8 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "play-language" % "4.1.0",
     "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.22",
     "commons-io" % "commons-io" % "2.6",
-    "uk.gov.hmrc" %% "tabular-data-validator" % "1.0.0"
+    "uk.gov.hmrc" %% "tabular-data-validator" % "1.0.0",
+    "uk.gov.hmrc" %% "auth-client" % "2.33.0-play-25"
   )
 
   trait TestDependencies {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package controllers
 
+import controllers.auth.AuthAction
+import helpers.WithMockedAuthActions
 import models.CSformMappings
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
@@ -24,6 +26,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.http.Status
+import play.api.libs.json.JsString
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.UnitSpec
@@ -32,36 +35,34 @@ import play.api.mvc.Request
 
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.cache.client.CacheMap
 
 
-class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with MockitoSugar {
+class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with MockitoSugar with WithMockedAuthActions {
 
   implicit val hc = new HeaderCarrier
   implicit lazy val messages: Messages = Messages(Lang("en"), app.injector.instanceOf[MessagesApi])
   implicit val request: Request[_] = FakeRequest()
+  val mockAuthAction : AuthAction = mock[AuthAction]
 
   "start Page GET" should {
 
     def buildFakeCheckingServiceController() = new CheckingServiceController {
       val mockCacheUtil: CacheUtil = mock[CacheUtil]
       override val cacheUtil: CacheUtil = mockCacheUtil
-    }
-
-    "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
-      val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.startPage().apply(FakeRequest("GET", ""))
-      status(result) shouldBe Status.SEE_OTHER
+      override val authAction: AuthAction = mockAuthAction
+      mockAnyContentAction
     }
 
     "gives a call to showStartPage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
       val result = controllerUnderTest.startPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
-      status(result) shouldBe Status.SEE_OTHER
+      status(result) shouldBe Status.OK
     }
 
     "give a status OK and shows start page" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.showStartPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
+      val result = controllerUnderTest.showStartPage()(Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
       status(result) shouldBe Status.OK
     }
 
@@ -72,23 +73,19 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
     def buildFakeCheckingServiceController() = new CheckingServiceController {
       val mockCacheUtil: CacheUtil = mock[CacheUtil]
       override val cacheUtil: CacheUtil = mockCacheUtil
-    }
-
-    "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
-      val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.schemeTypePage().apply(FakeRequest("GET", ""))
-      status(result) shouldBe Status.SEE_OTHER
+      override val authAction: AuthAction = mockAuthAction
+      mockAnyContentAction
     }
 
     "gives a call to showSchemeTypePage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
       val result = controllerUnderTest.schemeTypePage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
-      status(result) shouldBe Status.SEE_OTHER
+      status(result) shouldBe Status.OK
     }
 
     "give a status OK and shows scheme type page" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.showSchemeTypePage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val result = controllerUnderTest.showSchemeTypePage(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
       status(result) shouldBe Status.OK
     }
 
@@ -107,12 +104,8 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
           case _ => Future.failed(new Exception)
         }
       )
-    }
-
-    "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
-      val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.schemeTypeSelected().apply(FakeRequest("GET", ""))
-      status(result) shouldBe Status.SEE_OTHER
+      override val authAction: AuthAction = mockAuthAction
+      mockAnyContentAction
     }
 
     "gives a call to showSchemeTypeSelected if user is authenticated" in {
@@ -126,7 +119,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       val schemeTypeData = Map("" -> "")
       val form = CSformMappings.schemeTypeForm.bind(schemeTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showSchemeTypeSelected(Fixtures.buildFakeUser, request)
+      val result = controllerUnderTest.showSchemeTypeSelected(request)
       status(result) shouldBe Status.SEE_OTHER
       result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.schemeTypePage.toString()
     }
@@ -136,7 +129,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       val schemeTypeData = Map("schemeType" -> "1")
       val form = CSformMappings.schemeTypeForm.bind(schemeTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showSchemeTypeSelected(Fixtures.buildFakeUser, request)
+      val result = controllerUnderTest.showSchemeTypeSelected(request)
       status(result) shouldBe Status.SEE_OTHER
       result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkFileTypePage.toString()
     }
@@ -146,7 +139,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       val schemeTypeData = Map("schemeType" -> "1")
       val form = CSformMappings.schemeTypeForm.bind(schemeTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      contentAsString(await(controllerUnderTest.showSchemeTypeSelected(Fixtures.buildFakeUser, request))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
+      contentAsString(await(controllerUnderTest.showSchemeTypeSelected(request))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
     }
 
 //    "give a redirect Status and shows the check file page" in {
@@ -171,23 +164,19 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
           case _ => Future.failed(new NoSuchElementException)
         }
       )
-    }
-
-    "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
-      val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.checkFileTypePage().apply(FakeRequest("GET", ""))
-      status(result) shouldBe Status.SEE_OTHER
+      override val authAction: AuthAction = mockAuthAction
+      mockAnyContentAction
     }
 
     "gives a call to showCheckFileTypePage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
       val result = controllerUnderTest.checkFileTypePage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
-      status(result) shouldBe Status.SEE_OTHER
+      status(result) shouldBe Status.OK
     }
 
     "give a status OK if fetch successful and shows check file type page with file type selected" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.showCheckFileTypePage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val result = controllerUnderTest.showCheckFileTypePage(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=csv]").hasAttr("checked") shouldEqual true
@@ -196,7 +185,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
     "give a status OK if fetch fails then show check file type page with nothing selected" in {
       val controllerUnderTest = buildFakeCheckingServiceController(fileTypeRes = false)
-      val result = controllerUnderTest.showCheckFileTypePage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val result = controllerUnderTest.showCheckFileTypePage(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=csv]").hasAttr("checked") shouldEqual false
@@ -219,12 +208,8 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
           case _ => Future.failed(new Exception)
         }
       )
-    }
-
-    "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
-      val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.checkFileTypeSelected().apply(FakeRequest("GET", ""))
-      status(result) shouldBe Status.SEE_OTHER
+      override val authAction: AuthAction = mockAuthAction
+      mockAnyContentAction
     }
 
     "gives a call to showCheckFileTypeSelected if user is authenticated" in {
@@ -238,7 +223,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       val fileTypeData = Map("" -> "")
       val form = CSformMappings.checkFileTypeForm.bind(fileTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showCheckFileTypeSelected(Fixtures.buildFakeUser, request)
+      val result = controllerUnderTest.showCheckFileTypeSelected(request)
       status(result) shouldBe Status.SEE_OTHER
       result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkFileTypePage.toString()
     }
@@ -248,7 +233,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       val checkFileTypeData = Map("checkFileType" -> "csv")
       val form = CSformMappings.schemeTypeForm.bind(checkFileTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showCheckFileTypeSelected(Fixtures.buildFakeUser, request)
+      val result = controllerUnderTest.showCheckFileTypeSelected(request)
       status(result) shouldBe Status.SEE_OTHER
       result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkCSVFilePage.toString()
     }
@@ -258,7 +243,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       val checkFileTypeData = Map("checkFileType" -> "ods")
       val form = CSformMappings.schemeTypeForm.bind(checkFileTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showCheckFileTypeSelected(Fixtures.buildFakeUser, request)
+      val result = controllerUnderTest.showCheckFileTypeSelected(request)
       status(result) shouldBe Status.SEE_OTHER
       result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkODSFilePage.toString()
     }
@@ -268,7 +253,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       val schemeTypeData = Map("checkFileType" -> "csv")
       val form = CSformMappings.schemeTypeForm.bind(schemeTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      contentAsString(await(controllerUnderTest.showCheckFileTypeSelected(Fixtures.buildFakeUser, request))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
+      contentAsString(await(controllerUnderTest.showCheckFileTypeSelected(request))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
     }
 
   }
@@ -297,29 +282,25 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
           case _ => Future.failed(new Exception)
         }
       )
-    }
-
-    "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
-      val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.checkODSFilePage().apply(FakeRequest("GET", ""))
-      status(result) shouldBe Status.SEE_OTHER
+      override val authAction: AuthAction = mockAuthAction
+      mockAnyContentAction
     }
 
     "gives a call to showCheckFilePage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
       val result = controllerUnderTest.checkODSFilePage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
-      status(result) shouldBe Status.SEE_OTHER
+      status(result) shouldBe Status.OK
     }
 
     "give a status OK and shows check file page if fetch successful" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = true)
-      val result = controllerUnderTest.showCheckODSFilePage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
+      val result = controllerUnderTest.showCheckODSFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       status(result) shouldBe Status.OK
     }
 
     "direct to ers errors page if fetch fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
-      contentAsString(await( controllerUnderTest.showCheckODSFilePage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages]))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
+      contentAsString(await( controllerUnderTest.showCheckODSFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages]))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
     }
 
   }
@@ -339,29 +320,25 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
           case _ => Future.failed(new Exception)
         }
       )
-    }
-
-    "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
-      val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.checkCSVFilePage().apply(FakeRequest("GET", ""))
-      status(result) shouldBe Status.SEE_OTHER
+      override val authAction: AuthAction = mockAuthAction
+      mockAnyContentAction
     }
 
     "gives a call to showCheckCSVFilePage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
       val result = controllerUnderTest.checkCSVFilePage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
-      status(result) shouldBe Status.SEE_OTHER
+      status(result) shouldBe Status.OK
     }
 
     "give a status OK and shows check csv file page if fetch successful" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = true)
-      val result = controllerUnderTest.showCheckCSVFilePage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
+      val result = controllerUnderTest.showCheckCSVFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       status(result) shouldBe Status.OK
     }
 
     "direct to ers errors page if fetch fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
-      contentAsString(await( controllerUnderTest.showCheckCSVFilePage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages]))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
+      contentAsString(await( controllerUnderTest.showCheckCSVFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages]))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
     }
 
   }
@@ -399,23 +376,19 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
           case _ => Future.failed(new Exception)
         }
       )
-    }
-
-    "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
-      val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.checkingSuccessPage().apply(FakeRequest("GET", ""))
-      status(result) shouldBe Status.SEE_OTHER
+      override val authAction: AuthAction = mockAuthAction
+      mockAnyContentAction
     }
 
     "gives a call to showCheckingSuccessPage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
       val result = controllerUnderTest.checkingSuccessPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
-      status(result) shouldBe Status.SEE_OTHER
+      status(result) shouldBe Status.OK
     }
 
     "give a status OK and shows check success page" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.showCheckingSuccessPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
+      val result = controllerUnderTest.showCheckingSuccessPage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       status(result) shouldBe Status.OK
     }
 
@@ -451,18 +424,19 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
           case _ => Future.failed(new Exception)
         }
       )
-    }
-
-    "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
-      val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.checkingErrorsPage().apply(FakeRequest("GET", ""))
-      status(result) shouldBe Status.SEE_OTHER
+      when(
+        mockCacheUtil.fetchAll()(any(),any(),any())
+      ).thenReturn(
+        Future.successful(CacheMap("test", Map(CacheUtil.SCHEME_CACHE -> JsString("test"))))
+      )
+      override val authAction: AuthAction = mockAuthAction
+      mockAnyContentAction
     }
 
     "gives a call to showCheckingErrorsPage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
       val result = controllerUnderTest.checkingErrorsPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
-      status(result) shouldBe Status.SEE_OTHER
+      status(result) shouldBe Status.OK
     }
 
 //    "give a status OK and shows check errors page if fetch successful and scheme type is csv" in {
@@ -517,33 +491,25 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
           case _ => Future.failed(new Exception)
         }
       )
-    }
-
-    "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
-      val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.formatErrorsPage().apply(FakeRequest("GET", ""))
-      status(result) shouldBe Status.SEE_OTHER
+      override val authAction: AuthAction = mockAuthAction
+      mockAnyContentAction
     }
 
     "gives a call to showFormatErrorsPage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
       val result = controllerUnderTest.formatErrorsPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
-      status(result) shouldBe Status.SEE_OTHER
+      status(result) shouldBe Status.OK
     }
 
     "give a status OK and shows check errors page if fetch successful for scheme type and error count" in {
       val controllerUnderTest = buildFakeCheckingServiceController(fileTypeRes = "csv")
-      val result = controllerUnderTest.showFormatErrorsPage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val result = controllerUnderTest.showFormatErrorsPage(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
       status(result) shouldBe Status.OK
     }
 
     "direct to ers errors page if fetch fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
-      contentAsString(await(controllerUnderTest.showFormatErrorsPage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
+      contentAsString(await(controllerUnderTest.showFormatErrorsPage(Fixtures.buildFakeRequestWithSessionId("GET"), hc))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
     }
-
   }
-
-
-
 }

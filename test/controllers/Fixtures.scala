@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 package controllers
 
+import controllers.auth.RequestWithOptionalEmpRef
 import models.SheetErrors
 import org.scalatest.{BeforeAndAfterAll, Suite}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json._
+import play.api.mvc.{AnyContent, AnyContentAsEmpty}
 import play.api.test.FakeRequest
 import play.test.WithApplication
 import uk.gov.hmrc.play.frontend.auth.AuthContext
@@ -36,7 +38,11 @@ object Fixtures {
   def buildFakeAuthority = Authority("/auth/oid/krogers", Accounts(None), None, None, CredentialStrength.Strong, L0, None, None, None, "")
   def buildFakeUser = AuthContext(buildFakeAuthority)
 
-  def buildFakeRequestWithSessionId(method: String) = FakeRequest(method, "").withSession("sessionId" -> "FAKE_SESSION_ID")
+  def buildFakeRequestWithSessionId(method: String): FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest(method, "").withSession("sessionId" -> "FAKE_SESSION_ID")
+
+  def buildEmpRefRequestWithSessionId(method: String): RequestWithOptionalEmpRef[AnyContent] =
+    RequestWithOptionalEmpRef(FakeRequest(method, "").withSession("sessionId" -> "FAKE_SESSION_ID"), None)
 
   def getMockErrorList(): JsValue = {
     val schemeErrors = new ListBuffer[SheetErrors]()

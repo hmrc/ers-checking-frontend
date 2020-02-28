@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package services.audit
 //import models.SchemeInfo
 
+import controllers.auth.RequestWithOptionalEmpRef
 import play.api.mvc.Request
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.http.HeaderCarrier
@@ -49,11 +50,9 @@ trait AuditEvents {
   }
 
 
-  def numRowsInSchemeData(sheetName : String, rowsWithData : Int)(implicit authContext: AuthContext, hc: HeaderCarrier, request: Request[_]): Boolean = {
-    var empRef = ""
-    if(authContext.principal.accounts.epaye.isDefined){
-        empRef = authContext.principal.accounts.epaye.get.empRef.toString()
-    }
+  def numRowsInSchemeData(sheetName : String, rowsWithData : Int)(implicit hc: HeaderCarrier, request: RequestWithOptionalEmpRef[_]): Boolean = {
+    val empRef = request.optionalEmpRef.map(_.value).getOrElse("")
+
     auditService.sendEvent("CheckingServiceNumRowsInSchemeData", Map(
     "sheetName" -> sheetName,
     "rowsWithData" -> rowsWithData.toString,

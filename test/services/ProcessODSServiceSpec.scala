@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ class ProcessODSServiceSpec extends UnitSpec with MockitoSugar with WithFakeAppl
     def buildProcessODSService() = new ProcessODSService {
       override val uploadedFileUtil: UploadedFileUtil = mock[UploadedFileUtil]
       override val cacheUtil:CacheUtil = mock[CacheUtil]
-      override def checkFileType(uploadedFile: MultipartFormData.FilePart[Files.TemporaryFile])(implicit scheme:String, authContext: AuthContext, hc: HeaderCarrier,request: Request[_], messages: Messages):ListBuffer[SheetErrors] = new ListBuffer
+      def checkFileType(uploadedFile: MultipartFormData.FilePart[Files.TemporaryFile])(implicit scheme:String, authContext: AuthContext, hc: HeaderCarrier,request: Request[_], messages: Messages):ListBuffer[SheetErrors] = new ListBuffer
     }
 
     //    "return (false, ers_check_file.no_file_error) if there isn't uploaded file" in {
@@ -109,7 +109,7 @@ class ProcessODSServiceSpec extends UnitSpec with MockitoSugar with WithFakeAppl
         )
       override val uploadedFileUtil: UploadedFileUtil = mockUploadedFileUtil
       override val cacheUtil:CacheUtil = mock[CacheUtil]
-      override def parseOdsContent(fileName: String, uploadedFileName: String)(implicit scheme:String, authContext: AuthContext, hc: HeaderCarrier,request: Request[_], messages: Messages): ListBuffer[SheetErrors] = new ListBuffer
+      def parseOdsContent(fileName: String, uploadedFileName: String)(implicit scheme:String, authContext: AuthContext, hc: HeaderCarrier,request: Request[_], messages: Messages): ListBuffer[SheetErrors] = new ListBuffer
     }
 
     //    "return (false, ers_check_file.file_type_error) if uploaded file isn't .ods" in {

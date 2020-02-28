@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package controllers
 
+import controllers.auth.AuthAction
 import play.Logger
 import play.api.i18n.Messages
 import play.api.mvc._
@@ -25,26 +26,28 @@ import models.SheetErrors
 import uk.gov.hmrc.services.validation.ValidationError
 import play.api.i18n.Messages.Implicits._
 import play.api.Play.current
+
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
 object HtmlReportController extends HtmlReportController {
   override val cacheUtil: CacheUtil = CacheUtil
+  override val authAction: AuthAction = AuthAction
 }
 
 trait HtmlReportController extends ERSCheckingBaseController {
 
   var jsonParser = JsonParser
   val cacheUtil: CacheUtil
+  val authAction: AuthAction
 
-  def htmlErrorReportPage() = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
-    implicit authContext =>
+  def htmlErrorReportPage(): Action[AnyContent] = authAction.async {
       implicit request =>
         showHtmlErrorReportPage()
   }
 
-  def showHtmlErrorReportPage()(implicit authContext: AuthContext, request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
+  def showHtmlErrorReportPage()(implicit request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
     cacheUtil.fetchAll().map { all =>
       val scheme: (String, String) = all.getEntry[String](CacheUtil.SCHEME_CACHE) match {
         case Some(name) => ContentUtil.getSchemeName(name)(messages)

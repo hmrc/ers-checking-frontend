@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package controllers
 
 import java.util.NoSuchElementException
 
+import controllers.auth.AuthAction
+import helpers.WithMockedAuthActions
 import models.SheetErrors
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -42,7 +44,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.HeaderCarrier
 
-class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with MockitoSugar {
+class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with MockitoSugar with WithMockedAuthActions {
 
   val config = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
@@ -55,6 +57,8 @@ class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with Mockito
   implicit val request: Request[_] = FakeRequest()
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
+
+  val mockAuthAction : AuthAction = mock[AuthAction]
 
   "html Error Report Page GET" should {
 
@@ -69,18 +73,20 @@ class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with Mockito
           case _ => Future.failed(new Exception)
         }
       )
-    }
+      when(
+        mockCacheUtil.fetchAll()(any(),any(),any())
+      ).thenReturn(
+        Future.successful(CacheMap("test", Map(CacheUtil.SCHEME_CACHE -> JsString("test"))))
+      )
 
-    "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
-      val controllerUnderTest = buildFakeHtmlReportController()
-      val result = controllerUnderTest.htmlErrorReportPage().apply(FakeRequest("GET", ""))
-      status(result) shouldBe Status.SEE_OTHER
+      override val authAction: AuthAction = mockAuthAction
+      mockAnyContentAction
     }
 
     "gives a call to showHtmlErrorReportPage if user is authenticated" in {
       val controllerUnderTest = buildFakeHtmlReportController()
       val result = controllerUnderTest.htmlErrorReportPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
-      status(result) shouldBe Status.SEE_OTHER
+      status(result) shouldBe Status.OK
     }
 
     //    "give a status OK and shows Html Error page if fetch successful and error count > 0" in {
@@ -145,17 +151,14 @@ class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with Mockito
 
       override def shortLivedCache: ShortLivedCache = ???
     }
+    override val authAction: AuthAction = mockAuthAction
+
+    mockAnyContentAction
   }
 
 
   // html error page
-  "Calling HtmlReportController.htmlErrorReportPage without authentication" should {
-    "give a redirect status (to company authentication frontend)" in {
-      val controllerUnderTest = buildFakeHtmlReportController
-      val result = controllerUnderTest.htmlErrorReportPage().apply(FakeRequest("GET", ""))
-      status(result) shouldBe Status.SEE_OTHER
-    }
-  }
+
   //
   //  "Calling HtmlReportController.showHtmlErrorReportPage with authentication, an error list, scheme type, error count, and summary in cache" should {
   //    "render html error report page)" in {
@@ -170,7 +173,7 @@ class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with Mockito
     "throw exception" in {
       val controllerUnderTest = buildFakeHtmlReportController
       contentAsString(
-        await(controllerUnderTest.showHtmlErrorReportPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc, messages))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
+        await(controllerUnderTest.showHtmlErrorReportPage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, messages))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
     }
   }
 
@@ -178,7 +181,7 @@ class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with Mockito
     "give a status OK and show error report" in {
       val controllerUnderTest = buildFakeHtmlReportController
       controllerUnderTest.fetchAllMapVal = "withErrorListSchemeTypeFileTypeZeroErrorCountSummary"
-      val result = controllerUnderTest.showHtmlErrorReportPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"),hc, messages)
+      val result = controllerUnderTest.showHtmlErrorReportPage()(Fixtures.buildFakeRequestWithSessionId("GET"),hc, messages)
       status(result) shouldBe Status.OK
       // result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkingSuccessPage.toString()
     }

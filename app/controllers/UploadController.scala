@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,24 @@
 
 package controllers
 
-import services.{CsvFileProcessor, ProcessODSService}
+import controllers.auth.{AuthAction, RequestWithOptionalEmpRef}
 import models.ERSFileProcessingException
-import play.api.i18n.Messages
-import uk.gov.hmrc.play.frontend.auth.AuthContext
-import utils.CacheUtil
-import play.api.mvc.{Action, AnyContent, Request, Result}
 import play.api.Play.current
+import play.api.i18n.Messages
 import play.api.i18n.Messages.Implicits._
+import play.api.mvc.{Action, AnyContent, Request, Result}
+import services.{CsvFileProcessor, ProcessODSService}
+import uk.gov.hmrc.http.HeaderCarrier
+import utils.CacheUtil
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import uk.gov.hmrc.http.HeaderCarrier
 
 object UploadController extends UploadController {
 	override val processODSService: ProcessODSService = ProcessODSService
 	override val cacheUtil: CacheUtil = CacheUtil
 	override val csvFileProcessor: CsvFileProcessor = CsvFileProcessor
+	override val authAction: AuthAction = AuthAction
 }
 
 trait UploadController extends ERSCheckingBaseController {
@@ -40,15 +41,15 @@ trait UploadController extends ERSCheckingBaseController {
 	val processODSService: ProcessODSService
 	val cacheUtil: CacheUtil
 	val csvFileProcessor: CsvFileProcessor
+	val authAction: AuthAction
 
-	def uploadCSVFile(scheme: String): Action[AnyContent] = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
-		implicit authContext =>
-			implicit request =>
-				showuploadCSVFile(scheme)
+	def uploadCSVFile(scheme: String): Action[AnyContent] = authAction.async {
+		implicit request =>
+			showuploadCSVFile(scheme)
 	}
 
-	def showuploadCSVFile(scheme: String)(implicit authContext: AuthContext, request: Request[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
-		val result = csvFileProcessor.processCsvUpload(scheme)(request,authContext, hc, messages)
+	def showuploadCSVFile(scheme: String)(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
+		val result = csvFileProcessor.processCsvUpload(scheme)(request, hc, messages)
 		result.flatMap[Result] {
 			case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
 			case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage()))
@@ -56,14 +57,13 @@ trait UploadController extends ERSCheckingBaseController {
 		}
 	}
 
-	def uploadODSFile(scheme: String): Action[AnyContent] = AuthenticatedBy(ERSGovernmentGateway, pageVisibilityPredicate).async {
-		implicit authContext =>
-			implicit request =>
-				showuploadODSFile(scheme)
+	def uploadODSFile(scheme: String): Action[AnyContent] = authAction.async {
+		implicit request =>
+			showuploadODSFile(scheme)
 	}
 
-	def showuploadODSFile(scheme: String)(implicit authContext: AuthContext, request: Request[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
-		val result = processODSService.performODSUpload()(request, scheme, authContext, hc, messages)
+	def showuploadODSFile(scheme: String)(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
+		val result = processODSService.performODSUpload()(request, scheme, hc, messages)
 		result.flatMap[Result] {
 			case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
 			case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage()))

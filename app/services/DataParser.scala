@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package services
 
 import java.util.concurrent.TimeUnit
 
+import controllers.auth.RequestWithOptionalEmpRef
 import javax.xml.parsers.SAXParserFactory
 import metrics.Metrics
 import models._
@@ -115,7 +116,7 @@ object DataGenerator extends DataGenerator
 
 trait DataGenerator extends DataParser with Metrics{
 
-  def getErrors(iterator:Iterator[String], scheme:String, fileName : String)(implicit authContext: AuthContext, hc: HeaderCarrier, request: Request[_], messages: Messages) =
+  def getErrors(iterator:Iterator[String], scheme:String, fileName : String)(implicit hc: HeaderCarrier, request: RequestWithOptionalEmpRef[_], messages: Messages) =
   {
     var rowNum = 0
     implicit var sheetName :String = ""
@@ -199,7 +200,7 @@ trait DataGenerator extends DataParser with Metrics{
         needsExtendedInstructions = true)
     }
     deliverDataIteratorMetrics(startTime)
-    AuditEvents.numRowsInSchemeData(scheme, rowsWithData)(authContext,hc,request)
+    AuditEvents.numRowsInSchemeData(scheme, rowsWithData)(hc,request)
     Logger.debug("The SchemeData that GetData finally returns: " + schemeErrors)
     schemeErrors
   }

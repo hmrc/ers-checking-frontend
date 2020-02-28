@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import com.typesafe.config.ConfigFactory
 import controllers.Fixtures
+import controllers.auth.RequestWithOptionalEmpRef
 import models.ERSFileProcessingException
 import org.scalatest.concurrent.{ScalaFutures, Timeouts}
 import org.scalatest.mock.MockitoSugar
@@ -29,13 +30,14 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.libs.Files.TemporaryFile
-import play.api.mvc.MultipartFormData
+import play.api.mvc.{AnyContent, MultipartFormData}
 import play.api.mvc.MultipartFormData.FilePart
 import services.validation.ErsValidator
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.{Cell, DataValidator, ValidationError}
 import play.api.inject.Injector
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.test.FakeRequest
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{Await, Future}
@@ -111,8 +113,8 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with GuiceOneAppPe
     }
 
     "validate multiple CSV files" in {
-      val request = Fixtures.buildFakeRequestWithSessionId("POST").withMultipartFormDataBody(getMockFileCSV)
-      val result = CsvFileProcessor.validateCsvFiles("3")(request, Fixtures.buildFakeUser,hc = HeaderCarrier(), implicitly[Messages])
+      val request = RequestWithOptionalEmpRef[AnyContent](Fixtures.buildFakeRequestWithSessionId("POST").withMultipartFormDataBody(getMockFileCSV), None)
+      val result = CsvFileProcessor.validateCsvFiles("3")(request, hc = HeaderCarrier(), implicitly[Messages])
 
       val expected = getMockFileCSV.files.size
       result.size shouldEqual expected

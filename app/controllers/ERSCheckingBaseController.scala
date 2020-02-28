@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,13 @@
 
 package controllers
 
-import config.{ERSFileValidatorAuditConnector, ErsContext, ErsContextImpl, WSHttp}
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L50
+import config.{ERSFileValidatorAuditConnector, ErsContext, ErsContextImpl}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.frontend.auth.{Actions, IdentityConfidencePredicate}
 
-import scala.concurrent.Future
 import scala.concurrent.duration._
-import playconfig.ERSAuthConnector
 
-trait ERSCheckingBaseController extends FrontendController with Actions{
-
+trait ERSCheckingBaseController extends FrontendController {
 	lazy val auditConnector = ERSFileValidatorAuditConnector
-	lazy val authConnector = ERSAuthConnector
 	val maxTimeOut = 90 seconds
-	val pageVisibilityPredicate = new IdentityConfidencePredicate(L50, Future.successful(Forbidden))
 	implicit val context: ErsContext = ErsContextImpl
 }
