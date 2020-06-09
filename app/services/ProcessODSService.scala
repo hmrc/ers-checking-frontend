@@ -16,22 +16,23 @@
 
 package services
 
-import java.io.{File, InputStream}
+import java.io.{File, FileInputStream, InputStream}
 import java.util.zip.ZipFile
 
 import controllers.auth.RequestWithOptionalEmpRef
 import models.{ERSFileProcessingException, FileObject, SheetErrors}
+import org.apache.commons.io.IOUtils
 import play.api.Logger
 import play.api.i18n.Messages
 import play.api.libs.Files
 import play.api.mvc.{AnyContent, MultipartFormData, Request}
-import uk.gov.hmrc.play.frontend.auth.AuthContext
+import services.audit.AuditEvents
 import utils.{CacheUtil, ParserUtil, UploadedFileUtil}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Try}
+import scala.util.{Failure, Success, Try}
 import uk.gov.hmrc.http.HeaderCarrier
 
 object ProcessODSService extends ProcessODSService {
@@ -110,14 +111,24 @@ trait ProcessODSService {
     res
   }
 
-  def parseOdsContent(fileName: String, uploadedFileName: String)(implicit scheme: String, hc : HeaderCarrier, request: RequestWithOptionalEmpRef[_], messages: Messages): ListBuffer[SheetErrors] = {
+  def parseOdsContent(fileName: String, uploadedFileName: String)
+                     (implicit scheme: String, hc : HeaderCarrier, request: RequestWithOptionalEmpRef[_], messages: Messages): ListBuffer[SheetErrors] = {
 
-    val zipFile: ZipFile = new ZipFile(fileName)
-    val content: InputStream = zipFile.getInputStream(zipFile.getEntry("content.xml"))
-    val processor = new StaxProcessor(content)
-    val result = DataGenerator.getErrors(processor, scheme, uploadedFileName)
-    zipFile.close()
-    result
+    Try (new ZipFile(fileName)) match {
+      case Failure(ex) => {
+        val stream = new FileInputStream(fileName)
+        val hexString = IOUtils.toByteArray(stream, 64).map(_.toHexString).mkString("")
+        AuditEvents.auditRunTimeError(ex,s"Could not open zip file starting with: $hexString" ,"None")(hc,request)
+        throw ex
+      }
+      case Success(zipFile: ZipFile) => {
+        val content: InputStream = zipFile.getInputStream(zipFile.getEntry("content.xml"))
+        val processor = new StaxProcessor(content)
+        val result = DataGenerator.getErrors(processor, scheme, uploadedFileName)
+        zipFile.close()
+        result
+      }
+    }
   }
 
 }
