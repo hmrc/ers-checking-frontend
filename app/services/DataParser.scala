@@ -242,7 +242,7 @@ trait DataGenerator extends DataParser with Metrics{
   def getSheet(sheetName:String, scheme:String)(implicit messages: Messages) = {
     Logger.info(s"Looking for sheetName: ${sheetName}")
     ersSheets.getOrElse(sheetName, {
-      Logger.warn(Messages("ers.exceptions.dataParser.unidentifiableSheetName") + sheetName)
+      Logger.warn(Messages("ers.exceptions.dataParser.unidentifiableSheetName"))
       val schemeName = ContentUtil.getSchemeName(scheme)._2
       throw ERSFileProcessingException(
         "ers.exceptions.dataParser.incorrectSheetName",
