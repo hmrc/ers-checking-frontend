@@ -25,7 +25,7 @@ trait UploadedFileUtil {
 	def checkODSFileType(fileName: String): Boolean = {
 		val delimiter: Char = '.'
 		val stringTokens: Array[String] = fileName.split(delimiter)
-		stringTokens(stringTokens.length - 1) match {
+		stringTokens(stringTokens.length - 1).toLowerCase match {
 			case "ods" => true
 			case _ => false
 		}

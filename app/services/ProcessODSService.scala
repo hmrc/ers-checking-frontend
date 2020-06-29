@@ -71,7 +71,7 @@ trait ProcessODSService {
       }
       catch {
         case e: ERSFileProcessingException =>
-					Logger.error(s"[ProcessODSService][performODSUpload] ERSFileProcessingException thrown trying to upload file - $e")
+					Logger.warn(s"[ProcessODSService][performODSUpload] ERSFileProcessingException thrown trying to upload file - $e")
 					Future.successful(Failure(e))
       }
     ).getOrElse {

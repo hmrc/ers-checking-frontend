@@ -26,6 +26,11 @@ class UploadedFileUtilSpec  extends UnitSpec with MockitoSugar {
     "return positively for an ods file" in {
       UploadedFileUtil.checkODSFileType("abc.ods") shouldBe true
     }
+
+    "return positively for an ods file with extension in upper case" in {
+      UploadedFileUtil.checkODSFileType("abc.ODS") shouldBe true
+    }
+
     "return negatively for other files" in {
       UploadedFileUtil.checkODSFileType("abc.doc") shouldBe false
     }
@@ -37,6 +42,7 @@ class UploadedFileUtilSpec  extends UnitSpec with MockitoSugar {
     "return positively for an csv file" in {
       UploadedFileUtil.checkCSVFileType("abc.csv") shouldBe true
     }
+
     "return negatively for other files" in {
       UploadedFileUtil.checkCSVFileType("abc.doc") shouldBe false
     }
