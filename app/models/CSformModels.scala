@@ -19,13 +19,17 @@ package models
 import play.api.libs.json.Json
 
 case class CS_checkFileType (
-  checkFileType: String
-)
+  checkFileType: Option[String]
+) {
+  def getFileType: String = checkFileType.getOrElse("")
+}
 
 
 case class CS_schemeType (
-  schemeType: String
-)
+  schemeType: Option[String]
+) {
+  def getSchemeType: String = schemeType.getOrElse("")
+}
 
 case class SchemeTypes(isNilReturn: Option[String])
 object SchemeTypes {

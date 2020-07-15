@@ -22,12 +22,12 @@ object ContentUtil extends ContentUtil
 trait ContentUtil {
 
   def getSchemeName(schemeType: String)(implicit messages: Messages) : (String,String) = {
-    schemeType match {
-      case "1" => (Messages("ers_pdf_error_report.csop"),"CSOP")
-      case "2" => (Messages("ers_pdf_error_report.emi"),"EMI")
-      case "4" => (Messages("ers_pdf_error_report.saye"),"SAYE")
-      case "5" => (Messages("ers_pdf_error_report.sip"),"SIP")
-      case "3" => (Messages("ers_pdf_error_report.other"),"OTHER")
+    schemeType.toLowerCase match {
+      case "csop" | "1" => (Messages("ers_pdf_error_report.csop"),"CSOP")
+      case "emi" | "2" => (Messages("ers_pdf_error_report.emi"),"EMI")
+      case "saye" | "4" => (Messages("ers_pdf_error_report.saye"),"SAYE")
+      case "sip" | "5" => (Messages("ers_pdf_error_report.sip"),"SIP")
+      case "other" | "3" => (Messages("ers_pdf_error_report.other"),"OTHER")
       case _ => ("","")
     }
   }

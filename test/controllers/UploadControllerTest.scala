@@ -21,7 +21,7 @@ import helpers.WithMockedAuthActions
 import models.ERSFileProcessingException
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.inject.Injector

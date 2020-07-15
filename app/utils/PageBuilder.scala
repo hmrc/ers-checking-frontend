@@ -27,11 +27,11 @@ trait PageBuilder {
   val DEFAULT = ""
 
   // Schemes
-  val SCHEME_CSOP: String = "1"
-  val SCHEME_EMI: String = "2"
-  val SCHEME_SAYE: String = "4"
-  val SCHEME_SIP: String = "5"
-  val SCHEME_OTHER: String = "3"
+  val SCHEME_CSOP: String = "csop"
+  val SCHEME_EMI: String = "emi"
+  val SCHEME_SAYE: String = "saye"
+  val SCHEME_SIP: String = "sip"
+  val SCHEME_OTHER: String = "other"
 
   // pageId's  
   val PAGE_START = "ers_start"

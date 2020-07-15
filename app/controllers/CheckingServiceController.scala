@@ -17,9 +17,10 @@
 package controllers
 
 import controllers.auth.AuthAction
-import models.CSformMappings
+import models.{CS_checkFileType, CS_schemeType, CSformMappings}
 import play.api.Logger
 import play.api.Play.current
+import play.api.data.Form
 import play.api.i18n.Messages
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc._
@@ -48,14 +49,13 @@ trait CheckingServiceController extends ERSCheckingBaseController {
 
   def showStartPage()(implicit request: Request[AnyRef], messages: Messages): Future[Result] = Future.successful(Ok(views.html.start(request, context, messages)))
 
-  def schemeTypePage(): Action[AnyContent] = authAction.async {
+  def schemeTypePage(form: Form[CS_schemeType] = CSformMappings.schemeTypeForm): Action[AnyContent] = authAction.async {
       implicit request =>
-        showSchemeTypePage(request, hc)
+        showSchemeTypePage(form: Form[CS_schemeType])(request, hc)
   }
 
-  def showSchemeTypePage(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
-    val schemeType: String = "0"
-    Future(Ok(views.html.scheme_type(schemeType)))
+  def showSchemeTypePage(form: Form[CS_schemeType])(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+    Future(Ok(views.html.scheme_type(form)))
   }
 
   def schemeTypeSelected(): Action[AnyContent] = authAction.async {
@@ -63,36 +63,31 @@ trait CheckingServiceController extends ERSCheckingBaseController {
         showSchemeTypeSelected(request)
   }
 
-  def showSchemeTypeSelected(implicit request: Request[AnyRef]): Future[Result] = {
+  def showSchemeTypeSelected(implicit request: Request[AnyContent]): Future[Result] = {
     CSformMappings.schemeTypeForm.bindFromRequest.fold(
       formWithErrors => {
-        Future.successful(Redirect(routes.CheckingServiceController.schemeTypePage).flashing("scheme-not-selected-error" -> Messages("ers_scheme_type.select_scheme_type")))
+        Future.successful(BadRequest(views.html.scheme_type(formWithErrors)))
       },
       formData => {
-        cacheUtil.cache[String](CacheUtil.SCHEME_CACHE, formData.schemeType.toString).map { res =>
+        cacheUtil.cache[String](CacheUtil.SCHEME_CACHE, formData.getSchemeType).map { res =>
           Redirect(routes.CheckingServiceController.checkFileTypePage)
         }.recover {
-          case e: Exception => {
+          case e: Exception =>
             Logger.error("showSchemeTypeSelected: Unable to save scheme. Error: " + e.getMessage)
             getGlobalErrorPage
-          }
         }
       }
     )
   }
 
 
-  def checkFileTypePage(): Action[AnyContent] = authAction.async {
+  def checkFileTypePage(form: Form[CS_checkFileType] = CSformMappings.checkFileTypeForm): Action[AnyContent] = authAction.async {
       implicit request =>
-        showCheckFileTypePage(request, hc)
+        showCheckFileTypePage(form: Form[CS_checkFileType])(request, hc)
   }
 
-  def showCheckFileTypePage(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
-    cacheUtil.fetch[String](CacheUtil.FILE_TYPE_CACHE).map { fileType =>
-      Ok(views.html.check_file_type(fileType))
-    } recover {
-      case e: NoSuchElementException => Ok(views.html.check_file_type(""))
-    }
+  def showCheckFileTypePage(form: Form[CS_checkFileType])(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+      Future.successful(Ok(views.html.check_file_type(form)))
   }
 
   def checkFileTypeSelected(): Action[AnyContent] = authAction.async {
@@ -100,14 +95,14 @@ trait CheckingServiceController extends ERSCheckingBaseController {
         showCheckFileTypeSelected(request)
   }
 
-  def showCheckFileTypeSelected(implicit request: Request[AnyRef]): Future[Result] = {
+  def showCheckFileTypeSelected(implicit request: Request[AnyContent]): Future[Result] = {
     CSformMappings.checkFileTypeForm.bindFromRequest.fold(
       formWithErrors => {
-        Future.successful(Redirect(routes.CheckingServiceController.checkFileTypePage).flashing("check-file-type-not-selected-error" -> Messages("ers_check_file_type.alert")))
+        Future.successful(BadRequest(views.html.check_file_type(formWithErrors)))
       },
       formData => {
-        cacheUtil.cache[String](CacheUtil.FILE_TYPE_CACHE, formData.checkFileType).map { res =>
-          if (formData.checkFileType == PageBuilder.OPTION_ODS) {
+        cacheUtil.cache[String](CacheUtil.FILE_TYPE_CACHE, formData.getFileType).map { res =>
+          if (formData.getFileType == PageBuilder.OPTION_ODS) {
             Redirect(routes.CheckingServiceController.checkODSFilePage)
           } else {
             Redirect(routes.CheckingServiceController.checkCSVFilePage)

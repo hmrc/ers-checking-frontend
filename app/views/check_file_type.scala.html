@@ -14,41 +14,26 @@
  * limitations under the License.
  *@
 
-@(checkFileType: String = "")(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext, messages: Messages)
-@* type of activity template *@
+@(form: Form[CS_checkFileType])(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext, messages: Messages)
+    @* type of activity template *@
+    @import views.html.templates._
+    @import uk.gov.hmrc.play.views.html.helpers
+    @ers_main(title = Messages("ers.file_type.page_title")) {
 
-@import views.html.templates._
-@import utils.PageBuilder._
-@import views.html.helpers.error_overview
-@ers_main(title = Messages("ers.file_type.page_title")) {
-
-
-		<p class="font-xsmall"><a href="@routes.CheckingServiceController.schemeTypePage()" class="link-back">@Html(Messages("ers.back"))</a></p>
-		@header(Messages("ers_check_file_type.title"))
-		@if(flash.get("check-file-type-not-selected-error").isDefined) {
-		@error_overview(flash.get("check-file-type-not-selected-error"), "error-summary")
-		}
-		@uk.gov.hmrc.play.views.html.helpers.form(action = routes.CheckingServiceController.checkFileTypeSelected()) {
-			<fieldset>
-				<legend class="title-with-error">
-					<span class="visuallyhidden">@Html(Messages("ers_check_file_type.title"))</span>
-				</legend>
-				@if(flash.get("check-file-type-not-selected-error").isDefined) {
-				<div aria-labelledby="error-heading" class="validation-message" id="error-summary" role="alert" tabindex="-1">
-					<span id="error-heading">@flash.get("check-file-type-not-selected-error")</span>
-				</div>
-				}
-				<div class="form-field @if(flash.get("check-file-type-not-selected-error").isDefined) {error}">
-					<label for="csv" class="block-label @(if(checkFileType == OPTION_CSV) "selected")">
-						<input id="csv" type="radio" name="checkFileType" value=@OPTION_CSV @(if(checkFileType == OPTION_CSV) "checked" else "")>
-						@Html(Messages("ers_check_file_type.option_1"))<br>
-					</label>
-					<label for="ods" class="block-label @(if(checkFileType == OPTION_ODS) "selected")">
-						<input id="ods" type="radio" name="checkFileType" value=@OPTION_ODS @(if(checkFileType == OPTION_ODS) "checked" else "")>
-						@Html(Messages("ers_check_file_type.option_2"))<br>
-					</label>
-				</div>
-			</fieldset>
-			<input role="button" id="continue" class="button" type="submit" value="@Html(Messages("ers.continue"))">
-			}
-}
+        <p class="font-xsmall"><a href="@routes.CheckingServiceController.schemeTypePage()" class="link-back">@Html(Messages("ers.back"))</a></p>
+        @helpers.errorSummary(Messages("validation.summary.heading"), form, forceDivToAppear = false)
+        @header(Messages("ers_check_file_type.title"))
+        @helpers.form(action = routes.CheckingServiceController.checkFileTypeSelected()) {
+            @helpers.input_radio_group(form("checkFileType"), Seq(
+                ("csv", Messages("ers_check_file_type.option_1")),
+                ("ods", Messages("ers_check_file_type.option_2"))
+            ),
+                '_legend -> Messages("ers_check_file_type.title"),
+                '_legendClass -> "visuallyhidden",
+                '_fieldsetAttributes -> Html("""id='checkFileType'""")
+            )
+            <div class="form-field form-field--submit">
+                <input role="button" id="continue" class="button" type="submit" value="@Html(Messages("ers.continue"))">
+            </div>
+        }
+    }

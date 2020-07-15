@@ -20,7 +20,7 @@ import controllers.Fixtures
 import models.ERSFileProcessingException
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.play.PlaySpec
 import play.api.Application
@@ -63,7 +63,7 @@ class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures wit
   "display incorrectSheetName exception in identifyAndDefineSheet method" in {
 
     val thrown = the[ERSFileProcessingException] thrownBy
-      TestDataGenerator.identifyAndDefineSheet("EMI40_Taxable","2")(hc,Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
+      TestDataGenerator.identifyAndDefineSheet("EMI40_Taxable","EMI")(hc,Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
 
     thrown.getMessage mustBe "ers.exceptions.dataParser.incorrectSheetName"
     thrown.optionalParams mustBe Seq("EMI40_Taxable", "EMI")
@@ -104,7 +104,7 @@ class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures wit
 
   "throw an exception for an invalid sheetName" in {
     val result = intercept[ERSFileProcessingException]{
-      TestDataGenerator.getSheet("abc", "1")
+      TestDataGenerator.getSheet("abc", "csop")
     }
     result.message mustBe "ers.exceptions.dataParser.incorrectSheetName"
     result.optionalParams mustBe Seq("abc", "CSOP")

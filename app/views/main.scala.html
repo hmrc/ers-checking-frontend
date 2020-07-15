@@ -36,10 +36,6 @@ scriptElement: Option[Html] = None)(mainContent: Html = HtmlFormat.empty)(implic
     <meta name="format-detection" content="telephone=no"/>
 }
 
-@headerNavLinks = {
-    <li></li>
-}
-
 @insideHeader = {
     @if(headerNav) {
         @uiLayouts.header_nav(
@@ -64,7 +60,6 @@ scriptElement: Option[Html] = None)(mainContent: Html = HtmlFormat.empty)(implic
 }
 
 @footerTop = {}
-@footerLinks = {}
 
 @mainContentHeader = {
 
@@ -79,17 +74,24 @@ scriptElement: Option[Html] = None)(mainContent: Html = HtmlFormat.empty)(implic
         Some("text--right"))
     }
 }
+@serviceInfo = {
+@uiLayouts.serviceInfo(
+    betaBanner = HtmlFormat.empty,
+    includeGridWrapper = false,
+    serviceInfoContent = Some(HtmlFormat.empty),
+    includeHMRCBranding = false
+)
+}
 
 @getHelpForm = {
-    @if(supportLinkEnabled) {
-        @get_help_form(true, false)
-    }
+@{uiHelpers.reportAProblemLink(applicationConfig.reportAProblemPartialUrl,applicationConfig.reportAProblemNonJSUrl)}
 }
 
 @content = {
     @uiLayouts.main_content(
-        article = mainContent,
+        article = uiLayouts.article(mainContent),
         mainContentHeader = mainContentHeader,
+        serviceInfo = serviceInfo,
         getHelpForm = getHelpForm,
         sidebar = sidebar
     )

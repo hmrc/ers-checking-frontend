@@ -23,7 +23,7 @@ import helpers.WithMockedAuthActions
 import models.SheetErrors
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Application
 import play.api.http.Status
@@ -130,20 +130,20 @@ class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with Mockito
           case "e" => Future(throw new NoSuchElementException)
           case "withErrorListSchemeTypeFileTypeErrorCountSummary" => {
 
-            val data : scala.Predef.Map[scala.Predef.String, play.api.libs.json.JsValue] = Map((CacheUtil.ERROR_LIST_CACHE -> Fixtures.getMockErrorList()), (CacheUtil.SCHEME_CACHE -> Json.toJson("1")), (CacheUtil.FILE_TYPE_CACHE -> Json.toJson(PageBuilder.OPTION_ODS)), (CacheUtil.SCHEME_ERROR_COUNT_CACHE -> Json.toJson(10)), (CacheUtil.ERROR_SUMMARY_CACHE -> Fixtures.getMockSummaryErrors()))
-            val cm : CacheMap = new CacheMap("id1", data)
+            val data : scala.Predef.Map[scala.Predef.String, play.api.libs.json.JsValue] = Map((CacheUtil.ERROR_LIST_CACHE -> Fixtures.getMockErrorList()), (CacheUtil.SCHEME_CACHE -> Json.toJson("csop")), (CacheUtil.FILE_TYPE_CACHE -> Json.toJson(PageBuilder.OPTION_ODS)), (CacheUtil.SCHEME_ERROR_COUNT_CACHE -> Json.toJson(10)), (CacheUtil.ERROR_SUMMARY_CACHE -> Fixtures.getMockSummaryErrors()))
+            val cm : CacheMap = new CacheMap("idcsop", data)
             Future.successful(cm)
           }
           case "withErrorListSchemeTypeFileTypeZeroErrorCountSummary" => {
 
-            val data : scala.Predef.Map[scala.Predef.String, play.api.libs.json.JsValue] = Map((CacheUtil.ERROR_LIST_CACHE -> Fixtures.getMockErrorList()), (CacheUtil.SCHEME_CACHE -> Json.toJson("1")), (CacheUtil.FILE_TYPE_CACHE -> Json.toJson(PageBuilder.OPTION_ODS)), (CacheUtil.SCHEME_ERROR_COUNT_CACHE -> Json.toJson(0)), (CacheUtil.ERROR_SUMMARY_CACHE -> Fixtures.getMockSummaryErrors()))
-            val cm : CacheMap = new CacheMap("id1", data)
+            val data : scala.Predef.Map[scala.Predef.String, play.api.libs.json.JsValue] = Map((CacheUtil.ERROR_LIST_CACHE -> Fixtures.getMockErrorList()), (CacheUtil.SCHEME_CACHE -> Json.toJson("csop")), (CacheUtil.FILE_TYPE_CACHE -> Json.toJson(PageBuilder.OPTION_ODS)), (CacheUtil.SCHEME_ERROR_COUNT_CACHE -> Json.toJson(0)), (CacheUtil.ERROR_SUMMARY_CACHE -> Fixtures.getMockSummaryErrors()))
+            val cm : CacheMap = new CacheMap("idcsop", data)
             Future.successful(cm)
           }
           case "withSchemeType" => {
 
-            val data : scala.Predef.Map[scala.Predef.String, play.api.libs.json.JsValue] = Map(("mock_scheme" -> Json.toJson("1")))
-            val cm : CacheMap = new CacheMap("id1", data)
+            val data : scala.Predef.Map[scala.Predef.String, play.api.libs.json.JsValue] = Map(("mock_scheme" -> Json.toJson("csop")))
+            val cm : CacheMap = new CacheMap("idcsop", data)
             Future.successful(cm)
           }
         }

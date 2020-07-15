@@ -20,7 +20,7 @@ import akka.stream.Materializer
 import controllers.routes
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{Assertion, BeforeAndAfterEach}
 import play.api.Play
 import play.api.http.Status

@@ -18,7 +18,7 @@ package services.validation
 
 import com.typesafe.config.ConfigFactory
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder

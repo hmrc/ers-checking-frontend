@@ -25,14 +25,13 @@ object CSformMappings {
     /*
    * check file type Form definition
    */
-  val checkFileTypeForm = Form(mapping("checkFileType" -> text)(CS_checkFileType.apply)(CS_checkFileType.unapply))
+  val checkFileTypeForm = Form(mapping("checkFileType" -> optional(text).verifying("ers_check_file_type.alert", _.isDefined))(CS_checkFileType.apply)(CS_checkFileType.unapply))
 
   /*
   * scheme type Form definition.
   */
   val schemeTypeForm = Form(
 
-    mapping("schemeType" -> text)(CS_schemeType.apply)(CS_schemeType.unapply))
+    mapping("schemeType" -> optional(text).verifying("ers_scheme_type.select_scheme_type", _.isDefined))(CS_schemeType.apply)(CS_schemeType.unapply))
 
-      
 }

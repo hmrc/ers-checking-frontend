@@ -16,7 +16,7 @@
 
 package utils
 
-import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -41,15 +41,15 @@ class ContentUtilSpec  extends UnitSpec with MockitoSugar with GuiceOneAppPerSui
 
   "ContentUtil" should {
     val data = List(
-      ("1","csop", "Company Share Option Plan"),
-      ("2","emi", "Enterprise Management Incentives"),
-      ("3","other", "Other"),
-      ("4","saye", "Save As You Earn"),
-      ("5","sip", "Share Incentive Plan")
+      ("csop", "Company Share Option Plan"),
+      ("emi", "Enterprise Management Incentives"),
+      ("other", "Other"),
+      ("saye", "Save As You Earn"),
+      ("sip", "Share Incentive Plan")
     )
     for(schemeType <- data) {
       s"return scheme name and abbreviation for ${schemeType._2}" in {
-        ContentUtil.getSchemeName(schemeType._1)._2 shouldBe schemeType._2.toUpperCase
+        ContentUtil.getSchemeName(schemeType._1)._2 shouldBe schemeType._1.toUpperCase
       }
     }
   }
