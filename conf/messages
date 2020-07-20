@@ -46,7 +46,6 @@ ers_scheme_type.sip = Share Incentive Plan (SIP - Form 39)
 ers_scheme_type.other = Other (Form 42)
 ers_scheme_type.continue = Continue
 ers_scheme_type.select_scheme_type = Select the type of ERS scheme or arrangement
-
 #********************************************************************
 # File type messages
 #********************************************************************
@@ -133,7 +132,7 @@ ers_html_error_report.errors_sheet =sheet
 ers_html_error_report.table_column_names = <tr><th class='column' scope='col'>Column</th><th class='row' scope='col'>Row</th><th class='errorTitle' scope='col'>Error</th></tr>
 ers_html_error_report.sheet_name = <h3 class='sheet-title'><span class='font-small'>{0}</span></h3>
 ers_html_error_report.table_row = <tr><td>{0}</td><td>{1}</td><td class='errorMsg'>{2}</td></tr>
-ers_html_error_report.sheet = {0}<table id={3} class="error-table">{1}{2}</table>
+ers_html_error_report.sheet = {0}<table id={3}>{1}{2}</table>
 
 ers_pdf_error_report.csop = Company Share Option Plan
 ers_pdf_error_report.emi = Enterprise Management Incentives 
@@ -161,7 +160,7 @@ ers.global_errors.heading = Check your ERS files – Employment Related Securiti
 ers.global_errors.title = Sorry, there is a problem with the service - Check your ERS files – GOV.UK
 ers.global.errors.try.later=Try again later.
 
-validation.summary.heading = There’s a problem
+validation.summary.heading = There is a problem
 csv_file_upload.summary_error = Choose a different file - it must be a CSV file
 ods_file_upload.summary_error = Choose a different file - it must be an ODS file
 

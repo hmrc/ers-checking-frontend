@@ -16,11 +16,9 @@
 
 @(pageTitle: String, heading: String, message: String, applicationConfig: config.ApplicationConfig = config.ApplicationConfig)(implicit request: Request[_], messages: Messages)
 
-@import play.api.Play.current
-@import uk.gov.hmrc.play.config.RunMode._
-
 @import layouts.{govuk_template => hmrcGovUkTemplate}
 @import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
+@import uk.gov.hmrc.play.views.html.{helpers => uiHelpers}
 
 @commonLinkElement = {
     @includes.commonLinkElements()
@@ -54,7 +52,7 @@
 }
 
 @getHelpForm = {
-    @get_help_form(true, false)
+    @{uiHelpers.reportAProblemLink(applicationConfig.reportAProblemPartialUrl,applicationConfig.reportAProblemNonJSUrl)}
 }
 
 @content = {

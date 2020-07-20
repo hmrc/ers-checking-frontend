@@ -18,11 +18,11 @@ package controllers
 
 import controllers.auth.AuthAction
 import helpers.WithMockedAuthActions
-import models.CSformMappings
+import models.{CS_schemeType, CSformMappings}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.http.Status
@@ -84,8 +84,11 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
     }
 
     "give a status OK and shows scheme type page" in {
+
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.showSchemeTypePage(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+
+      val form = CSformMappings.schemeTypeForm.bind(Map("" -> ""))
+      val result = controllerUnderTest.showSchemeTypePage(form)(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
       status(result) shouldBe Status.OK
     }
 
@@ -110,8 +113,8 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
     "gives a call to showSchemeTypeSelected if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.schemeTypeSelected().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
-      status(result) shouldBe Status.SEE_OTHER
+      val result = controllerUnderTest.schemeTypeSelected().apply(Fixtures.buildFakeRequestWithSessionId("POST"))
+      status(result) shouldBe Status.BAD_REQUEST
     }
 
     "give a bad request status and stay on the same page if form errors" in {
@@ -120,8 +123,8 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       val form = CSformMappings.schemeTypeForm.bind(schemeTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeTypeSelected(request)
-      status(result) shouldBe Status.SEE_OTHER
-      result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.schemeTypePage.toString()
+      status(result) shouldBe Status.BAD_REQUEST
+      contentAsString(await(result)) shouldBe contentAsString(controllerUnderTest.showSchemeTypePage(form)(request, hc))
     }
 
     "if no form errors with scheme type and save success" in {
@@ -174,22 +177,22 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       status(result) shouldBe Status.OK
     }
 
-    "give a status OK if fetch successful and shows check file type page with file type selected" in {
+    "give a status OK if fetch successful and shows check file type page" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.showCheckFileTypePage(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val form = CSformMappings.checkFileTypeForm.bind(Map("" -> ""))
+      val result = controllerUnderTest.showCheckFileTypePage(form)(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
-      document.select("input[id=csv]").hasAttr("checked") shouldEqual true
-      document.select("input[id=ods]").hasAttr("checked") shouldEqual false
     }
 
     "give a status OK if fetch fails then show check file type page with nothing selected" in {
       val controllerUnderTest = buildFakeCheckingServiceController(fileTypeRes = false)
-      val result = controllerUnderTest.showCheckFileTypePage(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val form = CSformMappings.checkFileTypeForm.bind(Map("" -> ""))
+      val result = controllerUnderTest.showCheckFileTypePage(form)(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
-      document.select("input[id=csv]").hasAttr("checked") shouldEqual false
-      document.select("input[id=ods]").hasAttr("checked") shouldEqual false
+      document.select("input[id=checkFileType-csv]").hasAttr("checked") shouldEqual false
+      document.select("input[id=checkFileType-ods]").hasAttr("checked") shouldEqual false
     }
 
   }
@@ -214,8 +217,8 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
     "gives a call to showCheckFileTypeSelected if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.checkFileTypeSelected().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
-      status(result) shouldBe Status.SEE_OTHER
+      val result = controllerUnderTest.checkFileTypeSelected().apply(Fixtures.buildFakeRequestWithSessionId("POST"))
+      status(result) shouldBe Status.BAD_REQUEST
     }
 
     "give a bad request status and stay on the same page if form errors" in {
@@ -224,8 +227,8 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       val form = CSformMappings.checkFileTypeForm.bind(fileTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showCheckFileTypeSelected(request)
-      status(result) shouldBe Status.SEE_OTHER
-      result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkFileTypePage.toString()
+      status(result) shouldBe Status.BAD_REQUEST
+      contentAsString(await(result)) shouldBe contentAsString(controllerUnderTest.showCheckFileTypePage(form)(request, hc))
     }
 
     "if no form errors with file type = csv and save success" in {

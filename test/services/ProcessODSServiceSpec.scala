@@ -21,7 +21,7 @@ import java.io.File
 import models.SheetErrors
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n.Messages
 import play.api.libs.Files
 import play.api.libs.Files.TemporaryFile

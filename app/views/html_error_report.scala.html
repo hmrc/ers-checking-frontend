@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import views.html.templates.header
 @(schemeName: String,
   sheets: String,
   schemeNameShort: String,
@@ -25,10 +26,8 @@
 
 @ers_main(title = Messages("ers.error_report.page_title")) {
 
-		<header>
-			<h1 class="heading-xlarge">@Messages("ers_html_error_report.report_title", schemeName, schemeNameShort)</h1>
-		</header>
-		<div class="panel-indent panel-indent--gutter">
+	@header(Messages("ers_html_error_report.report_title", schemeName, schemeNameShort))
+		<div class="panel panel-border-wide">
 			<p>
 				@(if(schemeErrorCount == 1) {
 					Messages("ers_html_error_report.number_of_errors_sing",errorListCount, schemeErrorCount)

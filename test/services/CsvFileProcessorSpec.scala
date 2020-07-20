@@ -25,7 +25,7 @@ import controllers.Fixtures
 import controllers.auth.RequestWithOptionalEmpRef
 import models.ERSFileProcessingException
 import org.scalatest.concurrent.{ScalaFutures, Timeouts}
-import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Span}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
@@ -107,14 +107,14 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with GuiceOneAppPe
       Files.copy(file.toPath,new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv").toPath)
       val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv")
       val request = Fixtures.buildFakeRequestWithSessionId("POST")
-      val result = CsvFileProcessor.readCSVFile("Other_Grants_V3", fileCopied, "3")(request, hc = HeaderCarrier(), implicitly[Messages])
+      val result = CsvFileProcessor.readCSVFile("Other_Grants_V3", fileCopied, "other")(request, hc = HeaderCarrier(), implicitly[Messages])
       result.errors.size shouldBe  4
 
     }
 
     "validate multiple CSV files" in {
       val request = RequestWithOptionalEmpRef[AnyContent](Fixtures.buildFakeRequestWithSessionId("POST").withMultipartFormDataBody(getMockFileCSV), None)
-      val result = CsvFileProcessor.validateCsvFiles("3")(request, hc = HeaderCarrier(), implicitly[Messages])
+      val result = CsvFileProcessor.validateCsvFiles("other")(request, hc = HeaderCarrier(), implicitly[Messages])
 
       val expected = getMockFileCSV.files.size
       result.size shouldEqual expected

@@ -14,7 +14,9 @@
  * limitations under the License.
  *@
 
-@(title: String, scripts: Html = Html(""), showSignOutLink: Boolean = false)(mainContent: Html)(implicit request: Request[AnyRef], context: config.ErsContext, messages: Messages)
+@(title: String,
+        scripts: Html = Html(""),
+        showSignOutLink: Boolean = false)(mainContent: Html)(implicit request: Request[AnyRef], context: config.ErsContext, messages: Messages)
 
 @import play.api.Play.current
 @import play.api.Play
@@ -33,7 +35,6 @@
 	headerNav = Some(views.helpers.HeaderNav(title = Some(Messages("ers.header")),
 	showBetaLink = false,
 	links = Some(views.html.templates.header_links(showSignOutLink)))),
-	supportLinkEnabled = true,
 	linkElement = Some(commonLinkElement),
 	scriptElement = Some(commonScriptElement)) {
 	@mainContent
