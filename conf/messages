@@ -13,9 +13,11 @@ ers.signout = Sign out
 ers.continue = Continue
 ers.back = Back
 
+
 ers.start.page_title = Check your ERS files – Employment Related Securities – GOV.UK
 ers.scheme_types.page_title = Choose scheme or arrangement type – Employment Related Securities – GOV.UK
 ers.file_type.page_title = Choose file type – Employment Related Securities – GOV.UK
+ers.choose_csv_files.title = Choose the .csv files – Employment Related Securities – GOV.UK
 ers.upload_csv.page_title = Choose and check the .csv files – Employment Related Securities – GOV.UK
 ers.upload_ods.page_title = Choose and check the .ods file – Employment Related Securities – GOV.UK
 ers.error_report.page_title = Error report – Employment Related Securities – GOV.UK
@@ -49,6 +51,7 @@ ers_scheme_type.select_scheme_type = Select the type of ERS scheme or arrangemen
 #********************************************************************
 # File type messages
 #********************************************************************
+csv_file_upload.upload_your_file_header = Upload your ‘{0}’ file
 
 ers_check_file_type.title = Which type of file do you want to check?
 ers_check_file_type.option_1 = Comma separated values (.csv)
@@ -60,34 +63,36 @@ ers_check_csv_file.check_file_button = Check for errors
 ers_check_csv_file.file_type_error = You chose to check a CSV file, but {0} isn’t a CSV file.
 ers_check_csv_file.noData = The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload {0} as part of your annual return.
 ers_check_csv_file.no_file_error = No files selected. Please choose your files.
+ers_check_csv_file.invalidCharacters = Remove invalid characters
+
 ers_check_csv_file.clear_all_link = Clear all
 
-ers_check_csv_file.csop.file0 = Options granted
-ers_check_csv_file.csop.file1 = Options released (including exchanges) cancelled or lapsed in year
-ers_check_csv_file.csop.file2 = Options and replacement options exercised
+ers_check_csv_file.csop.CSOP_GRANTED = Options granted
+ers_check_csv_file.csop.CSOP_RCL = Options released (including exchanges) cancelled or lapsed in year
+ers_check_csv_file.csop.CSOP_Exercised = Options and replacement options exercised
 
-ers_check_csv_file.emi.file0 = Adjustment of options
-ers_check_csv_file.emi.file1 = Replacement of options
-ers_check_csv_file.emi.file2 = Options released, lapsed or cancelled
-ers_check_csv_file.emi.file3 = Non-taxable exercise of options
-ers_check_csv_file.emi.file4 = Taxable exercise of options
+ers_check_csv_file.emi.EMI_ADJUSTMENTS = Adjustment of options
+ers_check_csv_file.emi.EMI_REPLACED = Replacement of options
+ers_check_csv_file.emi.EMI_RCL = Options released, lapsed or cancelled
+ers_check_csv_file.emi.EMI_NONTAXABLE = Non-taxable exercise of options
+ers_check_csv_file.emi.EMI_TAXABLE = Taxable exercise of options
 
-ers_check_csv_file.saye.file0 = Options granted
-ers_check_csv_file.saye.file1 = Options released (including exchanges), cancelled or lapsed in year
-ers_check_csv_file.saye.file2 = Options exercised
+ers_check_csv_file.saye.SAYE_GRANTED = Options granted
+ers_check_csv_file.saye.SAYE_RCL = Options released (including exchanges), cancelled or lapsed in year
+ers_check_csv_file.saye.SAYE_EXERCISED = Options exercised
 
-ers_check_csv_file.sip.file0 = Share awards
-ers_check_csv_file.sip.file1 = Shares withdrawn from the plan
+ers_check_csv_file.sip.SIP_AWARDS = Share awards
+ers_check_csv_file.sip.SIP_OUT = Shares withdrawn from the plan
 
-ers_check_csv_file.other.file0 = Grant of options
-ers_check_csv_file.other.file1 = Other option events
-ers_check_csv_file.other.file2 = Acquisition of securities
-ers_check_csv_file.other.file3 = Restricted securities post acquisition events
-ers_check_csv_file.other.file4 = Receipt of other benefits from securities post acquisition
-ers_check_csv_file.other.file5 = Convertible securities post-acquisition
-ers_check_csv_file.other.file6 = Discharge of notional loans post-acquisition
-ers_check_csv_file.other.file7 = Artificial enhancement of market value. Value of securities post acquisition
-ers_check_csv_file.other.file8 = Securities sold for more than market value post acquisition
+ers_check_csv_file.other.OTHER_GRANTS = Grant of options
+ers_check_csv_file.other.OTHER_OPTIONS = Other option events
+ers_check_csv_file.other.OTHER_ACQUISITION = Acquisition of securities
+ers_check_csv_file.other.OTHER_RESTRICTED = Restricted securities post acquisition events
+ers_check_csv_file.other.OTHER_BENEFITS = Receipt of other benefits from securities post acquisition
+ers_check_csv_file.other.OTHER_CONVERTABLE = Convertible securities post-acquisition
+ers_check_csv_file.other.OTHER_NOTIONAL = Discharge of notional loans post-acquisition
+ers_check_csv_file.other.OTHER_ENCHANCEMENT = Artificial enhancement of market value. Value of securities post acquisition
+ers_check_csv_file.other.OTHER_SOLD = Securities sold for more than market value post acquisition
 
 ers_check_file.title = Choose the .ods file that you want to check for errors
 ers_check_file.file_upload_label = Select the file to upload.
@@ -135,7 +140,7 @@ ers_html_error_report.table_row = <tr><td>{0}</td><td>{1}</td><td class='errorMs
 ers_html_error_report.sheet = {0}<table id={3}>{1}{2}</table>
 
 ers_pdf_error_report.csop = Company Share Option Plan
-ers_pdf_error_report.emi = Enterprise Management Incentives 
+ers_pdf_error_report.emi = Enterprise Management Incentives
 ers_pdf_error_report.saye = Save As You Earn
 ers_pdf_error_report.sip = Share Incentive Plan
 ers_pdf_error_report.other = Other

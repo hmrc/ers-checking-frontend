@@ -119,7 +119,7 @@ class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with Mockito
 
     override val cacheUtil: CacheUtil = new CacheUtil {
 
-      override def cache[T](key:String, body:T)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[AnyRef]) = {
+			override def cache[T](key:String, body:T)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[_]) = {
         Future.successful(null)
       }
 

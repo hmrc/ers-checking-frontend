@@ -16,17 +16,24 @@
 
 package controllers
 
+import java.io.{BufferedReader, InputStream, InputStreamReader}
+import java.net.URL
+import java.util.zip.ZipInputStream
+
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRef}
 import models.ERSFileProcessingException
+import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallbackList}
+import play.api.Logger
 import play.api.Play.current
 import play.api.i18n.Messages
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent, Request, Result}
-import services.{CsvFileProcessor, ProcessODSService}
+import services.{CsvFileProcessor, ProcessODSService, StaxProcessor}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.CacheUtil
 
-import scala.concurrent.Future
+import scala.collection.JavaConverters._
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 object UploadController extends UploadController {
@@ -43,37 +50,94 @@ trait UploadController extends ERSCheckingBaseController {
 	val csvFileProcessor: CsvFileProcessor
 	val authAction: AuthAction
 
+	def downloadAsInputStream(downloadUrl: String): InputStream = new URL(downloadUrl).openStream()
+
+	private[controllers] def readFileCsv(downloadUrl: String)(implicit ec: ExecutionContext): Future[Iterator[String]] = {
+		try {
+			val reader = new BufferedReader(new InputStreamReader(downloadAsInputStream(downloadUrl)))
+			Future(reader.lines().iterator().asScala)
+		} catch {
+			case _: Throwable => throw ERSFileProcessingException("Failed to stream the data from file", "Exception bulk entity streaming")
+		}
+	}
+
+	private[controllers] def readFileOds(downloadUrl: String): StaxProcessor = {
+		val stream: InputStream = downloadAsInputStream(downloadUrl)
+		val targetFileName = "content.xml"
+		val zipInputStream: ZipInputStream = new ZipInputStream(stream)
+
+		@scala.annotation.tailrec
+    def findFileInZip(stream: ZipInputStream): InputStream = {
+			Option(stream.getNextEntry) match {
+				case Some(entry) if entry.getName == targetFileName =>
+					stream
+				case Some(_) =>
+					findFileInZip(stream)
+				case None =>
+					throw ERSFileProcessingException(
+						"Failed to stream the data from file",
+						"Exception bulk entity streaming"
+					)
+			}
+		}
+		val contentInputStream = findFileInZip(zipInputStream)
+		new StaxProcessor(contentInputStream)
+	}
+
 	def uploadCSVFile(scheme: String): Action[AnyContent] = authAction.async {
 		implicit request =>
 			showuploadCSVFile(scheme)
 	}
 
 	def showuploadCSVFile(scheme: String)(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
-		val result = csvFileProcessor.processCsvUpload(scheme)(request, hc, messages)
-		result.flatMap[Result] {
-			case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
-			case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage()))
-			case Failure(t) => handleException(t)
+		cacheUtil.shortLivedCache.fetchAndGetEntry[UpscanCsvFilesCallbackList](cacheUtil.getCacheId, "callback_data_key_csv") flatMap { callback =>
+			val processFiles = callback.get.files map { file =>
+				val successUpload = file.uploadStatus.asInstanceOf[UploadedSuccessfully]
+				readFileCsv(successUpload.downloadUrl) flatMap  { iterator =>
+					csvFileProcessor.processCsvUpload(iterator, successUpload.name, scheme)(request, hc, messages) flatMap {
+						case Success(true)	  =>
+							Future.successful(true)
+						case Success(false) 	=>
+							Future.successful(false)
+					}
+				}
+			}
+
+			Future.sequence(processFiles).map { list =>
+				if (list.forall(identity)) {
+					Redirect(routes.CheckingServiceController.checkingSuccessPage())
+				} else {
+					Redirect(routes.HtmlReportController.htmlErrorReportPage())
+				}
+			} recoverWith {
+				case t: Throwable => handleException(t)
+			}
 		}
 	}
+
+
 
 	def uploadODSFile(scheme: String): Action[AnyContent] = authAction.async {
 		implicit request =>
 			showuploadODSFile(scheme)
 	}
 
-	def showuploadODSFile(scheme: String)(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
-		val result = processODSService.performODSUpload()(request, scheme, hc, messages)
-		result.flatMap[Result] {
-			case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
-			case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage()))
-			case Failure(t) => handleException(t)
+	def showuploadODSFile(scheme: String)
+											 (implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
+		//These .get's are safe because the UploadedSuccessfully model is already validated as existing in the UpscanController
+		cacheUtil.shortLivedCache.fetchAndGetEntry[UploadedSuccessfully](cacheUtil.getCacheId, "callback_data_key") flatMap { file =>
+			val result = processODSService.performODSUpload(file.get.name, readFileOds(file.get.downloadUrl))(request, scheme, hc, messages)
+			result.flatMap[Result] {
+				case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
+				case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage()))
+				case Failure(t) => handleException(t)
+			}
 		}
 	}
 
 	def handleException(t: Throwable)(implicit request: Request[AnyContent], hc: HeaderCarrier): Future[Result] = {
 		t match {
-			case e: ERSFileProcessingException => {
+			case e: ERSFileProcessingException =>
 				for {
 					_ <- cacheUtil.cache[String](CacheUtil.FORMAT_ERROR_CACHE, e.message)
 					_ <- cacheUtil.cache[Seq[String]](CacheUtil.FORMAT_ERROR_CACHE_PARAMS, e.optionalParams)
@@ -81,7 +145,6 @@ trait UploadController extends ERSCheckingBaseController {
 				} yield {
 					Redirect(routes.CheckingServiceController.formatErrorsPage())
 				}
-			}
 			case _ => throw t
 		}
 	}

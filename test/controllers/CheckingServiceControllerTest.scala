@@ -32,6 +32,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CacheUtil
 import play.api.mvc.Request
+import services.UpscanService
 
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
@@ -40,18 +41,20 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 
 class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with MockitoSugar with WithMockedAuthActions {
 
-  implicit val hc = new HeaderCarrier
+  implicit val hc: HeaderCarrier = new HeaderCarrier
   implicit lazy val messages: Messages = Messages(Lang("en"), app.injector.instanceOf[MessagesApi])
   implicit val request: Request[_] = FakeRequest()
   val mockAuthAction : AuthAction = mock[AuthAction]
+	val mockUpscanService: UpscanService = mock[UpscanService]
 
   "start Page GET" should {
 
-    def buildFakeCheckingServiceController() = new CheckingServiceController {
+    def buildFakeCheckingServiceController(): CheckingServiceController = new CheckingServiceController {
       val mockCacheUtil: CacheUtil = mock[CacheUtil]
       override val cacheUtil: CacheUtil = mockCacheUtil
       override val authAction: AuthAction = mockAuthAction
-      mockAnyContentAction
+			override val upscanService: UpscanService = mockUpscanService
+			mockAnyContentAction
     }
 
     "gives a call to showStartPage if user is authenticated" in {
@@ -70,11 +73,12 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
   "Scheme Type Page GET" should {
 
-    def buildFakeCheckingServiceController() = new CheckingServiceController {
+    def buildFakeCheckingServiceController(): CheckingServiceController = new CheckingServiceController {
       val mockCacheUtil: CacheUtil = mock[CacheUtil]
       override val cacheUtil: CacheUtil = mockCacheUtil
       override val authAction: AuthAction = mockAuthAction
-      mockAnyContentAction
+			override val upscanService: UpscanService = mockUpscanService
+			mockAnyContentAction
     }
 
     "gives a call to showSchemeTypePage if user is authenticated" in {
@@ -96,7 +100,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
   "Scheme Type Page POST" should {
 
-    def buildFakeCheckingServiceController(schemeRes: Boolean = true) = new CheckingServiceController {
+    def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController = new CheckingServiceController {
       val mockCacheUtil: CacheUtil = mock[CacheUtil]
       override val cacheUtil: CacheUtil = mockCacheUtil
       when(
@@ -108,7 +112,8 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
         }
       )
       override val authAction: AuthAction = mockAuthAction
-      mockAnyContentAction
+			override val upscanService: UpscanService = mockUpscanService
+			mockAnyContentAction
     }
 
     "gives a call to showSchemeTypeSelected if user is authenticated" in {
@@ -156,7 +161,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
   "Check File Type Page GET" should {
 
-    def buildFakeCheckingServiceController(fileTypeRes: Boolean = true) = new CheckingServiceController {
+    def buildFakeCheckingServiceController(fileTypeRes: Boolean = true): CheckingServiceController = new CheckingServiceController {
       val mockCacheUtil: CacheUtil = mock[CacheUtil]
       override val cacheUtil: CacheUtil = mockCacheUtil
       when(
@@ -168,7 +173,8 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
         }
       )
       override val authAction: AuthAction = mockAuthAction
-      mockAnyContentAction
+			override val upscanService: UpscanService = mockUpscanService
+			mockAnyContentAction
     }
 
     "gives a call to showCheckFileTypePage if user is authenticated" in {
@@ -200,7 +206,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
   "Check File Type Page POST" should {
 
-    def buildFakeCheckingServiceController(fileTypeRes: Boolean = true) = new CheckingServiceController {
+    def buildFakeCheckingServiceController(fileTypeRes: Boolean = true): CheckingServiceController = new CheckingServiceController {
       val mockCacheUtil: CacheUtil = mock[CacheUtil]
       override val cacheUtil: CacheUtil = mockCacheUtil
       when(
@@ -212,7 +218,8 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
         }
       )
       override val authAction: AuthAction = mockAuthAction
-      mockAnyContentAction
+			override val upscanService: UpscanService = mockUpscanService
+			mockAnyContentAction
     }
 
     "gives a call to showCheckFileTypeSelected if user is authenticated" in {
@@ -238,7 +245,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showCheckFileTypeSelected(request)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkCSVFilePage.toString()
+      result.header.headers.get("Location").get shouldBe routes.CheckCsvFilesController.selectCsvFilesPage.toString()
     }
 
     "if no form errors with file type = ods and save success" in {
@@ -265,7 +272,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
   "Check file page GET" should {
 
-    def buildFakeCheckingServiceController(schemeRes: Boolean = true) = new CheckingServiceController {
+    def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController = new CheckingServiceController {
       val mockCacheUtil: CacheUtil = mock[CacheUtil]
       override val cacheUtil: CacheUtil = mockCacheUtil
       val scheme: String = "1"
@@ -286,7 +293,8 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
         }
       )
       override val authAction: AuthAction = mockAuthAction
-      mockAnyContentAction
+			override val upscanService: UpscanService = mockUpscanService
+			mockAnyContentAction
     }
 
     "gives a call to showCheckFilePage if user is authenticated" in {
@@ -311,7 +319,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
   "Check CSV file page GET" should {
 
-    def buildFakeCheckingServiceController(schemeRes: Boolean = true) = new CheckingServiceController {
+    def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController = new CheckingServiceController {
       val mockCacheUtil: CacheUtil = mock[CacheUtil]
       override val cacheUtil: CacheUtil = mockCacheUtil
       val scheme: String = "1"
@@ -324,7 +332,8 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
         }
       )
       override val authAction: AuthAction = mockAuthAction
-      mockAnyContentAction
+			override val upscanService: UpscanService = mockUpscanService
+			mockAnyContentAction
     }
 
     "gives a call to showCheckCSVFilePage if user is authenticated" in {
@@ -351,7 +360,10 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
   "Checking success page GET" should {
 
-    def buildFakeCheckingServiceController(schemeRes: Boolean = true, errorRes: Boolean = true, errorCount: String = "0") = new CheckingServiceController {
+    def buildFakeCheckingServiceController(schemeRes: Boolean = true,
+																					 errorRes: Boolean = true,
+																					 errorCount: String = "0"
+																					): CheckingServiceController = new CheckingServiceController {
       val mockCacheUtil: CacheUtil = mock[CacheUtil]
       override val cacheUtil: CacheUtil = mockCacheUtil
       val scheme: String = "1"
@@ -380,7 +392,8 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
         }
       )
       override val authAction: AuthAction = mockAuthAction
-      mockAnyContentAction
+			override val upscanService: UpscanService = mockUpscanService
+			mockAnyContentAction
     }
 
     "gives a call to showCheckingSuccessPage if user is authenticated" in {
@@ -399,7 +412,11 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
   "checking errors page GET" should {
 
-    def buildFakeCheckingServiceController(schemeRes: Boolean = true, fileTypeRes: String = "ods", errorRes: Boolean = true, errorCount: String = "0") = new CheckingServiceController {
+    def buildFakeCheckingServiceController(schemeRes: Boolean = true,
+																					 fileTypeRes: String = "ods",
+																					 errorRes: Boolean = true,
+																					 errorCount: String = "0"
+																					): CheckingServiceController = new CheckingServiceController {
       val mockCacheUtil: CacheUtil = mock[CacheUtil]
       override val cacheUtil: CacheUtil = mockCacheUtil
       val scheme: String = "1"
@@ -433,7 +450,8 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
         Future.successful(CacheMap("test", Map(CacheUtil.SCHEME_CACHE -> JsString("test"))))
       )
       override val authAction: AuthAction = mockAuthAction
-      mockAnyContentAction
+			override val upscanService: UpscanService = mockUpscanService
+			mockAnyContentAction
     }
 
     "gives a call to showCheckingErrorsPage if user is authenticated" in {
@@ -466,7 +484,11 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
   "format errors page GET" should {
 
-    def buildFakeCheckingServiceController(schemeRes: Boolean = true, fileTypeRes: String = "ods", errorRes: Boolean = true, errorCount: String = "0") = new CheckingServiceController {
+    def buildFakeCheckingServiceController(schemeRes: Boolean = true,
+																					 fileTypeRes: String = "ods",
+																					 errorRes: Boolean = true,
+																					 errorCount: String = "0"
+																					): CheckingServiceController = new CheckingServiceController {
       val mockCacheUtil: CacheUtil = mock[CacheUtil]
       override val cacheUtil: CacheUtil = mockCacheUtil
       val scheme: String = "1"
@@ -495,7 +517,8 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
         }
       )
       override val authAction: AuthAction = mockAuthAction
-      mockAnyContentAction
+			override val upscanService: UpscanService = mockUpscanService
+			mockAnyContentAction
     }
 
     "gives a call to showFormatErrorsPage if user is authenticated" in {

@@ -17,9 +17,11 @@
 package config
 
 import akka.actor.ActorSystem
-import play.api.Play
+import com.typesafe.config.Config
+import play.api.{Configuration, Play}
 import services.AllWsHttp.runModeConfiguration
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.hooks.HttpHooks
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.config.AppName
@@ -31,15 +33,15 @@ object ERSFileValidatorAuditConnector extends AuditConnector {
   override lazy val auditingConfig = LoadAuditingConfig("auditing")
 }
 
-trait WSHttp extends WSGet with HttpGet with HttpPatch with HttpPut with HttpDelete with HttpPost with WSPut with WSPost with WSDelete with WSPatch with AppName with HttpAuditing {
-  protected def mode: play.api.Mode.Mode = Play.current.mode
-  protected def runModeConfiguration: play.api.Configuration = Play.current.configuration
-  protected def appNameConfiguration: play.api.Configuration = runModeConfiguration
-  override protected def actorSystem : ActorSystem = Play.current.actorSystem
-  override protected val configuration : scala.Option[com.typesafe.config.Config] = Option(runModeConfiguration.underlying)
+trait Hooks extends HttpHooks with HttpAuditing {
+	override val hooks = Seq(AuditingHook)
+	override lazy val auditConnector: AuditConnector = ERSFileValidatorAuditConnector
+}
 
-  override val hooks = Seq(AuditingHook)
-  override val auditConnector = ERSFileValidatorAuditConnector
+trait WSHttp extends HttpGet with WSGet with HttpPut with WSPut with HttpPost with WSPost with HttpDelete with WSDelete with Hooks with AppName {
+	override protected def actorSystem: ActorSystem = Play.current.actorSystem
+	override protected def configuration: Option[Config] = Some(Play.current.configuration.underlying)
+	override protected def appNameConfiguration: Configuration = Play.current.configuration
 }
 
 object WSHttp extends WSHttp

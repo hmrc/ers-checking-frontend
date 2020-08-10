@@ -1,27 +1,36 @@
-GET /								            controllers.CheckingServiceController.startPage()
+->          /template                                       template.Routes
 
-GET /assets/*file					            @controllers.AssetsController.at(path="/public", file)
+GET 		/								            controllers.CheckingServiceController.startPage()
 
-GET /start							            controllers.CheckingServiceController.startPage()
+GET  		/assets/*file					            @controllers.AssetsController.at(path="/public", file)
 
-GET /choose-file-type				            controllers.CheckingServiceController.checkFileTypePage()
-POST /choose-file-type				            controllers.CheckingServiceController.checkFileTypeSelected()
+GET  		/start							            controllers.CheckingServiceController.startPage()
 
-GET /choose-and-check-csv-files					controllers.CheckingServiceController.checkCSVFilePage()
-POST /choose-and-check-csv-files				controllers.UploadController.uploadCSVFile(fileId: String)
+GET  		/choose-file-type				            controllers.CheckingServiceController.checkFileTypePage()
+POST 		/choose-file-type				            controllers.CheckingServiceController.checkFileTypeSelected()
 
-GET /choose-and-check-ods-file					controllers.CheckingServiceController.checkODSFilePage()
-POST /choose-and-check-ods-file					controllers.UploadController.uploadODSFile(fileId: String)
+GET         /select-csv-files                           controllers.CheckCsvFilesController.selectCsvFilesPage()
+POST        /select-csv-files                           controllers.CheckCsvFilesController.checkCsvFilesPageSelected()
 
-GET /choose-scheme-or-arrangement-type			controllers.CheckingServiceController.schemeTypePage()
-POST /choose-scheme-or-arrangement-type			controllers.CheckingServiceController.schemeTypeSelected()
+GET  		/choose-and-check-csv-files					controllers.CheckingServiceController.checkCSVFilePage()
+GET  		/choose-and-check-ods-file					controllers.CheckingServiceController.checkODSFilePage()
 
-GET /confirmation			                    controllers.CheckingServiceController.checkingSuccessPage()
-GET /checking-errors				            controllers.CheckingServiceController.checkingErrorsPage()
-GET /format-errors				                controllers.CheckingServiceController.formatErrorsPage()
+GET 		/download-validate-csv-files				controllers.UploadController.uploadCSVFile(fileId: String)
+GET 		/download-validate-ods-file					controllers.UploadController.uploadODSFile(fileId: String)
 
-GET /error-report			    	            controllers.HtmlReportController.htmlErrorReportPage()
+GET			/upscan/success/csv                         controllers.UpscanController.successCSV(uploadId: UploadId, scheme: String)
+GET			/upscan/success/ods                         controllers.UpscanController.successODS(scheme: String)
+GET			/upscan/failure                          	controllers.UpscanController.failure()
 
-GET /not-authorised                             controllers.AuthorizationController.notAuthorised()
+GET			/choose-scheme-or-arrangement-type			controllers.CheckingServiceController.schemeTypePage()
+POST  		/choose-scheme-or-arrangement-type			controllers.CheckingServiceController.schemeTypeSelected()
 
-GET /language/:lang                             @controllers.LanguageSwitchController.switchToLanguage(lang: String)
+GET			/confirmation			                    controllers.CheckingServiceController.checkingSuccessPage()
+GET			/checking-errors				            controllers.CheckingServiceController.checkingErrorsPage()
+GET			/format-errors				                controllers.CheckingServiceController.formatErrorsPage()
+
+GET			/error-report			    	            controllers.HtmlReportController.htmlErrorReportPage()
+
+GET			/not-authorised                             controllers.AuthorizationController.notAuthorised()
+
+GET			/language/:lang                             @controllers.LanguageSwitchController.switchToLanguage(lang: String)

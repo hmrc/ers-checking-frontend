@@ -14,29 +14,21 @@
  * limitations under the License.
  */
 
-package utils
+package models.upscan
 
-import java.io.File
+import java.util.UUID
 
-object UploadedFileUtil extends UploadedFileUtil
+import play.api.libs.json.{JsString, Reads, Writes}
+import play.api.mvc.QueryStringBindable
 
-trait UploadedFileUtil {
+case class UploadId(value: String) extends AnyVal
 
-	def checkODSFileType(fileName: String): Boolean = {
-		val delimiter: Char = '.'
-		val stringTokens: Array[String] = fileName.split(delimiter)
-		stringTokens(stringTokens.length - 1).toLowerCase match {
-			case "ods" => true
-			case _ => false
-		}
-	}
+object UploadId {
+  def generate = UploadId(UUID.randomUUID().toString)
 
-	def checkCSVFileType(fileName: String): Boolean = {
-		val delimiter: Char = '.'
-		val stringTokens: Array[String] = fileName.split(delimiter)
-		stringTokens(stringTokens.length - 1) match {
-			case "csv" => true
-			case _ => false
-		}
-	}
+  implicit def queryBinder(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[UploadId] =
+    stringBinder.transform(UploadId(_), _.value)
+
+  implicit def readsUploadId: Reads[UploadId] = Reads.StringReads.map(UploadId(_))
+  implicit def writesUploadId: Writes[UploadId] = Writes[UploadId](id => JsString(id.value))
 }

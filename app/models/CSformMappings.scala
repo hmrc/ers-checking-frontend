@@ -18,6 +18,7 @@ package models
 
 import play.api.data.Forms._
 import play.api.data._
+import play.api.i18n.Messages
 
 
 object CSformMappings {
@@ -25,13 +26,35 @@ object CSformMappings {
     /*
    * check file type Form definition
    */
-  val checkFileTypeForm = Form(mapping("checkFileType" -> optional(text).verifying("ers_check_file_type.alert", _.isDefined))(CS_checkFileType.apply)(CS_checkFileType.unapply))
+  val checkFileTypeForm: Form[CS_checkFileType] = Form(
+		mapping("checkFileType" -> optional(text).verifying("ers_check_file_type.alert", _.isDefined))
+		(CS_checkFileType.apply)(CS_checkFileType.unapply)
+	)
 
   /*
   * scheme type Form definition.
   */
-  val schemeTypeForm = Form(
+  val schemeTypeForm: Form[CS_schemeType] = Form(
+    mapping(
+			"schemeType" -> optional(text).verifying("ers_scheme_type.select_scheme_type", _.isDefined)
+		)(CS_schemeType.apply)(CS_schemeType.unapply)
+	)
 
-    mapping("schemeType" -> optional(text).verifying("ers_scheme_type.select_scheme_type", _.isDefined))(CS_schemeType.apply)(CS_schemeType.unapply))
+  def csvFileCheckForm()(implicit messages: Messages): Form[List[CsvFiles]] = Form(
+		mapping(
+		"files" -> list(
+			mapping(
+				"fileId" -> text.verifying("no_file_error", _.nonEmpty).verifying("invalidCharacters", id => fileIdList.contains(id)),
+				"isSelected" -> optional(text.verifying("no_file_error", _.nonEmpty)))
+			(CsvFiles.apply)(CsvFiles.unapply)
+		))(List[CsvFiles])(Option[List[CsvFiles]]))
 
+	val fileIdList = Seq(
+		"EMI_ADJUSTMENTS", "EMI_REPLACED","EMI_RCL","EMI_NONTAXABLE","EMI_TAXABLE",
+		"CSOP_GRANTED","CSOP_RCL","CSOP_Exercised",
+		"OTHER_GRANTS","OTHER_OPTIONS","OTHER_ACQUISITION","OTHER_RESTRICTED","OTHER_BENEFITS",
+		"OTHER_CONVERTABLE","OTHER_NOTIONAL","OTHER_ENCHANCEMENT","OTHER_SOLD",
+		"SAYE_GRANTED","SAYE_RCL","SAYE_EXERCISED",
+		"SIP_AWARDS","SIP_OUT"
+	)
 }
