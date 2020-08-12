@@ -24,6 +24,7 @@ import com.typesafe.config.ConfigFactory
 import controllers.Fixtures
 import controllers.auth.RequestWithOptionalEmpRef
 import models.ERSFileProcessingException
+import org.apache.commons.io.{FileUtils, LineIterator}
 import org.scalatest.concurrent.{ScalaFutures, Timeouts}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Span}
@@ -47,6 +48,7 @@ import scala.util.{Failure, Success}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.collection.mutable
+import scala.io.BufferedSource
 
 class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with GuiceOneAppPerSuite with Timeouts with I18nSupport with ScalaFutures {
 
@@ -85,6 +87,10 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with GuiceOneAppPe
     val file = MultipartFormData(dataParts = Map(), files = Seq(part), badParts = Seq())
     file
   }
+	def convertToBufferedSource(file: File): BufferedSource = {
+		import scala.io.Source._
+		fromFile(file)
+	}
 
   private def createTempFile(content: String): File = {
     val file = File.createTempFile("test", "csv")
@@ -94,50 +100,48 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with GuiceOneAppPe
     file
   }
 
+
+
   "The CsvFileProcessor service " must {
 
     "validate file data and return errors" in {
-      val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv")
+			val source = convertToBufferedSource(new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv"))
+			val fileCopied = source.getLines()
       val dataValidator = DataValidator(ConfigFactory.load.getConfig("ers-other-grants-validation-config"))
       val result = CsvFileProcessor.validateFile(fileCopied, "Other_Grants_V3.csv", ErsValidator.validateRow(dataValidator))
-    //  Thread.sleep(2000)
-      result.size shouldBe 4
+			source.close()
+			result.size shouldBe 4
     }
+
     "read csv file" in {
-      Files.copy(file.toPath,new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv").toPath)
-      val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv")
-      val request = Fixtures.buildFakeRequestWithSessionId("POST")
+      val source = convertToBufferedSource(new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv"))
+			val fileCopied = source.getLines()
+			val request = Fixtures.buildFakeRequestWithSessionId("POST")
       val result = CsvFileProcessor.readCSVFile("Other_Grants_V3", fileCopied, "other")(request, hc = HeaderCarrier(), implicitly[Messages])
-      result.errors.size shouldBe  4
-
-    }
-
-    "validate multiple CSV files" in {
-      val request = RequestWithOptionalEmpRef[AnyContent](Fixtures.buildFakeRequestWithSessionId("POST").withMultipartFormDataBody(getMockFileCSV), None)
-      val result = CsvFileProcessor.validateCsvFiles("other")(request, hc = HeaderCarrier(), implicitly[Messages])
-
-      val expected = getMockFileCSV.files.size
-      result.size shouldEqual expected
+      source.close()
+			result.errors.size shouldBe  4
     }
 
     "throw the correct error message in the validateFile function" in{
       val result = intercept[Exception]{
         def validator(rowData:Seq[String],rowCount:Int): Option[List[ValidationError]] = throw new Exception
-        Files.copy(file.toPath,new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv").toPath)
-        val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv")
-        CsvFileProcessor.validateFile(fileCopied, "Other_Grants_V3.csv", validator)
-      }
+        val source = convertToBufferedSource(new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv"))
+				val fileCopied = source.getLines()
+				CsvFileProcessor.validateFile(fileCopied, "Other_Grants_V3.csv", validator)
+				source.close()
+			}
       result.getMessage shouldEqual  Messages("ers.exceptions.dataParser.fileParsingError", "Other_Grants_V3.csv")
     }
 
     "throw correct exception if an empty csv is given" in {
       val result = intercept[ERSFileProcessingException] {
         val file = new File(System.getProperty("user.dir") + "/test/resources/Other_Acquisition_V3.csv")
-        Files.copy(file.toPath,new java.io.File(System.getProperty("user.dir") + "/test/resources/copy/Other_Acquisition_V3.csv").toPath)
-        val fileCopied = new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Acquisition_V3.csv")
+        val source = convertToBufferedSource(new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Acquisition_V3.csv"))
+				val fileCopied = source.getLines()
         val dataValidator = DataValidator(ConfigFactory.load.getConfig("ers-other-acquisition-validation-config"))
         CsvFileProcessor.validateFile(fileCopied,"Other_Acquisition_V3",ErsValidator.validateRow(dataValidator))
-      }
+				source.close()
+			}
       result.getMessage shouldEqual Messages("ers_check_csv_file.noData", "Other_Acquisition_V3.csv")
     }
 
@@ -170,23 +174,29 @@ class CsvFileProcessorSpec extends UnitSpec with MockitoSugar with GuiceOneAppPe
 
     "return the correct number of rows" in {
       val fixture = getRowsFromFileFixture
-      val file = createTempFile(fixture.content)
+      val source = convertToBufferedSource(createTempFile(fixture.content))
+			val file = source.getLines()
       val (_, actual) = CsvFileProcessor.getRowsFromFile(file, fixture.sheetName)
+			source.close()
       actual shouldEqual 3
     }
 
     "return the rows from the file" in {
       val fixture = getRowsFromFileFixture
-      val file = createTempFile(fixture.content)
+      val source = convertToBufferedSource(createTempFile(fixture.content))
+			val file = source.getLines()
       val (actual, _) = CsvFileProcessor.getRowsFromFile(file, fixture.sheetName)
       val expected: List[List[String]] = fixture.content.split(nl).toList.map(s => s.split(",").toList)
+			source.close()
       actual shouldEqual expected
     }
 
     "handle empty files" in {
       val fixture = getRowsFromFileFixture
-      val file = createTempFile("")
-      val actual = CsvFileProcessor.getRowsFromFile(file, fixture.sheetName)
+      val source = convertToBufferedSource(createTempFile(""))
+			val file = source.getLines()
+			val actual = CsvFileProcessor.getRowsFromFile(file, fixture.sheetName)
+			source.close()
       actual shouldEqual (Nil, 0)
     }
   }

@@ -41,7 +41,7 @@ private object AppDependencies {
 
 
   object Test {
-    def apply() = new TestDependencies {
+    def apply(): Seq[ModuleID] = new TestDependencies {
       override lazy val test = Seq(
         "uk.gov.hmrc" %% "hmrctest" % hmrcTestVersion % scope,
         "org.scalatest" %% "scalatest" % scalatestVersion % scope,
@@ -49,11 +49,11 @@ private object AppDependencies {
         "org.mockito" % "mockito-core" % mockitoVersion % scope,
         "org.pegdown" % "pegdown" % "1.4.2" % scope,
         "org.jsoup" % "jsoup" % "1.7.3" % scope,
-      //  "uk.gov.hmrc" %% "url-builder" % urlBuilderVersion,
+				"com.github.tomakehurst" % "wiremock-standalone" % "2.25.1" % scope,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope
       )
     }.test
   }
 
-  def apply() = compile ++ Test()
+  def apply(): Seq[ModuleID] = compile ++ Test()
 }

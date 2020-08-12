@@ -52,8 +52,9 @@ trait MicroService {
       parallelExecution in Test := false,
       fork in Test := false,
       retrieveManaged := true,
-      routesGenerator := StaticRoutesGenerator
-    )
+      routesGenerator := StaticRoutesGenerator,
+			routesImport += "models.upscan.UploadId"
+		)
     .settings(Repositories.playPublishingSettings: _*)
     .settings(inConfig(TemplateTest)(Defaults.testSettings): _*)
     .configs(IntegrationTest)

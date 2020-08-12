@@ -17,6 +17,7 @@
 package utils
 
 import controllers.routes
+import models.CsvFiles
 import play.api.Play.current
 import play.api.i18n.Messages
 import play.api.i18n.Messages.Implicits._
@@ -33,7 +34,7 @@ trait PageBuilder {
   val SCHEME_SIP: String = "sip"
   val SCHEME_OTHER: String = "other"
 
-  // pageId's  
+  // pageId's
   val PAGE_START = "ers_start"
   val PAGE_CHOOSE = "ers_choose"
   val PAGE_CHECK_FILE = "ers_check_file"
@@ -65,6 +66,49 @@ trait PageBuilder {
   val SIP_CSV_FILES: Int = 2
   val OTHER_CSV_FILES: Int = 9
 
+	val CSVFilesList = Map(
+		(
+			SCHEME_EMI, List(
+			CsvFiles("EMI_ADJUSTMENTS", None),
+			CsvFiles("EMI_REPLACED", None),
+			CsvFiles("EMI_RCL", None),
+			CsvFiles("EMI_NONTAXABLE", None),
+			CsvFiles("EMI_TAXABLE", None)
+		)),
+		(
+			SCHEME_CSOP, List(
+			CsvFiles("CSOP_GRANTED", None),
+			CsvFiles("CSOP_RCL", None),
+			CsvFiles("CSOP_Exercised", None)
+		)),
+		(
+			SCHEME_OTHER, List(
+			CsvFiles("OTHER_GRANTS", None),
+			CsvFiles("OTHER_OPTIONS", None),
+			CsvFiles("OTHER_ACQUISITION", None),
+			CsvFiles("OTHER_RESTRICTED", None),
+			CsvFiles("OTHER_BENEFITS", None),
+			CsvFiles("OTHER_CONVERTABLE", None),
+			CsvFiles("OTHER_NOTIONAL", None),
+			CsvFiles("OTHER_ENCHANCEMENT", None),
+			CsvFiles("OTHER_SOLD", None)
+		)),
+		(
+			SCHEME_SAYE, List(
+			CsvFiles("SAYE_GRANTED", None),
+			CsvFiles("SAYE_RCL", None),
+			CsvFiles("SAYE_EXERCISED", None)
+		)),
+		(
+			SCHEME_SIP, List(
+			CsvFiles("SIP_AWARDS", None),
+			CsvFiles("SIP_OUT", None)
+		))
+	)
+
+	def getCsvFilesList(scheme: String): Seq[CsvFiles] = {
+		CSVFilesList.getOrElse(scheme.toLowerCase, Seq[CsvFiles]())
+	}
   def getGlobalPageElement(scheme: String, element: String) : String = {
     val pageElement: String = scheme match {
       case SCHEME_CSOP => Messages(MSG_ERS + MSG_CSOP + element)
@@ -106,11 +150,11 @@ trait PageBuilder {
       	  pageId match {
       	    case PAGE_ALT_ACTIVITY => routes.ReturnServiceController.altActivitySelected
       	  }
-      	} 
+      	}
     }
     formAction
-  } 
-  
+  }
+
   */
 
   def getNumberOfBrowseButtons(scheme: String): Int = {

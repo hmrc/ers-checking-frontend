@@ -14,7 +14,9 @@
  * limitations under the License.
  *@
 
-@(param: String, invalidChars: String)(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext, messages: Messages)
+@import models.upscan.UpscanInitiateResponse
+@import views.html.includes.upscan_file_upload_form
+@(param: String, invalidChars: String)(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext, messages: Messages, upscanResponse: UpscanInitiateResponse)
 @* check return file Template *@
 
 @import views.html.templates._
@@ -27,17 +29,18 @@
 
 @ers_main(title = Messages("ers.upload_ods.page_title"), scripts) {
 	<p class="font-xsmall"><a href="@routes.CheckingServiceController.checkFileTypePage()" class="link-back">@Html(Messages("ers.back"))</a></p>
-	@header(Messages("ers_check_file.title"))
 	<div id="errors" class="validation-summary visibility" role="group" aria-labelledby="error-summary-heading" tabindex="-1">
 		<h1 class="heading-medium error-summary-heading" id="error-summary-heading">
-			@Messages("validation.summary.heading")
+		@Messages("validation.summary.heading")
 		</h1>
 		<ul class="error-summary-list">
 			<li class="validation-summary-message"><a href="#error-summary" data-focuses="error-summary">@Html(Messages("ods_file_upload.summary_error"))</a></li>
 		</ul>
 	</div>
+
+	@header(Messages("ers_check_file.title"))
+
 	<div id="file-wrapper">
-		@helpers.form(action = routes.UploadController.uploadODSFile(param), 'id -> "upload-file-form", 'enctype -> "multipart/form-data", 'class -> "form-field-group") {
 			<div id="file-input" class="form-field">
 				<label for="input-file-name" class="form-label visuallyhidden" id="input-file-name-label">@Html(Messages("ers_check_file.file_upload_label"))</label>
 				@if(flash.get("filetype-error").isDefined) {
@@ -45,10 +48,7 @@
 					@flash.get("filetype-error")
 				</div>
 				}
-				<input id="input-file-name" type="file" name="fileUpload" accept=".ods" size="40"/>
+			@upscan_file_upload_form(".ods", upscanResponse.formFields, upscanResponse.postTarget)
 			</div>
-			<button role="button" id="check-file-button" class="button" type="submit" value="@Messages("ers_check_file.check_file_button")">@Messages("ers_check_file.check_file_button")</button>
-			@spinner()
-		}
 	</div>
 }

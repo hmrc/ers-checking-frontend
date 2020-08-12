@@ -21,7 +21,7 @@ import javax.xml.stream.events.XMLEvent
 import javax.xml.stream.{XMLEventReader, XMLInputFactory}
 
 
-class StaxProcessor(inputStream: InputStream)  extends Iterator[String] {
+class StaxProcessor(inputStream: InputStream) extends Iterator[String] {
 
   val xif : XMLInputFactory = XMLInputFactory.newInstance();
   xif.setProperty(XMLInputFactory.SUPPORT_DTD, false)
