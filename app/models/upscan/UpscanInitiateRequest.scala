@@ -14,29 +14,18 @@
  * limitations under the License.
  */
 
-package utils
+package models.upscan
 
-import java.io.File
+import play.api.libs.json.{Json, OFormat}
 
-object UploadedFileUtil extends UploadedFileUtil
+case class UpscanInitiateRequest(
+                                  callbackUrl: String,
+                                  successRedirect: String,
+                                  errorRedirect: String,
+                                  minimumFileSize: Option[Int] = None,
+                                  maximumFileSize: Option[Int] = None
+                                )
 
-trait UploadedFileUtil {
-
-	def checkODSFileType(fileName: String): Boolean = {
-		val delimiter: Char = '.'
-		val stringTokens: Array[String] = fileName.split(delimiter)
-		stringTokens(stringTokens.length - 1).toLowerCase match {
-			case "ods" => true
-			case _ => false
-		}
-	}
-
-	def checkCSVFileType(fileName: String): Boolean = {
-		val delimiter: Char = '.'
-		val stringTokens: Array[String] = fileName.split(delimiter)
-		stringTokens(stringTokens.length - 1) match {
-			case "csv" => true
-			case _ => false
-		}
-	}
+object UpscanInitiateRequest {
+  implicit val format: OFormat[UpscanInitiateRequest] = Json.format[UpscanInitiateRequest]
 }

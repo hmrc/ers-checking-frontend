@@ -17,6 +17,7 @@
 package utils
 
 import models.SheetErrors
+import models.upscan.UpscanCsvFilesCallback
 import play.api.mvc.{AnyContent, Request}
 import play.api.{Logger, Play}
 import services.ERSTemplatesInfo
@@ -46,27 +47,20 @@ trait ParserUtil {
     }
   }
 
-  def isFileValid(errorList: ListBuffer[SheetErrors], source: String)(implicit request: Request[AnyContent], hc: HeaderCarrier): Future[Try[Boolean]] = {
+  def isFileValid(errorList: ListBuffer[SheetErrors], source: String, file: Option[UpscanCsvFilesCallback] = None)
+								 (implicit request: Request[AnyContent], hc: HeaderCarrier): Future[Try[Boolean]] = {
     if (isValid(errorList)) {
       Future.successful(Success(true))
     }
     else {
-      val cache1 = cacheUtil.cache[Long](CacheUtil.SCHEME_ERROR_COUNT_CACHE, getTotalErrorCount(errorList)) recover {
-        case ex: Exception =>
-          Logger.error("Unable to save total scheme error count.", ex)
-          throw ex
-      }
-
-      val cache2 = cacheUtil.cache[ListBuffer[SheetErrors]](CacheUtil.ERROR_LIST_CACHE, getSheetErrors(errorList)) recover {
-        case ex: Exception =>
-          Logger.error("Unable to save error list.", ex)
-          throw ex
-      }
+			val updatedErrorCount = getTotalErrorCount(errorList)
+			val updatedErrorList = getSheetErrors(errorList)
+			val id = if(file.isDefined) file.get.uploadId else ""
 
       val result = for {
-        _ <- cache1
-        _ <- cache2
-      } yield Success(false)
+				_ <- cacheUtil.cache[Long](s"${CacheUtil.SCHEME_ERROR_COUNT_CACHE}$id", updatedErrorCount )
+				_ <- cacheUtil.cache[ListBuffer[SheetErrors]](s"${CacheUtil.ERROR_LIST_CACHE}$id", updatedErrorList)
+			} yield Success(false)
 
       result recover {
         case ex: Exception => Failure(ex)
@@ -97,5 +91,5 @@ trait ParserUtil {
       SheetErrors(schemeError.sheetName,schemeError.errors.take(errorCount))
     }
   }
-  
+
 }

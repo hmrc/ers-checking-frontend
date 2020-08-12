@@ -1,0 +1,4 @@
+#Internal routes
+
+POST		/upscan/callbackOds                         	controllers.internal.UpscanCallbackController.callbackOds(sessionId: String)
+POST		/upscan/callbackCsv		                       	controllers.internal.UpscanCallbackController.callbackCsv(uploadId: UploadId, sessionId: String)

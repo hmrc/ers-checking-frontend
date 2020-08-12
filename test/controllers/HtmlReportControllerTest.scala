@@ -85,7 +85,7 @@ class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with Mockito
 
     "gives a call to showHtmlErrorReportPage if user is authenticated" in {
       val controllerUnderTest = buildFakeHtmlReportController()
-      val result = controllerUnderTest.htmlErrorReportPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result = controllerUnderTest.htmlErrorReportPage(true).apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
     }
 
@@ -119,7 +119,7 @@ class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with Mockito
 
     override val cacheUtil: CacheUtil = new CacheUtil {
 
-      override def cache[T](key:String, body:T)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[AnyRef]) = {
+			override def cache[T](key:String, body:T)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[_]) = {
         Future.successful(null)
       }
 
@@ -173,7 +173,7 @@ class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with Mockito
     "throw exception" in {
       val controllerUnderTest = buildFakeHtmlReportController
       contentAsString(
-        await(controllerUnderTest.showHtmlErrorReportPage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, messages))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
+        await(controllerUnderTest.showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"), hc, messages))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
     }
   }
 
@@ -181,7 +181,7 @@ class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with Mockito
     "give a status OK and show error report" in {
       val controllerUnderTest = buildFakeHtmlReportController
       controllerUnderTest.fetchAllMapVal = "withErrorListSchemeTypeFileTypeZeroErrorCountSummary"
-      val result = controllerUnderTest.showHtmlErrorReportPage()(Fixtures.buildFakeRequestWithSessionId("GET"),hc, messages)
+      val result = controllerUnderTest.showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"),hc, messages)
       status(result) shouldBe Status.OK
       // result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkingSuccessPage.toString()
     }

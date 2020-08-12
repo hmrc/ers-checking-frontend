@@ -22,9 +22,10 @@ import play.api.libs.json.JsValue
 import play.api.mvc.Request
 import uk.gov.hmrc.http.cache.client.ShortLivedCache
 import uk.gov.hmrc.http.cache.client.CacheMap
-import scala.concurrent.{ExecutionContext}
+
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 object CacheUtil extends CacheUtil {
   def shortLivedCache = playconfig.ShortLivedCache
@@ -33,8 +34,8 @@ object CacheUtil extends CacheUtil {
 trait CacheUtil {
 
   // Cache Ids
-  val SCHEME_CACHE: String = "scheme-type"      
-  val FILE_TYPE_CACHE: String = "check-file-type"     
+  val SCHEME_CACHE: String = "scheme-type"
+  val FILE_TYPE_CACHE: String = "check-file-type"
   val SCHEME_ERROR_COUNT_CACHE: String = "scheme-error-count"
   val FILE_NAME_NO_EXTN_CACHE: String = "file-name-no-extn"
   val ERROR_LIST_CACHE: String = "error-list"
@@ -43,20 +44,23 @@ trait CacheUtil {
   val FORMAT_ERROR_CACHE_PARAMS: String = "format_error_params"
   val FORMAT_ERROR_EXTENDED_CACHE: String = "format_extended_error"
   val FILE_NAME_CACHE: String = "file-name"
-    
-  private val sourceId : String = "ers-eoy"
+	val CSV_FILES_UPLOAD: String = "csv-files-upload"
 
   def shortLivedCache: ShortLivedCache
 
-  def cache[T](key:String, body:T)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[AnyRef]) = {
+  def cache[T](key:String, body:T)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[_]) = {
     shortLivedCache.cache[T](getCacheId, key, body)
   }
 
-  def cache[T](key:String, body:T, cacheId : String)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[AnyRef]) = {
+  def cache[T](key:String, body:T, cacheId : String)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[_]) = {
     shortLivedCache.cache[T](cacheId, key, body)
   }
 
-  @throws(classOf[NoSuchElementException])
+	def remove(cacheId: String)(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[HttpResponse] = {
+		shortLivedCache.remove(cacheId)
+	}
+
+	@throws(classOf[NoSuchElementException])
   def fetch[T](key:String)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[AnyRef]): Future[T] = {
     shortLivedCache.fetchAndGetEntry[JsValue](getCacheId, key).map{ res =>
       res.get.as[T]
@@ -72,7 +76,7 @@ trait CacheUtil {
   }
 
   @throws(classOf[NoSuchElementException])
-  def fetch[T](key:String, cacheId: String)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[AnyRef]): Future[T] = {
+  def fetch[T](key:String, cacheId: String)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[_]): Future[T] = {
     shortLivedCache.fetchAndGetEntry[JsValue](cacheId, key).map{ res =>
       res.get.as[T]
     }recover{
@@ -111,7 +115,7 @@ trait CacheUtil {
     }
   }
 
-  private def getCacheId (implicit hc: HeaderCarrier): String = {
+	def getCacheId (implicit hc: HeaderCarrier): String = {
     hc.sessionId.getOrElse(throw new RuntimeException("")).value
   }
 }
