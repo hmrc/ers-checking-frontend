@@ -53,7 +53,7 @@ class ApplicationConfigImpl extends ApplicationConfig with ServicesConfig {
   private lazy val contactHost = baseUrl("contact-frontend")
   private val contactFormServiceIdentifier = "ERS-CHECKING"
 
-	override lazy val upscanProtocol: String = getConfString("microservice.services.upscan.protocol","http").toLowerCase()
+	override lazy val upscanProtocol: String = getConfString("upscan.protocol","http").toLowerCase()
 	override lazy val upscanInitiateHost: String = baseUrl("upscan")
 	override lazy val upscanRedirectBase: String = getString("microservice.services.upscan.redirect-base")
 
