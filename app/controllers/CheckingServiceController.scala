@@ -135,6 +135,7 @@ trait CheckingServiceController extends ERSCheckingBaseController {
 			if currentCsvFile.isDefined
 			upscanResponse <- upscanService.getUpscanFormData(isCSV = true, scheme, currentCsvFile)
 		} yield {
+			//TODO REMOVE INVALID CHARACTERS
 			val invalidChars: String = "[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]"
 			Ok(views.html.check_csv_file(scheme, invalidChars, currentCsvFile.get.fileId)(request, request.flash, context, messages, upscanResponse))
 		}) recover {
@@ -156,6 +157,7 @@ trait CheckingServiceController extends ERSCheckingBaseController {
 			upscanResponse <- upscanService.getUpscanFormData(isCSV = false, scheme)
 			_ <- SessionService.createCallbackRecord
 		} yield {
+			//TODO REMOVE INVALID CHARACTERS
 			val invalidChars: String = "[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]"
 			Ok(views.html.check_file(scheme, invalidChars)(request, request.flash, context, messages, upscanResponse))
 		}) recover {

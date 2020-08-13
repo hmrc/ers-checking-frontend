@@ -3,7 +3,7 @@
 	/***********************/
 
 	var MAX_ODS_FILESIZE = 10000000// 100 MB
-
+	var INVALID_CHARACTERS = "[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]"
 	function showODSErrorMsg(msg) {
     	if ($("#error-summary").length) {
     		$("#error-summary").remove();

@@ -3,6 +3,7 @@
 	/***********************/
 
 	var MAX_CSV_FILESIZE = 100000000// 100 MB
+	var INVALID_CHARACTERS = "[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]"
 
 	function csvFileSizeOK (fileSize) {
 		if (ie<10) {
