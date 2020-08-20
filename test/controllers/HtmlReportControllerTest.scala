@@ -16,11 +16,10 @@
 
 package controllers
 
-import java.util.NoSuchElementException
-
 import controllers.auth.AuthAction
 import helpers.WithMockedAuthActions
 import models.SheetErrors
+import models.upscan.UploadId
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
@@ -88,23 +87,7 @@ class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with Mockito
       val result = controllerUnderTest.htmlErrorReportPage(true).apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
     }
-
-    //    "give a status OK and shows Html Error page if fetch successful and error count > 0" in {
-    //      val controllerUnderTest = buildFakeHtmlReportController(errorRes = true)
-    //      val result = controllerUnderTest.showHtmlErrorReportPage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
-    //      status(result) shouldBe Status.OK
-    //    }
-    //
-    //    "throws exception if fetch fails" in {
-    //      val controllerUnderTest = buildFakeHtmlReportController(errorRes = false)
-    //      intercept[Exception] {
-    //        Await.result( controllerUnderTest.showHtmlErrorReportPage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc), Fixtures.getAwaitDuration)
-    //      }
-    //    }
-
   }
-
-
 
   def buildFakeHtmlReportController() = new HtmlReportController {
 
@@ -156,19 +139,6 @@ class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with Mockito
     mockAnyContentAction
   }
 
-
-  // html error page
-
-  //
-  //  "Calling HtmlReportController.showHtmlErrorReportPage with authentication, an error list, scheme type, error count, and summary in cache" should {
-  //    "render html error report page)" in {
-  //      val controllerUnderTest = buildFakeHtmlReportController
-  //      controllerUnderTest.fetchAllMapVal = "withErrorListSchemeTypeFileTypeErrorCountSummary"
-  //      val result = controllerUnderTest.showHtmlErrorReportPage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"),hc)
-  //      status(result) shouldBe Status.OK
-  //    }
-  //  }
-
   "Calling HtmlReportController.showHtmlErrorReportPage with authentication, and nothing in cache" should {
     "throw exception" in {
       val controllerUnderTest = buildFakeHtmlReportController
@@ -183,7 +153,34 @@ class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with Mockito
       controllerUnderTest.fetchAllMapVal = "withErrorListSchemeTypeFileTypeZeroErrorCountSummary"
       val result = controllerUnderTest.showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"),hc, messages)
       status(result) shouldBe Status.OK
-      // result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkingSuccessPage.toString()
+    }
+  }
+
+  "csvExtractErrors" should {
+    val uploadId = UploadId("uploadId")
+    "return no errors when none are present" in {
+      val cacheMap = CacheMap("uploadId", Map.empty)
+
+      val result = buildFakeHtmlReportController.csvExtractErrors(Seq(uploadId), cacheMap)
+      result shouldBe (ListBuffer(), 0, 0)
+    }
+
+    "return the errors and count in the" in {
+      val errorList = ListBuffer(
+        SheetErrors("CSOP_OptionsExercised_V3",
+          ListBuffer(
+            ValidationError(Cell("A",1,"23-07-2015"),"error.1","001","ers.upload.error.date")
+          )
+        )
+      )
+      val errorJson = Json.toJson(errorList)
+      val cacheMapWithErrors = CacheMap("uploadId",
+        Map(s"error-listUploadId(uploadId)" -> errorJson,
+            "scheme-error-countUploadId(uploadId)" -> Json.toJson(1)
+      ))
+
+      val result = buildFakeHtmlReportController.csvExtractErrors(Seq(uploadId), cacheMapWithErrors)
+      result shouldBe (errorList, 1, 1)
     }
   }
 }
