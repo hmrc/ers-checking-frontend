@@ -49,7 +49,7 @@ trait HtmlReportController extends ERSCheckingBaseController {
         showHtmlErrorReportPage(isCsv)
   }
 
-	def csvStuff(ids: Seq[UploadId], all: CacheMap): (ListBuffer[SheetErrors], Long, Int) = {
+	def csvExtractErrors(ids: Seq[UploadId], all: CacheMap): (ListBuffer[SheetErrors], Long, Int) = {
 		var totalErrors = 0
 		val listBufferAndCount: Seq[(ListBuffer[SheetErrors], Long)] = ids map { id =>
 			val errors = all.getEntry[ListBuffer[SheetErrors]](s"${CacheUtil.ERROR_LIST_CACHE}$id").getOrElse(ListBuffer())
@@ -65,7 +65,7 @@ trait HtmlReportController extends ERSCheckingBaseController {
 			(errors, errorCount)
 		}
 
-		val (errorsList, errorCountLong) = listBufferAndCount.reduceLeft ((a, b) => (a._1 ++ b._1, a._2 + b._2))
+		val (errorsList, errorCountLong) = listBufferAndCount.reduceLeft ((accum, error) => (accum._1 ++ error._1, accum._2 + error._2))
 
 		(errorsList, errorCountLong, totalErrors)
 	}
@@ -81,17 +81,11 @@ trait HtmlReportController extends ERSCheckingBaseController {
 
 			lazy val (errorsList, errorCountLong, totalErrorsCount) =	if(isCsv) {
 				val uploadIds: Seq[UploadId] = all.getEntry[UpscanCsvFilesCallbackList]("callback_data_key_csv").get.files.map(_.uploadId)
-				csvStuff(uploadIds, all)
+				csvExtractErrors(uploadIds, all)
 			} else {
-				var odsErrors = 0
 				val schemeErrors: ListBuffer[SheetErrors] = all.getEntry[ListBuffer[SheetErrors]](CacheUtil.ERROR_LIST_CACHE).getOrElse(new ListBuffer[SheetErrors]())
 				val schemeErrorCount: Long = all.getEntry[Long](CacheUtil.SCHEME_ERROR_COUNT_CACHE).getOrElse(0)
-				for (sheet <- schemeErrors) {
-					val sheetErrors: ListBuffer[ValidationError] = sheet.errors
-					for (errors <- sheetErrors) {
-						odsErrors += 1
-					}
-				}
+				val odsErrors = schemeErrors.flatMap(sheet => sheet.errors).length
 				(schemeErrors, schemeErrorCount, odsErrors)
 			}
 
