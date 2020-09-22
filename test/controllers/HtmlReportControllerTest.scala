@@ -30,7 +30,7 @@ import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json
 import play.api.libs.json._
-import play.api.mvc.Request
+import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.{CacheMap, ShortLivedCache}
@@ -142,8 +142,9 @@ class HtmlReportControllerTest extends UnitSpec with OneAppPerSuite with Mockito
   "Calling HtmlReportController.showHtmlErrorReportPage with authentication, and nothing in cache" should {
     "throw exception" in {
       val controllerUnderTest = buildFakeHtmlReportController
-      contentAsString(
-        await(controllerUnderTest.showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"), hc, messages))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
+      val res: Future[Result] = controllerUnderTest.showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"), hc, messages)
+      res.map { result =>
+        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))}
     }
   }
 
