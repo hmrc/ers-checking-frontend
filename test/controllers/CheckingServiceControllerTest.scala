@@ -31,9 +31,9 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.CacheUtil
-import play.api.mvc.Request
+import play.api.mvc.{Request, Result}
 import services.UpscanService
-
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -311,8 +311,10 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
     "direct to ers errors page if fetch fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
-      contentAsString(await( controllerUnderTest.showCheckODSFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages]))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
-    }
+      val res: Future[Result] = controllerUnderTest.showCheckODSFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
+      res.map { result =>
+        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
+      }    }
 
   }
 
@@ -350,8 +352,11 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
     "direct to ers errors page if fetch fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
-      contentAsString(await( controllerUnderTest.showCheckCSVFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages]))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
-    }
+      val res: Future[Result] = controllerUnderTest.showCheckCSVFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
+      (Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
+      res.map{ result =>
+        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
+      }}
 
   }
 
@@ -529,7 +534,9 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
     "direct to ers errors page if fetch fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
-      contentAsString(await(controllerUnderTest.showFormatErrorsPage(Fixtures.buildFakeRequestWithSessionId("GET"), hc))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
-    }
+      val res: Future[Result] = controllerUnderTest.showFormatErrorsPage(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      res.map { result =>
+        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
+      }}
   }
 }
