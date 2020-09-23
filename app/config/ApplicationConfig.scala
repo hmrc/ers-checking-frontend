@@ -50,7 +50,7 @@ class ApplicationConfigImpl extends ApplicationConfig with ServicesConfig {
   protected def runModeConfiguration: play.api.Configuration = Play.current.configuration
   private def loadConfig(key: String) = runModeConfiguration.getString(key).getOrElse(throw new Exception(s"Missing key: $key"))
 
-  private lazy val contactHost = baseUrl("contact-frontend")
+	lazy val contactHost: String = getString("contact-frontend.host")
   private val contactFormServiceIdentifier = "ERS-CHECKING"
 
 	override lazy val upscanProtocol: String = getConfString("upscan.protocol","http").toLowerCase()
