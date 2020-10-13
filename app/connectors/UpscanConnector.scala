@@ -38,7 +38,6 @@ class UpscanConnectorImpl extends UpscanConnector {
 	val httpPost: HttpPost = WSHttp
 
 	val headers = Map(
-		HeaderNames.USER_AGENT   -> "ers-checking-frontend",
 		HeaderNames.CONTENT_TYPE -> "application/json"
 	)
 
