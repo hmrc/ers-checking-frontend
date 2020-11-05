@@ -43,6 +43,7 @@ trait ApplicationConfig {
   val reportAProblemPartialUrl: String
   def languageMap: Map[String, Lang]
   def routeToSwitchLanguage: String => Call
+  val googleTagManagerId: String
 }
 
 class ApplicationConfigImpl extends ApplicationConfig with ServicesConfig {
@@ -81,6 +82,8 @@ class ApplicationConfigImpl extends ApplicationConfig with ServicesConfig {
 
   override lazy val reportAProblemPartialUrl = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   override lazy val reportAProblemNonJSUrl = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+
+  lazy val googleTagManagerId: String = loadConfig(s"google-tag-manager.id")
 }
 
 object ApplicationConfig extends ApplicationConfigImpl
