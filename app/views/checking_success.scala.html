@@ -14,19 +14,18 @@
  * limitations under the License.
  *@
 
-@(implicit request: Request[AnyRef], context: config.ErsContext, messages: Messages)
+@import config.ApplicationConfig
+@(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
 
-@import views.html.templates._
-
-@ers_main(title = Messages("ers.confirmation.page_title")) {
+@ers_main(title = messages("ers.confirmation.page_title")) {
 	<div class="transaction-banner--complete"  id="success-message">
 			<h1 class="transaction-banner__heading" id="title">
-				@Html(Messages("ers_file_format_successful.page_title"))
+				@messages("ers_file_format_successful.page_title")
 			</h1>
-		<p class="transaction-banner__subheading">@Html(Messages("ers_file_format_successful.banner"))</p>
+		<p class="transaction-banner__subheading">@Html(messages("ers_file_format_successful.banner"))</p>
 	</div>
-		<h2 class="heading-medium">@Html(Messages("ers_file_format_successful.sub_heading"))</h2>
-		<p>@Html(Messages("ers_file_format_successful.instructions"))</p>
-		<p><a href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@Html(Messages("ers_file_format_successful.return_to_start_page_link"))</a></p>
-		<a href="https://www.gov.uk/done/employment-related-securities-files" id="finished">@Html(Messages("ers_file_format_successful.feedback"))</a>&nbsp;@Html(Messages("ers_file_format_successful.feedback_time"))
+		<h2 class="heading-medium">@messages("ers_file_format_successful.sub_heading")</h2>
+		<p>@messages("ers_file_format_successful.instructions")</p>
+		<p><a href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@messages("ers_file_format_successful.return_to_start_page_link")</a></p>
+		<a href="https://www.gov.uk/done/employment-related-securities-files" id="finished">@messages("ers_file_format_successful.feedback")</a>&nbsp;@messages("ers_file_format_successful.feedback_time")
 }

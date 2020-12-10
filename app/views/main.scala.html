@@ -14,7 +14,10 @@
  * limitations under the License.
  *@
 
-@(applicationConfig: config.ApplicationConfig = config.ApplicationConfig,
+@import config.ApplicationConfig
+@import play.twirl.api.HtmlFormat
+
+@(
 title: String,
 headerNav: Option[views.helpers.HeaderNav] = None,
 contentHeader: Option[Html] = None,
@@ -23,7 +26,7 @@ userLoggedIn: Boolean = false,
 supportLinkEnabled: Boolean = true,
 getHelpForm: Html  = HtmlFormat.empty,
 linkElement : Option[Html] = None,
-scriptElement: Option[Html] = None)(mainContent: Html = HtmlFormat.empty)(implicit request: Request[_], context: config.ErsContext, messages: Messages)
+scriptElement: Option[Html] = None)(mainContent: Html = HtmlFormat.empty)(implicit request: Request[_], applicationConfig: ApplicationConfig, messages: Messages)
 
 @import layouts.{govuk_template => hmrcGovUkTemplate}
 @import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
@@ -64,7 +67,7 @@ scriptElement: Option[Html] = None)(mainContent: Html = HtmlFormat.empty)(implic
 
 @bodyEnd = {
     @uiLayouts.footer(
-        analyticsToken = applicationConfig.analyticsToken,
+        analyticsToken = Option(applicationConfig.analyticsToken),
         analyticsHost = applicationConfig.analyticsHost,
         ssoUrl = None,
         scriptElem = scriptElement,
@@ -110,6 +113,4 @@ scriptElement: Option[Html] = None)(mainContent: Html = HtmlFormat.empty)(implic
     )
 }
 
-
-
-@hmrcGovUkTemplate(Some(title), None)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(uiLayouts.footer_links()), true)(content)
+@hmrcGovUkTemplate(Some(title), None)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(uiLayouts.footer_links()), nav = true)(content)

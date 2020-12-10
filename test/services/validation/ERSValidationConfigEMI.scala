@@ -17,12 +17,10 @@
 package services.validation
 
 import com.typesafe.config.ConfigFactory
-import uk.gov.hmrc.services.validation.{Cell, DataValidator, Row, ValidationError}
 import org.scalatestplus.play.PlaySpec
-import play.api.i18n.Messages.Implicits._
+import services.validation.EMITestData._
 import services.validation.ValidationErrorHelper._
-
-import services.validation.EMITestData.{ERSValidationEMIRLCTestData, ERSValidationEMINonTaxableTestData, ERSValidationEMIReplacedTestData, ERSValidationEMITaxableTestData, ERSValidationEMIAdjustmentsTestData}
+import uk.gov.hmrc.services.validation.{Cell, DataValidator, Row, ValidationError}
 
 class EMIAdjustmentsV3ValidationTest extends PlaySpec with ERSValidationEMIAdjustmentsTestData with ValidationTestRunner {
 
@@ -76,7 +74,7 @@ class EMIAdjustmentsV3ValidationTest extends PlaySpec with ERSValidationEMIAdjus
 
 }
 
-class EMIReplacedV3ValidationTest extends PlaySpec with ERSValidationEMIReplacedTestData with ValidationTestRunner{
+class EMIReplacedV3ValidationTest extends PlaySpec with ERSValidationEMIReplacedTestData with ValidationTestRunner {
 
   "ERS EMI Replaced Validation Test" should {
     val validator = DataValidator(ConfigFactory.load.getConfig("ers-emi-replaced-validation-config"))
@@ -121,7 +119,7 @@ class EMIRLCV3ValidationTest extends PlaySpec with ERSValidationEMIRLCTestData w
   }
 }
 
-class EMINonTaxableV3ValidationTest extends PlaySpec with ERSValidationEMINonTaxableTestData with ValidationTestRunner{
+class EMINonTaxableV3ValidationTest extends PlaySpec with ERSValidationEMINonTaxableTestData with ValidationTestRunner {
 
   "ERS EMI Replaced Exercised Validation Test" should {
 

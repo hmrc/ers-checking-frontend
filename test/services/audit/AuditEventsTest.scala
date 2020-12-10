@@ -14,101 +14,119 @@
  * limitations under the License.
  */
 
-package services
-//import models.{SchemeInfo, ValidationErrorData}
+package services.audit
 
-import controllers.Fixtures
-import org.scalatest.{Matchers, WordSpec}
-import play.api.Play
-import play.api.test.{FakeApplication, FakeRequest}
-import services.audit.{AuditEvents, AuditService, AuditServiceConnector}
+import controllers.auth.RequestWithOptionalEmpRef
+import helpers.ErsTestHelper
+import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers._
+import org.mockito.Mockito._
+import play.api.test.FakeRequest
+import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.audit.model.DataEvent
+import uk.gov.hmrc.play.bootstrap.audit.DefaultAuditConnector
+import uk.gov.hmrc.play.test.UnitSpec
 
-import scala.collection.mutable.ListBuffer
-import uk.gov.hmrc.http.HeaderCarrier
+class AuditEventsTest extends UnitSpec with ErsTestHelper {
 
-class AuditEventsTest    extends WordSpec with Matchers {
+  val dataEvent: DataEvent = DataEvent(
+    auditSource = "ers-checking-frontend",
+    auditType = "transactionName",
+    eventId = "fakeId",
+    tags = Map("test" -> "test"),
+    detail = Map("test" -> "details")
+  )
 
-  val fakeApplication = FakeApplication()
-  Play.start(fakeApplication)
+  "The auditRunTimeError DataEvent" should {
+    class TestException(message: String) extends Throwable(message)
 
-  implicit val request = FakeRequest()
-  implicit var hc = new HeaderCarrier()
-  implicit val authContext = Fixtures.buildFakeUser
-  val sheetName = "sheetName"
+    "include the 'CheckingServiceFileProcessingError' auditType" in {
+      val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
+      val testAuditEvent = new AuditEvents(mockAuditConnector)
+      val eventCaptor = ArgumentCaptor.forClass(classOf[DataEvent])
+      val testException: TestException = new TestException("testErrorMessage")
+      val expectedDataEvent: DataEvent = dataEvent.copy(
+        auditType = "CheckingServiceRunTimeError",
+        detail = Map(
+          "ErrorMessage" -> "testErrorMessage",
+          "Context" -> "testContextInfo",
+          "sheetName" -> "testSheetName",
+          "StackTrace" -> testException.getStackTrace.toString
+        )
+      )
 
-  trait ObservableAuditConnector extends AuditServiceConnector {
-    val events: ListBuffer[DataEvent] = new ListBuffer[DataEvent]
-
-    def observedEvents: ListBuffer[DataEvent] = events
-
-    def addEvent(dataEvent: DataEvent): Unit = {
-      events += dataEvent
-    }
-
-    override def auditData(dataEvent: DataEvent)(implicit hc: HeaderCarrier): Unit = {
-      addEvent(dataEvent)
-    }
-  }
-
-  def createObservableAuditConnector = new ObservableAuditConnector {}
-
-  def createAuditor(observableAuditConnector: ObservableAuditConnector) = {
-
-    val testAuditService = new AuditService {
-      override def auditConnector = observableAuditConnector
-    }
-
-    new AuditEvents {
-      override def auditService: AuditService = testAuditService
-    }
-  }
-
-
-  "its should audit runtime errors" in {
-    val observableAuditConnector = createObservableAuditConnector
-    val auditor = createAuditor(observableAuditConnector)
-    var runtimeException : Throwable = null
-
-    try {
-      var divideByZero : Int = 0/0
-    } catch {
-      case e:Throwable => {
-        runtimeException = e
-        auditor.auditRunTimeError(e, "some context info", sheetName)
-      }
+      testAuditEvent.auditRunTimeError(testException, "testContextInfo", "testSheetName")
+      verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(any(), any())
+      expectedDataEvent.auditSource shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditSource
+      expectedDataEvent.auditType shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditType
+      expectedDataEvent.detail.head shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail.head
+      expectedDataEvent.detail.take(1) shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail.take(1)
+      expectedDataEvent.detail.take(2) shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail.take(2)
     }
   }
 
-  "count the number of rows being checked audit event" in {
+  "The fileProcessingErrorAudit DataEvent" should {
+    "include the 'CheckingServiceFileProcessingError' auditType" in {
+      val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
+      val testAuditEvent = new AuditEvents(mockAuditConnector)
+      val eventCaptor = ArgumentCaptor.forClass(classOf[DataEvent])
+      val expectedDataEvent: DataEvent = dataEvent.copy(
+        auditType = "CheckingServiceFileProcessingError",
+        detail = Map(
+          "schemeType" -> "testScheme",
+          "sheetName" -> "testSheetName",
+          "ErrorMessage" -> "testErrorMessage")
+      )
 
-    val observableAuditConnector = createObservableAuditConnector
-    val auditor = createAuditor(observableAuditConnector)
-
-    auditor.numRowsInSchemeData("sheet", 1)(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"))
-
-    observableAuditConnector.events.length should equal(1)
-
-    val event = observableAuditConnector.events.head
-
-    event.auditType should equal("CheckingServiceNumRowsInSchemeData")
-    event.detail("sheetName") should equal("sheet")
+      testAuditEvent.fileProcessingErrorAudit("testScheme", "testSheetName", "testErrorMessage")
+      verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(any(), any())
+      expectedDataEvent.auditSource shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditSource
+      expectedDataEvent.auditType shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditType
+      expectedDataEvent.detail shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail
+    }
   }
 
-  "submit audit for a file processing error" in {
-    val observableAuditConnector = createObservableAuditConnector
-    val auditor = createAuditor(observableAuditConnector)
-    val msg = "Could not set the validator"
-    auditor.fileProcessingErrorAudit("schemeType", sheetName,msg)(hc = HeaderCarrier(),Fixtures.buildFakeRequestWithSessionId("GET"))
+  "The numRowsInSchemeData DataEvent" should {
+    "include the 'CheckingServiceFileProcessingError' audit type when the request has no EmpRef" in {
+      val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
+      val testAuditEvent = new AuditEvents(mockAuditConnector)
+      implicit val fakeRequest: RequestWithOptionalEmpRef[_] = RequestWithOptionalEmpRef(FakeRequest(), None)
+      val eventCaptor = ArgumentCaptor.forClass(classOf[DataEvent])
+      val expectedDataEvent: DataEvent = dataEvent.copy(
+        auditType = "CheckingServiceNumRowsInSchemeData",
+        detail = Map(
+          "sheetName" -> "testSheetName",
+          "rowsWithData" -> "3",
+          "empRef" -> ""
+        )
+      )
 
-    observableAuditConnector.events.length should equal(1)
+      testAuditEvent.numRowsInSchemeData("testSheetName", 3)
+      verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(any(), any())
+      expectedDataEvent.auditSource shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditSource
+      expectedDataEvent.auditType shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditType
+      expectedDataEvent.detail shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail
+    }
 
-    val event = observableAuditConnector.events.head
-    event.auditType should equal("CheckingServiceFileProcessingError")
-    event.detail("schemeType") should equal("schemeType")
-    event.detail("sheetName") should equal(sheetName)
-    event.detail("ErrorMessage") should equal(msg)
+    "include the 'CheckingServiceFileProcessingError' audit type when the request has an EmpRef" in {
+      val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
+      val testAuditEvent = new AuditEvents(mockAuditConnector)
+      implicit val fakeRequest: RequestWithOptionalEmpRef[_] = RequestWithOptionalEmpRef(FakeRequest(), Some(EmpRef("1234", "GA4567")))
+      val eventCaptor = ArgumentCaptor.forClass(classOf[DataEvent])
+      val expectedDataEvent: DataEvent = dataEvent.copy(
+        auditType = "CheckingServiceNumRowsInSchemeData",
+        detail = Map(
+          "sheetName" -> "testSheetName",
+          "rowsWithData" -> "2",
+          "empRef" -> "1234/GA4567"
+        )
+      )
 
+      testAuditEvent.numRowsInSchemeData("testSheetName", 2)
+      verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(any(), any())
+      expectedDataEvent.auditSource shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditSource
+      expectedDataEvent.auditType shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditType
+      expectedDataEvent.detail shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail
+    }
   }
-
 }

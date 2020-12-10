@@ -19,20 +19,23 @@ package utils
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.play.test.UnitSpec
 
-class UploadedFileUtilSpec  extends UnitSpec with MockitoSugar {
+class UploadedFileUtilSpec extends UnitSpec with MockitoSugar {
+
+  class TestUtil extends UploadedFileUtil
+  val uploadedFileUtil = new TestUtil
 
   "UploadedFileUtil ODS" should {
 
     "return positively for an ods file" in {
-      UploadedFileUtil.checkODSFileType("abc.ods") shouldBe true
+      uploadedFileUtil.checkODSFileType("abc.ods") shouldBe true
     }
 
     "return positively for an ods file with extension in upper case" in {
-      UploadedFileUtil.checkODSFileType("abc.ODS") shouldBe true
+      uploadedFileUtil.checkODSFileType("abc.ODS") shouldBe true
     }
 
     "return negatively for other files" in {
-      UploadedFileUtil.checkODSFileType("abc.doc") shouldBe false
+      uploadedFileUtil.checkODSFileType("abc.doc") shouldBe false
     }
 
   }
@@ -40,11 +43,11 @@ class UploadedFileUtilSpec  extends UnitSpec with MockitoSugar {
   "UploadedFileUtil CSV" should {
 
     "return positively for an csv file" in {
-      UploadedFileUtil.checkCSVFileType("abc.csv") shouldBe true
+      uploadedFileUtil.checkCSVFileType("abc.csv") shouldBe true
     }
 
     "return negatively for other files" in {
-      UploadedFileUtil.checkCSVFileType("abc.doc") shouldBe false
+      uploadedFileUtil.checkCSVFileType("abc.doc") shouldBe false
     }
 
   }

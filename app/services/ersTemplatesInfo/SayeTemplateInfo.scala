@@ -45,7 +45,8 @@ trait SayeTemplateInfo {
 
   val sayeRCLHeaderRow = List(
     "1.Date of event (yyyy-mm-dd)",
-    "2.Was money or value received by the option holder or anyone else when the option was released, exchanged, cancelled or lapsed? (yes/no) If yes go to question 3, otherwise no more information is needed for this event.",
+    "2.Was money or value received by the option holder or anyone else when the option was released, exchanged, " +
+      "cancelled or lapsed? (yes/no) If yes go to question 3, otherwise no more information is needed for this event.",
     "3.If yes, amount or value £ e.g. 10.1234",
     "4.Employee first name",
     "5.Employee second name (if applicable)",
@@ -71,6 +72,7 @@ trait SayeTemplateInfo {
     "13.Exercise price per share £ e.g. 10.1234",
     "14.Unrestricted market value (UMV) of a share on the date of exercise £ e.g. 10.1234",
     "15.Does the exercise qualify for tax relief? (yes/no)",
-    "16.Were all shares resulting from the exercise sold? (yes/no). Answer yes if they were either sold on the same day as the exercise in connection with the exercise or sale instructions were given for all shares to be sold on exercise"
+    "16.Were all shares resulting from the exercise sold? (yes/no). Answer yes if they were either sold on the same day " +
+      "as the exercise in connection with the exercise or sale instructions were given for all shares to be sold on exercise"
   )
 }

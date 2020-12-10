@@ -15,39 +15,40 @@
  *@
 
 @import views.html.templates.header
+@import config.ApplicationConfig
+@import _root_.utils.ERSUtil
+
 @(schemeName: String,
   sheets: String,
   schemeNameShort: String,
   errorListCount: Long,
-  schemeErrorCount: Long)(implicit request: Request[AnyRef], context: config.ErsContext, messages: Messages)
+  schemeErrorCount: Long)(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig, ersUtil: ERSUtil)
 @* HTML Error Report Template *@
 
-@import utils.PageBuilder
+@ers_main(title = messages("ers.error_report.page_title")) {
 
-@ers_main(title = Messages("ers.error_report.page_title")) {
-
-	@header(Messages("ers_html_error_report.report_title", schemeName, schemeNameShort))
+	@header(messages("ers_html_error_report.report_title", messages(schemeName), schemeNameShort))
 		<div class="panel panel-border-wide">
 			<p>
 				@(if(schemeErrorCount == 1) {
-					Messages("ers_html_error_report.number_of_errors_sing",errorListCount, schemeErrorCount)
+					messages("ers_html_error_report.number_of_errors_sing",errorListCount, schemeErrorCount)
 				}
 				else {
-					Messages("ers_html_error_report.number_of_errors",errorListCount, schemeErrorCount)
+					messages("ers_html_error_report.number_of_errors",errorListCount, schemeErrorCount)
 				})
 			</p>
 		</div>
 
 		<h2 class="heading-medium">
 			@(if(errorListCount != 0) {
-			Html(Messages("ers_html_error_report.errors_title", Messages("ers_html_error_report.errors_sheet")))
+			Html(messages("ers_html_error_report.errors_title", messages("ers_html_error_report.errors_sheet")))
 			})</h2>
 			@Html(sheets)
 
 
 
 
-	<h2 class="heading-medium">@Html(Messages("ers_error_report.sub_heading"))</h2>
-	<p class="text">@Html(Messages("ers_error_report.instructions1"))&nbsp;<a href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@Html(Messages("ers_error_report.instructions2"))</a>.</p>
-	<a href="https://www.gov.uk/done/employment-related-securities-files" id="finished">@Html(Messages("ers_file_format_successful.feedback"))</a>&nbsp;@Html(Messages("ers_file_format_successful.feedback_time"))
+	<h2 class="heading-medium">@Html(messages("ers_error_report.sub_heading"))</h2>
+	<p class="text">@Html(messages("ers_error_report.instructions1"))&nbsp;<a href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@Html(messages("ers_error_report.instructions2"))</a>.</p>
+	<a href="https://www.gov.uk/done/employment-related-securities-files" id="finished">@Html(messages("ers_file_format_successful.feedback"))</a>&nbsp;@Html(messages("ers_file_format_successful.feedback_time"))
 }

@@ -16,139 +16,115 @@
 
 package services
 
-import java.io.File
+import java.util.NoSuchElementException
 
-import models.SheetErrors
+import controllers.Fixtures
+import controllers.auth.RequestWithOptionalEmpRef
+import helpers.ErsTestHelper
+import models.{ERSFileProcessingException, SheetErrors}
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatestplus.mockito.MockitoSugar
-import play.api.i18n.Messages
-import play.api.libs.Files
-import play.api.libs.Files.TemporaryFile
-import play.api.mvc.MultipartFormData.FilePart
-import play.api.mvc.{MultipartFormData, Request}
-import uk.gov.hmrc.play.frontend.auth.AuthContext
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.{Application, i18n}
+import play.api.i18n.MessagesImpl
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents}
+import play.api.test.FakeRequest
+import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import utils.{CacheUtil, UploadedFileUtil}
+import uk.gov.hmrc.services.validation.ValidationError
+import utils.{ParserUtil, UploadedFileUtil}
 
 import scala.collection.mutable.ListBuffer
-import uk.gov.hmrc.http.HeaderCarrier
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
-class ProcessODSServiceSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
+class ProcessODSServiceSpec extends UnitSpec with ErsTestHelper with GuiceOneAppPerSuite {
 
-  val mockFile: File = mock[File]
-  when(
-    mockFile.getAbsolutePath
-  ).thenReturn(
-      "/test/ods/EMI_template_V3.ods"
-    )
+  val mockUploadedFileUtil: UploadedFileUtil = mock[UploadedFileUtil]
+  val mockDataGenerator: DataGenerator = mock[DataGenerator]
+  val mockStaxProcessor: StaxProcessor = mock[StaxProcessor]
 
-  val mockTempFile: Files.TemporaryFile = mock[Files.TemporaryFile]
-  when(
-    mockTempFile.file
-  ).thenReturn(
-      mockFile
-    )
+  val config = Map(
+    "microservice.services.cachable.short-lived-cache-frontend.host" -> "test",
+    "cachable.short-lived-cache-frontend.port" -> "test",
+    "short-lived-cache-frontend.domain" -> "test"
+  )
 
-  val mockUploadedFile: MultipartFormData.FilePart[Files.TemporaryFile] = mock[MultipartFormData.FilePart[Files.TemporaryFile]]
-  when(
-    mockUploadedFile.filename
-  ).thenReturn(
-      "EMI_template_V3.ods"
-    )
-  when(
-    mockUploadedFile.ref
-  ).thenReturn(
-      mockTempFile
-    )
-
-  def getMockFile(isEmpty: Boolean): MultipartFormData[Files.TemporaryFile] = {
-    if(isEmpty) {
-      MultipartFormData(dataParts = Map(), files = Seq(), badParts = Seq())
-    }
-    else {
-      val part = FilePart[TemporaryFile](key = "fileUpload", filename = "EMI_template_V3.ods", contentType = Some("Content-Type: multipart/form-data"), ref = mockTempFile)
-      MultipartFormData(dataParts = Map(), files = Seq(part), badParts = Seq())
-    }
-  }
-
+  override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
+  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication)
+  lazy val mockParserUtil: ParserUtil = mock[ParserUtil]
+  lazy val testParserUtil: ParserUtil = app.injector.instanceOf[ParserUtil]
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
+  implicit val scheme: String = "testScheme"
+  implicit val fakeRequest: RequestWithOptionalEmpRef[AnyContent] = RequestWithOptionalEmpRef(FakeRequest(), None)
 
   "calling performODSUpload" should {
 
-    def buildProcessODSService() = new ProcessODSService {
-      override val uploadedFileUtil: UploadedFileUtil = mock[UploadedFileUtil]
-      override val cacheUtil:CacheUtil = mock[CacheUtil]
-      def checkFileType(uploadedFile: MultipartFormData.FilePart[Files.TemporaryFile])(implicit scheme:String, authContext: AuthContext, hc: HeaderCarrier,request: Request[_], messages: Messages):ListBuffer[SheetErrors] = new ListBuffer
+    def buildProcessODSService(checkODSFileTypeResult: Boolean = true, isValid: Boolean = true): ProcessODSService = {
+      lazy val result = if(isValid) Future.successful(Success(true)) else Future.successful(Success(false))
+      new ProcessODSService(mockUploadedFileUtil, mockParserUtil, mockDataGenerator, mockErsUtil){
+        when(mockParserUtil.isFileValid(any(), any())(any(), any())).thenReturn(result)
+        when(mockUploadedFileUtil.checkODSFileType(anyString())).thenReturn(checkODSFileTypeResult)
+      }
     }
 
-    //    "return (false, ers_check_file.no_file_error) if there isn't uploaded file" in {
-    //
-    //      val file = getMockFile(true)
-    //      val result = await(buildProcessODSService().performODSUpload()(FakeRequest().withMultipartFormDataBody(file)))
-    //      result._1 shouldBe false
-    //      result._2.get shouldBe Messages("ers_check_file.no_file_error")
-    //    }
+    val sheetErrors = Fixtures.buildSheetErrors
 
-    //    "return the result of checkFileType if there is an uploaded file" in {
-    //
-    //      val file = getMockFile(false)
-    //      val result = await(buildProcessODSService().performODSUpload()(FakeRequest().withMultipartFormDataBody(file)))
-    //      result._1 shouldBe true
-    //      result._2.isEmpty shouldBe true
-    //    }
+    "return false if the file has validation errors" in {
+      when(mockDataGenerator.getErrors(any(), any(), any())(any(), any(), any())).thenReturn(sheetErrors)
+      when(mockErsUtil.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(CacheMap("id", Map())))
+
+      await(buildProcessODSService(isValid = false).performODSUpload("testFileName", mockStaxProcessor)) shouldBe Success(false)
+    }
+
+    "return true if the file doesn't have any errors" in {
+      val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
+      when(mockDataGenerator.getErrors(any(), any(), any())(any(), any(), any())).thenReturn(emptyErrors)
+      when(mockErsUtil.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(CacheMap("id", Map())))
+
+      await(buildProcessODSService().performODSUpload("testFileName", mockStaxProcessor)) shouldBe Success(true)
+    }
+
+    "return a failure if nothing was found in the cache" in {
+      val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
+      when(mockDataGenerator.getErrors(any(), any(), any())(any(), any(), any())).thenReturn(emptyErrors)
+      when(mockErsUtil.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any(), any(), any()))
+        .thenReturn(Future.failed(new NoSuchElementException))
+
+      await(buildProcessODSService().performODSUpload("testFileName", mockStaxProcessor)).toString shouldBe Failure(new NoSuchElementException).toString
+    }
+
+    "throw an ERSFileProcessingException if the file has an incorrect file type" in {
+      val exception = ERSFileProcessingException("You chose to check an ODS file, but testFileName isn’t an ODS file.",
+        "You chose to check an ODS file, but testFileName isn’t an ODS file.")
+
+      await(buildProcessODSService(false).performODSUpload("testFileName", mockStaxProcessor)) shouldBe Failure(exception)
+    }
   }
 
   "calling checkFileType" should {
 
-    def buildProcessODSService(checkODSFileTypeResult: Boolean): ProcessODSService = new ProcessODSService {
-      val mockUploadedFileUtil: UploadedFileUtil = mock[UploadedFileUtil]
-      when(
-        mockUploadedFileUtil.checkODSFileType(anyString())
-      ).thenReturn(
-          checkODSFileTypeResult
-        )
-      override val uploadedFileUtil: UploadedFileUtil = mockUploadedFileUtil
-      override val cacheUtil:CacheUtil = mock[CacheUtil]
-      def parseOdsContent(fileName: String, uploadedFileName: String)(implicit scheme:String, authContext: AuthContext, hc: HeaderCarrier,request: Request[_], messages: Messages): ListBuffer[SheetErrors] = new ListBuffer
+    def buildProcessODSService(checkODSFileTypeResult: Boolean = true): ProcessODSService =
+      new ProcessODSService(mockUploadedFileUtil, testParserUtil, mockDataGenerator, mockErsUtil){
+      when(mockUploadedFileUtil.checkODSFileType(anyString())).thenReturn(checkODSFileTypeResult)
     }
 
-    //    "return (false, ers_check_file.file_type_error) if uploaded file isn't .ods" in {
-    //      val service = buildProcessODSService(false)
-    //      val result = service.checkFileType(mockUploadedFile)
-    //      result._1 shouldBe false
-    //      result._2.get shouldBe Messages("ers_check_file.file_type_error")
-    //    }
-
-    //    "return the result of parseOdsContent if uploaded file is correct format" in {
-    //      val service = buildProcessODSService(true)
-    //      val result = service.checkFileType(mockUploadedFile)
-    //      result._1 shouldBe true
-    //      result._2.isEmpty shouldBe true
-    //    }
-  }
-
-  "calling parseOdsContent" should {
-
-    def buildProcessODSService(validateDataResult: Boolean) = new ProcessODSService {
-      override val uploadedFileUtil: UploadedFileUtil = mock[UploadedFileUtil]
-      override val cacheUtil:CacheUtil = mock[CacheUtil]
+    "return an exception when the file has the incorrect type" in {
+      val exceptionResult: ERSFileProcessingException = intercept[ERSFileProcessingException]{
+        buildProcessODSService(false).checkFileType(mockStaxProcessor, "testFileName")
+      }
+      exceptionResult.message shouldBe "You chose to check an ODS file, but testFileName isn’t an ODS file."
     }
 
-    //    "return (true, None) if validation is successful" in {
-    //      val service = buildProcessODSService(true)
-    //      val userDirectory = System.getProperty("user.dir")
-    //       val result = service.parseOdsContent(userDirectory + "/test/ods/EMI_template_V3.ods")
-    //      result._1 shouldBe true
-    //      result._2.isEmpty shouldBe true
-    //    }
-    //
-    //    "return (false, None) if validation is not successful" in {
-    //      val service = buildProcessODSService(false)
-    //      val userDirectory = System.getProperty("user.dir")
-    //       val result = service.parseOdsContent(userDirectory + "/test/ods/EMI_template_V3.ods")
-    //      result._1 shouldBe false
-    //      result._2.isEmpty shouldBe true
-    //    }
-  }
+    "return a ListBuffer of SheetErrors" in {
+      val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
+      when(mockDataGenerator.getErrors(any(), any(), any())(any(), any(), any())).thenReturn(emptyErrors)
 
+      buildProcessODSService().checkFileType(mockStaxProcessor, "testFileName") shouldBe emptyErrors
+    }
+  }
 }

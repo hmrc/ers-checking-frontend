@@ -16,41 +16,29 @@
 
 package connectors
 
-import config.{ApplicationConfig, WSHttp}
+import config.ApplicationConfig
+import javax.inject.{Inject, Singleton}
 import models.upscan.{PreparedUpload, UpscanInitiateRequest, UpscanInitiateResponse}
 import play.api.http.HeaderNames
-import uk.gov.hmrc.http.{HeaderCarrier, HttpPost}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait UpscanConnector {
-	val httpPost: HttpPost
-	val headers: Map[String, String]
-	val upscanInitiateHost: String
-	val upscanInitiatePath: String
-	val upscanInitiateUrl: String
+@Singleton
+class UpscanConnector @Inject()(appConfig: ApplicationConfig,
+                                httpClient: HttpClient
+                               )(implicit ec: ExecutionContext) {
 
-	def getUpscanFormData(body: UpscanInitiateRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[UpscanInitiateResponse]
+  private val headers = Map(HeaderNames.CONTENT_TYPE -> "application/json")
+  private val upscanInitiateHost: String = appConfig.upscanInitiateHost
+  private[connectors] val upscanInitiatePath: String = "/upscan/v2/initiate"
+  private val upscanInitiateUrl: String = upscanInitiateHost + upscanInitiatePath
+
+  def getUpscanFormData(body: UpscanInitiateRequest)
+                       (implicit hc: HeaderCarrier): Future[UpscanInitiateResponse] = {
+    httpClient.POST[UpscanInitiateRequest, PreparedUpload](upscanInitiateUrl, body, headers.toSeq).map {
+      _.toUpscanInitiateResponse
+    }
+  }
 }
-
-class UpscanConnectorImpl extends UpscanConnector {
-
-	val httpPost: HttpPost = WSHttp
-
-	val headers = Map(
-		HeaderNames.CONTENT_TYPE -> "application/json"
-	)
-
-	val upscanInitiateHost: String = ApplicationConfig.upscanInitiateHost
-	val upscanInitiatePath: String = "/upscan/v2/initiate"
-	val upscanInitiateUrl: String = upscanInitiateHost + upscanInitiatePath
-
-	def getUpscanFormData(body: UpscanInitiateRequest)
-											 (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[UpscanInitiateResponse] = {
-		httpPost.POST[UpscanInitiateRequest, PreparedUpload](upscanInitiateUrl, body, headers.toSeq).map {
-			_.toUpscanInitiateResponse
-		}
-	}
-}
-
-object UpscanConnector extends UpscanConnectorImpl

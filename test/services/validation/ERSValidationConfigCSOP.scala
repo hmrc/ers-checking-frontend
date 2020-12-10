@@ -17,13 +17,13 @@
 package services.validation
 
 import com.typesafe.config.ConfigFactory
-import uk.gov.hmrc.services.validation.{Cell, DataValidator, Row, ValidationError}
+import helpers.ErsTestHelper
 import org.scalatestplus.play.PlaySpec
-import services.validation.CSOPTestData.{ERSValidationCSOPExercisedTestData, ERSValidationCSOPRCLTestData, ERSValidationCSOPGrantedTestData}
-import play.api.i18n.Messages.Implicits._
+import services.validation.CSOPTestData.{ERSValidationCSOPExercisedTestData, ERSValidationCSOPGrantedTestData, ERSValidationCSOPRCLTestData}
 import services.validation.ValidationErrorHelper._
+import uk.gov.hmrc.services.validation.{Cell, DataValidator, Row, ValidationError}
 
-class CSOPOptionsGrantedV3ValidationCSOPTest extends PlaySpec with ERSValidationCSOPGrantedTestData with ValidationTestRunner{
+class CSOPOptionsGrantedV3ValidationCSOPTest extends PlaySpec with ERSValidationCSOPGrantedTestData with ValidationTestRunner {
 
   " ERS CSOP Granted Validation tests" should {
     val validator = DataValidator(ConfigFactory.load.getConfig("ers-csop-granted-validation-config"))
@@ -59,13 +59,10 @@ class CSOPOptionsGrantedV3ValidationCSOPTest extends PlaySpec with ERSValidation
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
       resOpt.get.size mustBe 7
     }
-
   }
-
-
 }
 
-class CSOPOptionsRCLTest extends PlaySpec with ERSValidationCSOPRCLTestData with ValidationTestRunner{
+class CSOPOptionsRCLTest extends PlaySpec with ERSValidationCSOPRCLTestData with ValidationTestRunner {
 
   "ERS CSOP Options RCL Validation Test " should {
     val validator = DataValidator(ConfigFactory.load.getConfig("ers-csop-rcl-validation"))
@@ -85,10 +82,9 @@ class CSOPOptionsRCLTest extends PlaySpec with ERSValidationCSOPRCLTestData with
 
 }
 
-class CSOPOptionsExercisedTest extends PlaySpec with ERSValidationCSOPExercisedTestData with ValidationTestRunner{
+class CSOPOptionsExercisedTest extends PlaySpec with ERSValidationCSOPExercisedTestData with ValidationTestRunner {
 
   "ERS CROP Options Exercised Validation Test" should {
-
     val validator = DataValidator(ConfigFactory.load.getConfig("ers-csop-exercised-validation"))
     runTests(validator, getDescriptions, getTestData, getExpectedResults)
 
@@ -111,7 +107,5 @@ class CSOPOptionsExercisedTest extends PlaySpec with ERSValidationCSOPExercisedT
         ValidationError(cellR,"mandatoryR","R01","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)")
       ))
     }
-
   }
-
 }

@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package controllers
+package utils
 
-import com.google.inject.Inject
-import play.api.http.HttpErrorHandler
+import config.ERSShortLivedCache
+import javax.inject.{Inject, Singleton}
 
-// $COVERAGE-OFF$
-class AssetsController @Inject() (errorHandler: HttpErrorHandler) extends AssetsBuilder(errorHandler)
+@Singleton
+class ERSUtil @Inject()(val shortLivedCache: ERSShortLivedCache)
+  extends CacheUtil
+    with PageBuilder
+    with ContentUtil

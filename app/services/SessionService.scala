@@ -16,47 +16,43 @@
 
 package services
 
-import models.upscan.{NotStarted, UploadId, UploadStatus, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
+import javax.inject.{Inject, Singleton}
+import models.upscan.{NotStarted, UploadStatus, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
-import utils.CacheUtil
+import utils.ERSUtil
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-object SessionService extends SessionService {
-	override val cacheUtil: CacheUtil = CacheUtil
-}
-
-trait SessionService {
-	val cacheUtil: CacheUtil
+@Singleton
+class SessionService @Inject()(val ersUtil: ERSUtil) {
 	val CALLBACK_DATA_KEY = "callback_data_key"
 	val CALLBACK_DATA_KEY_CSV = "callback_data_key_csv"
 
 
 	def createCallbackRecordCsv(sessionId: String)
-														 (implicit request: Request[_], hc: HeaderCarrier): Future[CacheMap] = {
-		cacheUtil.cache(CALLBACK_DATA_KEY_CSV, UpscanCsvFilesCallbackList(List[UpscanCsvFilesCallback]()), sessionId)
+														 (implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[CacheMap] = {
+		ersUtil.cache(CALLBACK_DATA_KEY_CSV, UpscanCsvFilesCallbackList(List[UpscanCsvFilesCallback]()), sessionId)
 	}
 
-	def createCallbackRecord(implicit request: Request[_], hc: HeaderCarrier): Future[CacheMap] = {
-		cacheUtil.cache[UploadStatus](CALLBACK_DATA_KEY, NotStarted)
+	def createCallbackRecord(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[CacheMap] = {
+		ersUtil.cache[UploadStatus](CALLBACK_DATA_KEY, NotStarted)
 	}
 
 	def updateCallbackRecordCsv(callbackList: UpscanCsvFilesCallbackList, sessionId: String)
-														 (implicit request: Request[_], hc: HeaderCarrier): Future[CacheMap] = {
-		cacheUtil.cache(CALLBACK_DATA_KEY_CSV, callbackList, sessionId)
+														 (implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[CacheMap] = {
+		ersUtil.cache(CALLBACK_DATA_KEY_CSV, callbackList, sessionId)
 	}
 
-	def updateCallbackRecord(uploadStatus: UploadStatus)(implicit request: Request[_], hc: HeaderCarrier): Future[CacheMap] =
-		cacheUtil.cache(CALLBACK_DATA_KEY, uploadStatus)
+	def updateCallbackRecord(uploadStatus: UploadStatus)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[CacheMap] =
+		ersUtil.cache(CALLBACK_DATA_KEY, uploadStatus)
 
-	def getCallbackRecord(implicit request: Request[_], hc: HeaderCarrier): Future[Option[UploadStatus]] =
-		cacheUtil.shortLivedCache.fetchAndGetEntry[UploadStatus](cacheUtil.getCacheId, CALLBACK_DATA_KEY)
+	def getCallbackRecord(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UploadStatus]] =
+		ersUtil.shortLivedCache.fetchAndGetEntry[UploadStatus](ersUtil.getCacheId, CALLBACK_DATA_KEY)
 
 	def getCallbackRecordCsv(sessionId: String)
-													(implicit request: Request[_], hc: HeaderCarrier): Future[UpscanCsvFilesCallbackList] = {
-		cacheUtil.fetch[UpscanCsvFilesCallbackList](CALLBACK_DATA_KEY_CSV, sessionId)
+													(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[UpscanCsvFilesCallbackList] = {
+		ersUtil.fetch[UpscanCsvFilesCallbackList](CALLBACK_DATA_KEY_CSV, sessionId)
 	}
 }

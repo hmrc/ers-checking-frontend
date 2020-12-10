@@ -14,16 +14,16 @@
  * limitations under the License.
  *@
 
-@(implicit request: Request[AnyRef], context: config.ErsContext, messages: Messages)
+@import config.ApplicationConfig
+@(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
 
-@ers_main(title = Messages("ers.start.page_title")) {
+@ers_main(title = messages("ers.start.page_title")) {
 <header id="page-header">
 
-	<h1>@Html(Messages("ers_not_authorised.page_title"))</h1>
+	<h1>@messages("ers_not_authorised.page_title")</h1>
 
 	<div class="application-notice help-notice">
-		<p>@Html(Messages("ers_not_authorised.para1"))</p>
+		<p>@messages("ers_not_authorised.para1")</p>
 	</div>
-
-
-	}
+</header>
+}

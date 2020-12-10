@@ -18,11 +18,8 @@ package utils
 
 import controllers.routes
 import models.CsvFiles
-import play.api.Play.current
 import play.api.i18n.Messages
-import play.api.i18n.Messages.Implicits._
 
-object PageBuilder extends PageBuilder
 trait PageBuilder {
 
   val DEFAULT = ""
@@ -33,6 +30,7 @@ trait PageBuilder {
   val SCHEME_SAYE: String = "saye"
   val SCHEME_SIP: String = "sip"
   val SCHEME_OTHER: String = "other"
+  val schemeList: Seq[String] = Seq(SCHEME_CSOP, SCHEME_EMI, SCHEME_SAYE, SCHEME_SIP, SCHEME_OTHER)
 
   // pageId's
   val PAGE_START = "ers_start"
@@ -109,65 +107,23 @@ trait PageBuilder {
 	def getCsvFilesList(scheme: String): Seq[CsvFiles] = {
 		CSVFilesList.getOrElse(scheme.toLowerCase, Seq[CsvFiles]())
 	}
-  def getGlobalPageElement(scheme: String, element: String) : String = {
-    val pageElement: String = scheme match {
-      case SCHEME_CSOP => Messages(MSG_ERS + MSG_CSOP + element)
-      case SCHEME_EMI => Messages(MSG_ERS + MSG_EMI + element)
-      case SCHEME_SAYE => Messages(MSG_ERS + MSG_SAYE + element)
-      case SCHEME_SIP => Messages(MSG_ERS + MSG_SIP + element)
-      case SCHEME_OTHER => Messages(MSG_ERS + MSG_OTHER + element)
-      case _ => DEFAULT
-    }
-    pageElement
-  }
 
-  def getPageElement(scheme: String, pageId: String, element: String, para: String = "")(implicit messages: Messages) : String = {
-    val pageElement: String = scheme match {
-      case SCHEME_CSOP => messages(pageId + MSG_CSOP + element, para)
-      case SCHEME_EMI => messages(pageId + MSG_EMI + element, para)
-      case SCHEME_SAYE => messages(pageId + MSG_SAYE + element, para)
-      case SCHEME_SIP => messages(pageId + MSG_SIP + element, para)
-      case SCHEME_OTHER => messages(pageId + MSG_OTHER + element, para)
+  def getPageElement(scheme: String, pageId: String, element: String)(implicit messages: Messages) : String = {
+    scheme match {
+      case SCHEME_CSOP => pageId + MSG_CSOP + element
+      case SCHEME_EMI => pageId + MSG_EMI + element
+      case SCHEME_SAYE => pageId + MSG_SAYE + element
+      case SCHEME_SIP => pageId + MSG_SIP + element
+      case SCHEME_OTHER => pageId + MSG_OTHER + element
       case _ => DEFAULT
     }
-    pageElement
   }
 
 
   def getPageBackLink(fileType: String) : String = {
     fileType match {
-      case OPTION_ODS => routes.CheckingServiceController.checkODSFilePage.toString()
-      case OPTION_CSV => routes.CheckingServiceController.checkCSVFilePage.toString()
+      case OPTION_ODS => routes.CheckingServiceController.checkODSFilePage().toString
+      case OPTION_CSV => routes.CheckingServiceController.checkCSVFilePage().toString
     }
   }
-
-  /*
-
-  // action = getPageFormAction(scheme, pageId)
-  def getPageFormAction(scheme: String, pageId: String) : Call = {
-    val formAction: Call = scheme match {
-      	case SCHEME_CSOP => {
-      	  pageId match {
-      	    case PAGE_ALT_ACTIVITY => routes.ReturnServiceController.altActivitySelected
-      	  }
-      	}
-    }
-    formAction
-  }
-
-  */
-
-  def getNumberOfBrowseButtons(scheme: String): Int = {
-    val maxBrowseButtons: Int = scheme match {
-      case SCHEME_CSOP => CSOP_CSV_FILES
-      case SCHEME_EMI => EMI_CSV_FILES
-      case SCHEME_SAYE => SAYE_CSV_FILES
-      case SCHEME_SIP => SIP_CSV_FILES
-      case SCHEME_OTHER => OTHER_CSV_FILES
-      case _ => 1
-    }
-    maxBrowseButtons
-  }
-
-
 }

@@ -16,43 +16,15 @@
 
 package services
 
-import com.typesafe.config.ConfigFactory
+import java.util
+
+import com.typesafe.config.{Config, ConfigFactory, ConfigValue}
 import services.ersTemplatesInfo._
 import uk.gov.hmrc.services.validation.DataValidator
 
-/**
- * Created by raghu on 26/01/16.
- */
 case class SheetInfo (schemeType:String, sheetId: Int, sheetName:String, sheetTitle:String,configFileName: String, headerRow:List[String])
 
 object ERSTemplatesInfo extends EMITemplateInfo with CsopTemplateInfo with SipTemplateInfo with OtherTemplateInfo with SayeTemplateInfo{
-
-  val startElement = "<table:table-row"
-  val endElement = "</table:table-row>"
-
-  val sheetNames = Seq(    "CSOP_OptionsGranted_V3",
-    "CSOP_OptionsRCL_V3",
-    "CSOP_OptionsExercised_V3",
-    "EMI40_Adjustments_V3",
-    "EMI40_Replaced_V3",
-    "EMI40_RLC_V3",
-    "EMI40_NonTaxable_V3",
-    "EMI40_Taxable_V3",
-    "Other_Grants_V3",
-    "Other_Options_V3",
-    "Other_Acquisition_V3",
-    "Other_RestrictedSecurities_V3",
-    "Other_OtherBenefits_V3",
-    "Other_Convertible_V3",
-    "Other_Notional_V3",
-    "Other_Enhancement_V3",
-    "Other_Sold_V3",
-    "SAYE_Granted_V3",
-    "SAYE_RCL_V3",
-    "SAYE_Exercised_V3",
-    "SIP_Awards_V3",
-    "SIP_Out_V3"  )
-
 
   val ersSheets = Map(
     csopSheet1Name  -> SheetInfo(csop,  1, csopSheet1Name , csopSheet1title, csopSheet1ValConfig,  csopOptionsGrantedHeaderRow),
@@ -82,11 +54,11 @@ object ERSTemplatesInfo extends EMITemplateInfo with CsopTemplateInfo with SipTe
 
 object ERSValidationConfigs {
 
-  val defValidator = DataValidator(getConfig(ERSTemplatesInfo.emiSheet1ValConfig))
-def getValidator(configName:String) = DataValidator(getConfig(configName))
+  val defValidator: DataValidator = DataValidator(getConfig(ERSTemplatesInfo.emiSheet1ValConfig))
+  def getValidator(configName:String): DataValidator = DataValidator(getConfig(configName))
 
-def getConfig(sheetConfig:String) = ConfigFactory.load.getConfig(sheetConfig) //load new config per sheet on iteration
+  def getConfig(sheetConfig:String): Config = ConfigFactory.load.getConfig(sheetConfig) //load new config per sheet on iteration
 
-  def getColNames(sheetConfig:String) = getConfig(sheetConfig).entrySet()
+  def getColNames(sheetConfig:String): util.Set[util.Map.Entry[String, ConfigValue]] = getConfig(sheetConfig).entrySet()
 
 }

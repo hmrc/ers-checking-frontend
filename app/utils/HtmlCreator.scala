@@ -21,10 +21,7 @@ import play.api.i18n.Messages
 import uk.gov.hmrc.services.validation.ValidationError
 import scala.collection.mutable.ListBuffer
 
-object HtmlCreator extends HtmlCreator
-trait HtmlCreator {
-
-	var uploadedFileUtil = UploadedFileUtil
+class HtmlCreator {
 
 	def getSheets(schemeErrors: ListBuffer[SheetErrors])(implicit messages: Messages): String = {
 		var sheets: String = "";

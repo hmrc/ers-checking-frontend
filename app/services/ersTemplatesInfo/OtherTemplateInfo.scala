@@ -33,7 +33,8 @@ trait OtherTemplateInfo {
 
   val otherSheet1Desc = "Other ERS schemes or arrangements – Grant of securities options, including Restricted Stock Units (RSUs)"
   val otherSheet1ValConfig = "ers-other-grants-validation-config"
-  val otherSheet2Desc = "Other ERS schemes or arrangements – Other option events, including conditional awards.  Options lapsed for nil consideration should not be included"
+  val otherSheet2Desc: String = "Other ERS schemes or arrangements – Other option events, including conditional awards.  " +
+    "Options lapsed for nil consideration should not be included"
   val otherSheet2ValConfig = "ers-other-options-validation-config"
   val otherSheet3Desc = "Other ERS schemes or arrangements – Acquisition of securities"
   val otherSheet3ValConfig = "ers-other-acquisition-validation-config"
@@ -55,7 +56,7 @@ trait OtherTemplateInfo {
     "2.Number of employees granted options",
     "3.Unrestricted market value of a security at date of grant £ e.g. 10.1234",
     "4.Number of securities over which options grantede.g. 100.00"
-  )//.map(_.replaceAll(otherHeaderFormat,""))
+  )
 
 
   val otherOptionsHeaderRow = List(
@@ -96,12 +97,13 @@ trait OtherTemplateInfo {
     "35.If shares were not listed on a recognised stock exchange, was valuation agreed with HMRC? (yes/no)",
     "36.If yes, enter the HMRC reference given",
     "37.If the shares were acquired, total deductible amount excluding any consideration given for the securities £ e.g. 10.1234. Then go to question 40",
-    "38.If securities were not acquired, was money or value received on the release, assignment, cancellation or lapse of the option? (yes/no) If yes go to next question If no, no further information required on this event.",
-    "39.If yes, amount of money or value received £ e.g. 10.1234"	,
+    "38.If securities were not acquired, was money or value received on the release, assignment, cancellation or lapse " +
+      "of the option? (yes/no) If yes go to next question If no, no further information required on this event.",
+    "39.If yes, amount of money or value received £ e.g. 10.1234",
     "40.Was a NICs election or agreement operated? (yes/no)",
     "41.Was PAYE operated? (yes/no)",
     "42.Was any adjustment made for amounts subject to apportionment for residence or duties outside the UK (yes/no)"
-  )//.map(_.replaceAll(otherHeaderFormat,""))
+  )
 
   val otherAcquisitionHeaderRow = List(
     "1.Date of event (yyyy-mm-dd)",
@@ -123,15 +125,19 @@ trait OtherTemplateInfo {
     "17.Corporation Tax reference of company whose securities acquired",
     "18.PAYE reference of company whose securities acquired",
     "19.Description of security. Enter a number from 1 to 9. Follow the link in cell A7 for a list of security types",
-    "20.If the securities are not shares enter ' no' and go to question 24 If the securities are shares, are they part of the largest class of shares in the company? (yes/no)",
+    "20.If the securities are not shares enter ' no' and go to question 24 If the securities are shares, are they part " +
+      "of the largest class of shares in the company? (yes/no)",
     "21.If the securities are shares, are they listed on a recognised stock exchange? (yes/no) If no go to question 22, If yes go to question 24",
     "22.If shares were not listed on a recognised stock exchange, was valuation agreed with HMRC? (yes/no)",
     "23.If yes, enter the HMRC reference given",
     "24.Number of securities acquired e.g. 100.00",
-    "25.Security type. Enter a number from 1 to 3, (follow the link at cell A7 for a list of security types). If restricted go to next question. If convertible go to question 32.If both restricted and convertible enter 1 and answer all questions 26 to 32. If neither restricted nor convertible go to question 29.",
+    "25.Security type. Enter a number from 1 to 3, (follow the link at cell A7 for a list of security types). " +
+      "If restricted go to next question. If convertible go to question 32.If both restricted and convertible enter 1 " +
+      "and answer all questions 26 to 32. If neither restricted nor convertible go to question 29.",
     "26.If restricted, nature of restriction. Enter a number from 1-3, follow the link at cell A7 for a list of restrictions",
     "27.If restricted, length of time of restriction in years (if less than a whole year, enter as a decimal fraction, for example 0.6)",
-    "28.If restricted, actual market value per security at date of acquisition £ e.g. 10.1234 (no entry should be made if an election to disregard ALL restrictions is operated)",
+    "28.If restricted, actual market value per security at date of acquisition £ e.g. 10.1234 " +
+      "(no entry should be made if an election to disregard ALL restrictions is operated)",
     "29.Unrestricted market value per security at date of acquisition £ e.g. 10.1234",
     "30.If restricted, has an election been operated to disregard restrictions? (yes/no)",
     "31.If an election has been operated to disregard restrictions, have all or some been disregarded? (enter all or some)",
@@ -139,12 +145,13 @@ trait OtherTemplateInfo {
     "33.Total price paid for the securities £ e.g. 10.1234",
     "34.Was the price paid in pounds sterling? (yes/no)",
     "35.Was there an artificial reduction in value on acquisition? (yes/no) If 'yes' go to question 36, if 'No' go to question 37",
-    "36.If there was an artificial reduction in value, nature of the artificial reduction Enter a number from 1 to 3. Follow the link in cell A7 for a list of types of artificial restriction",
+    "36.If there was an artificial reduction in value, nature of the artificial reduction Enter a number from 1 to 3. " +
+      "Follow the link in cell A7 for a list of types of artificial restriction",
     "37.Were shares acquired under an employee shareholder arrangement? (yes/no)",
     "38.If shares were acquired under an employee shareholder arrangement, was the total actual market value (AMV) of shares £2,000 or more? (yes/no)",
     "39.Was PAYE operated? (yes/no)",
     "40.Was any adjustment made for amounts subject to apportionment for residence or duties outside the UK (yes/no)"
-  )//.map(_.replaceAll(otherHeaderFormat,""))
+  )
 
   val otherRestrictedSecuritiesHeaderRow = List(
     "1.Date of event (yyyy-mm-dd)",
@@ -167,7 +174,7 @@ trait OtherTemplateInfo {
     "18.Has a National Insurance Contribution election or agreement been operated (yes/no)",
     "19.Was PAYE operated? (yes/no)",
     "20.Was any adjustment made for amounts subject to apportionment for residence or duties outside the UK (yes/no)"
-  )//.map(_.replaceAll(otherHeaderFormat,""))
+  )
 
   val otherBenefitsHeaderRow = List(
     "1.Date of event (yyyy-mm-dd)",
@@ -183,7 +190,7 @@ trait OtherTemplateInfo {
     "11.Amount or market value of the benefit £ e.g. 10.1234",
     "12.Was PAYE operated? (yes/no)",
     "13.Was any adjustment made for amounts subject to apportionment for residence or duties outside the UK (yes/no)"
-  )//.map(_.replaceAll(otherHeaderFormat,""))
+  )
 
   val otherConvertibleHeaderRow = List(
     "1.Date of event (yyyy-mm-dd)",
@@ -201,7 +208,7 @@ trait OtherTemplateInfo {
     "13.Has a National Insurance Contribution election or agreement been operated (yes/no)",
     "14.Was PAYE operated? (yes/no)",
     "15.Was any adjustment made for amounts subject to apportionment for residence or duties outside the UK? (yes/no)"
-  )//.map(_.replaceAll(otherHeaderFormat,""))
+  )
 
   val otherNotionalHeaderRow = List(
     "1.Date of event (yyyy-mm-dd)",
@@ -217,7 +224,7 @@ trait OtherTemplateInfo {
     "11.Amount of notional loan discharged £ e.g. 10.1234",
     "12.Was PAYE operated? (yes/no)",
     "13.Was any adjustment made for amounts subject to apportionment for residence or duties outside the UK? (yes/no)"
-  )//.map(_.replaceAll(otherHeaderFormat,""))
+  )
 
   val otherEnhancementHeaderRow = List(
     "1.Date of event (yyyy-mm-dd)",
@@ -234,7 +241,7 @@ trait OtherTemplateInfo {
     "12.Total UMV ignoring effect of artificial increase on date of taxable event £ e.g. 10.1234",
     "13.Was PAYE operated? (yes/no)",
     "14.Was any adjustment made for amounts subject to apportionment for residence or duties outside the UK? (yes/no)"
-  )//.map(_.replaceAll(otherHeaderFormat,""))
+  )
 
   val otherSoldHeaderRow = List(
     "1.Date of event (yyyy-mm-dd)",
@@ -251,6 +258,6 @@ trait OtherTemplateInfo {
     "12.Expenses incurred £ e.g. 10.1234",
     "13.Was PAYE operated? (yes/no)",
     "14.Was any adjustment made for amounts subject to apportionment for residence or duties outside the UK? (yes/no)"
-  )//.map(_.replaceAll(otherHeaderFormat,""))
+  )
 
 }

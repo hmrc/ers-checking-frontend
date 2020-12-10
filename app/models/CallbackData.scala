@@ -16,8 +16,10 @@
 
 package models
 
-import play.api.i18n.Messages
-import play.api.libs.json.{JsObject, Json}
+import java.io.File
+import java.nio.file.Path
+
+import play.api.libs.json.{JsObject, Json, OFormat}
 import uk.gov.hmrc.services.validation._
 
 import scala.collection.mutable.ListBuffer
@@ -33,16 +35,14 @@ case class ERSFileProcessingException(message: String,
 case class CallbackData(collection: String, id: String, length: Long, name: Option[String], contentType: Option[String], customMetadata: Option[JsObject])
 
 object CallbackData {
-  implicit val format = Json.format[CallbackData]
+  implicit val format: OFormat[CallbackData] = Json.format[CallbackData]
 }
 
 case class SheetErrors (sheetName: String, errors: ListBuffer[ValidationError])
 object SheetErrors {
-  implicit val formatCell = Json.format[Cell]
-  implicit val formatErrors = Json.format[ValidationError]
-  implicit val format = Json.format[SheetErrors]
+  implicit val formatCell: OFormat[Cell] = Json.format[Cell]
+  implicit val formatErrors: OFormat[ValidationError] = Json.format[ValidationError]
+  implicit val format: OFormat[SheetErrors] = Json.format[SheetErrors]
 }
 
-import java.io.File
-
-case class FileObject (fileName: String, file: File)
+case class FileObject(fileName: String, file: Path)

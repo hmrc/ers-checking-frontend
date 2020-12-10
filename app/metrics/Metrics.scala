@@ -20,25 +20,15 @@ import java.util.concurrent.TimeUnit
 
 import com.codahale.metrics.MetricRegistry
 import play.api.Logger
-import uk.gov.hmrc.play.graphite.MicroserviceMetrics
 
-trait ERSMetrics {
-  def dataIteratorTimer(diff: Long, unit: TimeUnit): Unit
-}
+class Metrics {
 
-object ERSMetrics extends ERSMetrics with MicroserviceMetrics {
+  lazy val registry: MetricRegistry = new MetricRegistry
 
-  val logger = Logger(this.getClass.getCanonicalName)
-  lazy val registry: MetricRegistry = metrics.defaultRegistry
-
-  override def dataIteratorTimer(diff: Long, unit: TimeUnit): Unit =
+   def dataIteratorTimer(diff: Long, unit: TimeUnit): Unit =
     try {
       registry.timer("data-iterator-time").update(diff, unit)
     } catch {
-      case t: Throwable => logger.warn("Unable to initialise MetricRegistry, timer will not be created.", t)
+      case t: Throwable => Logger.warn("[Metrics][dataIteratorTimer] Unable to initialise MetricRegistry, timer will not be created.", t)
     }
-}
-
-trait Metrics {
-  val metrics:ERSMetrics = ERSMetrics
 }

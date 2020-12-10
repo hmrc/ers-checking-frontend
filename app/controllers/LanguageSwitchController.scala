@@ -17,15 +17,15 @@
 package controllers
 
 import com.google.inject.Inject
-import play.api.i18n.{Lang, MessagesApi}
 import play.api.Configuration
+import play.api.i18n.Lang
+import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.play.language.{LanguageController, LanguageUtils}
 
-class LanguageSwitchController @Inject()(
-                                          configuration: Configuration,
-                                          languageUtils: LanguageUtils,
-                                          val messagesApi: MessagesApi
-                                        ) extends LanguageController(configuration, languageUtils) {
+class LanguageSwitchController @Inject()(configuration: Configuration,
+                                         languageUtils: LanguageUtils,
+                                         cc: ControllerComponents
+                                        ) extends LanguageController(configuration, languageUtils, cc) {
 
   override def languageMap: Map[String, Lang] = Map(
     "english" -> Lang("en"),
@@ -33,8 +33,4 @@ class LanguageSwitchController @Inject()(
   )
 
   override def fallbackURL: String = routes.CheckingServiceController.startPage().url
-
-
-
-
 }

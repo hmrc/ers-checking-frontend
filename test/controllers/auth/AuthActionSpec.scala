@@ -18,13 +18,13 @@ package controllers.auth
 
 import akka.stream.Materializer
 import controllers.routes
+import helpers.ErsTestHelper
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{Assertion, BeforeAndAfterEach}
 import play.api.Play
 import play.api.http.Status
-import play.api.mvc.{Result, Results}
+import play.api.mvc.{BodyParsers, Result, Results}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
@@ -33,12 +33,12 @@ import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.allEnrolments
 import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-class AuthActionSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach with WithFakeApplication {
+class AuthActionSpec extends UnitSpec with ErsTestHelper with BeforeAndAfterEach with WithFakeApplication {
 
-  val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  override val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  override val testBodyParser: BodyParsers.Default = fakeApplication.injector.instanceOf[BodyParsers.Default]
   implicit def materializer: Materializer = Play.materializer(fakeApplication)
 
   override protected def beforeEach(): Unit = {
@@ -46,10 +46,7 @@ class AuthActionSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach 
     reset(mockAuthConnector)
   }
 
-  def authAction: AuthAction = new AuthAction {
-    override implicit val ec: ExecutionContext = ExecutionContext.global
-    override val authConnector: AuthConnector = mockAuthConnector
-  }
+  def authAction: AuthAction = new AuthAction(mockAuthConnector, mockAppConfig, testBodyParser)
 
   def defaultAsyncBody(requestTestCase: RequestWithOptionalEmpRef[_] => Assertion): RequestWithOptionalEmpRef[_] => Result = testRequest => {
     requestTestCase(testRequest)
@@ -59,7 +56,7 @@ class AuthActionSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach 
   def getPredicate: Predicate =
     AuthProviders(GovernmentGateway) and ConfidenceLevel.L50
 
-  val epayeEnrolments: Enrolments =
+  val ersEnrolments: Enrolments =
     Enrolments(Set(
       Enrolment("IR-PAYE",
         Seq(EnrolmentIdentifier("TaxOfficeNumber","1234"), EnrolmentIdentifier("TaxOfficeReference","1234")),
@@ -83,7 +80,7 @@ class AuthActionSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach 
           )(
             ArgumentMatchers.any(), ArgumentMatchers.any()
           )
-      ).thenReturn(Future.successful(epayeEnrolments))
+      ).thenReturn(Future.successful(ersEnrolments))
 
       val result: Future[Result] = authAction(
         defaultAsyncBody(_.optionalEmpRef shouldBe Some(EmpRef("1234", "1234")))
@@ -154,7 +151,8 @@ class AuthActionSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach 
 
       val result: Future[Result] = authAction(defaultAsyncBody(_.optionalEmpRef shouldBe None))(FakeRequest())
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe "http://localhost:9949/gg/sign-in?continue=http%3A%2F%2Flocalhost%3A9225%2Fcheck-your-ers-files&origin=ers-checking-frontend"
+      result.header.headers("Location") shouldBe "http://localhost:9553/bas-gateway/sign-in?" +
+        "continue_url=http%3A%2F%2Flocalhost%3A9225%2Fcheck-your-ers-files&origin=ers-checking-frontend"
     }
 
     "return a 401 if an UnsupportedAuthProvider Exception is experienced" in {
@@ -170,7 +168,7 @@ class AuthActionSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach 
 
       val result: Future[Result] = authAction(defaultAsyncBody(_.optionalEmpRef shouldBe None))(FakeRequest())
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.AuthorizationController.notAuthorised().url
+      result.header.headers("Location") shouldBe routes.AuthorisationController.notAuthorised().url
     }
 
     "return a 401 if an InsufficientConfidenceLevel Exception is experienced" in {
@@ -186,7 +184,7 @@ class AuthActionSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach 
 
       val result: Future[Result] = authAction(defaultAsyncBody(_.optionalEmpRef shouldBe None))(FakeRequest())
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.AuthorizationController.notAuthorised().url
+      result.header.headers("Location") shouldBe routes.AuthorisationController.notAuthorised().url
     }
   }
 

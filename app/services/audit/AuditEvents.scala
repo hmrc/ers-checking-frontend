@@ -15,23 +15,21 @@
  */
 
 package services.audit
-//import models.SchemeInfo
 
 import controllers.auth.RequestWithOptionalEmpRef
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.Request
-import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 
-object AuditEvents extends AuditEvents {
-  override def auditService : AuditService = AuditService
-}
+import scala.concurrent.{ExecutionContext, Future}
 
-trait AuditEvents {
+@Singleton
+class AuditEvents @Inject()(val auditConnector: AuditConnector) extends AuditService {
 
-  def auditService: AuditService
-
-  def auditRunTimeError(exception : Throwable, contextInfo : String, sheetName : String) (implicit hc: HeaderCarrier, request: Request[_]) : Unit = {
-    auditService.sendEvent("CheckingServiceRunTimeError",Map(
+  def auditRunTimeError(exception : Throwable, contextInfo : String, sheetName : String)
+                       (implicit hc: HeaderCarrier, request: Request[_], ec: ExecutionContext): Future[AuditResult] = {
+    sendEvent("CheckingServiceRunTimeError", Map(
       "ErrorMessage" -> exception.getMessage,
       "Context" -> contextInfo,
       "sheetName" -> sheetName,
@@ -39,26 +37,23 @@ trait AuditEvents {
     ))
   }
 
-
-  def fileProcessingErrorAudit(schemeType : String, sheetName : String, errorMsg:String)(implicit hc: HeaderCarrier, request: Request[_]): Boolean = {
-    auditService.sendEvent("CheckingServiceFileProcessingError", Map(
+  def fileProcessingErrorAudit(schemeType : String, sheetName : String, errorMsg:String)
+                              (implicit hc: HeaderCarrier, request: Request[_], ec: ExecutionContext): Future[AuditResult] = {
+    sendEvent("CheckingServiceFileProcessingError", Map(
       "schemeType" -> schemeType,
       "sheetName" -> sheetName,
       "ErrorMessage" -> errorMsg)
     )
-    true
   }
 
-
-  def numRowsInSchemeData(sheetName : String, rowsWithData : Int)(implicit hc: HeaderCarrier, request: RequestWithOptionalEmpRef[_]): Boolean = {
+  def numRowsInSchemeData(sheetName : String, rowsWithData : Int)
+                         (implicit hc: HeaderCarrier, request: RequestWithOptionalEmpRef[_], ec: ExecutionContext): Future[AuditResult] = {
     val empRef = request.optionalEmpRef.map(_.value).getOrElse("")
-
-    auditService.sendEvent("CheckingServiceNumRowsInSchemeData", Map(
+    sendEvent("CheckingServiceNumRowsInSchemeData", Map(
     "sheetName" -> sheetName,
     "rowsWithData" -> rowsWithData.toString,
     "empRef" -> empRef
     ))
-    true
   }
 
 }

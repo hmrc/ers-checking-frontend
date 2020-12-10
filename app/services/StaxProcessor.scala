@@ -17,13 +17,14 @@
 package services
 
 import java.io.InputStream
+
 import javax.xml.stream.events.XMLEvent
 import javax.xml.stream.{XMLEventReader, XMLInputFactory}
 
 
 class StaxProcessor(inputStream: InputStream) extends Iterator[String] {
 
-  val xif : XMLInputFactory = XMLInputFactory.newInstance();
+  val xif : XMLInputFactory = XMLInputFactory.newInstance()
   xif.setProperty(XMLInputFactory.SUPPORT_DTD, false)
   xif.setProperty("javax.xml.stream.isSupportingExternalEntities", false)
   xif.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, false)
@@ -69,9 +70,8 @@ class StaxProcessor(inputStream: InputStream) extends Iterator[String] {
   def getStringToEndElement(endelement: String): String =
   {
     val buffer: StringBuilder = new StringBuilder
-    var foundit: Boolean = false
 
-    def foundelement(  event: XMLEvent,elementName: String): Boolean = {
+    def foundElement(event: XMLEvent, elementName: String): Boolean = {
       if(event.isEndElement)
         event.asEndElement().getName.getLocalPart == elementName
       else
@@ -80,23 +80,14 @@ class StaxProcessor(inputStream: InputStream) extends Iterator[String] {
 
     while(eventReader.hasNext)
       {
-        val thenextEvent = eventReader.nextEvent()
+        val theNextEvent = eventReader.nextEvent()
 
-        buffer.append(thenextEvent.toString)
-        if(foundelement(thenextEvent, endelement)) {
+        buffer.append(theNextEvent.toString)
+        if(foundElement(theNextEvent, endelement)) {
           return buffer.toString()
         }
       }
 
-/*    def printAttributes(xMLEvent: XMLEvent) = {
-      if(xMLEvent.isStartElement)
-        {
-          val attr = xMLEvent.asStartElement().getAttributes
-          while(attr.hasNext)
-            println("ATTRIBUTE " + attr.next().toString)
-        }
-
-    }*/
     buffer.toString()
   }
 }

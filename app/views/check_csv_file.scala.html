@@ -16,34 +16,33 @@
 
 @import models.upscan.UpscanInitiateResponse
 @import views.html.includes.upscan_file_upload_form
-@(scheme: String, invalidChars: String, fileId: String)(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext, messages: Messages, upscanResponse: UpscanInitiateResponse)
+@import config.ApplicationConfig
+@import _root_.utils.ERSUtil
+@(scheme: String, invalidChars: String, fileId: String)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, upscanResponse: UpscanInitiateResponse, appConfig: ApplicationConfig, ersUtil: ERSUtil)
 @* check return file Template *@
 
 @import _root_.views.html.templates._
-@import uk.gov.hmrc.play.views.html.helpers
-@import utils.PageBuilder._
-@import utils.ContentUtil._
 
 @scripts = {
 	<script>var INVALID_CHARACTERS=/@Html(invalidChars)/</script>
-	<script src='@routes.AssetsController.at("javascripts/ers_csv_scripts.js")'> </script>
+	<script src='@routes.Assets.at("javascripts/ers_csv_scripts.js")'> </script>
 }
 
-@ers_main(title = Messages("ers.upload_csv.page_title"), scripts) {
+@ers_main(title = messages("ers.upload_csv.page_title"), scripts) {
 
-		<p class="font-xsmall"><a href="@routes.CheckCsvFilesController.selectCsvFilesPage()" class="link-back">@Html(Messages("ers.back"))</a></p>
+		<p class="font-xsmall"><a href="@routes.CheckCsvFilesController.selectCsvFilesPage()" class="link-back">@messages("ers.back")</a></p>
 		<div id="errors" class="validation-summary visibility" role="group" aria-labelledby="error-summary-heading" tabindex="-1">
 			<h1 class="heading-medium error-summary-heading" id="error-summary-heading">
-				@Messages("validation.summary.heading")
+				@messages("validation.summary.heading")
 			</h1>
 			<ul class="error-summary-list">
-				<li class="validation-summary-message"><a href="#error-summary" data-focuses="error-summary">@Html(Messages("csv_file_upload.summary_error"))</a></li>
+				<li class="validation-summary-message"><a href="#error-summary" data-focuses="error-summary">@Html(messages("csv_file_upload.summary_error"))</a></li>
 			</ul>
 		</div>
-		@header(messages("csv_file_upload.upload_your_file_header", messages(s"$PAGE_CHECK_CSV_FILE.$scheme.$fileId")))
+		@header(messages("csv_file_upload.upload_your_file_header", messages(s"${ersUtil.PAGE_CHECK_CSV_FILE}.$scheme.$fileId")))
 
 			<div class="form-field form-field--submit">
-				<label class="input-csv-file-name-heading" for="fileUpload[@fileId]">@messages(s"$PAGE_CHECK_CSV_FILE.$scheme.$fileId")</label>
+				<label class="input-csv-file-name-heading" for="fileUpload[@fileId]">@messages(s"${ersUtil.PAGE_CHECK_CSV_FILE}.$scheme.$fileId")</label>
 				@upscan_file_upload_form(".csv", upscanResponse.formFields, upscanResponse.postTarget)
 			</div>
 

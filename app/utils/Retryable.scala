@@ -27,6 +27,9 @@ import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
 
 trait Retryable {
+
+ val appConfig: ApplicationConfig
+
   case class LoopException[A](retryNumber: Int, finalFutureData: Option[A])
     extends Exception(s"Failed to meet predicate after retrying $retryNumber times.")
 
@@ -34,7 +37,7 @@ trait Retryable {
 		lazy val actorSystem: ActorSystem = current.actorSystem
 
 		def withRetry(maxTimes: Int)(pToBreakLoop: A => Boolean): Future[A] = {
-      val delay: FiniteDuration = ApplicationConfig.retryDelay
+      val delay: FiniteDuration = appConfig.retryDelay
       val scheduler: Scheduler = actorSystem.getScheduler
       def loop(count: Int = 0, previous: Option[A] = None): Future[A] = {
         Logger.info(s"[Retryable][withRetry][loop]Retrying call x$count with predicate - $f")

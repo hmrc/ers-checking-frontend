@@ -16,7 +16,7 @@
 
 package controllers.internal
 
-import controllers.ERSCheckingBaseController
+import javax.inject.{Inject, Singleton}
 import models.upscan._
 import play.api.Logger
 import play.api.libs.json.JsValue
@@ -24,14 +24,14 @@ import play.api.mvc._
 import services.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
-trait UpscanCallbackController extends ERSCheckingBaseController {
-
-	val sessionService: SessionService
+@Singleton
+class UpscanCallbackController @Inject()(sessionService: SessionService,
+																				 mcc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends FrontendController(mcc) {
 
 	def callbackCsv(uploadId: UploadId, sessionId: String): Action[JsValue] = Action.async(parse.json) {
 		implicit request =>
@@ -83,7 +83,7 @@ trait UpscanCallbackController extends ERSCheckingBaseController {
 						Failed
 				}
 				Logger.info(s"[UpscanController][callbackOds] Updating callback for session: $sessionId to ${uploadStatus.getClass.getSimpleName}")
-				sessionService.updateCallbackRecord(uploadStatus)(request, headerCarrier).map(_ => Ok) recover {
+				sessionService.updateCallbackRecord(uploadStatus)(request, headerCarrier,ec).map(_ => Ok) recover {
 					case e: Throwable =>
 						Logger.error(s"[UpscanController][callbackOds] Failed to update callback record for session: $sessionId, " +
 							s"timestamp: ${System.currentTimeMillis()}.", e)
@@ -93,9 +93,3 @@ trait UpscanCallbackController extends ERSCheckingBaseController {
 		)
 	}
 }
-
-
-object UpscanCallbackController extends UpscanCallbackController {
-	override val sessionService: SessionService = SessionService
-}
-

@@ -19,8 +19,7 @@ package utils
 import models._
 import play.api.libs.json.{JsValue, Json}
 
-object JsonParser extends JsonParser
-trait  JsonParser {
+trait JsonParser {
 
   def parseErrorList(errorList: String): ErrorListJSON = {
     val errorListJsValue: JsValue = Json.parse(errorList)
@@ -42,10 +41,10 @@ trait  JsonParser {
         val cellColumn: String = (error \ "8").as[String]; // column
         val cellRow: String = (error \ "9").as[String]; // row
         val cellError: String = (error \ "a").as[String]; // error code
-        val cellErrorJson: CellErrorJSON = new CellErrorJSON(cellColumn, cellRow, cellError);
+        val cellErrorJson: CellErrorJSON = new CellErrorJSON(cellColumn, cellRow, cellError)
         sheetJSON.addError(cellErrorJson)
       }
-      errorListJson.addSheet(sheetJSON);
+      errorListJson.addSheet(sheetJSON)
     }
     errorListJson
   }
