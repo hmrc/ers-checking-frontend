@@ -16,74 +16,53 @@
 
 package config
 
-import play.api.Play
-import uk.gov.hmrc.play.config.ServicesConfig
 import play.api.i18n.Lang
 import play.api.mvc.Call
 import controllers.routes
+import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.duration._
 
-trait ApplicationConfig {
-  val assetsPrefix: String
-  val analyticsToken: Option[String]
-  val analyticsHost: String
-	val upscanProtocol: String
-	val upscanInitiateHost: String
-	val upscanRedirectBase: String
-	val odsSuccessRetryAmount: Int
-	val odsValidationRetryAmount: Int
-	val allCsvFilesCacheRetryAmount: Int
-	val retryDelay: FiniteDuration
-  val startElement: String
-  val endElement: String
-  val ggSignInUrl: String
-  val languageTranslationEnabled: Boolean
-  val reportAProblemNonJSUrl: String
-  val reportAProblemPartialUrl: String
-  def languageMap: Map[String, Lang]
-  def routeToSwitchLanguage: String => Call
-  val googleTagManagerId: String
-}
+@Singleton
+class ApplicationConfig @Inject()(config: ServicesConfig) {
 
-class ApplicationConfigImpl extends ApplicationConfig with ServicesConfig {
-  protected def mode: play.api.Mode.Mode = Play.current.mode
-  protected def runModeConfiguration: play.api.Configuration = Play.current.configuration
-  private def loadConfig(key: String) = runModeConfiguration.getString(key).getOrElse(throw new Exception(s"Missing key: $key"))
-
-	lazy val contactHost: String = getString("contact-frontend.host")
+  lazy val appName: String = config.getString("appName")
+  lazy val contactHost: String = config.getString("contact-frontend.host")
   private val contactFormServiceIdentifier = "ERS-CHECKING"
 
-	override lazy val upscanProtocol: String = getConfString("upscan.protocol","http").toLowerCase()
-	override lazy val upscanInitiateHost: String = baseUrl("upscan")
-	override lazy val upscanRedirectBase: String = getString("microservice.services.upscan.redirect-base")
+  lazy val upscanProtocol: String = config.getConfString("upscan.protocol","http").toLowerCase()
+  lazy val upscanInitiateHost: String = config.baseUrl("upscan")
+  lazy val upscanRedirectBase: String = config.getString("microservice.services.upscan.redirect-base")
 
-	override lazy val odsSuccessRetryAmount: Int = runModeConfiguration.getInt("retry.ods-success-cache.complete-upload.amount").getOrElse(3)
-	override lazy val odsValidationRetryAmount: Int = runModeConfiguration.getInt("retry.ods-success-cache.validation.amount").getOrElse(3)
-	override lazy val allCsvFilesCacheRetryAmount: Int = runModeConfiguration.getInt("retry.csv-success-cache.all-files-complete.amount").getOrElse(3)
-	override lazy val retryDelay: FiniteDuration = runModeConfiguration.getMilliseconds("retry.delay").get milliseconds
+  lazy val odsSuccessRetryAmount: Int = config.getInt("retry.ods-success-cache.complete-upload.amount")
+  lazy val odsValidationRetryAmount: Int = config.getInt("retry.ods-success-cache.validation.amount")
+  lazy val allCsvFilesCacheRetryAmount: Int = config.getInt("retry.csv-success-cache.all-files-complete.amount")
+  lazy val retryDelay: FiniteDuration = FiniteDuration(config.getString("retry.delay").toInt, "ms")
 
-	override lazy val assetsPrefix: String = loadConfig(s"govuk-tax.assets.url") + loadConfig(s"govuk-tax.assets.version")
-  override lazy val analyticsToken: Option[String] = runModeConfiguration.getString("govuk-tax.google-analytics.token")
-  override lazy val analyticsHost: String = runModeConfiguration.getString("govuk-tax.google-analytics.host").getOrElse("service.gov.uk")
+  lazy val assetsPrefix: String = config.getString("govuk-tax.assets.url") + config.getString("govuk-tax.assets.version")
+  lazy val analyticsToken: String = config.getString("govuk-tax.google-analytics.token")
+  lazy val analyticsHost: String = config.getString("govuk-tax.google-analytics.host")
 
-  override lazy val startElement: String = "<table:table-row"
-  override lazy val endElement: String = "</table:table-row>"
+  lazy val shortLivedCacheBaseUri: String = config.baseUrl("cachable.short-lived-cache")
+  lazy val shortLivedCacheDomain: String = config.getString("microservice.services.cachable.short-lived-cache.domain")
 
-  override val ggSignInUrl: String = runModeConfiguration.getString("govuk-tax.government-gateway-sign-in.host").getOrElse("")
-
-  override lazy val languageTranslationEnabled: Boolean = runModeConfiguration.getBoolean("microservice.services.features.welsh-translation").getOrElse(true)
-
-  def languageMap: Map[String, Lang] = Map(
-    "english" -> Lang("en"),
-    "cymraeg" -> Lang("cy"))
-
+  lazy val languageTranslationEnabled: Boolean = config.getConfBool("features.welsh-translation", defBool = true)
+  def languageMap: Map[String, Lang] = Map("english" -> Lang("en"), "cymraeg" -> Lang("cy"))
   def routeToSwitchLanguage: String => Call = (lang: String) => routes.LanguageSwitchController.switchToLanguage(lang)
 
-  override lazy val reportAProblemPartialUrl = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
-  override lazy val reportAProblemNonJSUrl = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+  lazy val reportAProblemPartialUrl = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
+  lazy val reportAProblemNonJSUrl = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
 
-  lazy val googleTagManagerId: String = loadConfig(s"google-tag-manager.id")
+  lazy val googleTagManagerId: String = config.getString("google-tag-manager.id")
+
+  lazy val chunkSize: Option[Int] = Option(config.getInt("validationChunkSize"))
+  lazy val errorCount: Option[Int] = Option(config.getInt("errorDisplayCount"))
+
+  //ExternalUrls
+  lazy val basGatewayHost: String = config.getString("govuk-tax.auth.bas-gateway.host")
+  lazy val loginCallback: String = Option(config.getString("govuk-tax.auth.login-callback.url")).getOrElse(routes.CheckingServiceController.startPage().url)
+  lazy val loginPath: String = Option(config.getString("govuk-tax.auth.login_path")).getOrElse("sign-in")
+  lazy val signIn: String = s"$basGatewayHost/bas-gateway/$loginPath"
+  lazy val signOut: String = s"$basGatewayHost/bas-gateway/sign-out-without-state"
 }
-
-object ApplicationConfig extends ApplicationConfigImpl

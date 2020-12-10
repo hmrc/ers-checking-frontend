@@ -16,30 +16,27 @@
 
 package controllers
 
-import controllers.auth.{AuthAction, RequestWithOptionalEmpRef}
-import helpers.WithMockedAuthActions
+import controllers.auth.RequestWithOptionalEmpRef
+import helpers.ErsTestHelper
 import models.ERSFileProcessingException
-import models.upscan.{NotStarted, UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
+import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, Logger}
 import play.api.http.Status
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.inject.Injector
+import play.api.i18n.{Messages, MessagesImpl}
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.AnyContent
+import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents}
+import play.api.test.FakeRequest
+import play.api.{Application, i18n}
 import services.{CsvFileProcessor, ProcessODSService, StaxProcessor}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.http.cache.client.ShortLivedCache
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.CacheUtil
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-class UploadControllerTest extends UnitSpec with MockitoSugar with GuiceOneAppPerSuite with I18nSupport with WithMockedAuthActions {
+class UploadControllerTest extends UnitSpec with ErsTestHelper with GuiceOneAppPerSuite {
 
 	val config = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
@@ -47,16 +44,11 @@ class UploadControllerTest extends UnitSpec with MockitoSugar with GuiceOneAppPe
     "contact-frontend.port" -> "9250",
     "metrics.enabled" -> false)
 
-	implicit val hc: HeaderCarrier = new HeaderCarrier
-
-	override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build
-	def injector: Injector = app.injector
-	implicit val messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
-	val mockAuthAction : AuthAction = mock[AuthAction]
+	override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
+	lazy val mcc: DefaultMessagesControllerComponents = testMCC(app)
+	implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
 	val mockProcessODSService: ProcessODSService = mock[ProcessODSService]
-	val mockCacheUtil: CacheUtil = mock[CacheUtil]
 	val mockCsvFileProcessor: CsvFileProcessor = mock[CsvFileProcessor]
-	val mockShortLivedCache: ShortLivedCache = mock[ShortLivedCache]
 	val uploadedSuccessfully: Option[UploadedSuccessfully] = Some(UploadedSuccessfully("testName", "testDownloadUrl", noOfRows = Some(1)))
 	val callbackList: Option[UpscanCsvFilesCallbackList] = {
 		Some(UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId.generate, uploadedSuccessfully.get))))
@@ -65,44 +57,27 @@ class UploadControllerTest extends UnitSpec with MockitoSugar with GuiceOneAppPe
 	val mockIterator: Iterator[String] = mock[Iterator[String]]
 
   def buildFakeUploadControllerOds(uploadRes: Boolean = true,
-																proccessFile: Boolean = true,
-																formatRes: Boolean = true,
-																clearCacheResponse: Boolean = true
-																	): UploadController = new UploadController {
-
-		override val csvFileProcessor:CsvFileProcessor = mockCsvFileProcessor
-		override val processODSService: ProcessODSService = mockProcessODSService
-		override val authAction: AuthAction = mockAuthAction
-		override val cacheUtil: CacheUtil = mockCacheUtil
+																	 proccessFile: Boolean = true,
+																	 formatRes: Boolean = true,
+																	 clearCacheResponse: Boolean = true
+																	): UploadController =
+		new UploadController(mockAuthAction, mockProcessODSService, mockCsvFileProcessor, mcc, mockErsUtil, mockAppConfig) {
 
 		override def clearCache()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Boolean] =
 			Future.successful(clearCacheResponse)
+
 		override private[controllers] def readFileOds(downloadUrl: String): StaxProcessor = mockStaxProcessor
 
-		when(mockProcessODSService.performODSUpload(any(), any())(any(),any(),any(),any())).thenReturn(
-				if (proccessFile) {
-					Future.successful(Success(uploadRes))
-				} else {
-					Future.successful(Failure(new ERSFileProcessingException("", "")))
-				}
-		)
-		when(csvFileProcessor.processCsvUpload(any(), any(), any(), any())(any(),any(),any())).thenReturn(
-				if (proccessFile) {
-					Future.successful(Success(uploadRes))
-				} else {
-					Future.successful(Failure(new ERSFileProcessingException("", "")))
-				}
-		)
+		when(mockProcessODSService.performODSUpload(any(), any())(any(),any(),any(),any()))
+			.thenReturn(if (proccessFile) Future.successful(Success(uploadRes)) else Future.successful(Failure(ERSFileProcessingException("", ""))))
 
-		when(mockCacheUtil.cache(refEq(CacheUtil.FORMAT_ERROR_CACHE), anyString())(any(), any(), any(), any())).thenReturn(
-			if (formatRes) {
-				Future.successful(null)
-			} else {
-				Future.failed(new Exception)
-			}
-		)
+		when(mockCsvFileProcessor.processCsvUpload(any(), any(), any(), any())(any(),any(),any()))
+			.thenReturn(if (proccessFile) Future.successful(Success(uploadRes)) else Future.successful(Failure(ERSFileProcessingException("", ""))))
 
-		when(mockCacheUtil.shortLivedCache).thenReturn(mockShortLivedCache)
+		when(mockErsUtil.cache(refEq(mockErsUtil.FORMAT_ERROR_CACHE), anyString())(any(), any(), any(), any()))
+			.thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))
+
+		when(mockErsUtil.shortLivedCache).thenReturn(mockShortLivedCache)
 		when(mockShortLivedCache.fetchAndGetEntry[UploadedSuccessfully](any(), any())(any(),any(), any())).thenReturn(uploadedSuccessfully)
 
 		mockAnyContentAction
@@ -112,18 +87,13 @@ class UploadControllerTest extends UnitSpec with MockitoSugar with GuiceOneAppPe
 																	 proccessFile: Boolean = true,
 																	 formatRes: Boolean = true,
 																	 clearCacheResponse: Boolean = true
-																	): UploadController = new UploadController {
-
-		override val csvFileProcessor:CsvFileProcessor = mockCsvFileProcessor
-		override val processODSService: ProcessODSService = mockProcessODSService
-		override val authAction: AuthAction = mockAuthAction
-		override val cacheUtil: CacheUtil = mockCacheUtil
+																	): UploadController =
+		new UploadController(mockAuthAction, mockProcessODSService, mockCsvFileProcessor, mcc, mockErsUtil, mockAppConfig) {
 
 		override def clearCache()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Boolean] =
 			Future.successful(clearCacheResponse)
 
-		override private[controllers] def readFileCsv(downloadUrl: String)
-																								 (implicit ec: ExecutionContext): Future[Iterator[String]] = Future.successful(mockIterator)
+		override private[controllers] def readFileCsv(downloadUrl: String): Future[Iterator[String]] = Future.successful(mockIterator)
 		val returnValue: Future[Try[Boolean]] = {
 			if (proccessFile) {
 				Future.successful(Success(uploadRes))
@@ -132,17 +102,12 @@ class UploadControllerTest extends UnitSpec with MockitoSugar with GuiceOneAppPe
 			}
 		}
 
-		when(csvFileProcessor.processCsvUpload(any(), any(), any(), any())(any(),any(),any())).thenReturn(returnValue)
+		when(mockCsvFileProcessor.processCsvUpload(any(), any(), any(), any())(any(),any(),any())).thenReturn(returnValue)
 
-		when(mockCacheUtil.cache(refEq(CacheUtil.FORMAT_ERROR_CACHE), anyString())(any(), any(), any(), any())).thenReturn(
-			if (formatRes) {
-				Future.successful(null)
-			} else {
-				Future.failed(new Exception)
-			}
-		)
+		when(mockErsUtil.cache(refEq(ersUtil.FORMAT_ERROR_CACHE), anyString())(any(), any(), any(), any()))
+			.thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))
 
-		when(mockCacheUtil.shortLivedCache).thenReturn(mockShortLivedCache)
+		when(mockErsUtil.shortLivedCache).thenReturn(mockShortLivedCache)
 		when(mockShortLivedCache.fetchAndGetEntry[UpscanCsvFilesCallbackList](any(), any())(any(),any(), any())).thenReturn(callbackList)
 
 		mockAnyContentAction
@@ -151,12 +116,11 @@ class UploadControllerTest extends UnitSpec with MockitoSugar with GuiceOneAppPe
 	"Calling UploadController.uploadODSFile" should {
 
 		"give a redirect status and show checkingSuccessPage if authenticated and no validation errors" in {
-			implicit val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET")
+			implicit val fakeRequest: FakeRequest[AnyContent] = Fixtures.buildFakeRequestWithSessionId("GET")
 			val controllerUnderTest = buildFakeUploadControllerOds()
 
 			val result = controllerUnderTest.uploadODSFile(Fixtures.getMockSchemeTypeString)(fakeRequest)
 			status(result) shouldBe Status.SEE_OTHER
-			//result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkingSuccessPage.toString()
 		}
 
 		"give a redirect status to checkingSuccessPage if no formating or structural errors" in {
@@ -178,7 +142,7 @@ class UploadControllerTest extends UnitSpec with MockitoSugar with GuiceOneAppPe
 	"Calling UploadController.uploadCSVFile" should {
 
 		"give a redirect status and show checkingSuccessPage if authenticated and no validation errors" in {
-			implicit val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET")
+			implicit val fakeRequest: FakeRequest[AnyContent] = Fixtures.buildFakeRequestWithSessionId("GET")
 			UpscanCsvFilesCallbackList
 			val controllerUnderTest = buildFakeUploadControllerCsv()
 			val result = controllerUnderTest.uploadCSVFile(Fixtures.getMockSchemeTypeString)(fakeRequest)
@@ -198,7 +162,5 @@ class UploadControllerTest extends UnitSpec with MockitoSugar with GuiceOneAppPe
 			status(result) shouldBe Status.SEE_OTHER
 			result.header.headers("Location") shouldBe routes.HtmlReportController.htmlErrorReportPage(true).toString
 		}
-
 	}
-
 }

@@ -14,25 +14,21 @@
  * limitations under the License.
  *@
 
+@import config.ApplicationConfig
 @(title: String,
         scripts: Html = Html(""),
-        showSignOutLink: Boolean = false)(mainContent: Html)(implicit request: Request[AnyRef], context: config.ErsContext, messages: Messages)
-
-@import play.api.Play.current
-@import play.api.Play
-@import uk.gov.hmrc.play.config.RunMode._
+        showSignOutLink: Boolean = false)(mainContent: Html)(implicit request: Request[AnyRef], appConfig: ApplicationConfig, messages: Messages)
 
 @commonLinkElement = {
     @includes.commonLinkElements()
 }
 
 @commonScriptElement = {
-    @includes.commonScriptElements(scripts)
+    @includes.commonScriptElements(scripts, appConfig)
 }
 
-@main(applicationConfig = config.ApplicationConfig,
-	title,
-	headerNav = Some(views.helpers.HeaderNav(title = Some(Messages("ers.header")),
+@main(title,
+	headerNav = Some(views.helpers.HeaderNav(title = Some(messages("ers.header")),
 	showBetaLink = false,
 	links = Some(views.html.templates.header_links(showSignOutLink)))),
 	linkElement = Some(commonLinkElement),

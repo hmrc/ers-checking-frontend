@@ -16,11 +16,7 @@
 
 package utils
 
-import java.io.File
-
-object UploadedFileUtil extends UploadedFileUtil
-
-trait UploadedFileUtil {
+class UploadedFileUtil {
 
 	def checkODSFileType(fileName: String): Boolean = {
 		val delimiter: Char = '.'

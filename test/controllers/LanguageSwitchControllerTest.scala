@@ -15,35 +15,40 @@
  */
 
 package controllers
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 import play.api.test.Helpers._
 import play.api.test.FakeRequest
-import play.api.i18n.MessagesApi
+import play.api.mvc.{ControllerComponents, Cookie, Cookies}
 import uk.gov.hmrc.play.language.LanguageUtils
 import uk.gov.hmrc.play.test.UnitSpec
 
 
-class LanguageSwitchControllerTest extends UnitSpec with OneAppPerSuite {
-  val messagesApi = app.injector.instanceOf(classOf[MessagesApi])
+class LanguageSwitchControllerTest extends UnitSpec with GuiceOneAppPerSuite {
+  val controllerComponents: ControllerComponents = app.injector.instanceOf[ControllerComponents]
   val langUtils : LanguageUtils = app.injector.instanceOf[LanguageUtils]
   val config: Configuration = app.injector.instanceOf[Configuration]
+  val testLanguageSwitchController = new LanguageSwitchController(config: Configuration, langUtils : LanguageUtils, controllerComponents : ControllerComponents)
 
-  object TestLanguageSwitchController extends LanguageSwitchController(
-                                                                        config: Configuration,
-                                                                        langUtils : LanguageUtils,
-                                                                        messagesApi : MessagesApi)
   "Hitting language selection endpoint" must {
     "redirect to Welsh translated start page if Welsh language is selected" in {
       val request = FakeRequest()
-      val result = TestLanguageSwitchController.switchToLanguage("cymraeg")(request)
-      header("Set-Cookie",result) shouldBe Some("PLAY_LANG=cy; Path=/;;PLAY_FLASH=switching-language=true; Path=/; HTTPOnly")
+      val result = testLanguageSwitchController.switchToLanguage("cymraeg")(request)
+      val resultCookies: Cookies = cookies(result)
+      resultCookies.size shouldBe 1
+      val cookie: Cookie = resultCookies.head
+      cookie.name shouldBe "PLAY_LANG"
+      cookie.value shouldBe "cy"
     }
 
     "redirect to English translated start page if English language is selected" in {
       val request = FakeRequest()
-      val result = TestLanguageSwitchController.switchToLanguage("english")(request)
-      header("Set-Cookie",result) shouldBe Some("PLAY_LANG=en; Path=/;;PLAY_FLASH=switching-language=true; Path=/; HTTPOnly")
+      val result = testLanguageSwitchController.switchToLanguage("english")(request)
+      val resultCookies: Cookies = cookies(result)
+      resultCookies.size shouldBe 1
+      val cookie: Cookie = resultCookies.head
+      cookie.name shouldBe "PLAY_LANG"
+      cookie.value shouldBe "en"
     }
   }
 }

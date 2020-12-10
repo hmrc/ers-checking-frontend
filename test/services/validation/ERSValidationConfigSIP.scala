@@ -17,15 +17,18 @@
 package services.validation
 
 import com.typesafe.config.ConfigFactory
-import uk.gov.hmrc.services.validation.{Cell, DataValidator, Row, ValidationError}
+import helpers.ErsTestHelper
 import org.scalatestplus.play.PlaySpec
+import play.api.i18n
+import play.api.i18n.MessagesImpl
+import play.api.mvc.DefaultMessagesControllerComponents
 import services.validation.SIPTestData.{ERSValidationSIPAwardsTestData, ERSValidationSIPOutTestData}
-import play.api.i18n.Messages.Implicits._
 import services.validation.ValidationErrorHelper._
+import uk.gov.hmrc.services.validation.{Cell, DataValidator, Row, ValidationError}
 
 class SIPAwardsV3ValidationTest extends PlaySpec with ERSValidationSIPAwardsTestData with ValidationTestRunner{
 
-  val validator = DataValidator(ConfigFactory.load.getConfig("ers-sip-awards-validation-config"))
+  val validator: DataValidator = DataValidator(ConfigFactory.load.getConfig("ers-sip-awards-validation-config"))
 
   "Ers Validation tests for SIP Awards" should {
     runTests(validator, getDescriptions, getTestData, getExpectedResults)
@@ -88,7 +91,7 @@ class SIPAwardsV3ValidationTest extends PlaySpec with ERSValidationSIPAwardsTest
 }
 class SIPOutV3ValidationTest extends PlaySpec with ERSValidationSIPOutTestData with ValidationTestRunner{
 
-  val validator = DataValidator(ConfigFactory.load.getConfig("ers-sip-out-validation-config"))
+  val validator: DataValidator = DataValidator(ConfigFactory.load.getConfig("ers-sip-out-validation-config"))
 
   "Ers Validation tests for SIP Out" should {
     runTests(validator, getDescriptions, getTestData, getExpectedResults)

@@ -14,31 +14,32 @@
  * limitations under the License.
  *@
 
-@(form: Form[CS_schemeType])(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext, messages: Messages)
+@import config.ApplicationConfig
+@(form: Form[CS_schemeType])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, appConfig: ApplicationConfig)
     @* type of scheme template *@
     @import views.html.templates._
     @import uk.gov.hmrc.play.views.html.helpers
 
-    @ers_main(title = Messages("ers.scheme_types.page_title")) {
+    @ers_main(title = messages("ers.scheme_types.page_title")) {
 
-        <p class="font-xsmall"><a href="@routes.CheckingServiceController.startPage()" class="link-back">@Html(Messages("ers.back"))</a></p>
-        @helpers.errorSummary(Messages("validation.summary.heading"), form, forceDivToAppear = false)
-        @header(Messages("ers_scheme_type.page_title"))
+        <p class="font-xsmall"><a href="@routes.CheckingServiceController.startPage()" class="link-back">@messages("ers.back")</a></p>
+        @helpers.errorSummary(messages("validation.summary.heading"), form, forceDivToAppear = false)
+        @header(messages("ers_scheme_type.page_title"))
         @helpers.form(action = routes.CheckingServiceController.schemeTypeSelected()) {
             @helpers.input_radio_group(form("schemeType"), Seq(
-                ("csop", Messages("ers_scheme_type.csop")),
-                ("emi", Messages("ers_scheme_type.emi")),
-                ("saye", Messages("ers_scheme_type.saye")),
-                ("sip", Messages("ers_scheme_type.sip")),
-                ("other", Messages("ers_scheme_type.other"))
+                ("csop", messages("ers_scheme_type.csop")),
+                ("emi", messages("ers_scheme_type.emi")),
+                ("saye", messages("ers_scheme_type.saye")),
+                ("sip", messages("ers_scheme_type.sip")),
+                ("other", messages("ers_scheme_type.other"))
             ),
-                '_legend -> Messages("ers_scheme_type.page_title"),
+                '_legend -> messages("ers_scheme_type.page_title"),
                 '_legendClass -> "visuallyhidden",
                 '_fieldsetAttributes -> Html("""id='schemeType'""")
             )
 
             <div class="form-field form-field--submit">
-                <input type="submit" id="continue" class="button" value="@Html(Messages("ers_scheme_type.continue"))">
+                <input type="submit" id="continue" class="button" value="@messages("ers_scheme_type.continue")">
             </div>
         }
     }

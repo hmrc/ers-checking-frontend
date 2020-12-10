@@ -16,22 +16,18 @@
 
 package utils
 
+import config.ERSShortLivedCache
 import play.api.Logger
 import play.api.libs.json
 import play.api.libs.json.JsValue
 import play.api.mvc.Request
-import uk.gov.hmrc.http.cache.client.ShortLivedCache
 import uk.gov.hmrc.http.cache.client.CacheMap
-
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-object CacheUtil extends CacheUtil {
-  def shortLivedCache = playconfig.ShortLivedCache
-}
+import scala.concurrent.{ExecutionContext, Future}
 
 trait CacheUtil {
+  val shortLivedCache: ERSShortLivedCache
 
   // Cache Ids
   val SCHEME_CACHE: String = "scheme-type"
@@ -46,13 +42,13 @@ trait CacheUtil {
   val FILE_NAME_CACHE: String = "file-name"
 	val CSV_FILES_UPLOAD: String = "csv-files-upload"
 
-  def shortLivedCache: ShortLivedCache
-
-  def cache[T](key:String, body:T)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[_]) = {
+  def cache[T](key:String, body:T)
+              (implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[_]): Future[CacheMap] = {
     shortLivedCache.cache[T](getCacheId, key, body)
   }
 
-  def cache[T](key:String, body:T, cacheId : String)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[_]) = {
+  def cache[T](key:String, body:T, cacheId : String)
+              (implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[_]): Future[CacheMap] = {
     shortLivedCache.cache[T](cacheId, key, body)
   }
 
@@ -65,13 +61,12 @@ trait CacheUtil {
     shortLivedCache.fetchAndGetEntry[JsValue](getCacheId, key).map{ res =>
       res.get.as[T]
     }recover{
-      case e: NoSuchElementException => {
+      case e: NoSuchElementException =>
+        Logger.warn(s"[CacheUtil][fetch] fetch failed to get key $key with exception $e, timestamp: ${System.currentTimeMillis()}.")
         throw new NoSuchElementException
-      }
-      case _ : Throwable => {
-        Logger.error(s"fetch failed to get key $key for $getCacheId with exception, timestamp: ${System.currentTimeMillis()}.")
+      case _ : Throwable =>
+        Logger.error(s"[CacheUtil][fetch] fetch failed to get key $key for ${hc.sessionId} with exception, timestamp: ${System.currentTimeMillis()}.")
         throw new Exception
-      }
     }
   }
 
@@ -80,13 +75,12 @@ trait CacheUtil {
     shortLivedCache.fetchAndGetEntry[JsValue](cacheId, key).map{ res =>
       res.get.as[T]
     }recover{
-      case e:NoSuchElementException => {
+      case e:NoSuchElementException =>
+        Logger.warn(s"[CacheUtil][fetch] fetch with 2 params failed to get key [$key] for cacheId [$cacheId] with exception - $e")
         throw new NoSuchElementException
-      }
-      case _ : Throwable => {
-        Logger.error(s"fetch with 2 params failed to get key $key for $cacheId with exception, timestamp: ${System.currentTimeMillis()}.")
+      case t : Throwable =>
+        Logger.error(s"[CacheUtil][fetch] fetch with 2 params failed to get key [$key] for cacheId [$cacheId] with exception - $t")
         throw new Exception
-      }
     }
   }
 
@@ -99,19 +93,21 @@ trait CacheUtil {
         sessionMap
 
       } catch {
-        case e: NoSuchElementException => {
+        case e: NoSuchElementException =>
+          Logger.warn(s"[CacheUtil][fetchAll] failed to get all keys with exception. " +
+            s"Method: ${request.method} req: ${request.path}, param: ${request.rawQueryString}", e)
+
           throw new NoSuchElementException
-        }
-        case _: Throwable => {
-          Logger.error(s"fetchAll failed to get all keys with exception. Method: ${request.method} req: ${request.path}, param: ${request.rawQueryString}")
+        case t: Throwable =>
+          Logger.error(s"[CacheUtil][fetchAll] failed to get all keys with exception. " +
+            s"Method: ${request.method} req: ${request.path}, param: ${request.rawQueryString}", t)
           throw new Exception
-        }
       }
-    }recover{
-      case e:NoSuchElementException => {
-        Logger.error(s"fetchAll failed to get all keys with exception ${e.getMessage} method: ${request.method}  req: ${request.path}, param: ${request.rawQueryString}", e)
+    } recover {
+      case e:NoSuchElementException =>
+        Logger.error(s"[CacheUtil][fetchAll] failed to get all keys with " +
+          s"exception ${e.getMessage} method: ${request.method}  req: ${request.path}, param: ${request.rawQueryString}", e)
         throw new Exception
-      }
     }
   }
 

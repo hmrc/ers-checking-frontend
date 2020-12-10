@@ -16,21 +16,19 @@
 
 package connectors
 
+import com.github.tomakehurst.wiremock.client.WireMock._
 import models.upscan.{PreparedUpload, Reference, UploadForm, UpscanInitiateRequest}
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, Upstream5xxResponse}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.test.UnitSpec
-import com.github.tomakehurst.wiremock.client.WireMock._
 import utils.WireMockHelper
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
-class UpscanConnectorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar with WireMockHelper {
+class UpscanConnectorSpec extends UnitSpec with GuiceOneAppPerSuite with MockitoSugar with WireMockHelper {
 
 	lazy val connector: UpscanConnector = app.injector.instanceOf[UpscanConnector]
 	implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -77,7 +75,7 @@ class UpscanConnectorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar
                 .withStatus(SERVICE_UNAVAILABLE)
             )
         )
-        an[Upstream5xxResponse] should be thrownBy await(connector.getUpscanFormData(request))
+        an[UpstreamErrorResponse] should be thrownBy await(connector.getUpscanFormData(request))
       }
     }
   }

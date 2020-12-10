@@ -16,41 +16,38 @@
 
 package services
 
-import java.io.File
+import java.nio.file.Path
 
 import controllers.auth.RequestWithOptionalEmpRef
+import javax.inject.{Inject, Singleton}
 import models.{ERSFileProcessingException, FileObject, SheetErrors}
 import play.api.Logger
 import play.api.i18n.Messages
 import play.api.libs.Files
 import play.api.mvc.{AnyContent, MultipartFormData, Request}
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.{CacheUtil, ParserUtil, UploadedFileUtil}
+import utils.{ERSUtil, ParserUtil, UploadedFileUtil}
 
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
 
-object ProcessODSService extends ProcessODSService {
-  override val uploadedFileUtil: UploadedFileUtil = UploadedFileUtil
-  override val cacheUtil:CacheUtil = CacheUtil
-}
-
-trait ProcessODSService {
-  val uploadedFileUtil: UploadedFileUtil
-  val cacheUtil:CacheUtil
-
+@Singleton
+class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
+                                  parserUtil: ParserUtil,
+                                  dataGenerator: DataGenerator,
+                                  ersUtil: ERSUtil
+                                 )(implicit ec: ExecutionContext) {
   def performODSUpload(fileName: String, processor: StaxProcessor)
 											(implicit request: RequestWithOptionalEmpRef[AnyContent], scheme:String, hc : HeaderCarrier, messages: Messages): Future[Try[Boolean]] = {
 		try {
 			val errorList: ListBuffer[SheetErrors] = checkFileType(processor, fileName)(scheme, hc, request, messages)
-			val cache = cacheUtil.cache[String](CacheUtil.FILE_NAME_CACHE, fileName).recover {
+			val cache = ersUtil.cache[String](ersUtil.FILE_NAME_CACHE, fileName).recover {
 				case e: Exception =>
 					Logger.error("[ProcessODSService][performODSUpload] Unable to save File Name. Error: " + e.getMessage)
 					throw e
 			}
-			val valid = ParserUtil.isFileValid(errorList, "performODSUpload")
+			val valid = parserUtil.isFileValid(errorList)
 			val result = for {
 				_ <- cache
 				v <- valid
@@ -73,13 +70,12 @@ trait ProcessODSService {
     val fileSet = uploadedFile.map(file => file.key)
     val fileSetLength = fileSet.length
     val fileObjectList = new java.util.ArrayList[FileObject](fileSetLength)
-    var fileParam:String = ""
     var validFileExtn: Boolean = false
     for(fileIndex <- 0 until fileSetLength-1){
-      fileParam = fileSet(fileIndex)
-      val file: File = request.body.asMultipartFormData.get.file(fileParam).get.ref.file
+      val fileParam = fileSet(fileIndex)
+      val file: Path = request.body.asMultipartFormData.get.file(fileParam).get.ref.path
       val fileName: String = request.body.asMultipartFormData.get.file(fileParam).get.filename
-      fileObjectList.add(FileObject(fileName,file))
+      fileObjectList.add(FileObject(fileName, file))
           }
     validFileExtn = true
     (validFileExtn, fileObjectList)
@@ -87,16 +83,16 @@ trait ProcessODSService {
 
 	def checkFileType(processor: StaxProcessor, fileName: String)
                    (implicit scheme: String, hc: HeaderCarrier, request: RequestWithOptionalEmpRef[_], messages: Messages):ListBuffer[SheetErrors] = {
-    if (!uploadedFileUtil.checkODSFileType(fileName)) {
+		if (!uploadedFileUtil.checkODSFileType(fileName)) {
       throw ERSFileProcessingException(
-        Messages("ers_check_file.file_type_error", fileName),
-        Messages("ers_check_file.file_type_error", fileName))
+        messages("ers_check_file.file_type_error", fileName),
+        messages("ers_check_file.file_type_error", fileName))
     }
     parseOdsContent(processor, fileName)(scheme, hc, request, messages)
   }
 
   def parseOdsContent(processor: StaxProcessor, uploadedFileName: String)
 										 (implicit scheme: String, hc : HeaderCarrier, request: RequestWithOptionalEmpRef[_], messages: Messages): ListBuffer[SheetErrors] = {
-    DataGenerator.getErrors(processor, scheme, uploadedFileName)
+		dataGenerator.getErrors(processor, scheme, uploadedFileName)
   }
 }

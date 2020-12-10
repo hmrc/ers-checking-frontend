@@ -16,18 +16,15 @@
 
 package utils
 
-import play.api.i18n.Messages
-
-object ContentUtil extends ContentUtil
 trait ContentUtil {
 
-  def getSchemeName(schemeType: String)(implicit messages: Messages) : (String,String) = {
+  def getSchemeName(schemeType: String) : (String,String) = {
     schemeType.toLowerCase match {
-      case "csop" | "1" => (Messages("ers_pdf_error_report.csop"),"CSOP")
-      case "emi" | "2" => (Messages("ers_pdf_error_report.emi"),"EMI")
-      case "saye" | "4" => (Messages("ers_pdf_error_report.saye"),"SAYE")
-      case "sip" | "5" => (Messages("ers_pdf_error_report.sip"),"SIP")
-      case "other" | "3" => (Messages("ers_pdf_error_report.other"),"OTHER")
+      case "csop" | "1" => ("ers_pdf_error_report.csop", "CSOP")
+      case "emi" | "2" => ("ers_pdf_error_report.emi", "EMI")
+      case "saye" | "4" => ("ers_pdf_error_report.saye", "SAYE")
+      case "sip" | "5" => ("ers_pdf_error_report.sip", "SIP")
+      case "other" | "3" => ("ers_pdf_error_report.other", "OTHER")
       case _ => ("","")
     }
   }

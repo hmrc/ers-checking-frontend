@@ -16,46 +16,34 @@
 
 package controllers
 
-import controllers.auth.AuthAction
-import helpers.WithMockedAuthActions
-import models.{CS_schemeType, CSformMappings}
+import helpers.ErsTestHelper
+import models.CSformMappings
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
-import play.api.i18n.{Lang, Messages, MessagesApi}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
-import play.api.libs.json.JsString
-import play.api.test.FakeRequest
+import play.api.i18n
+import play.api.i18n.{Messages, MessagesImpl}
+import play.api.mvc.{DefaultMessagesControllerComponents, Result}
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.CacheUtil
-import play.api.mvc.{Request, Result}
-import services.UpscanService
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
 
 
-class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with MockitoSugar with WithMockedAuthActions {
+class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite with ErsTestHelper {
 
-  implicit val hc: HeaderCarrier = new HeaderCarrier
-  implicit lazy val messages: Messages = Messages(Lang("en"), app.injector.instanceOf[MessagesApi])
-  implicit val request: Request[_] = FakeRequest()
-  val mockAuthAction : AuthAction = mock[AuthAction]
-	val mockUpscanService: UpscanService = mock[UpscanService]
+  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
 
   "start Page GET" should {
 
-    def buildFakeCheckingServiceController(): CheckingServiceController = new CheckingServiceController {
-      val mockCacheUtil: CacheUtil = mock[CacheUtil]
-      override val cacheUtil: CacheUtil = mockCacheUtil
-      override val authAction: AuthAction = mockAuthAction
-			override val upscanService: UpscanService = mockUpscanService
-			mockAnyContentAction
-    }
+    def buildFakeCheckingServiceController(): CheckingServiceController =
+      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc, mockErsUtil, mockAppConfig) {
+        mockAnyContentAction
+      }
 
     "gives a call to showStartPage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
@@ -73,13 +61,10 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
   "Scheme Type Page GET" should {
 
-    def buildFakeCheckingServiceController(): CheckingServiceController = new CheckingServiceController {
-      val mockCacheUtil: CacheUtil = mock[CacheUtil]
-      override val cacheUtil: CacheUtil = mockCacheUtil
-      override val authAction: AuthAction = mockAuthAction
-			override val upscanService: UpscanService = mockUpscanService
-			mockAnyContentAction
-    }
+    def buildFakeCheckingServiceController(): CheckingServiceController =
+      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc, mockErsUtil, mockAppConfig) {
+        mockAnyContentAction
+      }
 
     "gives a call to showSchemeTypePage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
@@ -88,7 +73,6 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
     }
 
     "give a status OK and shows scheme type page" in {
-
       val controllerUnderTest = buildFakeCheckingServiceController()
 
       val form = CSformMappings.schemeTypeForm.bind(Map("" -> ""))
@@ -100,21 +84,12 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
   "Scheme Type Page POST" should {
 
-    def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController = new CheckingServiceController {
-      val mockCacheUtil: CacheUtil = mock[CacheUtil]
-      override val cacheUtil: CacheUtil = mockCacheUtil
-      when(
-        mockCacheUtil.cache(refEq(CacheUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any())
-      ).thenReturn(
-        schemeRes match {
-          case true => Future.successful(null)
-          case _ => Future.failed(new Exception)
-        }
-      )
-      override val authAction: AuthAction = mockAuthAction
-			override val upscanService: UpscanService = mockUpscanService
-			mockAnyContentAction
-    }
+    def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
+      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc, mockErsUtil, mockAppConfig) {
+        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any()))
+          .thenReturn(if (schemeRes) Future.successful(null) else Future.failed(new Exception))
+        mockAnyContentAction
+      }
 
     "gives a call to showSchemeTypeSelected if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
@@ -133,13 +108,13 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
     }
 
     "if no form errors with scheme type and save success" in {
-      val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = true)
+      val controllerUnderTest = buildFakeCheckingServiceController()
       val schemeTypeData = Map("schemeType" -> "1")
       val form = CSformMappings.schemeTypeForm.bind(schemeTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeTypeSelected(request)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkFileTypePage.toString()
+      result.header.headers("Location") shouldBe routes.CheckingServiceController.checkFileTypePage().toString
     }
 
     "if no form errors with scheme type and save fails" in {
@@ -147,33 +122,17 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       val schemeTypeData = Map("schemeType" -> "1")
       val form = CSformMappings.schemeTypeForm.bind(schemeTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      contentAsString(await(controllerUnderTest.showSchemeTypeSelected(request))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
+      contentAsString(await(controllerUnderTest.showSchemeTypeSelected(request)))shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, testMessages))
     }
-
-//    "give a redirect Status and shows the check file page" in {
-//      val controllerUnderTest = buildFakeCheckingServiceController()
-//      val result = controllerUnderTest.showSchemeTypeSelected(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"))
-//      status(result) shouldBe Status.SEE_OTHER
-//    }
-
   }
 
 
   "Check File Type Page GET" should {
 
-    def buildFakeCheckingServiceController(fileTypeRes: Boolean = true): CheckingServiceController = new CheckingServiceController {
-      val mockCacheUtil: CacheUtil = mock[CacheUtil]
-      override val cacheUtil: CacheUtil = mockCacheUtil
-      when(
-        mockCacheUtil.fetch[String](refEq(CacheUtil.FILE_TYPE_CACHE))(any(),any(),any(),any())
-      ).thenReturn(
-        fileTypeRes match {
-          case true => Future.successful("csv")
-          case _ => Future.failed(new NoSuchElementException)
-        }
-      )
-      override val authAction: AuthAction = mockAuthAction
-			override val upscanService: UpscanService = mockUpscanService
+    def buildFakeCheckingServiceController(fileTypeRes: Boolean = true): CheckingServiceController =
+      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc, mockErsUtil, mockAppConfig) {
+      when(mockErsUtil.fetch[String](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(),any(),any(),any()))
+        .thenReturn(if (fileTypeRes) Future.successful("csv") else Future.failed(new NoSuchElementException))
 			mockAnyContentAction
     }
 
@@ -188,7 +147,6 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       val form = CSformMappings.checkFileTypeForm.bind(Map("" -> ""))
       val result = controllerUnderTest.showCheckFileTypePage(form)(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
       status(result) shouldBe Status.OK
-      val document = Jsoup.parse(contentAsString(result))
     }
 
     "give a status OK if fetch fails then show check file type page with nothing selected" in {
@@ -206,19 +164,10 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
   "Check File Type Page POST" should {
 
-    def buildFakeCheckingServiceController(fileTypeRes: Boolean = true): CheckingServiceController = new CheckingServiceController {
-      val mockCacheUtil: CacheUtil = mock[CacheUtil]
-      override val cacheUtil: CacheUtil = mockCacheUtil
-      when(
-        mockCacheUtil.cache(refEq(CacheUtil.FILE_TYPE_CACHE), anyString())(any(), any(), any(), any())
-      ).thenReturn(
-        fileTypeRes match {
-          case true => Future.successful(null)
-          case _ => Future.failed(new Exception)
-        }
-      )
-      override val authAction: AuthAction = mockAuthAction
-			override val upscanService: UpscanService = mockUpscanService
+    def buildFakeCheckingServiceController(fileTypeRes: Boolean = true): CheckingServiceController =
+      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc, mockErsUtil, mockAppConfig) {
+      when(mockErsUtil.cache(refEq(mockErsUtil.FILE_TYPE_CACHE), anyString())(any(), any(), any(), any()))
+        .thenReturn(if (fileTypeRes) Future.successful(null) else Future.failed(new Exception))
 			mockAnyContentAction
     }
 
@@ -239,23 +188,23 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
     }
 
     "if no form errors with file type = csv and save success" in {
-      val controllerUnderTest = buildFakeCheckingServiceController(fileTypeRes = true)
+      val controllerUnderTest = buildFakeCheckingServiceController()
       val checkFileTypeData = Map("checkFileType" -> "csv")
       val form = CSformMappings.schemeTypeForm.bind(checkFileTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showCheckFileTypeSelected(request)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers.get("Location").get shouldBe routes.CheckCsvFilesController.selectCsvFilesPage.toString()
+      result.header.headers("Location") shouldBe routes.CheckCsvFilesController.selectCsvFilesPage().toString
     }
 
     "if no form errors with file type = ods and save success" in {
-      val controllerUnderTest = buildFakeCheckingServiceController(fileTypeRes = true)
+      val controllerUnderTest = buildFakeCheckingServiceController()
       val checkFileTypeData = Map("checkFileType" -> "ods")
       val form = CSformMappings.schemeTypeForm.bind(checkFileTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showCheckFileTypeSelected(request)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkODSFilePage.toString()
+      result.header.headers("Location") shouldBe routes.CheckingServiceController.checkODSFilePage().toString
     }
 
     "if no form errors with scheme type and save fails" in {
@@ -263,37 +212,20 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       val schemeTypeData = Map("checkFileType" -> "csv")
       val form = CSformMappings.schemeTypeForm.bind(schemeTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      contentAsString(await(controllerUnderTest.showCheckFileTypeSelected(request))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
+      contentAsString(await(controllerUnderTest.showCheckFileTypeSelected(request))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, testMessages))
     }
-
   }
-
 
 
   "Check file page GET" should {
 
-    def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController = new CheckingServiceController {
-      val mockCacheUtil: CacheUtil = mock[CacheUtil]
-      override val cacheUtil: CacheUtil = mockCacheUtil
-      val scheme: String = "1"
-      when(
-        mockCacheUtil.cache(refEq(CacheUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any())
-      ).thenReturn(
-        schemeRes match {
-          case true => Future.successful(null)
-          case _ => Future.failed(new Exception)
-        }
-      )
-      when(
-        mockCacheUtil.fetch[String](refEq(CacheUtil.SCHEME_CACHE))(any(),any(),any(),any())
-      ).thenReturn(
-        schemeRes match {
-          case true => Future.successful("1")
-          case _ => Future.failed(new Exception)
-        }
-      )
-      override val authAction: AuthAction = mockAuthAction
-			override val upscanService: UpscanService = mockUpscanService
+    def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
+      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc, mockErsUtil, mockAppConfig) {
+      when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any()))
+        .thenReturn(if (schemeRes) Future.successful(null) else Future.failed(new Exception))
+      when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any(),any()))
+        .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
+
 			mockAnyContentAction
     }
 
@@ -304,7 +236,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
     }
 
     "give a status OK and shows check file page if fetch successful" in {
-      val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = true)
+      val controllerUnderTest = buildFakeCheckingServiceController()
       val result = controllerUnderTest.showCheckODSFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       status(result) shouldBe Status.OK
     }
@@ -313,7 +245,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
       val res: Future[Result] = controllerUnderTest.showCheckODSFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       res.map { result =>
-        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
+        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, testMessages))
       }    }
 
   }
@@ -321,20 +253,10 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
   "Check CSV file page GET" should {
 
-    def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController = new CheckingServiceController {
-      val mockCacheUtil: CacheUtil = mock[CacheUtil]
-      override val cacheUtil: CacheUtil = mockCacheUtil
-      val scheme: String = "1"
-      when(
-        mockCacheUtil.fetch[String](refEq(CacheUtil.SCHEME_CACHE))(any(),any(),any(),any())
-      ).thenReturn(
-        schemeRes match {
-          case true => Future.successful("1")
-          case _ => Future.failed(new Exception)
-        }
-      )
-      override val authAction: AuthAction = mockAuthAction
-			override val upscanService: UpscanService = mockUpscanService
+    def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
+      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc, mockErsUtil, mockAppConfig) {
+      when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any(),any()))
+        .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
 			mockAnyContentAction
     }
 
@@ -345,7 +267,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
     }
 
     "give a status OK and shows check csv file page if fetch successful" in {
-      val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = true)
+      val controllerUnderTest = buildFakeCheckingServiceController()
       val result = controllerUnderTest.showCheckCSVFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       status(result) shouldBe Status.OK
     }
@@ -355,49 +277,27 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       val res: Future[Result] = controllerUnderTest.showCheckCSVFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       (Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       res.map{ result =>
-        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
+        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, testMessages))
       }}
 
   }
-
-
-
 
   "Checking success page GET" should {
 
     def buildFakeCheckingServiceController(schemeRes: Boolean = true,
 																					 errorRes: Boolean = true,
 																					 errorCount: String = "0"
-																					): CheckingServiceController = new CheckingServiceController {
-      val mockCacheUtil: CacheUtil = mock[CacheUtil]
-      override val cacheUtil: CacheUtil = mockCacheUtil
-      val scheme: String = "1"
-      when(
-        mockCacheUtil.cache(refEq(CacheUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any())
-      ).thenReturn(
-        schemeRes match {
-          case true => Future.successful(null)
-          case _ => Future.failed(new Exception)
-        }
-      )
-      when(
-        mockCacheUtil.fetch[String](refEq(CacheUtil.SCHEME_CACHE))(any(),any(),any(),any())
-      ).thenReturn(
-        schemeRes match {
-          case true => Future.successful("1")
-          case _ => Future.failed(new Exception)
-        }
-      )
-      when(
-        mockCacheUtil.fetch[String](refEq(CacheUtil.SCHEME_ERROR_COUNT_CACHE))(any(),any(),any(),any())
-      ).thenReturn(
-        errorRes match {
-          case true => Future.successful(errorCount)
-          case _ => Future.failed(new Exception)
-        }
-      )
-      override val authAction: AuthAction = mockAuthAction
-			override val upscanService: UpscanService = mockUpscanService
+																					): CheckingServiceController =
+      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc, mockErsUtil, mockAppConfig) {
+        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any()))
+          .thenReturn(if (schemeRes) Future.successful(null) else Future.failed(new Exception))
+
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any(),any()))
+        .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
+
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_ERROR_COUNT_CACHE))(any(),any(),any(),any()))
+        .thenReturn(if (errorRes) Future.successful(errorCount) else Future.failed(new Exception))
+
 			mockAnyContentAction
     }
 
@@ -415,108 +315,24 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
 
   }
 
-  "checking errors page GET" should {
-
-    def buildFakeCheckingServiceController(schemeRes: Boolean = true,
-																					 fileTypeRes: String = "ods",
-																					 errorRes: Boolean = true,
-																					 errorCount: String = "0"
-																					): CheckingServiceController = new CheckingServiceController {
-      val mockCacheUtil: CacheUtil = mock[CacheUtil]
-      override val cacheUtil: CacheUtil = mockCacheUtil
-      val scheme: String = "1"
-      when(
-        mockCacheUtil.cache(refEq(CacheUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any())
-      ).thenReturn(
-        schemeRes match {
-          case true => Future.successful(null)
-          case _ => Future.failed(new Exception)
-        }
-      )
-      when(
-        mockCacheUtil.fetch[String](refEq(CacheUtil.FILE_TYPE_CACHE))(any(),any(),any(),any())
-      ).thenReturn(
-        schemeRes match {
-          case true => Future.successful(fileTypeRes)
-          case _ => Future.failed(new Exception)
-        }
-      )
-      when(
-        mockCacheUtil.fetch[String](refEq(CacheUtil.SCHEME_ERROR_COUNT_CACHE))(any(),any(),any(),any())
-      ).thenReturn(
-        errorRes match {
-          case true => Future.successful(errorCount)
-          case _ => Future.failed(new Exception)
-        }
-      )
-      when(
-        mockCacheUtil.fetchAll()(any(),any(),any())
-      ).thenReturn(
-        Future.successful(CacheMap("test", Map(CacheUtil.SCHEME_CACHE -> JsString("test"))))
-      )
-      override val authAction: AuthAction = mockAuthAction
-			override val upscanService: UpscanService = mockUpscanService
-			mockAnyContentAction
-    }
-
-//    "give a status OK and shows check errors page if fetch successful and scheme type is csv" in {
-//      val controllerUnderTest = buildFakeCheckingServiceController(fileTypeRes = "csv")
-//      val result = controllerUnderTest.showCheckingErrorsPage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
-//      status(result) shouldBe Status.OK
-////      result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkingErrorsPage.toString()
-//    }
-
-//    "give a status OK and shows check errors page if fetch successful and scheme type is ods" in {
-//      val controllerUnderTest = buildFakeCheckingServiceController()
-//      val result = controllerUnderTest.showCheckingErrorsPage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
-//      status(result) shouldBe Status.OK
-//      //result.header.headers.get("Location").get shouldBe routes.CheckingServiceController.checkingErrorsPage.toString()
-//    }
-
-//    "direct to ers errors page if fetch fails" in {
-//      val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
-//      contentAsString(await(controllerUnderTest.showCheckingErrorsPage(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage)
-//    }
-
-  }
-
-
   "format errors page GET" should {
 
     def buildFakeCheckingServiceController(schemeRes: Boolean = true,
 																					 fileTypeRes: String = "ods",
 																					 errorRes: Boolean = true,
 																					 errorCount: String = "0"
-																					): CheckingServiceController = new CheckingServiceController {
-      val mockCacheUtil: CacheUtil = mock[CacheUtil]
-      override val cacheUtil: CacheUtil = mockCacheUtil
-      val scheme: String = "1"
-      when(
-        mockCacheUtil.cache(refEq(CacheUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any())
-      ).thenReturn(
-        schemeRes match {
-          case true => Future.successful(null)
-          case _ => Future.failed(new Exception)
-        }
-      )
-      when(
-        mockCacheUtil.fetch[String](refEq(CacheUtil.FILE_TYPE_CACHE))(any(),any(),any(),any())
-      ).thenReturn(
-        schemeRes match {
-          case true => Future.successful(fileTypeRes)
-          case _ => Future.failed(new Exception)
-        }
-      )
-      when(
-        mockCacheUtil.fetch[String](refEq(CacheUtil.FORMAT_ERROR_CACHE))(any(),any(),any(),any())
-      ).thenReturn(
-        errorRes match {
-          case true => Future.successful(errorCount)
-          case _ => Future.failed(new Exception)
-        }
-      )
-      override val authAction: AuthAction = mockAuthAction
-			override val upscanService: UpscanService = mockUpscanService
+																					): CheckingServiceController =
+      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc, mockErsUtil, mockAppConfig) {
+
+      when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any()))
+        .thenReturn(if (schemeRes) Future.successful(null) else Future.failed(new Exception))
+
+      when(mockErsUtil.fetch[String](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(),any(),any(),any()))
+        .thenReturn(if (schemeRes) Future.successful(fileTypeRes) else Future.failed(new Exception))
+
+      when(mockErsUtil.fetch[String](refEq(mockErsUtil.FORMAT_ERROR_CACHE))(any(),any(),any(),any()))
+        .thenReturn(if (errorRes) Future.successful(errorCount) else Future.failed(new Exception))
+
 			mockAnyContentAction
     }
 
@@ -536,7 +352,7 @@ class CheckingServiceControllerTest extends UnitSpec with OneAppPerSuite with Mo
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
       val res: Future[Result] = controllerUnderTest.showFormatErrorsPage(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
       res.map { result =>
-        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, messages))
+        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, testMessages))
       }}
   }
 }

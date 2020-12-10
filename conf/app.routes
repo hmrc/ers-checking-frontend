@@ -2,7 +2,7 @@
 
 GET 		/								            controllers.CheckingServiceController.startPage()
 
-GET  		/assets/*file					            @controllers.AssetsController.at(path="/public", file)
+GET  		/assets/*file					            @controllers.Assets.at(path="/public", file)
 
 GET  		/start							            controllers.CheckingServiceController.startPage()
 
@@ -30,6 +30,6 @@ GET			/format-errors				                controllers.CheckingServiceController.fo
 
 GET			/error-report			    	            controllers.HtmlReportController.htmlErrorReportPage(isCsv: Boolean)
 
-GET			/not-authorised                             controllers.AuthorizationController.notAuthorised()
+GET			/not-authorised                             controllers.AuthorisationController.notAuthorised()
 
 GET			/language/:lang                             @controllers.LanguageSwitchController.switchToLanguage(lang: String)

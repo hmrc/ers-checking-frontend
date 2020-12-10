@@ -19,29 +19,26 @@ package controllers.internal
 import java.net.URL
 import java.time.Instant
 
-import models.upscan._
+import helpers.ErsTestHelper
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json._
-import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.SessionService
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
-import models.upscan.UpscanCallback._
 
 import scala.concurrent.Future
 
-class UpscanCallbackControllerSpec extends UnitSpec with MockitoSugar
-																										with OneAppPerSuite
+class UpscanCallbackControllerSpec extends UnitSpec with ErsTestHelper
+																										with GuiceOneAppPerSuite
 																										with BeforeAndAfterEach {
-	implicit val hc: HeaderCarrier = HeaderCarrier()
-  implicit val request: Request[_] = FakeRequest()
+
+	import models.upscan._
+	import models.upscan.UpscanCallback._
 
 	implicit val failedWrites: OWrites[UpscanFailedCallback] = Json.writes[UpscanFailedCallback]
 		.transform((js: JsValue) => js.as[JsObject] + ("fileStatus" -> JsString("FAILED")))
@@ -49,7 +46,7 @@ class UpscanCallbackControllerSpec extends UnitSpec with MockitoSugar
 	implicit val readWrites: OWrites[UpscanReadyCallback] =
 		Json.writes[UpscanReadyCallback].transform((js: JsValue) => js.as[JsObject] + ("fileStatus" -> JsString("READY")))
 
-  val mockSessionService: SessionService = mock[SessionService]
+  override val mockSessionService: SessionService = mock[SessionService]
 	val sessionId = "sessionId"
 
 	val uploadDetails: UploadDetails = UploadDetails(Instant.now(), "checksum", "fileMimeType", "fileName")
@@ -58,9 +55,7 @@ class UpscanCallbackControllerSpec extends UnitSpec with MockitoSugar
 
   def request(body: JsValue): FakeRequest[JsValue] = FakeRequest().withBody(body)
 
-  lazy val upscanCallbackController: UpscanCallbackController = new UpscanCallbackController {
-		override val sessionService: SessionService = mockSessionService
-  }
+  lazy val upscanCallbackController: UpscanCallbackController = new UpscanCallbackController(mockSessionService, testMCC(fakeApplication()))
 
   override def beforeEach(): Unit = {
     reset(mockSessionService)
@@ -75,38 +70,38 @@ class UpscanCallbackControllerSpec extends UnitSpec with MockitoSugar
 				val uploadedSuccessfully = UploadedSuccessfully("name", "downloadUrl", noOfRows = None)
 				val callbackResponse = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(uploadId, uploadedSuccessfully)))
 
-				when(mockSessionService.getCallbackRecordCsv(any())(any(), any())).thenReturn(callbackResponse)
-				when(mockSessionService.updateCallbackRecordCsv(any(), any())(any(), any())).thenReturn(Future.successful(mock[CacheMap]))
+				when(mockSessionService.getCallbackRecordCsv(any())(any(), any(), any())).thenReturn(callbackResponse)
+				when(mockSessionService.updateCallbackRecordCsv(any(), any())(any(), any(), any())).thenReturn(Future.successful(mock[CacheMap]))
 
 				val result = upscanCallbackController.callbackCsv(uploadId, sessionId)(request(Json.toJson(readyCallback)))
 				status(result) shouldBe OK
-				verify(mockSessionService, times(1)).getCallbackRecordCsv(any())(any(), any())
-				verify(mockSessionService, times(1)).updateCallbackRecordCsv(any(), any())(any(), any())
+				verify(mockSessionService, times(1)).getCallbackRecordCsv(any())(any(), any(), any())
+				verify(mockSessionService, times(1)).updateCallbackRecordCsv(any(), any())(any(), any(), any())
 			}
 		}
 
     "update upload status to Failed" when {
       "callback is UpscanFailedCallback and upload is InProgress" in {
 				val callbackResponse = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(uploadId, Failed)))
-				when(mockSessionService.getCallbackRecordCsv(any())(any(), any())).thenReturn(callbackResponse)
-				when(mockSessionService.updateCallbackRecordCsv(any(), any())(any(), any())).thenReturn(Future.successful(mock[CacheMap]))
+				when(mockSessionService.getCallbackRecordCsv(any())(any(), any(), any())).thenReturn(callbackResponse)
+				when(mockSessionService.updateCallbackRecordCsv(any(), any())(any(), any(), any())).thenReturn(Future.successful(mock[CacheMap]))
 
 				val result = upscanCallbackController.callbackCsv(uploadId, sessionId)(request(Json.toJson(failedCallback)))
 
 				status(result) shouldBe OK
-				verify(mockSessionService, times(1)).getCallbackRecordCsv(any())(any(), any())
-				verify(mockSessionService, times(1)).updateCallbackRecordCsv(any(), any())(any(), any())
+				verify(mockSessionService, times(1)).getCallbackRecordCsv(any())(any(), any(), any())
+				verify(mockSessionService, times(1)).updateCallbackRecordCsv(any(), any())(any(), any(), any())
 			}
 		}
 
 		"return InternalServerError" when {
 			"updating the cache fails" in {
 				val body = UpscanFailedCallback(Reference("ref"), ErrorDetails("failed", "message"))
-				when(mockSessionService.getCallbackRecordCsv(any())(any(), any())).thenReturn(Future.failed(new Exception("Test exception")))
+				when(mockSessionService.getCallbackRecordCsv(any())(any(), any(), any())).thenReturn(Future.failed(new Exception("Test exception")))
 				val result = await(upscanCallbackController.callbackCsv(uploadId, sessionId)(request(Json.toJson(body))))
 
 				status(result) shouldBe INTERNAL_SERVER_ERROR
-				verify(mockSessionService, times(1)).getCallbackRecordCsv(any())(any(), any())
+				verify(mockSessionService, times(1)).getCallbackRecordCsv(any())(any(), any(), any())
 			}
 		}
 
@@ -116,8 +111,8 @@ class UpscanCallbackControllerSpec extends UnitSpec with MockitoSugar
 				val result = await(upscanCallbackController.callbackCsv(uploadId, sessionId)(request(jsonBody)))
 
 				status(result) shouldBe BAD_REQUEST
-				verify(mockSessionService, never()).getCallbackRecordCsv(any())(any(), any())
-				verify(mockSessionService, never()).updateCallbackRecordCsv(any(), any())(any(), any())
+				verify(mockSessionService, never()).getCallbackRecordCsv(any())(any(), any(), any())
+				verify(mockSessionService, never()).updateCallbackRecordCsv(any(), any())(any(), any(), any())
 			}
 		}
   }
@@ -126,29 +121,29 @@ class UpscanCallbackControllerSpec extends UnitSpec with MockitoSugar
 
 		"update callback" when {
 			"Upload status is UpscanReadyCallback" in {
-				when(mockSessionService.updateCallbackRecord(any())(any(), any())).thenReturn(Future.successful(mock[CacheMap]))
+				when(mockSessionService.updateCallbackRecord(any())(any(), any(), any())).thenReturn(Future.successful(mock[CacheMap]))
 
 				val result = upscanCallbackController.callbackOds(sessionId)(request(Json.toJson(readyCallback)))
 				status(result) shouldBe OK
-				verify(mockSessionService, times(1)).updateCallbackRecord(any())(any(), any())
+				verify(mockSessionService, times(1)).updateCallbackRecord(any())(any(), any(), any())
 			}
 
 			"Upload status is failed" in {
-				when(mockSessionService.updateCallbackRecord(any())(any(), any())).thenReturn(Future.successful(mock[CacheMap]))
+				when(mockSessionService.updateCallbackRecord(any())(any(), any(), any())).thenReturn(Future.successful(mock[CacheMap]))
 				val result = upscanCallbackController.callbackOds(sessionId)(request(Json.toJson(failedCallback)))
 
 				status(result) shouldBe OK
-				verify(mockSessionService, times(1)).updateCallbackRecord(any())(any(), any())
+				verify(mockSessionService, times(1)).updateCallbackRecord(any())(any(), any(), any())
 			}
 		}
 
 		"return InternalServerError" when {
 			"updating the cache fails" in {
-				when(mockSessionService.updateCallbackRecord(any())(any(), any())).thenReturn(Future.failed(new Exception("Test exception")))
+				when(mockSessionService.updateCallbackRecord(any())(any(), any(), any())).thenReturn(Future.failed(new Exception("Test exception")))
 				val result = await(upscanCallbackController.callbackOds(sessionId)(request(Json.toJson(readyCallback))))
 
 				status(result) shouldBe INTERNAL_SERVER_ERROR
-				verify(mockSessionService, times(1)).updateCallbackRecord(any())(any(), any())
+				verify(mockSessionService, times(1)).updateCallbackRecord(any())(any(), any(), any())
 			}
 		}
 
@@ -158,7 +153,7 @@ class UpscanCallbackControllerSpec extends UnitSpec with MockitoSugar
 				val result = await(upscanCallbackController.callbackOds(sessionId)(request(jsonBody)))
 
 				status(result) shouldBe BAD_REQUEST
-				verify(mockSessionService, never()).updateCallbackRecord(any())(any(), any())
+				verify(mockSessionService, never()).updateCallbackRecord(any())(any(), any(), any())
 			}
 		}
 	}

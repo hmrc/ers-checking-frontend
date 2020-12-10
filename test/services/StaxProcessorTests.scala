@@ -17,16 +17,19 @@
 package services
 
 import java.io._
+
 import org.scalatestplus.play.PlaySpec
-import services.staxintegrationTestData.StaxIntegrationTestData
+import services.staxintegrationTestData.CSOPStaxIntegrationTestData
+
 import scala.xml.Elem
 
-class StaxProcessorTests extends PlaySpec with StaxIntegrationTestData {
-  "StaxProcessor" must {
+class StaxProcessorTests extends PlaySpec with CSOPStaxIntegrationTestData {
 
+  "StaxProcessor" must {
     "return true for has next" in {
       val inputXml = xmlHeader + documentHeader + simpleXml.toString() + documentHeaderClosingTag
-      val processor = new StaxProcessor(new ByteArrayInputStream(inputXml.getBytes("utf-8")))
+      val x = new ByteArrayInputStream(inputXml.getBytes("utf-8"))
+      val processor = new StaxProcessor(x)
       processor.hasNext must equal(true)
     }
 

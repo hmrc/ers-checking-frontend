@@ -16,26 +16,25 @@
 
 package services.validation
 
-import uk.gov.hmrc.services.validation.{Cell, DataValidator, ValidationError}
+import helpers.ErsTestHelper
 import models.ValidationErrorData
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.i18n.MessagesApi
-import play.api.inject.Injector
+import play.api.{Application, i18n}
+import play.api.i18n.MessagesImpl
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.i18n.Messages.Implicits._
+import play.api.mvc.DefaultMessagesControllerComponents
 import services.validation.ValidationErrorHelper._
+import uk.gov.hmrc.services.validation.{Cell, DataValidator, ValidationError}
 
-/**
- * Created by matt on 25/01/16.
- */
-trait ValidationTestRunner extends PlaySpec with GuiceOneAppPerSuite{
+trait ValidationTestRunner extends PlaySpec with GuiceOneAppPerSuite with ErsTestHelper {
 
-  def injector: Injector = app.injector
-  def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
-  override def fakeApplication() = new GuiceApplicationBuilder().configure(Map("play.i18n.langs"->List("en", "cy"),"metrics.enabled"-> "false")).build()
+  def fakeApp(): Application = new GuiceApplicationBuilder().configure(Map("play.i18n.langs"->List("en", "cy"),"metrics.enabled"-> "false")).build()
 
-  def populateValidationError(expRes: ValidationErrorData)(implicit cell: Cell) = {
+  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApp())
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
+
+  def populateValidationError(expRes: ValidationErrorData)(implicit cell: Cell): ValidationError = {
     ValidationError(cell, expRes.id, expRes.errorId, expRes.errorMsg)
   }
 
@@ -47,7 +46,7 @@ trait ValidationTestRunner extends PlaySpec with GuiceOneAppPerSuite{
     } else None
   }
 
-  def runTests(validator:DataValidator, descriptions: List[String], testDatas:List[Cell], expectedResults:List[Option[List[ValidationErrorData]]]) = {
+  def runTests(validator:DataValidator, descriptions: List[String], testDatas:List[Cell], expectedResults:List[Option[List[ValidationErrorData]]]): Unit = {
       for (x <- 0 until descriptions.length) {
         descriptions(x) in {
           validator.validateCell(testDatas(x), Some(ValidationContext)).withErrorsFromMessages mustBe resultBuilder(testDatas(x), expectedResults(x))

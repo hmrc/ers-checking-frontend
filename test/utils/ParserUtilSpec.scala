@@ -16,43 +16,32 @@
 
 package utils
 
+import helpers.ErsTestHelper
 import models.SheetErrors
-import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 
 import scala.collection.mutable.ListBuffer
 
-class ParserUtilSpec extends UnitSpec with MockitoSugar with OneAppPerSuite{
-
-  override implicit lazy val app: Application = GuiceApplicationBuilder()
-    .configure(Map("metrics.enabled" -> false))
-    .build()
+class ParserUtilSpec extends UnitSpec with ErsTestHelper {
+  def parserUtil: ParserUtil = new ParserUtil(mockErsUtil, mockAppConfig)
 
   "getDataToValidate" must {
-
     "truncate array depending on number of columns in given sheet" in {
       val rowData: Array[String] = Array.fill(50)("")
-      val result = ParserUtil.formatDataToValidate(rowData, "Other_Grants_V3")
+      val result = parserUtil.formatDataToValidate(rowData, "Other_Grants_V3")
       result.length shouldBe 4
     }
 
     "add empty strings to match number of columns in given sheet" in {
       val rowData: Array[String] = Array("")
-      val result = ParserUtil.formatDataToValidate(rowData, "Other_Grants_V3")
+      val result = parserUtil.formatDataToValidate(rowData, "Other_Grants_V3")
       result.length shouldBe 4
     }
   }
 
   "calling getSheetErrors" should {
-
-    def buildParserUtil = new ParserUtil {
-      override val cacheUtil: CacheUtil = mock[CacheUtil]
-    }
-
     val schemeErrors = new ListBuffer[SheetErrors]()
 
     val list1 = ValidationError(Cell("A", 1, "abc"), "001", "error.1", "This entry must be 'yes' or 'no'.")
@@ -72,20 +61,15 @@ class ParserUtilSpec extends UnitSpec with MockitoSugar with OneAppPerSuite{
 
     "return up to the first 100 errors of each sheet" in {
 
-      val result = buildParserUtil.getSheetErrors(schemeErrors)
+      val result = parserUtil.getSheetErrors(schemeErrors)
 
-      result(0).errors.size shouldBe 3
+      result.head.errors.size shouldBe 3
       result(1).errors.size shouldBe 3
       result(2).errors.size shouldBe 1
     }
   }
 
   "validating the scheme" should {
-
-    def buildParserUtil = new ParserUtil {
-      override val cacheUtil: CacheUtil = mock[CacheUtil]
-    }
-
     val error = ValidationError(Cell("A", 1, "abc"), "001", "error.1", "This entry must be 'yes' or 'no'.")
     val errors = new ListBuffer[ValidationError]
     errors ++= List(error)
@@ -100,7 +84,7 @@ class ParserUtilSpec extends UnitSpec with MockitoSugar with OneAppPerSuite{
       schemeErrors += validSheet
       schemeErrors += validSheet
 
-      buildParserUtil.isValid(schemeErrors) shouldBe true
+      parserUtil.isValid(schemeErrors) shouldBe true
     }
 
     "return false if errors are found in first sheet" in {
@@ -110,7 +94,7 @@ class ParserUtilSpec extends UnitSpec with MockitoSugar with OneAppPerSuite{
       schemeErrors += validSheet
       schemeErrors += validSheet
 
-      buildParserUtil.isValid(schemeErrors) shouldBe false
+      parserUtil.isValid(schemeErrors) shouldBe false
     }
 
     "return false if errors are found in second sheet" in {
@@ -120,7 +104,7 @@ class ParserUtilSpec extends UnitSpec with MockitoSugar with OneAppPerSuite{
       schemeErrors += invalidSheet
       schemeErrors += validSheet
 
-      buildParserUtil.isValid(schemeErrors) shouldBe false
+      parserUtil.isValid(schemeErrors) shouldBe false
     }
 
     "return false if errors are found in third sheet" in {
@@ -130,17 +114,11 @@ class ParserUtilSpec extends UnitSpec with MockitoSugar with OneAppPerSuite{
       schemeErrors += validSheet
       schemeErrors += invalidSheet
 
-      buildParserUtil.isValid(schemeErrors) shouldBe false
+      parserUtil.isValid(schemeErrors) shouldBe false
     }
-
   }
 
   "getTotalErrorCount" should {
-
-    def buildParserUtil = new ParserUtil {
-      override val cacheUtil: CacheUtil = mock[CacheUtil]
-    }
-
     "return the total errors found over all sheets" in {
       val schemeErrors = new ListBuffer[SheetErrors]()
 
@@ -155,9 +133,7 @@ class ParserUtilSpec extends UnitSpec with MockitoSugar with OneAppPerSuite{
       schemeErrors += validSheet
       schemeErrors += invalidSheet
 
-      buildParserUtil.getTotalErrorCount(schemeErrors) shouldBe 2
+      parserUtil.getTotalErrorCount(schemeErrors) shouldBe 2
     }
-
   }
-
 }

@@ -1,5 +1,7 @@
 import play.routes.compiler.StaticRoutesGenerator
 import play.sbt.PlayImport.PlayKeys
+import play.sbt.routes.RoutesCompiler.autoImport._
+import play.sbt.routes.RoutesKeys.routesGenerator
 import sbt.Keys._
 import sbt.Tests.{Group, SubProcess}
 import sbt._
@@ -7,20 +9,13 @@ import scoverage.ScoverageKeys
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.versioning.SbtGitVersioning
-import play.sbt.routes.RoutesKeys.routesGenerator
-import play.sbt.routes.RoutesCompiler.autoImport._
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
-import uk.gov.hmrc.SbtAutoBuildPlugin
-import uk.gov.hmrc.versioning.SbtGitVersioning
-import uk.gov.hmrc.SbtArtifactory
 
 trait MicroService {
 
   import uk.gov.hmrc._
   import DefaultBuildSettings._
-  import uk.gov.hmrc.{SbtBuildInfo, ShellPrompt}
   import TestPhases._
-  import sbtbuildinfo.Plugin.buildInfoPackage
 
   val appName: String
 
@@ -29,10 +24,9 @@ trait MicroService {
   lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
   lazy val scoverageSettings = {
-    import scoverage.ScoverageSbtPlugin._
     Seq(
       ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;.*Service.*;models/.data/..*;prod.*;app.*;.*BuildInfo.*;view.*;.*Connector.*;.*Metrics;.*config;.*Global;prod.Routes;testOnlyDoNotUseInAppConf.Routes;.*Configuration;config.AuditFilter;config.LoggingFilter;.*config.WSHttp;models.*;controllers.ERSCheckingBaseController;services.AllWSHttp;",
-      ScoverageKeys.coverageMinimum := 65,
+      ScoverageKeys.coverageMinimum := 85,
       ScoverageKeys.coverageFailOnMinimum := false,
       ScoverageKeys.coverageHighlighting := true,
       parallelExecution in Test := false
@@ -54,7 +48,7 @@ trait MicroService {
       parallelExecution in Test := false,
       fork in Test := false,
       retrieveManaged := true,
-      routesGenerator := StaticRoutesGenerator,
+      routesGenerator := InjectedRoutesGenerator,
 			routesImport += "models.upscan.UploadId"
 		)
     .settings(Repositories.playPublishingSettings: _*)

@@ -17,29 +17,14 @@
 package utils
 
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Application
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.inject.Injector
-import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.play.test.UnitSpec
-import uk.gov.hmrc.http.HeaderCarrier
 
-class ContentUtilSpec  extends UnitSpec with MockitoSugar with GuiceOneAppPerSuite with I18nSupport {
+class ContentUtilSpec extends UnitSpec with MockitoSugar {
 
-  val config = Map("application.secret" -> "test",
-    "login-callback.url" -> "test",
-    "contact-frontend.host" -> "localhost",
-    "contact-frontend.port" -> "9250",
-    "metrics.enabled" -> false)
-
-  implicit val hc = HeaderCarrier()
-
-  override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
-  def injector: Injector = app.injector
-  implicit val messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
+  class TestUtil extends ContentUtil
 
   "ContentUtil" should {
+    val contentUtil = new TestUtil
     val data = List(
       ("csop", "Company Share Option Plan"),
       ("emi", "Enterprise Management Incentives"),
@@ -49,7 +34,7 @@ class ContentUtilSpec  extends UnitSpec with MockitoSugar with GuiceOneAppPerSui
     )
     for(schemeType <- data) {
       s"return scheme name and abbreviation for ${schemeType._2}" in {
-        ContentUtil.getSchemeName(schemeType._1)._2 shouldBe schemeType._1.toUpperCase
+        contentUtil.getSchemeName(schemeType._1)._2 shouldBe schemeType._1.toUpperCase
       }
     }
   }

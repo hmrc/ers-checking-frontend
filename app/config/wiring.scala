@@ -16,32 +16,27 @@
 
 package config
 
-import akka.actor.ActorSystem
-import com.typesafe.config.Config
-import play.api.{Configuration, Play}
-import services.AllWsHttp.runModeConfiguration
-import uk.gov.hmrc.http._
-import uk.gov.hmrc.http.hooks.HttpHooks
-import uk.gov.hmrc.play.audit.http.HttpAuditing
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.config.AppName
-import uk.gov.hmrc.play.frontend.config.LoadAuditingConfig
-import uk.gov.hmrc.play.http.ws._
-import uk.gov.hmrc.play.http._
+import javax.inject.{Inject, Singleton}
+import play.api.Configuration
+import uk.gov.hmrc.crypto.{ApplicationCrypto, CryptoWithKeysFromConfig}
+import uk.gov.hmrc.http.cache.client.{ShortLivedCache, ShortLivedHttpCaching}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
-object ERSFileValidatorAuditConnector extends AuditConnector {
-  override lazy val auditingConfig = LoadAuditingConfig("auditing")
+@Singleton
+class ERSShortLivedHttpCache @Inject()(val http: HttpClient,
+                                       appConfig: ApplicationConfig
+                                      ) extends ShortLivedHttpCaching {
+  override lazy val defaultSource: String = appConfig.appName
+  lazy val baseUri: String = appConfig.shortLivedCacheBaseUri
+  lazy val domain: String = appConfig.shortLivedCacheDomain
 }
 
-trait Hooks extends HttpHooks with HttpAuditing {
-	override val hooks = Seq(AuditingHook)
-	override lazy val auditConnector: AuditConnector = ERSFileValidatorAuditConnector
+@Singleton
+class ERSShortLivedCache @Inject()(val http: HttpClient,
+                                   appConfig: ApplicationConfig,
+                                   val configuration: Configuration
+                                  ) extends ShortLivedCache {
+  override def shortLiveCache: ShortLivedHttpCaching = new ERSShortLivedHttpCache(http, appConfig)
+  override implicit lazy val crypto: CryptoWithKeysFromConfig = new ApplicationCrypto(configuration.underlying).JsonCrypto
 }
 
-trait WSHttp extends HttpGet with WSGet with HttpPut with WSPut with HttpPost with WSPost with HttpDelete with WSDelete with Hooks with AppName {
-	override protected def actorSystem: ActorSystem = Play.current.actorSystem
-	override protected def configuration: Option[Config] = Some(Play.current.configuration.underlying)
-	override protected def appNameConfiguration: Configuration = Play.current.configuration
-}
-
-object WSHttp extends WSHttp

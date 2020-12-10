@@ -17,35 +17,31 @@
 package services
 
 import controllers.Fixtures
+import helpers.ErsTestHelper
 import models.ERSFileProcessingException
+import org.mockito.ArgumentMatchers
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.play.PlaySpec
-import play.api.Application
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.inject.Injector
-import play.api.inject.guice.GuiceApplicationBuilder
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.i18n
+import play.api.i18n.{Messages, MessagesImpl}
+import play.api.mvc.DefaultMessagesControllerComponents
 import services.XMLTestData._
-import uk.gov.hmrc.http.HeaderCarrier
+import utils.ParserUtil
+import org.mockito.Mockito._
 
-class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with MockitoSugar with BeforeAndAfter with I18nSupport{
-  
+
+class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with ErsTestHelper with BeforeAndAfter {
+
+  val mockParserUtil: ParserUtil = mock[ParserUtil]
+  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
+
   object TestDataParser extends DataParser
-  object TestDataGenerator extends DataGenerator
+  object TestDataGenerator extends DataGenerator(mockAuditEvents, mockMetrics, mockParserUtil, mockErsUtil)
 
-  val config = Map("application.secret" -> "test",
-    "login-callback.url" -> "test",
-    "contact-frontend.host" -> "localhost",
-    "contact-frontend.port" -> "9250",
-    "metrics.enabled" -> false)
-
-  implicit val hc = HeaderCarrier()
-
-  override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
-  def injector: Injector = app.injector
-  implicit val messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
+  when(mockErsUtil.withArticle(ArgumentMatchers.any())).thenReturn("article")
 
   "parse row with duplicate column data 1" in {
     val result = TestDataParser.parse(emiAdjustmentsXMLRow1.toString,"")
@@ -61,6 +57,8 @@ class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures wit
 
 
   "display incorrectSheetName exception in identifyAndDefineSheet method" in {
+
+    when(mockErsUtil.getSchemeName(ArgumentMatchers.any())).thenReturn(("ers_pdf_error_report.emi", "EMI"))
 
     val thrown = the[ERSFileProcessingException] thrownBy
       TestDataGenerator.identifyAndDefineSheet("EMI40_Taxable","EMI")(hc,Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
@@ -103,6 +101,8 @@ class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures wit
   }
 
   "throw an exception for an invalid sheetName" in {
+    when(mockErsUtil.getSchemeName(ArgumentMatchers.any())).thenReturn(("ers_pdf_error_report.csop", "CSOP"))
+
     val result = intercept[ERSFileProcessingException]{
       TestDataGenerator.getSheet("abc", "csop")
     }

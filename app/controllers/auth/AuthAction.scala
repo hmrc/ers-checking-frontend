@@ -17,34 +17,34 @@
 package controllers.auth
 
 import config.ApplicationConfig
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{ActionBuilder, Request, Result, WrappedRequest}
-import playconfig.ERSAuthConnector
+import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthProviders, AuthorisationException, AuthorisedFunctions, ConfidenceLevel, EnrolmentIdentifier, NoActiveSession}
-import uk.gov.hmrc.domain.EmpRef
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
-import utils.ExternalUrls
+import uk.gov.hmrc.domain.EmpRef
 
 import scala.concurrent.{ExecutionContext, Future}
 
 case class RequestWithOptionalEmpRef[A](request: Request[A], optionalEmpRef: Option[EmpRef]) extends WrappedRequest[A](request)
+trait AuthIdentifierAction extends ActionBuilder[RequestWithOptionalEmpRef, AnyContent] with ActionFunction[Request, RequestWithOptionalEmpRef]
 
-trait AuthAction extends AuthorisedFunctions with ActionBuilder[RequestWithOptionalEmpRef] {
+@Singleton
+class AuthAction @Inject()(override val authConnector: AuthConnector,
+                           appConfig: ApplicationConfig,
+                           val parser: BodyParsers.Default
+                          )(implicit val executionContext: ExecutionContext) extends AuthorisedFunctions with AuthIdentifierAction {
 
-  val authConnector: AuthConnector
-  implicit val ec: ExecutionContext
-  lazy val signInUrl: String = ApplicationConfig.ggSignInUrl
   val origin: String = "ers-checking-frontend"
 
   def loginParams: Map[String, Seq[String]] = Map(
-    "continue" -> Seq(ExternalUrls.loginCallback),
+    "continue_url" -> Seq(appConfig.loginCallback),
     "origin" -> Seq(origin)
   )
-
 
   override def invokeBlock[A](request: Request[A], block: RequestWithOptionalEmpRef[A] => Future[Result]): Future[Result] = {
     implicit val hc: HeaderCarrier =
@@ -72,15 +72,10 @@ trait AuthAction extends AuthorisedFunctions with ActionBuilder[RequestWithOptio
     } recover {
       case er: NoActiveSession =>
         Logger.warn(s"[AuthAction][invokeBlock] no active session for uri: ${request.uri} with message: ${er.getMessage}", er)
-        Redirect(ApplicationConfig.ggSignInUrl, loginParams)
+        Redirect(appConfig.signIn, loginParams)
       case er: AuthorisationException =>
         Logger.warn(s"[AuthAction][invokeBlock] Auth exception: ${er.getMessage} for  uri ${request.uri}")
-        Redirect(controllers.routes.AuthorizationController.notAuthorised.url)
+        Redirect(controllers.routes.AuthorisationController.notAuthorised().url)
     }
   }
-}
-
-object AuthAction extends AuthAction {
-  override val authConnector: AuthConnector = ERSAuthConnector
-  override implicit val ec: ExecutionContext = ExecutionContext.global
 }

@@ -17,11 +17,10 @@
 package services.validation
 
 import com.typesafe.config.ConfigFactory
-import uk.gov.hmrc.services.validation.{Cell, DataValidator, Row, ValidationError}
 import org.scalatestplus.play.PlaySpec
 import services.validation.SAYETestData.{ERSValidationSAYEExercisedTestData, ERSValidationSAYEGrantedTestData, ERSValidationSAYERCLTestData}
-import play.api.i18n.Messages.Implicits._
 import services.validation.ValidationErrorHelper._
+import uk.gov.hmrc.services.validation.{Cell, DataValidator, Row, ValidationError}
 
 class ERSValidationConfig_SAYE_SayeGrantedTests extends PlaySpec with ERSValidationSAYEGrantedTestData with ValidationTestRunner {
   "SAYE Granted V3 scheme config validation" should {

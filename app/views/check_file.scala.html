@@ -16,33 +16,33 @@
 
 @import models.upscan.UpscanInitiateResponse
 @import views.html.includes.upscan_file_upload_form
-@(param: String, invalidChars: String)(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext, messages: Messages, upscanResponse: UpscanInitiateResponse)
+@import config.ApplicationConfig
+@(param: String, invalidChars: String)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, upscanResponse: UpscanInitiateResponse, appConfig: ApplicationConfig)
 @* check return file Template *@
 
 @import views.html.templates._
-@import uk.gov.hmrc.play.views.html.helpers
 
 @scripts = {
 	<script>var INVALID_CHARACTERS=/@Html(invalidChars)/</script>
-	<script src='@routes.AssetsController.at("javascripts/ers_ods_scripts.js")'> </script>
+	<script src='@routes.Assets.at("javascripts/ers_ods_scripts.js")'> </script>
 }
 
-@ers_main(title = Messages("ers.upload_ods.page_title"), scripts) {
-	<p class="font-xsmall"><a href="@routes.CheckingServiceController.checkFileTypePage()" class="link-back">@Html(Messages("ers.back"))</a></p>
+@ers_main(title = messages("ers.upload_ods.page_title"), scripts) {
+	<p class="font-xsmall"><a href="@routes.CheckingServiceController.checkFileTypePage()" class="link-back">@Html(messages("ers.back"))</a></p>
 	<div id="errors" class="validation-summary visibility" role="group" aria-labelledby="error-summary-heading" tabindex="-1">
 		<h1 class="heading-medium error-summary-heading" id="error-summary-heading">
-		@Messages("validation.summary.heading")
+		@messages("validation.summary.heading")
 		</h1>
 		<ul class="error-summary-list">
-			<li class="validation-summary-message"><a href="#error-summary" data-focuses="error-summary">@Html(Messages("ods_file_upload.summary_error"))</a></li>
+			<li class="validation-summary-message"><a href="#error-summary" data-focuses="error-summary">@Html(messages("ods_file_upload.summary_error"))</a></li>
 		</ul>
 	</div>
 
-	@header(Messages("ers_check_file.title"))
+	@header(messages("ers_check_file.title"))
 
 	<div id="file-wrapper">
 			<div id="file-input" class="form-field">
-				<label for="input-file-name" class="form-label visuallyhidden" id="input-file-name-label">@Html(Messages("ers_check_file.file_upload_label"))</label>
+				<label for="input-file-name" class="form-label visuallyhidden" id="input-file-name-label">@Html(messages("ers_check_file.file_upload_label"))</label>
 				@if(flash.get("filetype-error").isDefined) {
 				<div aria-labelledby="error-heading" class="validation-message" id="error-summary" role="alert" tabindex="-1">
 					@flash.get("filetype-error")

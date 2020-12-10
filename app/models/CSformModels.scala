@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class CS_checkFileType (
   checkFileType: Option[String]
@@ -33,5 +33,5 @@ case class CS_schemeType (
 
 case class SchemeTypes(isNilReturn: Option[String])
 object SchemeTypes {
-  implicit val format = Json.format[SchemeTypes]
+  implicit val format: OFormat[SchemeTypes] = Json.format[SchemeTypes]
 }

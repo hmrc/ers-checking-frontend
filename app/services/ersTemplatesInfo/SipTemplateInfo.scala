@@ -32,7 +32,8 @@ trait SipTemplateInfo {
   val sipAwardsHeaderRow = List(
     "1.Date of event (yyyy-mm-dd)",
     "2.Number of employees who acquired or were awarded shares",
-    "3.Type of shares awarded Enter a number from 1 to 4 depending on the type of share awarded. Follow the link at cell A7 for a list of the types of share which can be awarded",
+    "3.Type of shares awarded Enter a number from 1 to 4 depending on the type of share awarded. Follow the link at cell" +
+      " A7 for a list of the types of share which can be awarded",
     "4.If free shares, are performance conditions attached to their award? (yes/no)",
     "5.If matching shares, what is the ratio of matching shares to partnership shares? Enter ratio for example 2:1; 2/1",
     "6.Unrestricted market value (UMV) per share on acquisition or award £ e.g. 10.1234",
@@ -47,7 +48,7 @@ trait SipTemplateInfo {
     "15.Are the shares listed on a recognised stock exchange? (yes/no)",
     "16.If no, was the market value agreed with HMRC? (yes/no)",
     "17.If yes, enter the HMRC reference given"
-  )//.map(_.replaceAll(sipHeaderFormat,""))
+  )
 
   val sipOutHeaderRow = List(
     "1.Date of event (yyyy-mm-dd)",
@@ -64,9 +65,9 @@ trait SipTemplateInfo {
     "12.Unrestricted market value per partnership share at date ceased to be part of the plan £ e.g. 10.1234",
     "13.Unrestricted market value per matching share at date ceased to be part of the plan £ e.g. 10.1234",
     "14.Unrestricted market value per dividend share at date ceased to be part of the plan £ e.g. 10.1234",
-    "15.Have all the shares been held in the plan for 5 years or more at the date they ceased to be part of the plan? (yes/no) If yes, no more information is needed for this event.If no, go to question 16",
+    "15.Have all the shares been held in the plan for 5 years or more at the date they ceased to be part of the plan? " +
+      "(yes/no) If yes, no more information is needed for this event.If no, go to question 16",
     "16.If no, for other than dividend shares, was PAYE operated? (yes/no)",
     "17.If no, does this withdrawal of shares qualify for tax relief? (yes/no)"
-  )//.map(_.replaceAll(sipHeaderFormat,""))
-
+  )
 }

@@ -16,44 +16,38 @@
 
 package controllers
 
+import config.ApplicationConfig
 import controllers.auth.AuthAction
+import javax.inject.{Inject, Singleton}
 import models.upscan.{NotStarted, UpscanCsvFilesList}
 import models.{CS_checkFileType, CS_schemeType, CSformMappings}
 import play.api.Logger
-import play.api.Play.current
 import play.api.data.Form
-import play.api.i18n.Messages
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.{SessionService, UpscanService}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-object CheckingServiceController extends CheckingServiceController {
-  override val cacheUtil: CacheUtil = CacheUtil
-  override val authAction: AuthAction = AuthAction
-	override val upscanService: UpscanService = UpscanService
+@Singleton
+class CheckingServiceController @Inject()(authAction: AuthAction,
+                                          upscanService: UpscanService,
+                                          sessionService: SessionService,
+                                          mcc: MessagesControllerComponents,
+                                          implicit val ersUtil: ERSUtil,
+                                          implicit val appConfig: ApplicationConfig
+                                          )(implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
-}
-
-trait CheckingServiceController extends ERSCheckingBaseController {
-
-  val jsonParser = JsonParser
-  val uploadedFileUtil = UploadedFileUtil
-  val contentUtil = ContentUtil
-  val cacheUtil: CacheUtil
-  val authAction: AuthAction
-	val upscanService: UpscanService
-
-
-	def startPage(): Action[AnyContent] = authAction.async {
-      implicit request =>
-        showStartPage()
+	def startPage(): Action[AnyContent] = authAction.async { implicit request =>
+    showStartPage()
   }
 
-  def showStartPage()(implicit request: Request[AnyRef], messages: Messages): Future[Result] = Future.successful(Ok(views.html.start(request, context, messages)))
+  def showStartPage()(implicit request: Request[AnyRef], messages: Messages): Future[Result] = {
+    Future.successful(Ok(views.html.start(request, messages, appConfig)))
+  }
 
   def schemeTypePage(form: Form[CS_schemeType] = CSformMappings.schemeTypeForm): Action[AnyContent] = authAction.async {
       implicit request =>
@@ -75,11 +69,11 @@ trait CheckingServiceController extends ERSCheckingBaseController {
         Future.successful(BadRequest(views.html.scheme_type(formWithErrors)))
       },
       formData => {
-        cacheUtil.cache[String](CacheUtil.SCHEME_CACHE, formData.getSchemeType).map { res =>
-          Redirect(routes.CheckingServiceController.checkFileTypePage)
+        ersUtil.cache[String](ersUtil.SCHEME_CACHE, formData.getSchemeType).map { _ =>
+          Redirect(routes.CheckingServiceController.checkFileTypePage())
         }.recover {
           case e: Exception =>
-            Logger.error("showSchemeTypeSelected: Unable to save scheme. Error: " + e.getMessage)
+            Logger.error("[CheckingServiceController][showSchemeTypeSelected] Unable to save scheme. Error: " + e.getMessage)
             getGlobalErrorPage
         }
       }
@@ -107,15 +101,15 @@ trait CheckingServiceController extends ERSCheckingBaseController {
         Future.successful(BadRequest(views.html.check_file_type(formWithErrors)))
       },
       formData => {
-        cacheUtil.cache[String](CacheUtil.FILE_TYPE_CACHE, formData.getFileType).map { res =>
-          if (formData.getFileType == PageBuilder.OPTION_ODS) {
+        ersUtil.cache[String](ersUtil.FILE_TYPE_CACHE, formData.getFileType).map { _ =>
+          if (formData.getFileType == ersUtil.OPTION_ODS) {
             Redirect(routes.CheckingServiceController.checkODSFilePage())
           } else {
             Redirect(routes.CheckCsvFilesController.selectCsvFilesPage())
           }
         }.recover {
           case e: Exception =>
-						Logger.error("showCheckFileTypeSelected: Unable to save file type. Error: " + e.getMessage)
+						Logger.error("[CheckingServiceController][showCheckFileTypeSelected] Unable to save file type. Error: " + e.getMessage)
 						getGlobalErrorPage
 				}
       }
@@ -129,14 +123,14 @@ trait CheckingServiceController extends ERSCheckingBaseController {
 
 	def showCheckCSVFilePage()(implicit request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
 		(for {
-			scheme <- cacheUtil.fetch[String](CacheUtil.SCHEME_CACHE)
-			csvFilesList    <- cacheUtil.fetch[UpscanCsvFilesList](CacheUtil.CSV_FILES_UPLOAD, hc.sessionId.get.value)
+			scheme <- ersUtil.fetch[String](ersUtil.SCHEME_CACHE)
+			csvFilesList    <- ersUtil.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD, hc.sessionId.get.value)
 			currentCsvFile  = csvFilesList.ids.find(ids => ids.uploadStatus == NotStarted)
 			if currentCsvFile.isDefined
 			upscanResponse <- upscanService.getUpscanFormData(isCSV = true, scheme, currentCsvFile)
 		} yield {
 			val invalidChars: String = "[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]"
-			Ok(views.html.check_csv_file(scheme, invalidChars, currentCsvFile.get.fileId)(request, request.flash, context, messages, upscanResponse))
+			Ok(views.html.check_csv_file(scheme, invalidChars, currentCsvFile.get.fileId)(request, request.flash, messages, upscanResponse, appConfig, ersUtil))
 		}) recover {
 			case e: Exception =>
 				Logger.error("[CheckingServiceController][showCheckCSVFilePage]: Unable to fetch scheme. Error: " + e.getMessage)
@@ -152,15 +146,15 @@ trait CheckingServiceController extends ERSCheckingBaseController {
 
   def showCheckODSFilePage()(implicit request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
 		(for {
-			scheme <- cacheUtil.fetch[String](CacheUtil.SCHEME_CACHE)
+			scheme <- ersUtil.fetch[String](ersUtil.SCHEME_CACHE)
 			upscanResponse <- upscanService.getUpscanFormData(isCSV = false, scheme)
-			_ <- SessionService.createCallbackRecord
+			_ <- sessionService.createCallbackRecord
 		} yield {
 			val invalidChars: String = "[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]"
-			Ok(views.html.check_file(scheme, invalidChars)(request, request.flash, context, messages, upscanResponse))
+			Ok(views.html.check_file(scheme, invalidChars)(request, request.flash, messages, upscanResponse, appConfig))
 		}) recover {
       case e: Exception =>
-				Logger.error("showCheckFilePage: Unable to fetch scheme. Error: " + e.getMessage)
+				Logger.error("[CheckingServiceController][showCheckODSFilePage] Unable to fetch scheme. Error: " + e.getMessage)
 				getGlobalErrorPage()(request, messages)
 		}
   }
@@ -171,7 +165,7 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   }
 
   def showCheckingSuccessPage()(implicit request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
-    Future.successful(Ok(views.html.checking_success.render(request, context, messages)))
+    Future.successful(Ok(views.html.checking_success(request, messages, appConfig)))
   }
 
   def formatErrorsPage(): Action[AnyContent] = authAction.async {
@@ -180,25 +174,33 @@ trait CheckingServiceController extends ERSCheckingBaseController {
   }
 
   def showFormatErrorsPage(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
-
     val future = for {
-      fileType <- cacheUtil.fetch[String](CacheUtil.FILE_TYPE_CACHE)
-      schemeName <- cacheUtil.fetch[String](CacheUtil.SCHEME_CACHE)
-      extendedInstructions <- cacheUtil.fetch[Boolean](CacheUtil.FORMAT_ERROR_EXTENDED_CACHE)
-      errorMsg <- cacheUtil.fetch[String](CacheUtil.FORMAT_ERROR_CACHE)
-      errorParams <- cacheUtil.fetch[Seq[String]](CacheUtil.FORMAT_ERROR_CACHE_PARAMS)
+      fileType <- ersUtil.fetch[String](ersUtil.FILE_TYPE_CACHE)
+      schemeName <- ersUtil.fetch[String](ersUtil.SCHEME_CACHE)
+      extendedInstructions <- ersUtil.fetch[Boolean](ersUtil.FORMAT_ERROR_EXTENDED_CACHE)
+      errorMsg <- ersUtil.fetch[String](ersUtil.FORMAT_ERROR_CACHE)
+      errorParams <- ersUtil.fetch[Seq[String]](ersUtil.FORMAT_ERROR_CACHE_PARAMS)
     } yield {
-      Ok(views.html.format_errors(fileType, ContentUtil.getSchemeName(schemeName)._1, ContentUtil.getSchemeName(schemeName)._2, errorMsg, errorParams, extendedInstructions))
+      Ok(views.html.format_errors(
+        fileType,
+        ersUtil.getSchemeName(schemeName)._1,
+        ersUtil.getSchemeName(schemeName)._2,
+        errorMsg,
+        errorParams,
+        extendedInstructions))
     }
 
     future recover {
-      case e: Exception => {
-        Logger.error("showFormatErrorsPage: Unable to fetch file type. Error: " + e.getMessage)
+      case e: Exception =>
+        Logger.error("[CheckingServiceController][showFormatErrorsPage] Unable to fetch file type. Error: " + e.getMessage)
         getGlobalErrorPage
-      }
     }
   }
 
-  def getGlobalErrorPage()(implicit request: Request[_], messages: Messages) = Ok(views.html.global_error(messages("ers.global_errors.title"), messages("ers.global_errors.heading"), messages("ers.global_errors.message"))(request, messages))
+  def getGlobalErrorPage()(implicit request: Request[_], messages: Messages): Result = {
+    Ok(views.html.global_error(
+      "ers.global_errors.title",
+      "ers.global_errors.message")(request, messages, appConfig))
+  }
 
 }

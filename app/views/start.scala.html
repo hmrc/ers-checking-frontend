@@ -14,21 +14,22 @@
  * limitations under the License.
  *@
 
-@(implicit request: Request[AnyRef], context: config.ErsContext, messages: Messages)
+@import config.ApplicationConfig
+@(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
 
 @import views.html.templates._
 
-@ers_main(title = Messages("ers.start.page_title")) {
-	@header(Messages("ers_start.page_title"))
-	<p class="font-medium">@Html(Messages("ers_start.intro_para_1"))</p>
-	<h2 class="heading-medium">@Html(Messages("ers_start.sub_title"))</h2>
-	<p>@Html(Messages("ers_start.intro_para_3"))</p>
-	<p>@Html(Messages("ers_start.intro_para_4"))</p>
-	<p>@Html(Messages("ers_start.intro_para_5"))</p>
+@ers_main(title = messages("ers.start.page_title")) {
+	@header(messages("ers_start.page_title"))
+	<p class="font-medium">@messages("ers_start.intro_para_1")</p>
+	<h2 class="heading-medium">@messages("ers_start.sub_title")</h2>
+	<p>@messages("ers_start.intro_para_3")</p>
+	<p>@messages("ers_start.intro_para_4")</p>
+	<p>@messages("ers_start.intro_para_5")</p>
 	<div class="panel panel-border-wide">
-		<p>@Html(Messages("ers_start.ers_help"))</p>
+		<p>@Html(messages("ers_start.ers_help"))</p>
 	</div>
 	<div class="form-group">
-		<a role="button" href="@routes.CheckingServiceController.schemeTypePage()" class="button button-get-started" id="start-now-button">@Html(Messages("ers_start.start_now_button"))</a>
+		<a role="button" href="@routes.CheckingServiceController.schemeTypePage()" class="button button-get-started" id="start-now-button">@messages("ers_start.start_now_button")</a>
 	</div>
 }

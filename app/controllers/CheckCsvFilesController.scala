@@ -16,101 +16,97 @@
 
 package controllers
 
+import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRef}
+import javax.inject.{Inject, Singleton}
 import models._
 import models.upscan.{NotStarted, UploadId, UpscanCsvFilesList, UpscanIds}
 import play.api.Logger
-import play.api.Play.current
 import play.api.data.Form
-import play.api.i18n.Messages
-import play.api.i18n.Messages.Implicits._
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.i18n.{I18nSupport, Messages}
+import play.api.mvc._
 import services.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.{CacheUtil, PageBuilder}
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import utils.ERSUtil
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-object CheckCsvFilesController extends CheckCsvFilesController {
-	override val cacheUtil: CacheUtil = CacheUtil
-	override val pageBuilder: PageBuilder = PageBuilder
-	override val authAction: AuthAction = AuthAction
-}
+@Singleton
+class CheckCsvFilesController @Inject()(authAction: AuthAction,
+                                        mcc: MessagesControllerComponents,
+                                        sessionService: SessionService,
+                                        implicit val ersUtil: ERSUtil,
+                                        implicit val appConfig: ApplicationConfig)
+                                       (implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
-trait CheckCsvFilesController extends ERSCheckingBaseController {
-	val cacheUtil: CacheUtil
-	val pageBuilder: PageBuilder
-	val authAction: AuthAction
+  def selectCsvFilesPage(): Action[AnyContent] = authAction.async {
+    implicit request =>
+        showCheckCsvFilesPage()(request, hc)
+  }
 
-	def selectCsvFilesPage(): Action[AnyContent] = authAction.async {
-		implicit request =>
-				showCheckCsvFilesPage()(request, hc)
-	}
+  def showCheckCsvFilesPage()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Result] = {
+    (for {
+      _ 					<- ersUtil.remove(ersUtil.CSV_FILES_UPLOAD)
+      scheme 			<- ersUtil.fetch[String](ersUtil.SCHEME_CACHE)
+      _ 					<- sessionService.createCallbackRecordCsv(hc.sessionId.get.value)
+    } yield {
+      val csvFilesList: Seq[CsvFiles] = ersUtil.getCsvFilesList(scheme)
+      Ok(views.html.select_csv_file_types(scheme, csvFilesList))
+    }) recover {
+      case _: Throwable => getGlobalErrorPage
+    }
+  }
 
-	def showCheckCsvFilesPage()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Result] = {
-		(for {
-			_ 					<- cacheUtil.remove(CacheUtil.CSV_FILES_UPLOAD)
-			scheme 			<- cacheUtil.fetch[String](CacheUtil.SCHEME_CACHE)
-			_ 					<- SessionService.createCallbackRecordCsv(hc.sessionId.get.value)
-		} yield {
-			val csvFilesList: Seq[CsvFiles] = PageBuilder.getCsvFilesList(scheme)
-			Ok(views.html.select_csv_file_types(scheme, csvFilesList))
-		}) recover {
-			case _: Throwable => getGlobalErrorPage
-		}
-	}
+  def checkCsvFilesPageSelected(): Action[AnyContent] = authAction.async {
+      implicit request =>
+        validateCsvFilesPageSelected()
+  }
 
-	def checkCsvFilesPageSelected(): Action[AnyContent] = authAction.async {
-			implicit request =>
-				validateCsvFilesPageSelected()
-	}
+  def validateCsvFilesPageSelected()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Result] = {
+    CSformMappings.csvFileCheckForm().bindFromRequest.fold(
+      formWithError =>
+        reloadWithError(Some(formWithError)),
+      formData =>
+        performCsvFilesPageSelected(formData)
+    )
+  }
 
-	def validateCsvFilesPageSelected()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Result] = {
-		CSformMappings.csvFileCheckForm.bindFromRequest.fold(
-			formWithError =>
-				reloadWithError(Some(formWithError)),
-			formData =>
-				performCsvFilesPageSelected(formData)
-		)
-	}
+  def performCsvFilesPageSelected(formData: Seq[CsvFiles])(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+    val csvFilesCallbackList: UpscanCsvFilesList = createCacheData(formData)
+    if(csvFilesCallbackList.ids.isEmpty) {
+      reloadWithError()
+    } else {
+      (for{
+        _   <- ersUtil.cache(ersUtil.CSV_FILES_UPLOAD, csvFilesCallbackList, hc.sessionId.get.value)
+      } yield {
+        Redirect(routes.CheckingServiceController.checkCSVFilePage())
+      }).recover {
+        case e: Throwable =>
+          Logger.error(s"[CheckCsvFilesController][performCsvFilesPageSelected]: Save data to cache failed with exception ${e.getMessage}.", e)
+          getGlobalErrorPage
+      }
+    }
+  }
 
-	def performCsvFilesPageSelected(formData: Seq[CsvFiles])(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
-		val csvFilesCallbackList: UpscanCsvFilesList = createCacheData(formData)
-		if(csvFilesCallbackList.ids.isEmpty) {
-			reloadWithError()
-		} else {
-			(for{
-				_   <- cacheUtil.cache(CacheUtil.CSV_FILES_UPLOAD, csvFilesCallbackList, hc.sessionId.get.value)
-			} yield {
-				Redirect(routes.CheckingServiceController.checkCSVFilePage())
-			}).recover {
-				case e: Throwable =>
-					Logger.error(s"[CheckCsvFilesController][performCsvFilesPageSelected]: Save data to cache failed with exception ${e.getMessage}.", e)
-					getGlobalErrorPage
-			}
-		}
-	}
+  def createCacheData(csvFilesList: Seq[CsvFiles]): UpscanCsvFilesList = {
+    val ids = for(fileData <- csvFilesList if fileData.isSelected.contains(ersUtil.OPTION_YES)) yield {
+      UpscanIds(UploadId.generate, fileData.fileId, NotStarted)
+    }
+    UpscanCsvFilesList(ids)
+  }
 
-	def createCacheData(csvFilesList: Seq[CsvFiles]): UpscanCsvFilesList = {
-		val ids = for(fileData <- csvFilesList if fileData.isSelected.contains(PageBuilder.OPTION_YES)) yield {
-			UpscanIds(UploadId.generate, fileData.fileId, NotStarted)
-		}
-		UpscanCsvFilesList(ids)
-	}
+  def reloadWithError(form: Option[Form[List[CsvFiles]]] = None)(implicit messages: Messages): Future[Result] = {
+    val errorKey = if(form.isDefined) form.get.errors.head.message else "no_file_error"
+    Future.successful(
+      Redirect(routes.CheckCsvFilesController.selectCsvFilesPage())
+        .flashing("csv-file-not-selected-error" -> messages(s"${ersUtil.PAGE_CHECK_CSV_FILE}.$errorKey"))
+    )
+  }
 
-	def reloadWithError(form: Option[Form[List[CsvFiles]]] = None)(implicit messages: Messages): Future[Result] = {
-		val errorKey = if(form.isDefined) form.get.errors.head.message else "no_file_error"
-		Future.successful(
-			Redirect(routes.CheckCsvFilesController.selectCsvFilesPage())
-				.flashing("csv-file-not-selected-error" -> messages(s"${PageBuilder.PAGE_CHECK_CSV_FILE}.$errorKey"))
-		)
-	}
-
-	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(views.html.global_error(
-			messages("ers.global_errors.title"),
-			messages("ers.global_errors.heading"),
-			messages("ers.global_errors.message"))(request, messages))
-	}
+  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
+    Ok(views.html.global_error(
+      "ers.global_errors.title",
+      "ers.global_errors.message")(request, messages, appConfig))
+  }
 }

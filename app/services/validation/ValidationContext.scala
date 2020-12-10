@@ -17,10 +17,10 @@
 package services.validation
 
 import scala.util.matching.Regex
-import uk.gov.hmrc.services.validation.{Row, Cell, DataValidator}
+import uk.gov.hmrc.services.validation.{Cell, DataValidator, Row, ValidationError}
 import play.api.Logger
 
-object ValidationContext extends ERSValidationFormatters{
+object ValidationContext extends ERSValidationFormatters {
 
   def verifyFormat(formatter: String, data:String):Boolean =
     (!formatter.isEmpty) && new Regex(formatter).pattern.matcher(data).matches
@@ -30,13 +30,12 @@ object ValidationContext extends ERSValidationFormatters{
       ersDateFormatter.parseDateTime(data)
       true
     } catch {
-      case e: IllegalArgumentException => false
+      case _: IllegalArgumentException => false
     }
   }
 
-  def mandatoryBoolean(condition:String, dataX:String, dataY:String) = {
-    if(condition.toLowerCase.equals(dataX.toLowerCase)) notEmpty(dataY)
-    else true
+  def mandatoryBoolean(condition:String, dataX:String, dataY:String): Boolean = {
+    if(condition.toLowerCase.equals(dataX.toLowerCase)) notEmpty(dataY) else true
   }
 
   def notEmpty(data: String): Boolean = {
@@ -45,20 +44,19 @@ object ValidationContext extends ERSValidationFormatters{
 }
 
 object ErsValidator {
-  val colNames = List("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","AA","AB","AC","AD","AE","AF","AG","AH","AI","AJ","AK","AL","AM","AN","AO","AP")
+  val colNames = List("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+    "AA","AB","AC","AD","AE","AF","AG","AH","AI","AJ","AK","AL","AM","AN","AO","AP")
 
-  def validateRow(validator: DataValidator)(rowData: Seq[String], rowNumber: Int) = {
-  try {
-    validator.validateRow(Row(rowNumber, getCells(rowData,rowNumber)), Some(ValidationContext))
+  def validateRow(validator: DataValidator)(rowData: Seq[String], rowNumber: Int): Option[List[ValidationError]] = {
+    try {
+      validator.validateRow(Row(rowNumber, getCells(rowData,rowNumber)), Some(ValidationContext))
     } catch {
-      case e: Exception => {
+      case e: Exception =>
         Logger.warn(e.toString)
         throw e
-      }
     }
   }
 
-  def getCells(rowData:Seq[String],rowNumber:Int) =
-        (rowData zip colNames ).map{case(cellValue,col) => Cell(col.toString,rowNumber,cellValue)}
+  def getCells(rowData:Seq[String],rowNumber:Int): Seq[Cell] = (rowData zip colNames ).map{case(cellValue,col) => Cell(col, rowNumber,cellValue)}
 
 }

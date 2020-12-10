@@ -16,25 +16,24 @@
 
 package utils
 
+import config.ApplicationConfig
+import javax.inject.{Inject, Singleton}
 import models.SheetErrors
 import models.upscan.UpscanCsvFilesCallback
+import play.api.Logger
 import play.api.mvc.{AnyContent, Request}
-import play.api.{Logger, Play}
 import services.ERSTemplatesInfo
-import scala.collection.mutable.ListBuffer
-import play.api.Play.current
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
 import uk.gov.hmrc.http.HeaderCarrier
 
-object ParserUtil extends ParserUtil {
-  override val cacheUtil: CacheUtil = CacheUtil
-}
+import scala.collection.mutable.ListBuffer
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
-trait ParserUtil {
-  val cacheUtil: CacheUtil
-
+@Singleton
+class ParserUtil @Inject()(val ersUtil: ERSUtil,
+                           appConfig: ApplicationConfig
+                          )(implicit ec: ExecutionContext) {
+  val HUNDRED = 100
   def formatDataToValidate(rowData: Seq[String], sheetName: String): Seq[String] = {
     val sheetColSize = ERSTemplatesInfo.ersSheets(sheetName.replace(".csv", "")).headerRow.size
     if(rowData.size < sheetColSize) {
@@ -47,7 +46,7 @@ trait ParserUtil {
     }
   }
 
-  def isFileValid(errorList: ListBuffer[SheetErrors], source: String, file: Option[UpscanCsvFilesCallback] = None)
+  def isFileValid(errorList: ListBuffer[SheetErrors], file: Option[UpscanCsvFilesCallback] = None)
 								 (implicit request: Request[AnyContent], hc: HeaderCarrier): Future[Try[Boolean]] = {
     if (isValid(errorList)) {
       Future.successful(Success(true))
@@ -58,8 +57,8 @@ trait ParserUtil {
 			val id = if(file.isDefined) file.get.uploadId else ""
 
       val result = for {
-				_ <- cacheUtil.cache[Long](s"${CacheUtil.SCHEME_ERROR_COUNT_CACHE}$id", updatedErrorCount )
-				_ <- cacheUtil.cache[ListBuffer[SheetErrors]](s"${CacheUtil.ERROR_LIST_CACHE}$id", updatedErrorList)
+				_ <- ersUtil.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}$id", updatedErrorCount )
+				_ <- ersUtil.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}$id", updatedErrorList)
 			} yield Success(false)
 
       result recover {
@@ -84,12 +83,10 @@ trait ParserUtil {
     totalErrors
   }
 
-
   def getSheetErrors(schemeErrors: ListBuffer[SheetErrors]): ListBuffer[SheetErrors] = {
-    val errorCount: Int = Play.configuration.getInt(s"errorDisplayCount").getOrElse(100)
+    val errorCount: Int = appConfig.errorCount.getOrElse(HUNDRED)
     schemeErrors.map { schemeError =>
       SheetErrors(schemeError.sheetName,schemeError.errors.take(errorCount))
     }
   }
-
 }
