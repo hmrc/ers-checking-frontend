@@ -27,7 +27,7 @@ ers.confirmation.page_title = Cadarnhad – Gwarantau ar Sail Cyflogaeth – GOV
 #********************************************************************
 
 ers_start.page_title = Gwirio’ch ffeiliau ERS
-ers_start.intro_para_1 = Defnyddiwch y gwasanaeth hwn i wirio am wallau yn y ffeiliau sydd angen i chi eu huwchlwytho fel rhan o’ch Datganiad Blynyddol ar gyfer Gwarantau ar Sail Cyflogaeth (ERS)
+ers_start.intro_para_1 = Defnyddiwch y gwasanaeth hwn i wirio am wallau yn y ffeiliau y mae angen i chi eu huwchlwytho fel rhan o’ch Datganiad Blynyddol ar gyfer Gwarantau ar Sail Cyflogaeth (ERS)
 ers_start.sub_title = Cyn i chi ddechrau
 ers_start.intro_para_3 = Bydd angen i chi wybod ar gyfer pa fath o gynllun neu drefniant ERS y mae’r ffeil.
 ers_start.intro_para_4 = Os ydych yn gwirio taenlen, mae’n rhaid iddi fod yn ffeil Taenlen OpenDocument (.ods). Gallwch hefyd wirio ffeiliau gwerthoedd wedi’u gwahanu gan goma (.csv).
@@ -46,7 +46,7 @@ ers_scheme_type.saye = Cynilo Wrth Ennill (SAYE - Ffurflen 34)
 ers_scheme_type.sip = Cynllun Cymell Cyfranddaliadau (SIP - Ffurflen 39)
 ers_scheme_type.other = Arall (Ffurflen 42)
 ers_scheme_type.continue = Yn eich blaen
-ers_scheme_type.select_scheme_type = Dewis y math o gynllun neu drefniant ERS
+ers_scheme_type.select_scheme_type = Dewiswch y math o gynllun neu drefniant ERS
 
 #********************************************************************
 # File type messages
@@ -56,8 +56,8 @@ csv_file_upload.upload_your_file_header = Uwchlwytho’ch ffeil ‘{0}’
 ers_check_file_type.title =Pa fath o ffeil rydych am ei gwirio?
 ers_check_file_type.option_1 =Gwerthoedd wedi’u gwahanu gan goma (.csv)
 ers_check_file_type.option_2 =Taenlen OpenDocument (.ods)
-ers_check_file_type.alert =Dewis y math o ffeil rydych am ei gwirio
-ers_check_csv_file.title =Dewis y ffeiliau .csv rydych am eu gwirio am wallau
+ers_check_file_type.alert =Dewiswch y math o ffeil rydych am ei gwirio
+ers_check_csv_file.title =Dewiswch y ffeiliau .csv rydych am eu gwirio am wallau
 ers_check_csv_file.check_file_button =Gwirio am wallau
 ers_check_csv_file.file_type_error =Gwnaethoch ddewis gwirio ffeil CSV, ond nid yw {0} yn ffeil CSV.
 ers_check_csv_file.invalidCharacters = Dileu cymeriadau annilys
@@ -85,8 +85,8 @@ ers_check_csv_file.other.OTHER_BENEFITS =Buddiannau eraill a gafwyd o warantau a
 ers_check_csv_file.other.OTHER_CONVERTABLE =Gwarantau trosadwy ar ôl caffael
 ers_check_csv_file.other.OTHER_NOTIONAL =Rhyddhau benthyciadau tybiannol ar ôl caffael
 ers_check_csv_file.other.OTHER_ENCHANCEMENT =Gwelliant artiffisial y gwerth marchnad. Gwerth gwarantau ar ôl caffael
-ers_check_csv_file.other.OTHER_SOLD =Gwarantau sydd wedi’u gwerthu am fwy na gwerth y farchnad ar ôl caffael
-ers_check_file.title =Dewis y ffeil .ods rydych am ei gwirio am wallau
+ers_check_csv_file.other.OTHER_SOLD =Gwarantau sydd wedi’u gwerthu am fwy na’r gwerth marchnadol ar ôl caffael
+ers_check_file.title =Dewiswch y ffeil .ods rydych am ei gwirio am wallau
 ers_check_file.file_upload_label =Dewis y ffeil i’w huwchlwytho.
 ers_check_file.check_file_button =Gwirio am wallau
 ers_check_file.file_type_error =Gwnaethoch ddewis gwirio ffeil ODS, ond nid yw {0} yn ffeil ODS.
@@ -120,7 +120,7 @@ ers_html_error_report.report_title =Adroddiad o wallau {0} ({1})
 ers_html_error_report.number_of_errors_sing =Dangos {0} o’r {1} gwall a ddarganfuwyd.
 ers_html_error_report.number_of_errors =Dangos {0} o’r {1} o wallau a ddarganfuwyd.
 ers_html_error_report.errors_title =Gwallau yn ôl enw (teitl) {0}
-ers_html_error_report.errors_sheet =cynfas
+ers_html_error_report.errors_sheet =dalen
 ers_html_error_report.table_column_names =<tr><th class='column' scope='col'>Colofn</th><th class='row' scope='col'>Rhes</th><th class='errorTitle' scope='col'>Gwall</th></tr>
 ers_html_error_report.sheet_name =<h3 class='sheet-title'><span class='font-small'>{0}</span></h3>
 ers_html_error_report.table_row =<tr><td>{0}</td><td>{1}</td><td class='errorMsg'>{2}</td></tr>
@@ -170,12 +170,12 @@ ers.upload.error.digits2=Mae’n rhaid i hyn fod yn rhif gyda 2 ddigid ar ôl y 
 ers.upload.error.digitsUpTo4=Mae’n rhaid i hyn fod yn rhif (ni all rhifau cyfan gynnwys mwy nag 13 digid; ni all degolion gynnwys mwy nag 13 digid cyn y pwynt degol a dim mwy na 4 digid ar ei ôl)
 ers.upload.error.digits4=Mae’n rhaid i hyn fod yn rhif gyda 4 digid ar ôl y pwynt degol (a dim mwy nag 13 digid o’i flaen)
 ers.upload.error.int6=Mae’n rhaid i hyn fod yn rhif cyfan ac yn llai na 1,000,000
-ers.upload.error.yes-no=Nodwch ‘Iawn’ neu ‘Na’
+ers.upload.error.yes-no=Nodwch ‘yes’ neu ‘no’
 ers.upload.error.enum1-3=Nodwch ‘1’, ‘2’ neu ‘3’
 ers.upload.error.enum1-4=Nodwch ‘1’, ‘2’, ‘3’ neu ‘4’
 ers.upload.error.enum1-8=Nodwch ‘1’, ‘2’, ‘3’, ‘4’, ‘5’, ‘6’, ‘7’ neu ‘8’
 ers.upload.error.enum1-9=Nodwch ‘1’, ‘2’, ‘3’, ‘4’, ‘5’, ‘6’, ‘7’, ‘8’ neu ‘9’
-ers.upload.error.enum-all-some=Nodwch ‘i gyd’ neu ‘rhai’
+ers.upload.error.enum-all-some=Nodwch ‘all’ neu ‘some’
 ers.upload.error.ratio=Nodwch gymhareb y cyfranddaliadau cyfatebol (mae’n rhaid i rifau gael eu gwahanu gan ‘:’ neu ‘/’, er enghraifft, 2:1 neu 2/1)
 ers.upload.error.company-name=Nodwch enw’r cwmni (mae’n rhaid i hwn fod yn llai na 121 o gymeriadau a gall gynnwys dim ond llythrennau, rhifau, cysylltnodau neu gollnodau)
 ers.upload.error.address-line1=Nodwch linell gyntaf y cyfeiriad (mae’n rhaid i hon gynnwys llai na 28 o gymeriadau a gall gynnwys dim ond llythrennau, rhifau, cysylltnodau, collnodau, blaenslaesys, comas neu ampersandau)
