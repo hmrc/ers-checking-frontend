@@ -56,7 +56,7 @@ class UpscanController @Inject()(authAction: AuthAction,
 }
 
   def successCSV(uploadId: UploadId, scheme: String): Action[AnyContent] = authAction.async { implicit request =>
-    Logger.debug(s"[UpscanController][successCSV] Upload form submitted for ID: $uploadId")
+    Logger.info(s"[UpscanController][successCSV] Upload form submitted for ID: $uploadId")
     val sessionId = hc.sessionId.get.value
 
     val upscanCsvFilesList = for {
@@ -71,12 +71,16 @@ class UpscanController @Inject()(authAction: AuthAction,
     upscanCsvFilesList flatMap { fileList =>
       if(fileList.noOfFilesToUpload == fileList.noOfUploads) {
         fetchCsvCallbackList(fileList, sessionId).withRetry(appConfig.allCsvFilesCacheRetryAmount){ list =>
-          Logger.debug(s"[UpscanController][successCSV] Comparing cached files [${list.size}] to numberOfFileToUpload[${fileList.noOfFilesToUpload}]")
-          list.size == fileList.noOfFilesToUpload
+          Logger.debug(s"[UpscanController][successCSV] Fetched Callback list - $list")
+          Logger.info(s"[UpscanController][successCSV] Comparing cached files [${list.size}] to numberOfFileToUpload[${fileList.noOfFilesToUpload}]")
+          Logger.info(s"[UpscanController][successCSV] Checking if all files have completed upload - [${list.forall(_.isComplete)}]")
+
+
+          (list.size == fileList.noOfFilesToUpload) && list.forall(_.isComplete)
         } map { files =>
           val callbackData = UpscanCsvFilesCallbackList(files.toList.reverse)
           sessionService.createCallbackRecordCSV(callbackData, sessionId)
-          if(callbackData.areAllFilesComplete() && callbackData.areAllFilesSuccessful()) {
+          if(callbackData.areAllFilesSuccessful()) {
             Redirect(routes.UploadController.uploadCSVFile(scheme))
           } else {
             Logger.error(s"[UpscanController][successCSV] Not all files are completed uploading - (${callbackData.areAllFilesComplete()}) " +

@@ -76,7 +76,6 @@ class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
 
       when(mockErsUtil.fetch[UpscanCsvFilesList](any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(singleCsvFile))
       when(mockErsUtil.cache(any(), any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(null))
-     // when(mockSessionService.getCallbackRecordCsv(any())(any(), any(), any())).thenReturn(Future.successful(upscanCsvFilesListCallbackList))
 
       val result = upscanController(upscanCsvFilesListCallbackList).successCSV(uploadId, Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
@@ -90,9 +89,7 @@ class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
 
       when(mockSessionService.ersUtil).thenReturn(mockErsUtil)
       when(mockErsUtil.fetch[UpscanCsvFilesList](any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(singleCsvFile))
-      when(mockSessionService.ersUtil).thenReturn(mockErsUtil)
       when(mockErsUtil.cache(any(), any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(null))
-      //when(mockSessionService.getCallbackRecordCsv(any())(any(), any(), any())).thenReturn(Future.successful(upscanCsvFilesListCallbackList))
 
       val result = upscanController(upscanCsvFilesListCallbackList).successCSV(uploadId, Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.OK
@@ -105,7 +102,6 @@ class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
 
       when(mockSessionService.ersUtil).thenReturn(mockErsUtil)
       when(mockErsUtil.fetch[UpscanCsvFilesList](any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(singleCsvFile))
-      when(mockSessionService.ersUtil).thenReturn(mockErsUtil)
       when(mockErsUtil.cache(any(), any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(null))
 
       def upscanControllerError(): UpscanController =
