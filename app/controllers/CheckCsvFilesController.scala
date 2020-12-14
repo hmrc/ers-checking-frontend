@@ -25,8 +25,8 @@ import play.api.Logger
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import services.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.ERSUtil
 
@@ -35,7 +35,6 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class CheckCsvFilesController @Inject()(authAction: AuthAction,
                                         mcc: MessagesControllerComponents,
-                                        sessionService: SessionService,
                                         implicit val ersUtil: ERSUtil,
                                         implicit val appConfig: ApplicationConfig)
                                        (implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
@@ -47,9 +46,8 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
 
   def showCheckCsvFilesPage()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Result] = {
     (for {
-      _ 					<- ersUtil.remove(ersUtil.CSV_FILES_UPLOAD)
-      scheme 			<- ersUtil.fetch[String](ersUtil.SCHEME_CACHE)
-      _ 					<- sessionService.createCallbackRecordCsv(hc.sessionId.get.value)
+      _           <- ersUtil.remove(ersUtil.CSV_FILES_UPLOAD)
+      scheme      <- ersUtil.fetch[String](ersUtil.SCHEME_CACHE)
     } yield {
       val csvFilesList: Seq[CsvFiles] = ersUtil.getCsvFilesList(scheme)
       Ok(views.html.select_csv_file_types(scheme, csvFilesList))
@@ -78,6 +76,7 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
       reloadWithError()
     } else {
       (for{
+        _   <- Future.sequence(cacheUpscanIds(csvFilesCallbackList.ids))
         _   <- ersUtil.cache(ersUtil.CSV_FILES_UPLOAD, csvFilesCallbackList, hc.sessionId.get.value)
       } yield {
         Redirect(routes.CheckingServiceController.checkCSVFilePage())
@@ -86,6 +85,12 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
           Logger.error(s"[CheckCsvFilesController][performCsvFilesPageSelected]: Save data to cache failed with exception ${e.getMessage}.", e)
           getGlobalErrorPage
       }
+    }
+  }
+
+  def cacheUpscanIds(ids: Seq[UpscanIds])(implicit request: Request[AnyRef], hc: HeaderCarrier): Seq[Future[CacheMap]] = {
+    ids map { id =>
+      ersUtil.cache[UpscanIds](id.uploadId.value, id)
     }
   }
 

@@ -30,17 +30,11 @@ class SessionService @Inject()(val ersUtil: ERSUtil) {
 	val CALLBACK_DATA_KEY = "callback_data_key"
 	val CALLBACK_DATA_KEY_CSV = "callback_data_key_csv"
 
-
-	def createCallbackRecordCsv(sessionId: String)
-														 (implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[CacheMap] = {
-		ersUtil.cache(CALLBACK_DATA_KEY_CSV, UpscanCsvFilesCallbackList(List[UpscanCsvFilesCallback]()), sessionId)
-	}
-
 	def createCallbackRecord(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[CacheMap] = {
 		ersUtil.cache[UploadStatus](CALLBACK_DATA_KEY, NotStarted)
 	}
 
-	def updateCallbackRecordCsv(callbackList: UpscanCsvFilesCallbackList, sessionId: String)
+	def createCallbackRecordCSV(callbackList: UpscanCsvFilesCallbackList, sessionId: String)
 														 (implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[CacheMap] = {
 		ersUtil.cache(CALLBACK_DATA_KEY_CSV, callbackList, sessionId)
 	}
@@ -50,9 +44,4 @@ class SessionService @Inject()(val ersUtil: ERSUtil) {
 
 	def getCallbackRecord(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UploadStatus]] =
 		ersUtil.shortLivedCache.fetchAndGetEntry[UploadStatus](ersUtil.getCacheId, CALLBACK_DATA_KEY)
-
-	def getCallbackRecordCsv(sessionId: String)
-													(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[UpscanCsvFilesCallbackList] = {
-		ersUtil.fetch[UpscanCsvFilesCallbackList](CALLBACK_DATA_KEY_CSV, sessionId)
-	}
 }
