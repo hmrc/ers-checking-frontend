@@ -51,9 +51,8 @@ class UpscanCallbackController @Inject()(sessionService: SessionService,
 					Logger.info(s"[UpscanController][callbackCsv] Updating CSV callback for upload id: ${uploadId.value} to ${uploadStatus.getClass.getSimpleName}")
 
 					(for{
-						callbackList 	<- 		sessionService.getCallbackRecordCsv(sessionId)
-						updatedList 	= 		UpscanCsvFilesCallback(uploadId, uploadStatus) :: callbackList.files
-						_ 						<- 		sessionService.updateCallbackRecordCsv(callbackList.copy(files = updatedList), sessionId)
+						upscanId   <- sessionService.ersUtil.fetch[UpscanIds](uploadId.value, sessionId)
+						_          <- sessionService.ersUtil.cache(uploadId.value, upscanId.copy(uploadStatus = uploadStatus), sessionId)
 					} yield {
 						Ok
 					}) recover {

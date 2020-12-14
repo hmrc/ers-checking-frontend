@@ -52,8 +52,8 @@ class UploadController @Inject()(authAction: AuthAction,
   def clearCache()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Boolean] = {
     //remove function doesn't work, the cache needs to be overwritten with 'blank' data
     (for {
-      _  	<-	ersUtil.cache[Long](ersUtil.SCHEME_ERROR_COUNT_CACHE, 0L)
-      _	 	<-	ersUtil.cache[ListBuffer[SheetErrors]](ersUtil.ERROR_LIST_CACHE, new ListBuffer[SheetErrors]())
+      _   <-  ersUtil.cache[Long](ersUtil.SCHEME_ERROR_COUNT_CACHE, 0L)
+      _   <-  ersUtil.cache[ListBuffer[SheetErrors]](ersUtil.ERROR_LIST_CACHE, new ListBuffer[SheetErrors]())
     } yield {
       Logger.debug(s"[UploadController][clearCache] Successfully cleared cache")
       true

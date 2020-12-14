@@ -24,6 +24,7 @@ import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import services.SessionService
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{ERSUtil, Retryable}
 
@@ -42,9 +43,22 @@ class UpscanController @Inject()(authAction: AuthAction,
     Future.successful(getGlobalErrorPage)
   }
 
+
+  def fetchCsvCallbackList(list: UpscanCsvFilesList, sessionId: String)
+                          (implicit hc: HeaderCarrier, request: Request[_]): Future[Seq[UpscanCsvFilesCallback]] = {
+    Future.sequence {
+      list.ids map { head =>
+        ersUtil.fetch[UpscanIds](head.uploadId.value, sessionId) map { upscanId =>
+          UpscanCsvFilesCallback(upscanId.uploadId, upscanId.uploadStatus)
+        }
+      }
+    }
+}
+
   def successCSV(uploadId: UploadId, scheme: String): Action[AnyContent] = authAction.async { implicit request =>
     Logger.debug(s"[UpscanController][successCSV] Upload form submitted for ID: $uploadId")
     val sessionId = hc.sessionId.get.value
+
     val upscanCsvFilesList = for {
       csvFileList   <- ersUtil.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD, sessionId)
       updatedCacheFileList = {
@@ -54,12 +68,14 @@ class UpscanController @Inject()(authAction: AuthAction,
       _ <- ersUtil.cache(ersUtil.CSV_FILES_UPLOAD, updatedCacheFileList, sessionId)
     } yield updatedCacheFileList
 
-    upscanCsvFilesList flatMap  { fileList =>
+    upscanCsvFilesList flatMap { fileList =>
       if(fileList.noOfFilesToUpload == fileList.noOfUploads) {
-        sessionService.getCallbackRecordCsv(sessionId).withRetry(appConfig.allCsvFilesCacheRetryAmount){ list =>
-          Logger.debug(s"[UpscanController][successCSV] Comparing cached files [${list.files.size}] to numberOfFileToUpload[${fileList.noOfFilesToUpload}]")
-          list.files.size == fileList.noOfFilesToUpload
-        } map { callbackData =>
+        fetchCsvCallbackList(fileList, sessionId).withRetry(appConfig.allCsvFilesCacheRetryAmount){ list =>
+          Logger.debug(s"[UpscanController][successCSV] Comparing cached files [${list.size}] to numberOfFileToUpload[${fileList.noOfFilesToUpload}]")
+          list.size == fileList.noOfFilesToUpload
+        } map { files =>
+          val callbackData = UpscanCsvFilesCallbackList(files.toList.reverse)
+          sessionService.createCallbackRecordCSV(callbackData, sessionId)
           if(callbackData.areAllFilesComplete() && callbackData.areAllFilesSuccessful()) {
             Redirect(routes.UploadController.uploadCSVFile(scheme))
           } else {
@@ -69,7 +85,7 @@ class UpscanController @Inject()(authAction: AuthAction,
           }
         } recover {
           case e: Exception =>
-            Logger.error(s"success: failed to fetch callback data with exception ${e.getMessage}," +
+            Logger.error(s"[UpscanController][successCSV] failed to fetch callback data with exception ${e.getMessage}," +
               s"timestamp: ${System.currentTimeMillis()}.", e)
             getGlobalErrorPage
         }
