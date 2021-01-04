@@ -28,8 +28,6 @@ import play.api.i18n.{Messages, MessagesImpl}
 import play.api.mvc.{DefaultMessagesControllerComponents, Result}
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.UnitSpec
-
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 

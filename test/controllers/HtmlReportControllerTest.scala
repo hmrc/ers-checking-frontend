@@ -36,9 +36,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 import utils.{ERSUtil, HtmlCreator}
-
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with ErsTestHelper {
