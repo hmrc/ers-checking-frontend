@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 import utils.{ERSUtil, HtmlCreator}
-
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with ErsTestHelper {
