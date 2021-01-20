@@ -27,8 +27,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 class LanguageSwitchControllerTest extends UnitSpec with GuiceOneAppPerSuite {
   val controllerComponents: ControllerComponents = app.injector.instanceOf[ControllerComponents]
   val langUtils : LanguageUtils = app.injector.instanceOf[LanguageUtils]
-  val config: Configuration = app.injector.instanceOf[Configuration]
-  val testLanguageSwitchController = new LanguageSwitchController(config: Configuration, langUtils : LanguageUtils, controllerComponents : ControllerComponents)
+  val testLanguageSwitchController = new LanguageSwitchController(langUtils : LanguageUtils, controllerComponents : ControllerComponents)
 
   "Hitting language selection endpoint" must {
     "redirect to Welsh translated start page if Welsh language is selected" in {
