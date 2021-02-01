@@ -62,10 +62,10 @@ trait CacheUtil {
       res.get.as[T]
     }recover{
       case e: NoSuchElementException =>
-        Logger.warn(s"[CacheUtil][fetch] fetch failed to get key $key with exception $e, timestamp: ${System.currentTimeMillis()}.")
+        Logger.warn(s"[CacheUtil][fetch] fetch failed to get key $key with exception $e, timestamp: ${java.time.LocalTime.now()}.")
         throw new NoSuchElementException
       case _ : Throwable =>
-        Logger.error(s"[CacheUtil][fetch] fetch failed to get key $key for ${hc.sessionId} with exception, timestamp: ${System.currentTimeMillis()}.")
+        Logger.error(s"[CacheUtil][fetch] fetch failed to get key $key for ${hc.sessionId} with exception, timestamp: ${java.time.LocalTime.now()}.")
         throw new Exception
     }
   }

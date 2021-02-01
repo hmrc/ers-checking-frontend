@@ -16,8 +16,6 @@
 
 package services.audit
 
-import org.joda.time.DateTime
-import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
@@ -45,6 +43,6 @@ trait AuditService {
   private[audit] def generateTags(hc: HeaderCarrier): Map[String, String] =
     hc.headers.toMap ++ Map("dateTime" ->  getDateTime.toString)
 
-  private def getDateTime = new DateTime
+    private def getDateTime = java.time.LocalTime.now()
 
 }
