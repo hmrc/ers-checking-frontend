@@ -85,7 +85,7 @@ class UpscanCallbackController @Inject()(sessionService: SessionService,
         sessionService.updateCallbackRecord(uploadStatus)(request, headerCarrier,ec).map(_ => Ok) recover {
           case e: Throwable =>
             Logger.error(s"[UpscanController][callbackOds] Failed to update callback record for session: $sessionId, " +
-              s"timestamp: ${System.currentTimeMillis()}.", e)
+              s"timestamp: ${java.time.LocalTime.now()}.", e)
             InternalServerError("Exception occurred when attempting to update callback data")
         }
       }

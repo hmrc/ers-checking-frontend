@@ -27,7 +27,6 @@ import services.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.{ERSUtil, Retryable}
-
 import scala.concurrent.{ExecutionContext, Future}
 
 @Inject
@@ -90,7 +89,7 @@ class UpscanController @Inject()(authAction: AuthAction,
         } recover {
           case e: Exception =>
             Logger.error(s"[UpscanController][successCSV] failed to fetch callback data with exception ${e.getMessage}," +
-              s"timestamp: ${System.currentTimeMillis()}.", e)
+              s"timestamp: ${java.time.LocalTime.now()}.", e)
             getGlobalErrorPage
         }
       } else {
