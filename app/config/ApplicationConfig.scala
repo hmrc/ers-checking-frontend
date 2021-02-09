@@ -41,8 +41,6 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
   lazy val retryDelay: FiniteDuration = FiniteDuration(config.getString("retry.delay").toInt, "ms")
 
   lazy val assetsPrefix: String = config.getString("govuk-tax.assets.url") + config.getString("govuk-tax.assets.version")
-  lazy val analyticsToken: String = config.getString("govuk-tax.google-analytics.token")
-  lazy val analyticsHost: String = config.getString("govuk-tax.google-analytics.host")
 
   lazy val shortLivedCacheBaseUri: String = config.baseUrl("cachable.short-lived-cache")
   lazy val shortLivedCacheDomain: String = config.getString("microservice.services.cachable.short-lived-cache.domain")
@@ -54,7 +52,6 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
   lazy val reportAProblemPartialUrl = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   lazy val reportAProblemNonJSUrl = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
 
-  lazy val googleTagManagerId: String = config.getString("google-tag-manager.id")
 
   lazy val chunkSize: Option[Int] = Option(config.getInt("validationChunkSize"))
   lazy val errorCount: Option[Int] = Option(config.getInt("errorDisplayCount"))
