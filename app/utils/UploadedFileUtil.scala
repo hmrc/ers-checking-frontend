@@ -27,12 +27,4 @@ class UploadedFileUtil {
 		}
 	}
 
-	def checkCSVFileType(fileName: String): Boolean = {
-		val delimiter: Char = '.'
-		val stringTokens: Array[String] = fileName.split(delimiter)
-		stringTokens(stringTokens.length - 1) match {
-			case "csv" => true
-			case _ => false
-		}
-	}
 }

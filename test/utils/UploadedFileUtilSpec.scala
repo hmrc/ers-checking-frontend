@@ -40,15 +40,4 @@ class UploadedFileUtilSpec extends UnitSpec with MockitoSugar {
 
   }
 
-  "UploadedFileUtil CSV" should {
-
-    "return positively for an csv file" in {
-      uploadedFileUtil.checkCSVFileType("abc.csv") shouldBe true
-    }
-
-    "return negatively for other files" in {
-      uploadedFileUtil.checkCSVFileType("abc.doc") shouldBe false
-    }
-
-  }
 }

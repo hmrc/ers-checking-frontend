@@ -18,6 +18,7 @@ package controllers
 
 import config.ApplicationConfig
 import controllers.auth.AuthAction
+
 import javax.inject.{Inject, Singleton}
 import models.SheetErrors
 import models.upscan.{UploadId, UpscanCsvFilesCallbackList}
@@ -27,8 +28,8 @@ import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import uk.gov.hmrc.services.validation.ValidationError
 import utils.{ERSUtil, HtmlCreator, JsonParser}
+import uk.gov.hmrc.services.validation.models.ValidationError
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,7 +40,7 @@ class HtmlReportController @Inject()(authAction: AuthAction,
                                      htmlCreator: HtmlCreator,
                                      implicit val ersUtil: ERSUtil,
                                      implicit val appConfig: ApplicationConfig
-                                    )(implicit executionContext: ExecutionContext) extends FrontendController(mcc) with JsonParser with I18nSupport {
+                                    )(implicit executionContext: ExecutionContext) extends FrontendController(mcc) with JsonParser with I18nSupport with BaseController {
 
   def htmlErrorReportPage(isCsv: Boolean): Action[AnyContent] = authAction.async {
       implicit request =>
@@ -49,8 +50,8 @@ class HtmlReportController @Inject()(authAction: AuthAction,
   def csvExtractErrors(ids: Seq[UploadId], all: CacheMap): (ListBuffer[SheetErrors], Long, Int) = {
     var totalErrors = 0
     val listBufferAndCount: Seq[(ListBuffer[SheetErrors], Long)] = ids map { id =>
-      val errors = all.getEntry[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}$id").getOrElse(ListBuffer())
-      val errorCount = all.getEntry[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}$id").getOrElse(0L)
+      val errors = all.getEntry[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${id.value}").getOrElse(ListBuffer())
+      val errorCount = all.getEntry[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${id.value}").getOrElse(0L)
 
       for (sheet <- errors) {
         val sheetErrors: ListBuffer[ValidationError] = sheet.errors
@@ -85,23 +86,14 @@ class HtmlReportController @Inject()(authAction: AuthAction,
         (schemeErrors, schemeErrorCount, odsErrors)
       }
 
-      val schemeName = scheme._1
-      val schemeNameShort = scheme._2
+      val (schemeName, schemeNameShort) = scheme
 
       val sheets: String = htmlCreator.getSheets(errorsList)(messages)
       Ok(views.html.html_error_report(schemeName, sheets, schemeNameShort, totalErrorsCount, errorCountLong)(request, messages, appConfig, ersUtil))
     } recover {
       case e: NoSuchElementException =>
         Logger.error("Unable to display error report in HtmlReportController.showHtmlErrorReportPage. Error: " + e.getMessage, e)
-        getGlobalErrorPage()(request, messages)
+        getGlobalErrorPage(request, messages)
     }
   }
-
-  def getGlobalErrorPage()(implicit request: Request[_], messages: Messages): Result = {
-    Ok(views.html.global_error(
-      "ers.global_errors.title",
-      "ers.global_errors.message"
-    )(request, messages, appConfig))
-  }
-
 }

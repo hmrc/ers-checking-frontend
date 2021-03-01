@@ -39,7 +39,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
                                           mcc: MessagesControllerComponents,
                                           implicit val ersUtil: ERSUtil,
                                           implicit val appConfig: ApplicationConfig
-                                          )(implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+                                          )(implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport with BaseController {
 
 	def startPage(): Action[AnyContent] = authAction.async { implicit request =>
     showStartPage()
@@ -134,7 +134,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
 		}) recover {
 			case e: Exception =>
 				Logger.error("[CheckingServiceController][showCheckCSVFilePage]: Unable to fetch scheme. Error: " + e.getMessage)
-				getGlobalErrorPage()(request, messages)
+				getGlobalErrorPage(request, messages)
 		}
 	}
 
@@ -155,7 +155,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
 		}) recover {
       case e: Exception =>
 				Logger.error("[CheckingServiceController][showCheckODSFilePage] Unable to fetch scheme. Error: " + e.getMessage)
-				getGlobalErrorPage()(request, messages)
+				getGlobalErrorPage(request, messages)
 		}
   }
 
@@ -196,11 +196,4 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
         getGlobalErrorPage
     }
   }
-
-  def getGlobalErrorPage()(implicit request: Request[_], messages: Messages): Result = {
-    Ok(views.html.global_error(
-      "ers.global_errors.title",
-      "ers.global_errors.message")(request, messages, appConfig))
-  }
-
 }

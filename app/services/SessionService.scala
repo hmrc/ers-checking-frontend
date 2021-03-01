@@ -16,13 +16,13 @@
 
 package services
 
-import javax.inject.{Inject, Singleton}
-import models.upscan.{NotStarted, UploadStatus, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
+import models.upscan.{NotStarted, UploadStatus, UpscanCsvFilesCallbackList}
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.ERSUtil
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

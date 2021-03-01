@@ -16,24 +16,26 @@
 
 package controllers
 
-import java.io.{BufferedReader, InputStream, InputStreamReader}
-import java.net.URL
-import java.util.zip.ZipInputStream
-
+import akka.actor.ActorSystem
+import akka.http.scaladsl._
+import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
+import akka.stream.scaladsl.Source
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRef}
-import javax.inject.{Inject, Singleton}
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallbackList}
 import models.{ERSFileProcessingException, SheetErrors}
 import play.api.Logger
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import services.{CsvFileProcessor, ProcessODSService, StaxProcessor}
-import uk.gov.hmrc.http.HeaderCarrier
+import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.ERSUtil
 
-import scala.collection.JavaConverters._
+import java.io.InputStream
+import java.net.URL
+import java.util.zip.ZipInputStream
+import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -41,19 +43,20 @@ import scala.util.{Failure, Success}
 @Singleton
 class UploadController @Inject()(authAction: AuthAction,
                                  processODSService: ProcessODSService,
-                                 csvFileProcessor: CsvFileProcessor,
+                                 processCsvService: ProcessCsvService,
                                  mcc: MessagesControllerComponents,
                                  implicit val ersUtil: ERSUtil,
                                  implicit val appConfig: ApplicationConfig
-                                 )(implicit executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+                                )(implicit executionContext: ExecutionContext, actorSystem: ActorSystem)
+  extends FrontendController(mcc) with I18nSupport with BaseController {
 
   def downloadAsInputStream(downloadUrl: String): InputStream = new URL(downloadUrl).openStream()
 
-  def clearCache()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Boolean] = {
+  def clearErrorCache()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Boolean] = {
     //remove function doesn't work, the cache needs to be overwritten with 'blank' data
     (for {
-      _   <-  ersUtil.cache[Long](ersUtil.SCHEME_ERROR_COUNT_CACHE, 0L)
-      _   <-  ersUtil.cache[ListBuffer[SheetErrors]](ersUtil.ERROR_LIST_CACHE, new ListBuffer[SheetErrors]())
+      _ <- ersUtil.cache[Long](ersUtil.SCHEME_ERROR_COUNT_CACHE, 0L)
+      _ <- ersUtil.cache[ListBuffer[SheetErrors]](ersUtil.ERROR_LIST_CACHE, new ListBuffer[SheetErrors]())
     } yield {
       Logger.debug(s"[UploadController][clearCache] Successfully cleared cache")
       true
@@ -64,14 +67,13 @@ class UploadController @Inject()(authAction: AuthAction,
     }
   }
 
-  private[controllers] def readFileCsv(downloadUrl: String): Future[Iterator[String]] = {
-    try {
-      val reader = new BufferedReader(new InputStreamReader(downloadAsInputStream(downloadUrl)))
-      Future(reader.lines().iterator().asScala)
-    } catch {
-      case _: Throwable => throw ERSFileProcessingException("Failed to stream the data from file", "Exception bulk entity streaming")
-    }
+  private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, _] = {
+    Source
+      .single(HttpRequest(uri = downloadUrl))
+      .mapAsync(parallelism = 1)(makeRequest)
   }
+
+  private[controllers] def makeRequest(request: HttpRequest): Future[HttpResponse] = Http()(actorSystem).singleRequest(request)
 
   private[controllers] def readFileOds(downloadUrl: String): StaxProcessor = {
     val stream: InputStream = downloadAsInputStream(downloadUrl)
@@ -92,46 +94,36 @@ class UploadController @Inject()(authAction: AuthAction,
           )
       }
     }
+
     val contentInputStream: InputStream = findFileInZip(zipInputStream)
     new StaxProcessor(contentInputStream)
   }
 
   def uploadCSVFile(scheme: String): Action[AnyContent] = authAction.async {
     implicit request =>
-      showuploadCSVFile(scheme)
-  }
-
-  def showuploadCSVFile(scheme: String)(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
-    clearCache() map {
-      case false => getGlobalErrorPage(request,messages)
-    }
-
-    ersUtil.shortLivedCache.fetchAndGetEntry[UpscanCsvFilesCallbackList](ersUtil.getCacheId, "callback_data_key_csv") flatMap { callback =>
-      val processFiles = callback.get.files map { file =>
-        val successUpload = file.uploadStatus.asInstanceOf[UploadedSuccessfully]
-        readFileCsv(successUpload.downloadUrl) flatMap { iterator =>
-          csvFileProcessor.processCsvUpload(iterator, successUpload.name, scheme, file)(request, hc, messages) flatMap {
-            case Success(true)  => Future.successful(true)
-            case Success(false) => Future.successful(false)
-            case Failure(e)     => Future.failed(e)
+      clearErrorCache() flatMap {
+        case false => Future(getGlobalErrorPage)
+        case _ =>
+          ersUtil.shortLivedCache.fetchAndGetEntry[UpscanCsvFilesCallbackList](ersUtil.getCacheId, "callback_data_key_csv") flatMap { callback =>
+            val validationResults = processCsvService.processFiles(callback, scheme, readFileCsv)
+            finaliseRequestAndRedirect(validationResults)
           }
-        }
       }
-
-      Future.sequence(processFiles).map { list =>
-        if (list.forall(identity)) {
-          Redirect(routes.CheckingServiceController.checkingSuccessPage())
-        } else {
-          Redirect(routes.HtmlReportController.htmlErrorReportPage(true))
-        }
-      } recoverWith {
-        case t: Throwable =>
-          handleException(t)
-      }
-    }
   }
 
+  def finaliseRequestAndRedirect(validationResults: List[Future[Either[Throwable, Boolean]]])(
+    implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Result] =
+    Future.sequence(validationResults).flatMap {
+      case noFailures if noFailures.forall(_.contains(true)) =>
+        Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
+      case failures  =>
+        failures.find(_.isLeft) match {
+          case Some(Left(exception)) => handleException(exception)
+          case _ =>
+            Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(true)))
+        }
 
+    }
 
   def uploadODSFile(scheme: String): Action[AnyContent] = authAction.async {
     implicit request =>
@@ -140,7 +132,7 @@ class UploadController @Inject()(authAction: AuthAction,
 
   def showuploadODSFile(scheme: String)
                        (implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
-    clearCache() map {
+    clearErrorCache() map {
       case false => getGlobalErrorPage(request, messages)
     }
 
@@ -165,14 +157,16 @@ class UploadController @Inject()(authAction: AuthAction,
         } yield {
           Redirect(routes.CheckingServiceController.formatErrorsPage())
         }
-      case _ => throw t
+      case upstreamError: UpstreamErrorResponse =>
+        Logger.error(
+          s"[UploadController][handleException] " +
+            s"Encountered an upstream error response when processing a CSV file: " +
+            s"status ${upstreamError.statusCode} with message ${upstreamError.getMessage()}")
+        Future(getGlobalErrorPage)
+      case notERSProcessingException =>
+        Logger.error(s"[UploadController][handleException] " +
+          s"Encountered unexpected exception: ${notERSProcessingException.getClass}. Redirecting to global error page.")
+        Future(getGlobalErrorPage)
     }
   }
-
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-    Ok(views.html.global_error(
-      "ers.global_errors.title",
-      "ers.global_errors.message")(request, messages, appConfig))
-  }
-
 }

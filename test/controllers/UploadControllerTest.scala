@@ -16,6 +16,8 @@
 
 package controllers
 
+import akka.actor.ActorSystem
+import akka.testkit.TestKit
 import controllers.auth.RequestWithOptionalEmpRef
 import helpers.ErsTestHelper
 import models.ERSFileProcessingException
@@ -29,16 +31,16 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.{Application, i18n}
-import services.{CsvFileProcessor, ProcessODSService, StaxProcessor}
+import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
-class UploadControllerTest extends UnitSpec with ErsTestHelper with GuiceOneAppPerSuite {
+class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) with UnitSpec with ErsTestHelper with GuiceOneAppPerSuite {
 
-	val config = Map("application.secret" -> "test",
+	val config: Map[String, Any] = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
     "contact-frontend.host" -> "localhost",
     "contact-frontend.port" -> "9250",
@@ -48,67 +50,33 @@ class UploadControllerTest extends UnitSpec with ErsTestHelper with GuiceOneAppP
 	lazy val mcc: DefaultMessagesControllerComponents = testMCC(app)
 	implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
 	val mockProcessODSService: ProcessODSService = mock[ProcessODSService]
-	val mockCsvFileProcessor: CsvFileProcessor = mock[CsvFileProcessor]
+	val mockProcessCsvService: ProcessCsvService = mock[ProcessCsvService]
 	val uploadedSuccessfully: Option[UploadedSuccessfully] = Some(UploadedSuccessfully("testName", "testDownloadUrl", noOfRows = Some(1)))
 	val callbackList: Option[UpscanCsvFilesCallbackList] = {
 		Some(UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId.generate, uploadedSuccessfully.get))))
 	}
 	val mockStaxProcessor: StaxProcessor = mock[StaxProcessor]
-	val mockIterator: Iterator[String] = mock[Iterator[String]]
 
   def buildFakeUploadControllerOds(uploadRes: Boolean = true,
-																	 proccessFile: Boolean = true,
+																	 processFile: Boolean = true,
 																	 formatRes: Boolean = true,
 																	 clearCacheResponse: Boolean = true
 																	): UploadController =
-		new UploadController(mockAuthAction, mockProcessODSService, mockCsvFileProcessor, mcc, mockErsUtil, mockAppConfig) {
+		new UploadController(mockAuthAction, mockProcessODSService, mockProcessCsvService, mcc, mockErsUtil, mockAppConfig) {
 
-		override def clearCache()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Boolean] =
+		override def clearErrorCache()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Boolean] =
 			Future.successful(clearCacheResponse)
 
 		override private[controllers] def readFileOds(downloadUrl: String): StaxProcessor = mockStaxProcessor
 
 		when(mockProcessODSService.performODSUpload(any(), any())(any(),any(),any(),any()))
-			.thenReturn(if (proccessFile) Future.successful(Success(uploadRes)) else Future.successful(Failure(ERSFileProcessingException("", ""))))
-
-		when(mockCsvFileProcessor.processCsvUpload(any(), any(), any(), any())(any(),any(),any()))
-			.thenReturn(if (proccessFile) Future.successful(Success(uploadRes)) else Future.successful(Failure(ERSFileProcessingException("", ""))))
+			.thenReturn(if (processFile) Future.successful(Success(uploadRes)) else Future.successful(Failure(ERSFileProcessingException("", ""))))
 
 		when(mockErsUtil.cache(refEq(mockErsUtil.FORMAT_ERROR_CACHE), anyString())(any(), any(), any(), any()))
 			.thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))
 
 		when(mockErsUtil.shortLivedCache).thenReturn(mockShortLivedCache)
 		when(mockShortLivedCache.fetchAndGetEntry[UploadedSuccessfully](any(), any())(any(),any(), any())).thenReturn(uploadedSuccessfully)
-
-		mockAnyContentAction
-	}
-
-	def buildFakeUploadControllerCsv(uploadRes: Boolean = true,
-																	 proccessFile: Boolean = true,
-																	 formatRes: Boolean = true,
-																	 clearCacheResponse: Boolean = true
-																	): UploadController =
-		new UploadController(mockAuthAction, mockProcessODSService, mockCsvFileProcessor, mcc, mockErsUtil, mockAppConfig) {
-
-		override def clearCache()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Boolean] =
-			Future.successful(clearCacheResponse)
-
-		override private[controllers] def readFileCsv(downloadUrl: String): Future[Iterator[String]] = Future.successful(mockIterator)
-		val returnValue: Future[Try[Boolean]] = {
-			if (proccessFile) {
-				Future.successful(Success(uploadRes))
-			} else {
-				Future.successful(Failure(ERSFileProcessingException("", "")))
-			}
-		}
-
-		when(mockCsvFileProcessor.processCsvUpload(any(), any(), any(), any())(any(),any(),any())).thenReturn(returnValue)
-
-		when(mockErsUtil.cache(refEq(ersUtil.FORMAT_ERROR_CACHE), anyString())(any(), any(), any(), any()))
-			.thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))
-
-		when(mockErsUtil.shortLivedCache).thenReturn(mockShortLivedCache)
-		when(mockShortLivedCache.fetchAndGetEntry[UpscanCsvFilesCallbackList](any(), any())(any(),any(), any())).thenReturn(callbackList)
 
 		mockAnyContentAction
 	}
@@ -123,44 +91,19 @@ class UploadControllerTest extends UnitSpec with ErsTestHelper with GuiceOneAppP
 			status(result) shouldBe Status.SEE_OTHER
 		}
 
-		"give a redirect status to checkingSuccessPage if no formating or structural errors" in {
+		"give a redirect status to checkingSuccessPage if no formatting or structural errors" in {
 			val controllerUnderTest = buildFakeUploadControllerOds()
 			val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
 			status(result) shouldBe Status.SEE_OTHER
 			result.header.headers("Location") shouldBe routes.CheckingServiceController.checkingSuccessPage().toString
 		}
 
-		"give a redirect status to checkingSuccessPage if formating errors" in {
+		"give a redirect status to checkingSuccessPage if formatting errors" in {
 			val controllerUnderTest = buildFakeUploadControllerOds(uploadRes = false)
 			val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
 			status(result) shouldBe Status.SEE_OTHER
 			result.header.headers("Location") shouldBe routes.HtmlReportController.htmlErrorReportPage(false).toString
 		}
 
-	}
-
-	"Calling UploadController.uploadCSVFile" should {
-
-		"give a redirect status and show checkingSuccessPage if authenticated and no validation errors" in {
-			implicit val fakeRequest: FakeRequest[AnyContent] = Fixtures.buildFakeRequestWithSessionId("GET")
-			UpscanCsvFilesCallbackList
-			val controllerUnderTest = buildFakeUploadControllerCsv()
-			val result = controllerUnderTest.uploadCSVFile(Fixtures.getMockSchemeTypeString)(fakeRequest)
-			status(result) shouldBe Status.SEE_OTHER
-		}
-
-		"give a redirect status to checkingSuccessPage if no formating or structural errors" in {
-			val controllerUnderTest = buildFakeUploadControllerCsv()
-			val result = controllerUnderTest.showuploadCSVFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
-			status(result) shouldBe Status.SEE_OTHER
-			result.header.headers("Location") shouldBe routes.CheckingServiceController.checkingSuccessPage().toString
-		}
-
-		"give a redirect status to checkingSuccessPage if formating errors" in {
-			val controllerUnderTest = buildFakeUploadControllerCsv(uploadRes = false)
-			val result = controllerUnderTest.showuploadCSVFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
-			status(result) shouldBe Status.SEE_OTHER
-			result.header.headers("Location") shouldBe routes.HtmlReportController.htmlErrorReportPage(true).toString
-		}
 	}
 }
