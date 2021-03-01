@@ -151,14 +151,14 @@ class UploadControllerTest extends UnitSpec with ErsTestHelper with GuiceOneAppP
 
 		"give a redirect status to checkingSuccessPage if no formating or structural errors" in {
 			val controllerUnderTest = buildFakeUploadControllerCsv()
-			val result = controllerUnderTest.showuploadCSVFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
+			val result = controllerUnderTest.showUploadCSVFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
 			status(result) shouldBe Status.SEE_OTHER
 			result.header.headers("Location") shouldBe routes.CheckingServiceController.checkingSuccessPage().toString
 		}
 
 		"give a redirect status to checkingSuccessPage if formating errors" in {
 			val controllerUnderTest = buildFakeUploadControllerCsv(uploadRes = false)
-			val result = controllerUnderTest.showuploadCSVFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
+			val result = controllerUnderTest.showUploadCSVFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
 			status(result) shouldBe Status.SEE_OTHER
 			result.header.headers("Location") shouldBe routes.HtmlReportController.htmlErrorReportPage(true).toString
 		}

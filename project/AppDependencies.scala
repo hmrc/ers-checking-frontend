@@ -16,7 +16,12 @@ object AppDependencies {
     "uk.gov.hmrc" %% "auth-client" % "3.2.0-play-26",
     "uk.gov.hmrc" %% "tabular-data-validator" % "0.1.0",
     "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.22",
-    "commons-io" % "commons-io" % "2.6"
+    "commons-io" % "commons-io" % "2.6",
+    "com.lightbend.akka" %% "akka-stream-alpakka-csv" % "2.0.2",
+    "com.typesafe.akka" %% "akka-stream" % "2.6.12",
+    "com.typesafe.akka" %% "akka-slf4j" % "2.6.12",
+    "com.typesafe.akka" %% "akka-protobuf" % "2.6.12",
+    "com.typesafe.akka" %% "akka-http-spray-json" % "10.1.12"
   )
 
   val test: Seq[ModuleID] = Seq(

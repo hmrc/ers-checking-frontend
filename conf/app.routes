@@ -15,7 +15,7 @@ POST        /select-csv-files                           controllers.CheckCsvFile
 GET  		/choose-and-check-csv-files					controllers.CheckingServiceController.checkCSVFilePage()
 GET  		/choose-and-check-ods-file					controllers.CheckingServiceController.checkODSFilePage()
 
-GET 		/download-validate-csv-files				controllers.UploadController.uploadCSVFile(fileId: String)
+GET 		/download-validate-csv-files				    controllers.UploadController.uploadCSVFile(fileId: String)
 GET 		/download-validate-ods-file					controllers.UploadController.uploadODSFile(fileId: String)
 
 GET			/upscan/success/csv                         controllers.UpscanController.successCSV(uploadId: UploadId, scheme: String)
@@ -33,3 +33,5 @@ GET			/error-report			    	            controllers.HtmlReportController.htmlErro
 GET			/not-authorised                             controllers.AuthorisationController.notAuthorised()
 
 GET			/language/:lang                             @controllers.LanguageSwitchController.switchToLanguage(lang: String)
+
+GET         /test                                       controllers.TEMPController.streamedWithContentLength()

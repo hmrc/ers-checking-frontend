@@ -135,23 +135,23 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
     }
   }
 
-  def identifyAndDefineSheet(data:String,scheme:String)(implicit headerCarrier: HeaderCarrier, request: Request[_], messages: Messages): String = {
+  def identifyAndDefineSheet(filename: String, scheme: String)(implicit hc: HeaderCarrier, request: Request[_], messages: Messages): String = {
     Logger.debug("5.1  case 0 identifyAndDefineSheet  " )
-    val res = getSheet(data, scheme)
+    val sheetInfo = getSheet(filename, scheme)
     val schemeName = ersUtil.getSchemeName(scheme)._2
-    if (res.schemeType.toLowerCase == schemeName.toLowerCase) {
-      Logger.debug("****5.1.1  data contains data:  *****" + data)
-      data
+    if (sheetInfo.schemeType.toLowerCase == schemeName.toLowerCase) {
+      Logger.debug("****5.1.1  data contains data:  *****" + filename)
+      filename
     } else {
-      auditEvents.fileProcessingErrorAudit(res.schemeType, res.sheetName, s"${res.schemeType.toLowerCase} is not equal to ${schemeName.toLowerCase}")
-      Logger.warn(Messages("ers.exceptions.dataParser.incorrectSchemeType", res.schemeType.toUpperCase, schemeName.toUpperCase))
+      auditEvents.fileProcessingErrorAudit(sheetInfo.schemeType, sheetInfo.sheetName, s"${sheetInfo.schemeType.toLowerCase} is not equal to ${schemeName.toLowerCase}")
+      Logger.warn(Messages("ers.exceptions.dataParser.incorrectSchemeType", sheetInfo.schemeType.toUpperCase, schemeName.toUpperCase))
       throw ERSFileProcessingException("ers.exceptions.dataParser.incorrectSchemeType",
-        Messages("ers.exceptions.dataParser.incorrectSchemeType", res.schemeType.toLowerCase, schemeName.toLowerCase),
-        optionalParams = Seq(ersUtil.withArticle(res.schemeType.toUpperCase), ersUtil.withArticle(schemeName.toUpperCase), res.sheetName))
+        Messages("ers.exceptions.dataParser.incorrectSchemeType", sheetInfo.schemeType.toLowerCase, schemeName.toLowerCase),
+        optionalParams = Seq(ersUtil.withArticle(sheetInfo.schemeType.toUpperCase), ersUtil.withArticle(schemeName.toUpperCase), sheetInfo.sheetName))
     }
   }
 
-  def getSheet(sheetName:String, scheme:String)(implicit messages: Messages): SheetInfo = {
+  def getSheet(sheetName: String, scheme: String)(implicit messages: Messages): SheetInfo = {
     Logger.info(s"[DataGenerator][getSheet] Looking for sheetName: $sheetName")
     ersSheets.getOrElse(sheetName, {
       Logger.warn("[DataGenerator][getSheet] Couldn’t identify SheetName")

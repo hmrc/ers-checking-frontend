@@ -18,8 +18,10 @@ package controllers
 
 import java.io.{BufferedReader, InputStream, InputStreamReader}
 import java.net.URL
+import java.nio.charset.StandardCharsets
 import java.util.zip.ZipInputStream
 
+import akka.actor.ActorSystem
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRef}
 import javax.inject.{Inject, Singleton}
@@ -31,21 +33,34 @@ import play.api.mvc._
 import services.{CsvFileProcessor, ProcessODSService, StaxProcessor}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import utils.ERSUtil
+import utils.{CsvParserUtil, ERSUtil}
+import services.DataGenerator
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
+import akka.http.scaladsl._
+import akka.http.scaladsl.model.StatusCodes.{Success => akkaOk}
+import akka.stream.scaladsl.{Flow, Sink, Source}
+import akka.http.scaladsl.model.{HttpRequest, HttpResponse, MediaRanges}
+import akka.stream.alpakka.csv.scaladsl.{CsvParsing, CsvToMap}
+import akka.util.ByteString
+import org.apache.commons.io.FilenameUtils
+import services.validation.ErsValidator
+import uk.gov.hmrc.services.validation.{DataValidator, ValidationError}
 
 @Singleton
 class UploadController @Inject()(authAction: AuthAction,
                                  processODSService: ProcessODSService,
                                  csvFileProcessor: CsvFileProcessor,
                                  mcc: MessagesControllerComponents,
+                                 parserUtil: CsvParserUtil,
+                                 dataGenerator: DataGenerator,
                                  implicit val ersUtil: ERSUtil,
                                  implicit val appConfig: ApplicationConfig
-                                 )(implicit executionContext: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+                                 )(implicit executionContext: ExecutionContext, actorSystem: ActorSystem)
+  extends FrontendController(mcc) with I18nSupport {
 
   def downloadAsInputStream(downloadUrl: String): InputStream = new URL(downloadUrl).openStream()
 
@@ -64,13 +79,35 @@ class UploadController @Inject()(authAction: AuthAction,
     }
   }
 
-  private[controllers] def readFileCsv(downloadUrl: String): Future[Iterator[String]] = {
-    try {
-      val reader = new BufferedReader(new InputStreamReader(downloadAsInputStream(downloadUrl)))
-      Future(reader.lines().iterator().asScala)
-    } catch {
-      case _: Throwable => throw ERSFileProcessingException("Failed to stream the data from file", "Exception bulk entity streaming")
-    }
+  private[controllers] def readFileCsv(downloadUrl: String): Source[Either[Throwable, List[ByteString]], _] = {
+
+    def makeRight(list: List[ByteString]): Either[Throwable, List[ByteString]] = Right(list)
+
+    val errorSink = Sink.foreach(println)
+
+    def extractEntityData(response: HttpResponse): Source[ByteString, _] =
+      response match {
+        case HttpResponse(akka.http.scaladsl.model.StatusCodes.OK, _, entity, _) => entity.withoutSizeLimit().dataBytes
+        case notOkResponse =>
+          Source.failed(new RuntimeException(s"illegal response $notOkResponse"))
+      }
+
+      Source
+        .single(HttpRequest(uri = downloadUrl))
+        .mapAsync(1)(Http()(actorSystem).singleRequest(_))
+        .flatMapConcat(extractEntityData)
+        .via(CsvParsing.lineScanner())
+        .via(Flow.fromFunction(makeRight))
+        .recover {
+          case e => Left(e)
+        }
+        .divertTo(errorSink, _.isLeft)
+      // extract entity
+      // get csv map
+      //last line: .via(convertToCsvMap)
+      //readFileCsv returns a Flow[List[ByteString], Map[String, String], NotUsed] containing the Map(String, String)
+
+      // apply functions of validation
   }
 
   private[controllers] def readFileOds(downloadUrl: String): StaxProcessor = {
@@ -98,25 +135,81 @@ class UploadController @Inject()(authAction: AuthAction,
 
   def uploadCSVFile(scheme: String): Action[AnyContent] = authAction.async {
     implicit request =>
-      showuploadCSVFile(scheme)
+      showUploadCSVFile(scheme)
   }
 
-  def showuploadCSVFile(scheme: String)(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
+  def showUploadCSVFile(scheme: String)(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
     clearCache() map {
-      case false => getGlobalErrorPage(request,messages)
+      case false => getGlobalErrorPage(request, messages)
     }
 
     ersUtil.shortLivedCache.fetchAndGetEntry[UpscanCsvFilesCallbackList](ersUtil.getCacheId, "callback_data_key_csv") flatMap { callback =>
+
       val processFiles = callback.get.files map { file =>
         val successUpload = file.uploadStatus.asInstanceOf[UploadedSuccessfully]
-        readFileCsv(successUpload.downloadUrl) flatMap { iterator =>
-          csvFileProcessor.processCsvUpload(iterator, successUpload.name, scheme, file)(request, hc, messages) flatMap {
-            case Success(true)  => Future.successful(true)
-            case Success(false) => Future.successful(false)
-            case Failure(e)     => Future.failed(e)
+
+        if (successUpload.name.takeRight(4) == ".csv") {
+          val filenameWithoutExtension = FilenameUtils.removeExtension(successUpload.name)
+          val sheetName = dataGenerator.identifyAndDefineSheet(filenameWithoutExtension, scheme)(messages = messages, hc = hc, request = request)
+          implicit val validator: DataValidator = dataGenerator.setValidator(sheetName)(messages = messages, hc = hc, request = request)
+          val columns = parserUtil.getHeadersForSchema(scheme)
+
+          /*
+          .viaEither(readStream)
+          .viaEither(intoCsvMap)
+          .viaEither(validateCsvRow)
+          .viaEither(processErrors)
+          */
+
+          /*
+
+
+           */
+          val futureListOfErrors: Future[Seq[List[ValidationError]]] = readFileCsv(successUpload.downloadUrl)
+            .via(Flow.fromFunction(_.right.get))
+            .via(CsvToMap.withHeadersAsStrings(StandardCharsets.UTF_8, columns: _*)) // Map("head1" -> "a", "head2" -> "b")
+            .via(Flow.fromFunction(csvFileProcessor.validateFile(_, sheetName, ErsValidator.validateRow(validator))(messages = messages)))
+            .runWith(Sink.seq[List[ValidationError]])
+
+          futureListOfErrors.map { listOfRows =>
+            if (listOfRows.isEmpty) {
+              ???
+            } else {
+              listOfRows.filter(rowErrors => rowErrors.nonEmpty) match {
+                case allGood if allGood == 0 => ???
+                case errors => {
+                  for {
+                    _ <- ersUtil.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${file.uploadId.value}", errors.flatten.length)
+                    _ <- ersUtil.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${file.uploadId.value}",
+                      new ListBuffer[SheetErrors]() :+ SheetErrors(sheetName, ListBuffer(listOfRows.filter(rowErrors => rowErrors.nonEmpty).flatten.toList)))
+                  } yield Success(false)
+                }
+              }
+            }
           }
         }
+
+          /*
+          parserUtil.isFileValid(
+            SheetErrors(sheetName, new ListBuffer ++ csvFileProcessor.validateFile(iterator, sheetName, ErsValidator.validateRow(validator))(messages = messages)),
+            Some(file)
+          ) flatMap {
+            case Success(true) => Future.successful(true)
+            case Success(false) => Future.successful(false)
+            case Failure(e) => Future.failed(e)
+          }
+        } else {
+          throw (ERSFileProcessingException(
+            Messages("ers_check_csv_file.file_type_error", successUpload.name)(messages),
+            Messages("ers_check_csv_file.file_type_error", successUpload.name)(messages)))
+        }
+
+           */
+
       }
+
+
+      // get file url AND THEN -> download file AND THEN -> process file into rows AND THEN -> check rows
 
       Future.sequence(processFiles).map { list =>
         if (list.forall(identity)) {
@@ -170,9 +263,8 @@ class UploadController @Inject()(authAction: AuthAction,
   }
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-    Ok(views.html.global_error(
-      "ers.global_errors.title",
-      "ers.global_errors.message")(request, messages, appConfig))
+    Ok (views.html.global_error (
+    "ers.global_errors.title",
+    "ers.global_errors.message") (request, messages, appConfig) )
   }
-
 }

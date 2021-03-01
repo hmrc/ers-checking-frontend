@@ -28,7 +28,7 @@ import play.api.mvc.{AnyContent, Request}
 import services.validation.ErsValidator
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.services.validation.{DataValidator, ValidationError}
-import utils.{ParserUtil, UploadedFileUtil}
+import utils.{CsvParserUtil, UploadedFileUtil}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration._
@@ -37,7 +37,7 @@ import scala.util.{Failure, Success, Try}
 
 @Singleton
 class CsvFileProcessor @Inject()(dataGenerator: DataGenerator,
-                                 parserUtil: ParserUtil,
+                                 parserUtil: CsvParserUtil,
                                  uploadedFileUtil: UploadedFileUtil,
                                  appConfig: ApplicationConfig
                                 )(implicit executionContext: ExecutionContext) {
@@ -47,78 +47,27 @@ class CsvFileProcessor @Inject()(dataGenerator: DataGenerator,
   val converter: String => Array[String] = _.split(",")
   val defaultChunkSize: Int = 10000
 
-  def readCSVFile(filename:String, file: Iterator[String], scheme:String)
-								 (implicit request: Request[AnyContent], hc : HeaderCarrier, messages: Messages): SheetErrors = {
-    Logger.debug("[CsvFileProcessor][readCSVFile] file.getName" + filename)
-    val sheetName = dataGenerator.identifyAndDefineSheet(filename, scheme)
+//  def flowValidateCsvFile(helperClass: HelperClass(csv: (String, String), filename: String, scheme: String)): Either[HelperClass, ERSFileProcessingException] = {
+//    if (helperClass.filename.takeRight(3) != "csv") {
+//      val filenameWithoutExtension = FilenameUtils.removeExtension(filename)
+//      Left(helperClass.copy(filename = filenameWithoutExtension))
+//    } else {
+//      Right(ERSFileProcessingException(...))
+//    }
+//  }
 
-    implicit val validator: DataValidator = dataGenerator.setValidator(sheetName)
-    Logger.debug("[CsvFileProcessor][readCSVFile] validator set " + validator.toString)
-    val errors = new ListBuffer() ++= validateFile(file, sheetName, ErsValidator.validateRow(validator))
-    SheetErrors(sheetName, errors)
-  }
-
-  def processCsvUpload(fileIterator: Iterator[String], filename: String, scheme:String, file: UpscanCsvFilesCallback)
-											(implicit request: RequestWithOptionalEmpRef[AnyContent], hc : HeaderCarrier, messages: Messages): Future[Try[Boolean]] = {
-		try {
-      val errors = validateCsvFiles(fileIterator, filename, scheme)
-      parserUtil.isFileValid(errors, Some(file))
-    }
-    catch {
-      case e: ERSFileProcessingException => Future.successful(Failure(e))
-    }
-  }
-
-  def validateCsvFiles(file: Iterator[String], filename: String, scheme:String)
-											(implicit request: RequestWithOptionalEmpRef[AnyContent], hc : HeaderCarrier, messages: Messages): ListBuffer[SheetErrors] = {
-    val filesErrors: ListBuffer[SheetErrors] = new ListBuffer()
-		checkFileType(filename)
-		val filenameUtil = FilenameUtils.removeExtension(filename)
-		filesErrors += readCSVFile(filenameUtil, file, scheme)
-    filesErrors
-  }
-
-  def checkFileType(filename: String)(implicit messages: Messages): Unit = {
-    if (!uploadedFileUtil.checkCSVFileType(filename)) {
-      throw ERSFileProcessingException(
-        Messages("ers_check_csv_file.file_type_error", filename),
-        Messages("ers_check_csv_file.file_type_error", filename))
-    }
-  }
-
-  def validateFile(file: Iterator[String], sheetName:String, validator: RowValidator)(implicit messages: Messages): List[ValidationError]= {
+  def validateFile(rowContents: Map[String, String], sheetName: String, validator: RowValidator)(implicit messages: Messages): List[ValidationError] = {
     val start = System.currentTimeMillis()
     val chunkSize = appConfig.chunkSize.getOrElse(defaultChunkSize)
     val cpus = Runtime.getRuntime.availableProcessors()
 
     Logger.info(s"[CsvFileProcessor][validateFile] Validating file $sheetName cpus: $cpus chunkSize: $chunkSize")
 
-    try {
-      val (rows, rowsWithData) = getRowsFromFile(file)
-      checkRowsExist(rowsWithData, sheetName) match {
-        case Failure(ex) => throw ex
-        case _ =>
-      }
+    val errors = processRow(rowContents.values.toList, sheetName, validator)
+    val timeTaken = System.currentTimeMillis() - start
+    Logger.info(s"[CsvFileProcessor][validateFile] Validation of file $sheetName completed in $timeTaken ms")
 
-      val chunks = numberOfChunks(rows.size, chunkSize)
-
-      val submissions = submitChunks(rows, chunks, chunkSize, sheetName, validator)
-      val result = getResult(submissions)
-
-      val errors = checkResult(result, sheetName) match {
-        case Success(err) => err
-        case Failure(ex) => throw ex
-      }
-
-      val timeTaken = System.currentTimeMillis() - start
-      Logger.info(s"[CsvFileProcessor][validateFile] Validation of file $sheetName completed in $timeTaken ms")
-
-      errors
-    } catch {
-      case e: Exception =>
-        Logger.error (s"[CsvFileProcessor][validateFile] Exception thrown inside 'try'", e)
-        throw e
-    }
+    errors
   }
 
   def checkRowsExist(rowsWithData: Int, sheetName: String)(implicit messages: Messages): Try[Boolean] = {
@@ -155,54 +104,17 @@ class CsvFileProcessor @Inject()(dataGenerator: DataGenerator,
     chunks
   }
 
-  def submitChunks(
-      rows: List[List[String]],
-      chunks: Int,
-      chunkSize: Int,
-      sheetName: String,
-      validator: RowValidator): Array[Future[List[ValidationError]]] = {
-
-    val futures = new Array[Future[List[ValidationError]]](chunks)
-
-    for (chunk <- 1 to chunks) {
-      val chunkStart = (chunk - 1) * chunkSize + 1
-      val chunkEnd = (chunk * chunkSize).min(rows.size)
-
-      futures(chunk - 1) = Future {
-        val chunk = rows.slice(chunkStart - 1, chunkEnd)
-        processChunk(chunk, chunkStart, sheetName, validator)
-      }
-    }
-    futures
-  }
-
-  def processChunk(chunk: List[List[String]], chunkStart: Int, sheetName: String, validator: RowValidator): List[ValidationError] = {
-    val errors: ListBuffer[ValidationError] = new ListBuffer()
-    var rowNo = chunkStart
-    chunk.foreach(row => {
+  def processRow(row: List[String], sheetName: String, validator: RowValidator): List[ValidationError] = {
       val parsedRow = parserUtil.formatDataToValidate(row, sheetName)
-      validator(parsedRow, rowNo) match {
+      validator(parsedRow, 0) match {
         case Some(newErrors) if newErrors.nonEmpty =>
-          Logger.debug("[CsvFileProcessor][processChunk] schemeErrors size is " + errors.size)
-          errors ++= newErrors
-        case _ =>
+          Logger.debug("[CsvFileProcessor][processChunk] schemeErrors size is " + newErrors.size)
+          newErrors
+        case _ => List.empty
       }
-      rowNo += 1
-    })
-    errors.toList
   }
 
-  def getResult(submissions: Array[Future[List[ValidationError]]]): Future[List[ValidationError]] = {
-    val errors: ListBuffer[ValidationError] = new ListBuffer()
-
-    val result = Future.fold(submissions)(errors)((a, b) => b match {
-      case newErrors if newErrors.nonEmpty => a ++= newErrors
-      case _ => a
-    }).map(errors => errors.toList)
-
-    result
-  }
-
+  /*
   def checkResult(result: Future[List[ValidationError]], sheetName: String)(implicit messages: Messages): Try[List[ValidationError]] = {
     Await.ready(result, Duration.Inf)
     result.value match {
@@ -215,5 +127,6 @@ class CsvFileProcessor @Inject()(dataGenerator: DataGenerator,
           messages("ers.exceptions.dataParser.parsingOfFileData")))
     }
   }
+   */
 
 }
