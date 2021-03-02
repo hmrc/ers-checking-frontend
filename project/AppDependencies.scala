@@ -4,6 +4,8 @@ import sbt._
 
 object AppDependencies {
 
+  val silencerVersion = "1.7.1"
+
   val compile: Seq[ModuleID] = Seq(
     ws,
     "uk.gov.hmrc" %% "bootstrap-play-26" % "2.3.0",
@@ -21,7 +23,10 @@ object AppDependencies {
     "com.typesafe.akka" %% "akka-stream" % "2.6.12",
     "com.typesafe.akka" %% "akka-slf4j" % "2.6.12",
     "com.typesafe.akka" %% "akka-protobuf" % "2.6.12",
-    "com.typesafe.akka" %% "akka-http-spray-json" % "10.1.12"
+    "com.typesafe.akka" %% "akka-http-spray-json" % "10.1.12",
+    compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
+    "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
+
   )
 
   val test: Seq[ModuleID] = Seq(

@@ -20,10 +20,10 @@ import java.io.{BufferedReader, InputStream, InputStreamReader}
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.util.zip.ZipInputStream
-
 import akka.actor.ActorSystem
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRef}
+
 import javax.inject.{Inject, Singleton}
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallbackList}
 import models.{ERSFileProcessingException, SheetErrors}
@@ -39,7 +39,7 @@ import services.DataGenerator
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 import akka.http.scaladsl._
 import akka.http.scaladsl.model.StatusCodes.{Success => akkaOk}
 import akka.stream.scaladsl.{Flow, Sink, Source}
@@ -150,69 +150,49 @@ class UploadController @Inject()(authAction: AuthAction,
 
         if (successUpload.name.takeRight(4) == ".csv") {
           val filenameWithoutExtension = FilenameUtils.removeExtension(successUpload.name)
-          val sheetName = dataGenerator.identifyAndDefineSheet(filenameWithoutExtension, scheme)(messages = messages, hc = hc, request = request)
+          val columns: Seq[String] = parserUtil.getHeadersForSchema(filenameWithoutExtension).getOrElse(Seq.empty) // TODO
+          val sheetName: String = dataGenerator.identifyAndDefineSheet(filenameWithoutExtension, scheme)(messages = messages, hc = hc, request = request)
           implicit val validator: DataValidator = dataGenerator.setValidator(sheetName)(messages = messages, hc = hc, request = request)
-          val columns = parserUtil.getHeadersForSchema(scheme)
 
-          /*
-          .viaEither(readStream)
-          .viaEither(intoCsvMap)
-          .viaEither(validateCsvRow)
-          .viaEither(processErrors)
-          */
-
-          /*
-
-
-           */
+          Logger.info(s"validating $columns, $sheetName")
           val futureListOfErrors: Future[Seq[List[ValidationError]]] = readFileCsv(successUpload.downloadUrl)
             .via(Flow.fromFunction(_.right.get))
             .via(CsvToMap.withHeadersAsStrings(StandardCharsets.UTF_8, columns: _*)) // Map("head1" -> "a", "head2" -> "b")
             .via(Flow.fromFunction(csvFileProcessor.validateFile(_, sheetName, ErsValidator.validateRow(validator))(messages = messages)))
             .runWith(Sink.seq[List[ValidationError]])
 
-          futureListOfErrors.map { listOfRows =>
+          val isValidInput: Future[Try[Boolean]] = futureListOfErrors.flatMap { listOfRows =>
             if (listOfRows.isEmpty) {
-              ???
+              Logger.info("listOfRows is empty")
+              Future.successful(Failure(ERSFileProcessingException(
+                messages("ers_check_csv_file.noData", sheetName + ".csv"),
+                messages("ers_check_csv_file.noData"),
+                needsExtendedInstructions = true)))
             } else {
+              Logger.info("listOfRows ain't empty " + listOfRows)
               listOfRows.filter(rowErrors => rowErrors.nonEmpty) match {
-                case allGood if allGood == 0 => ???
-                case errors => {
+                case allGood if allGood.isEmpty => Future.successful(Success(true))
+                case errors =>
+                  Logger.info("errors are " + errors)
                   for {
                     _ <- ersUtil.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${file.uploadId.value}", errors.flatten.length)
                     _ <- ersUtil.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${file.uploadId.value}",
-                      new ListBuffer[SheetErrors]() :+ SheetErrors(sheetName, ListBuffer(listOfRows.filter(rowErrors => rowErrors.nonEmpty).flatten.toList)))
+                      new ListBuffer[SheetErrors]() :+ SheetErrors(sheetName, listOfRows.filter(rowErrors => rowErrors.nonEmpty).flatten.to[ListBuffer]))
                   } yield Success(false)
-                }
               }
             }
           }
-        }
-
-          /*
-          parserUtil.isFileValid(
-            SheetErrors(sheetName, new ListBuffer ++ csvFileProcessor.validateFile(iterator, sheetName, ErsValidator.validateRow(validator))(messages = messages)),
-            Some(file)
-          ) flatMap {
-            case Success(true) => Future.successful(true)
-            case Success(false) => Future.successful(false)
-            case Failure(e) => Future.failed(e)
-          }
+          isValidInput
         } else {
-          throw (ERSFileProcessingException(
+          throw ERSFileProcessingException(
             Messages("ers_check_csv_file.file_type_error", successUpload.name)(messages),
-            Messages("ers_check_csv_file.file_type_error", successUpload.name)(messages)))
+            Messages("ers_check_csv_file.file_type_error", successUpload.name)(messages))
         }
-
-           */
-
       }
 
-
-      // get file url AND THEN -> download file AND THEN -> process file into rows AND THEN -> check rows
-
       Future.sequence(processFiles).map { list =>
-        if (list.forall(identity)) {
+        Logger.info("list at the end is " + list)
+        if (list.forall(_ == Success(true))) {
           Redirect(routes.CheckingServiceController.checkingSuccessPage())
         } else {
           Redirect(routes.HtmlReportController.htmlErrorReportPage(true))
@@ -223,8 +203,6 @@ class UploadController @Inject()(authAction: AuthAction,
       }
     }
   }
-
-
 
   def uploadODSFile(scheme: String): Action[AnyContent] = authAction.async {
     implicit request =>

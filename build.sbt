@@ -52,3 +52,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(resolvers ++= Seq(Resolver.bintrayRepo("hmrc", "releases"), Resolver.jcenterRepo))
   .settings(evictionWarningOptions in update := EvictionWarningOptions.default.withWarnTransitiveEvictions(false).withWarnDirectEvictions(false).withWarnScalaVersionEviction(false))
   .settings(majorVersion :=4)
+
+scalacOptions ++= Seq(
+  "-P:silencer:pathFilters=views;routes"
+)

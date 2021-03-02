@@ -33,5 +33,3 @@ GET			/error-report			    	            controllers.HtmlReportController.htmlErro
 GET			/not-authorised                             controllers.AuthorisationController.notAuthorised()
 
 GET			/language/:lang                             @controllers.LanguageSwitchController.switchToLanguage(lang: String)
-
-GET         /test                                       controllers.TEMPController.streamedWithContentLength()

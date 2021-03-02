@@ -61,11 +61,11 @@ class CsvFileProcessor @Inject()(dataGenerator: DataGenerator,
     val chunkSize = appConfig.chunkSize.getOrElse(defaultChunkSize)
     val cpus = Runtime.getRuntime.availableProcessors()
 
-    Logger.info(s"[CsvFileProcessor][validateFile] Validating file $sheetName cpus: $cpus chunkSize: $chunkSize")
+//    Logger.info(s"[CsvFileProcessor][validateFile] Validating file $sheetName cpus: $cpus chunkSize: $chunkSize")
 
     val errors = processRow(rowContents.values.toList, sheetName, validator)
     val timeTaken = System.currentTimeMillis() - start
-    Logger.info(s"[CsvFileProcessor][validateFile] Validation of file $sheetName completed in $timeTaken ms")
+//    Logger.info(s"[CsvFileProcessor][validateFile] Validation of file $sheetName completed in $timeTaken ms")
 
     errors
   }

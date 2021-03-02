@@ -74,8 +74,14 @@ class CsvParserUtil @Inject()(val ersUtil: ERSUtil,
     SheetErrors(schemeErrors.sheetName, schemeErrors.errors.take(errorCount))
   }
 
-  def getHeadersForSchema(schema: String): Seq[String] = schema match {
-    case ""
-  }
+  private val aToZ: Seq[String] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray.map(_.toString)
+  private val aaToAp: Seq[String] = for (character <- "ABCDEFGHIJKLMNOP") yield "A" + character
+  private val spreadsheetColumns: Seq[String] = aToZ ++ aaToAp
 
+  def getHeadersForSchema(schema: String): Option[Seq[String]] = ERSTemplatesInfo.ersSheets.get(schema).map(sheetInfo => {
+    Logger.info("spreadsheetColumns is " + spreadsheetColumns)
+    spreadsheetColumns.slice(0, sheetInfo.headerRow.length)
+  }
+  )
+  //TODO handle invalid schema correctly
 }
