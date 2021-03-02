@@ -56,15 +56,15 @@ class CsvFileProcessor @Inject()(dataGenerator: DataGenerator,
 //    }
 //  }
 
-  def validateFile(rowContents: Map[String, String], sheetName: String, validator: RowValidator)(implicit messages: Messages): List[ValidationError] = {
+  def validateFile(rowContents: List[String], sheetName: String, validator: RowValidator)(implicit messages: Messages): List[ValidationError] = {
     val start = System.currentTimeMillis()
-    val chunkSize = appConfig.chunkSize.getOrElse(defaultChunkSize)
-    val cpus = Runtime.getRuntime.availableProcessors()
+//    val chunkSize = appConfig.chunkSize.getOrElse(defaultChunkSize)
+//    val cpus = Runtime.getRuntime.availableProcessors()
 
 //    Logger.info(s"[CsvFileProcessor][validateFile] Validating file $sheetName cpus: $cpus chunkSize: $chunkSize")
 
-    val errors = processRow(rowContents.values.toList, sheetName, validator)
-    val timeTaken = System.currentTimeMillis() - start
+    val errors = processRow(rowContents, sheetName, validator)
+//    val timeTaken = System.currentTimeMillis() - start
 //    Logger.info(s"[CsvFileProcessor][validateFile] Validation of file $sheetName completed in $timeTaken ms")
 
     errors
@@ -106,9 +106,10 @@ class CsvFileProcessor @Inject()(dataGenerator: DataGenerator,
 
   def processRow(row: List[String], sheetName: String, validator: RowValidator): List[ValidationError] = {
       val parsedRow = parserUtil.formatDataToValidate(row, sheetName)
+//    Logger.info("parserRow is " + parsedRow)
       validator(parsedRow, 0) match {
         case Some(newErrors) if newErrors.nonEmpty =>
-          Logger.debug("[CsvFileProcessor][processChunk] schemeErrors size is " + newErrors.size)
+//          Logger.info("[CsvFileProcessor][processChunk] schemeErrors size is " + newErrors.size + newErrors)
           newErrors
         case _ => List.empty
       }

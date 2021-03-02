@@ -47,6 +47,7 @@ class CsvParserUtil @Inject()(val ersUtil: ERSUtil,
     }
   }
 
+  // Not called anymore! Leaving for reference for now
   def isFileValid(sheetErrors: SheetErrors, file: Option[UpscanCsvFilesCallback] = None)
 								 (implicit request: Request[AnyContent], hc: HeaderCarrier): Future[Try[Boolean]] = {
     if (sheetErrors.errors.isEmpty) {

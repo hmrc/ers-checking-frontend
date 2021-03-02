@@ -49,8 +49,8 @@ class HtmlReportController @Inject()(authAction: AuthAction,
   def csvExtractErrors(ids: Seq[UploadId], all: CacheMap): (ListBuffer[SheetErrors], Long, Int) = {
     var totalErrors = 0
     val listBufferAndCount: Seq[(ListBuffer[SheetErrors], Long)] = ids map { id =>
-      val errors = all.getEntry[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}$id").getOrElse(ListBuffer())
-      val errorCount = all.getEntry[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}$id").getOrElse(0L)
+      val errors = all.getEntry[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${id.value}").getOrElse(ListBuffer())
+      val errorCount = all.getEntry[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${id.value}").getOrElse(0L)
 
       for (sheet <- errors) {
         val sheetErrors: ListBuffer[ValidationError] = sheet.errors

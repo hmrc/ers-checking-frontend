@@ -17,8 +17,8 @@
 package services
 
 import java.util.concurrent.TimeUnit
-
 import controllers.auth.RequestWithOptionalEmpRef
+
 import javax.inject.{Inject, Singleton}
 import metrics.Metrics
 import models.{ERSFileProcessingException, SheetErrors}
@@ -34,6 +34,7 @@ import utils.{ERSUtil, ParserUtil}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Try, Success}
 
 @Singleton
 class DataGenerator @Inject()(auditEvents: AuditEvents,
@@ -148,6 +149,22 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
       throw ERSFileProcessingException("ers.exceptions.dataParser.incorrectSchemeType",
         Messages("ers.exceptions.dataParser.incorrectSchemeType", sheetInfo.schemeType.toLowerCase, schemeName.toLowerCase),
         optionalParams = Seq(ersUtil.withArticle(sheetInfo.schemeType.toUpperCase), ersUtil.withArticle(schemeName.toUpperCase), sheetInfo.sheetName))
+    }
+  }
+
+  def identifyAndDefineSheetCsv(filename: String, scheme: String)(implicit hc: HeaderCarrier, request: Request[_], messages: Messages): Try[String] = {
+    Logger.debug("5.1  case 0 identifyAndDefineSheet  " )
+    val sheetInfo = getSheet(filename, scheme)
+    val schemeName = ersUtil.getSchemeName(scheme)._2
+    if (sheetInfo.schemeType.toLowerCase == schemeName.toLowerCase) {
+      Logger.debug("****5.1.1  data contains data:  *****" + filename)
+      Success(filename)
+    } else {
+      auditEvents.fileProcessingErrorAudit(sheetInfo.schemeType, sheetInfo.sheetName, s"${sheetInfo.schemeType.toLowerCase} is not equal to ${schemeName.toLowerCase}")
+      Logger.warn(Messages("ers.exceptions.dataParser.incorrectSchemeType", sheetInfo.schemeType.toUpperCase, schemeName.toUpperCase))
+      Failure(ERSFileProcessingException("ers.exceptions.dataParser.incorrectSchemeType",
+        Messages("ers.exceptions.dataParser.incorrectSchemeType", sheetInfo.schemeType.toLowerCase, schemeName.toLowerCase),
+        optionalParams = Seq(ersUtil.withArticle(sheetInfo.schemeType.toUpperCase), ersUtil.withArticle(schemeName.toUpperCase), sheetInfo.sheetName)))
     }
   }
 

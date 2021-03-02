@@ -50,6 +50,8 @@ import org.apache.commons.io.FilenameUtils
 import services.validation.ErsValidator
 import uk.gov.hmrc.services.validation.{DataValidator, ValidationError}
 
+import scala.annotation.tailrec
+
 @Singleton
 class UploadController @Inject()(authAction: AuthAction,
                                  processODSService: ProcessODSService,
@@ -59,7 +61,7 @@ class UploadController @Inject()(authAction: AuthAction,
                                  dataGenerator: DataGenerator,
                                  implicit val ersUtil: ERSUtil,
                                  implicit val appConfig: ApplicationConfig
-                                 )(implicit executionContext: ExecutionContext, actorSystem: ActorSystem)
+                                )(implicit executionContext: ExecutionContext, actorSystem: ActorSystem)
   extends FrontendController(mcc) with I18nSupport {
 
   def downloadAsInputStream(downloadUrl: String): InputStream = new URL(downloadUrl).openStream()
@@ -67,8 +69,8 @@ class UploadController @Inject()(authAction: AuthAction,
   def clearCache()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Boolean] = {
     //remove function doesn't work, the cache needs to be overwritten with 'blank' data
     (for {
-      _   <-  ersUtil.cache[Long](ersUtil.SCHEME_ERROR_COUNT_CACHE, 0L)
-      _   <-  ersUtil.cache[ListBuffer[SheetErrors]](ersUtil.ERROR_LIST_CACHE, new ListBuffer[SheetErrors]())
+      _ <- ersUtil.cache[Long](ersUtil.SCHEME_ERROR_COUNT_CACHE, 0L)
+      _ <- ersUtil.cache[ListBuffer[SheetErrors]](ersUtil.ERROR_LIST_CACHE, new ListBuffer[SheetErrors]())
     } yield {
       Logger.debug(s"[UploadController][clearCache] Successfully cleared cache")
       true
@@ -92,22 +94,22 @@ class UploadController @Inject()(authAction: AuthAction,
           Source.failed(new RuntimeException(s"illegal response $notOkResponse"))
       }
 
-      Source
-        .single(HttpRequest(uri = downloadUrl))
-        .mapAsync(1)(Http()(actorSystem).singleRequest(_))
-        .flatMapConcat(extractEntityData)
-        .via(CsvParsing.lineScanner())
-        .via(Flow.fromFunction(makeRight))
-        .recover {
-          case e => Left(e)
-        }
-        .divertTo(errorSink, _.isLeft)
-      // extract entity
-      // get csv map
-      //last line: .via(convertToCsvMap)
-      //readFileCsv returns a Flow[List[ByteString], Map[String, String], NotUsed] containing the Map(String, String)
+    Source
+      .single(HttpRequest(uri = downloadUrl))
+      .mapAsync(1)(Http()(actorSystem).singleRequest(_))
+      .flatMapConcat(extractEntityData)
+      .via(CsvParsing.lineScanner())
+      .via(Flow.fromFunction(makeRight))
+      .recover {
+        case e => Left(e)
+      }
+      .divertTo(errorSink, _.isLeft)
+    // extract entity
+    // get csv map
+    //last line: .via(convertToCsvMap)
+    //readFileCsv returns a Flow[List[ByteString], Map[String, String], NotUsed] containing the Map(String, String)
 
-      // apply functions of validation
+    // apply functions of validation
   }
 
   private[controllers] def readFileOds(downloadUrl: String): StaxProcessor = {
@@ -129,6 +131,7 @@ class UploadController @Inject()(authAction: AuthAction,
           )
       }
     }
+
     val contentInputStream: InputStream = findFileInZip(zipInputStream)
     new StaxProcessor(contentInputStream)
   }
@@ -138,6 +141,28 @@ class UploadController @Inject()(authAction: AuthAction,
       showUploadCSVFile(scheme)
   }
 
+  @tailrec
+  private def listWithFirstNEntriesZippedNameTBD(n: Int, list: Seq[(List[ValidationError], Int)]): Seq[(List[ValidationError], Int)] = {
+    if (n == 0) list
+    else {
+      val indexOfFirstOccurrence: Int = list.indexWhere(entry => entry._1.nonEmpty && entry._1.exists(validationError => validationError.cell.row == 0))
+      if (indexOfFirstOccurrence != -1) {
+        val listOriginalReference = list(indexOfFirstOccurrence)._1
+        val entryReplacement = (listOriginalReference.map(validationError => {
+          val cellReplaced = validationError.cell.copy(row = indexOfFirstOccurrence + 1)
+          validationError.copy(cell = cellReplaced)
+        }), indexOfFirstOccurrence)
+        Logger.info("replaced with " + entryReplacement)
+        listWithFirstNEntriesZippedNameTBD(n - 1, list.updated(indexOfFirstOccurrence, entryReplacement))
+      } else list
+    }
+  }
+
+  def giveRowNumbers(list: Seq[List[ValidationError]]): Seq[List[ValidationError]] = {
+    val numberOfErrorsToDisplay: Int = 20
+    listWithFirstNEntriesZippedNameTBD(numberOfErrorsToDisplay, list.zipWithIndex).map(_._1)
+  }
+
   def showUploadCSVFile(scheme: String)(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
     clearCache() map {
       case false => getGlobalErrorPage(request, messages)
@@ -145,44 +170,48 @@ class UploadController @Inject()(authAction: AuthAction,
 
     ersUtil.shortLivedCache.fetchAndGetEntry[UpscanCsvFilesCallbackList](ersUtil.getCacheId, "callback_data_key_csv") flatMap { callback =>
 
-      val processFiles = callback.get.files map { file =>
+      val processFiles: List[Future[Try[Boolean]]] = callback.get.files map { file =>
         val successUpload = file.uploadStatus.asInstanceOf[UploadedSuccessfully]
 
         if (successUpload.name.takeRight(4) == ".csv") {
           val filenameWithoutExtension = FilenameUtils.removeExtension(successUpload.name)
-          val columns: Seq[String] = parserUtil.getHeadersForSchema(filenameWithoutExtension).getOrElse(Seq.empty) // TODO
-          val sheetName: String = dataGenerator.identifyAndDefineSheet(filenameWithoutExtension, scheme)(messages = messages, hc = hc, request = request)
-          implicit val validator: DataValidator = dataGenerator.setValidator(sheetName)(messages = messages, hc = hc, request = request)
+          dataGenerator.identifyAndDefineSheetCsv(filenameWithoutExtension, scheme)(messages = messages, hc = hc, request = request) match {
+            case Success(sheetName) =>
+              implicit val validator: DataValidator = dataGenerator.setValidator(sheetName)(messages = messages, hc = hc, request = request)
 
-          Logger.info(s"validating $columns, $sheetName")
-          val futureListOfErrors: Future[Seq[List[ValidationError]]] = readFileCsv(successUpload.downloadUrl)
-            .via(Flow.fromFunction(_.right.get))
-            .via(CsvToMap.withHeadersAsStrings(StandardCharsets.UTF_8, columns: _*)) // Map("head1" -> "a", "head2" -> "b")
-            .via(Flow.fromFunction(csvFileProcessor.validateFile(_, sheetName, ErsValidator.validateRow(validator))(messages = messages)))
-            .runWith(Sink.seq[List[ValidationError]])
+              val futureListOfErrors: Future[Seq[List[ValidationError]]] = readFileCsv(successUpload.downloadUrl)
+                .via(Flow.fromFunction(_.right.get))
+                .via(Flow.fromFunction(_.map(_.utf8String)))
+                .via(Flow.fromFunction(csvFileProcessor.validateFile(_, sheetName, ErsValidator.validateRow(validator))(messages = messages)))
+                .runWith(Sink.seq[List[ValidationError]])
 
-          val isValidInput: Future[Try[Boolean]] = futureListOfErrors.flatMap { listOfRows =>
-            if (listOfRows.isEmpty) {
-              Logger.info("listOfRows is empty")
-              Future.successful(Failure(ERSFileProcessingException(
-                messages("ers_check_csv_file.noData", sheetName + ".csv"),
-                messages("ers_check_csv_file.noData"),
-                needsExtendedInstructions = true)))
-            } else {
-              Logger.info("listOfRows ain't empty " + listOfRows)
-              listOfRows.filter(rowErrors => rowErrors.nonEmpty) match {
-                case allGood if allGood.isEmpty => Future.successful(Success(true))
-                case errors =>
-                  Logger.info("errors are " + errors)
-                  for {
-                    _ <- ersUtil.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${file.uploadId.value}", errors.flatten.length)
-                    _ <- ersUtil.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${file.uploadId.value}",
-                      new ListBuffer[SheetErrors]() :+ SheetErrors(sheetName, listOfRows.filter(rowErrors => rowErrors.nonEmpty).flatten.to[ListBuffer]))
-                  } yield Success(false)
+              val isValidInput: Future[Try[Boolean]] = futureListOfErrors.flatMap { listOfRows =>
+                if (listOfRows.isEmpty) {
+                  Logger.info("listOfRows is empty")
+                  Future.successful(Failure(ERSFileProcessingException(
+                    messages("ers_check_csv_file.noData", sheetName + ".csv"),
+                    messages("ers_check_csv_file.noData"),
+                    needsExtendedInstructions = true)))
+                } else {
+
+                  val rowsWithRowNumbers = giveRowNumbers(listOfRows)
+
+                  rowsWithRowNumbers.filter(rowErrors => rowErrors.nonEmpty) match {
+                    case allGood if allGood.isEmpty => Future.successful(Success(true))
+                    case errors =>
+                      val errorsToCache = new ListBuffer[SheetErrors]() :+ parserUtil.getSheetErrors(SheetErrors(sheetName, rowsWithRowNumbers.filter(rowErrors => rowErrors.nonEmpty).flatten.to[ListBuffer]))
+                      Logger.info("errorsToCache are " + errorsToCache.head.errors.length)
+                      for {
+                        _ <- ersUtil.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${file.uploadId.value}", errors.flatten.length)
+                        _ <- ersUtil.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${file.uploadId.value}",
+                          errorsToCache)
+                      } yield Success(false)
+                  }
+                }
               }
-            }
+              isValidInput
+            case Failure(errors) => Future.successful(Failure(errors))
           }
-          isValidInput
         } else {
           throw ERSFileProcessingException(
             Messages("ers_check_csv_file.file_type_error", successUpload.name)(messages),
@@ -191,11 +220,18 @@ class UploadController @Inject()(authAction: AuthAction,
       }
 
       Future.sequence(processFiles).map { list =>
-        Logger.info("list at the end is " + list)
+        //Logger.info("list at the end is " + list)
         if (list.forall(_ == Success(true))) {
           Redirect(routes.CheckingServiceController.checkingSuccessPage())
+        } else if (list.exists(_.isFailure)) {
+          list.find(_.isFailure).head match {
+            case Failure(exception) => {
+              Logger.info("throwing exception right here! " + exception)
+              throw exception
+            }
+          }
         } else {
-          Redirect(routes.HtmlReportController.htmlErrorReportPage(true))
+            Redirect(routes.HtmlReportController.htmlErrorReportPage(true))
         }
       } recoverWith {
         case t: Throwable =>
@@ -241,8 +277,8 @@ class UploadController @Inject()(authAction: AuthAction,
   }
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-    Ok (views.html.global_error (
-    "ers.global_errors.title",
-    "ers.global_errors.message") (request, messages, appConfig) )
+    Ok(views.html.global_error(
+      "ers.global_errors.title",
+      "ers.global_errors.message")(request, messages, appConfig))
   }
 }
