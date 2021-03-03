@@ -16,6 +16,8 @@
 
 package utils
 
+import akka.NotUsed
+import akka.stream.scaladsl.Flow
 import config.ApplicationConfig
 import javax.inject.{Inject, Singleton}
 import models.SheetErrors
@@ -37,7 +39,7 @@ class CsvParserUtil @Inject()(val ersUtil: ERSUtil,
 
   def formatDataToValidate(rowData: Seq[String], sheetName: String): Seq[String] = {
     val sheetColSize = ERSTemplatesInfo.ersSheets(sheetName.replace(".csv", "")).headerRow.size
-    if(rowData.size < sheetColSize) {
+    if (rowData.size < sheetColSize) {
       Logger.debug(s"Difference between amount of columns ${rowData.size} and amount of headers $sheetColSize")
       val additionalEmptyCells: Seq[String] = Seq.fill(sheetColSize - rowData.size)("")
       (rowData ++ additionalEmptyCells).take(sheetColSize)
@@ -49,20 +51,20 @@ class CsvParserUtil @Inject()(val ersUtil: ERSUtil,
 
   // Not called anymore! Leaving for reference for now
   def isFileValid(sheetErrors: SheetErrors, file: Option[UpscanCsvFilesCallback] = None)
-								 (implicit request: Request[AnyContent], hc: HeaderCarrier): Future[Try[Boolean]] = {
+                 (implicit request: Request[AnyContent], hc: HeaderCarrier): Future[Try[Boolean]] = {
     if (sheetErrors.errors.isEmpty) {
       Future.successful(Success(true))
     }
     else {
-			val updatedErrorCount = sheetErrors.errors.length
-			val updatedErrorList = getSheetErrors(sheetErrors)
+      val updatedErrorCount = sheetErrors.errors.length
+      val updatedErrorList = getSheetErrors(sheetErrors)
       val id = file.map(_.uploadId).getOrElse("")
 
       val result = for {
-				_ <- ersUtil.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}$id", updatedErrorCount)
-				_ <- ersUtil.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}$id",
+        _ <- ersUtil.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}$id", updatedErrorCount)
+        _ <- ersUtil.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}$id",
           new ListBuffer[SheetErrors]() :+ updatedErrorList)
-			} yield Success(false)
+      } yield Success(false)
 
       result recover {
         case ex: Exception => Failure(ex)
@@ -84,5 +86,12 @@ class CsvParserUtil @Inject()(val ersUtil: ERSUtil,
     spreadsheetColumns.slice(0, sheetInfo.headerRow.length)
   }
   )
+
   //TODO handle invalid schema correctly
+
+  implicit class FlowOps[A, B](flow: Flow[A, B, NotUsed]) {
+    def eitherFromFunction[A, B](input: A => Either[Throwable, B]): Flow[Either[Throwable, A], Either[Throwable, B], NotUsed] =
+      Flow.fromFunction(_.flatMap(input))
+  }
+
 }

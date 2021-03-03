@@ -22,7 +22,7 @@ import com.typesafe.config.{Config, ConfigFactory, ConfigValue}
 import services.ersTemplatesInfo._
 import uk.gov.hmrc.services.validation.DataValidator
 
-case class SheetInfo (schemeType:String, sheetId: Int, sheetName:String, sheetTitle:String,configFileName: String, headerRow:List[String])
+case class SheetInfo (schemeType: String, sheetId: Int, sheetName: String, sheetTitle: String, configFileName: String, headerRow: List[String])
 
 object ERSTemplatesInfo extends EMITemplateInfo with CsopTemplateInfo with SipTemplateInfo with OtherTemplateInfo with SayeTemplateInfo{
 

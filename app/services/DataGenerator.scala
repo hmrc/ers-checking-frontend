@@ -17,8 +17,10 @@
 package services
 
 import java.util.concurrent.TimeUnit
-import controllers.auth.RequestWithOptionalEmpRef
 
+import akka.NotUsed
+import akka.stream.scaladsl.Flow
+import controllers.auth.RequestWithOptionalEmpRef
 import javax.inject.{Inject, Singleton}
 import metrics.Metrics
 import models.{ERSFileProcessingException, SheetErrors}
@@ -30,16 +32,17 @@ import services.audit.AuditEvents
 import services.validation.ErsValidator
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.services.validation.DataValidator
-import utils.{ERSUtil, ParserUtil}
+import utils.{CsvParserUtil, ERSUtil, ParserUtil}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext
-import scala.util.{Failure, Try, Success}
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class DataGenerator @Inject()(auditEvents: AuditEvents,
                               metrics: Metrics,
                               parserUtil: ParserUtil,
+                              csvParserUtil: CsvParserUtil,
                               ersUtil: ERSUtil
                              )(implicit ec: ExecutionContext) extends DataParser {
 
@@ -125,7 +128,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
     try {
       ERSValidationConfigs.getValidator(ersSheets(sheetName).configFileName)
     }catch{
-      case e:Exception =>
+      case e: Exception =>
         auditEvents.auditRunTimeError(e,"Could not set the validator", sheetName)(hc, request, ec)
         Logger.error("setValidator has thrown an exception, SheetName: " + sheetName + " Exception message: " + e.getMessage)
         throw ERSFileProcessingException(
@@ -133,6 +136,22 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
           Messages("ers.exceptions.dataParser.validatorError"),
           optionalParams = Seq(sheetName)
         )
+    }
+  }
+
+  def setValidatorCsv(sheetName:String)(implicit hc : HeaderCarrier, request: Request[_], messages: Messages): Either[Throwable, DataValidator] = {
+    Try {
+      ERSValidationConfigs.getValidator(ersSheets(sheetName).configFileName)
+    } match {
+      case Success(validator) => Right(validator)
+      case Failure(e) =>
+        auditEvents.auditRunTimeError(e, "Could not set the validator", sheetName)(hc, request, ec)
+        Logger.error("setValidator has thrown an exception, SheetName: " + sheetName + " Exception message: " + e.getMessage)
+        Left(ERSFileProcessingException(
+          "ers.exceptions.dataParser.configFailure",
+          Messages("ers.exceptions.dataParser.validatorError"),
+          optionalParams = Seq(sheetName)
+        ))
     }
   }
 
@@ -152,21 +171,21 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
     }
   }
 
-  def identifyAndDefineSheetCsv(filename: String, scheme: String)(implicit hc: HeaderCarrier, request: Request[_], messages: Messages): Try[String] = {
-    Logger.debug("5.1  case 0 identifyAndDefineSheet  " )
-    val sheetInfo = getSheet(filename, scheme)
-    val schemeName = ersUtil.getSchemeName(scheme)._2
-    if (sheetInfo.schemeType.toLowerCase == schemeName.toLowerCase) {
-      Logger.debug("****5.1.1  data contains data:  *****" + filename)
-      Success(filename)
-    } else {
-      auditEvents.fileProcessingErrorAudit(sheetInfo.schemeType, sheetInfo.sheetName, s"${sheetInfo.schemeType.toLowerCase} is not equal to ${schemeName.toLowerCase}")
-      Logger.warn(Messages("ers.exceptions.dataParser.incorrectSchemeType", sheetInfo.schemeType.toUpperCase, schemeName.toUpperCase))
-      Failure(ERSFileProcessingException("ers.exceptions.dataParser.incorrectSchemeType",
-        Messages("ers.exceptions.dataParser.incorrectSchemeType", sheetInfo.schemeType.toLowerCase, schemeName.toLowerCase),
-        optionalParams = Seq(ersUtil.withArticle(sheetInfo.schemeType.toUpperCase), ersUtil.withArticle(schemeName.toUpperCase), sheetInfo.sheetName)))
-    }
-  }
+   def identifyAndDefineSheetEither(informationOnInput: (SheetInfo, String))(implicit hc: HeaderCarrier, request: Request[_], messages: Messages): Either[Throwable, String] = {
+     val sheetInfo = informationOnInput._1
+     val schemeName = informationOnInput._2
+
+     if (sheetInfo.schemeType.toLowerCase == schemeName.toLowerCase) {
+       Logger.debug("****5.1.1  data contains data:  *****" + sheetInfo.sheetName)
+       Right(sheetInfo.sheetName)
+     } else {
+       auditEvents.fileProcessingErrorAudit(sheetInfo.schemeType, sheetInfo.sheetName, s"${sheetInfo.schemeType.toLowerCase} is not equal to ${schemeName.toLowerCase}")
+       Logger.warn(Messages("ers.exceptions.dataParser.incorrectSchemeType", sheetInfo.schemeType.toUpperCase, schemeName.toUpperCase))
+       Left(ERSFileProcessingException("ers.exceptions.dataParser.incorrectSchemeType",
+         Messages("ers.exceptions.dataParser.incorrectSchemeType", sheetInfo.schemeType.toLowerCase, schemeName.toLowerCase),
+         optionalParams = Seq(ersUtil.withArticle(sheetInfo.schemeType.toUpperCase), ersUtil.withArticle(schemeName.toUpperCase), sheetInfo.sheetName)))
+     }
+   }
 
   def getSheet(sheetName: String, scheme: String)(implicit messages: Messages): SheetInfo = {
     Logger.info(s"[DataGenerator][getSheet] Looking for sheetName: $sheetName")
@@ -180,6 +199,21 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
         optionalParams = Seq(sheetName, schemeName)
       )
     })
+  }
+
+  def getSheetCsv(sheetName: String, scheme: String)(implicit messages: Messages): Either[Throwable, (SheetInfo, String)] = { // IS CSV
+    Logger.info(s"[DataGenerator][getSheet] Looking for sheetName: $sheetName")
+    ersSheets.get(sheetName) match {
+      case Some(sheetInfo) => Right((sheetInfo, ersUtil.getSchemeName(scheme)._2))
+      case _ =>
+        Logger.warn("[DataGenerator][getSheet] Couldn’t identify SheetName")
+        val schemeName = ersUtil.getSchemeName(scheme)._2
+        Left(ERSFileProcessingException(
+          "ers.exceptions.dataParser.incorrectSheetName",
+          Messages("ers.exceptions.dataParser.unidentifiableSheetName") + " " + sheetName,
+          needsExtendedInstructions = true,
+          optionalParams = Seq(sheetName, schemeName)))
+    }
   }
 
   def validateHeaderRow(rowData:Seq[String], sheetName:String, scheme:String, fileName: String)(implicit messages: Messages): Int =
