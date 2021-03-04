@@ -20,6 +20,8 @@ import scala.util.matching.Regex
 import uk.gov.hmrc.services.validation.{Cell, DataValidator, Row, ValidationError}
 import play.api.Logger
 
+import scala.util.{Failure, Success, Try}
+
 object ValidationContext extends ERSValidationFormatters {
 
   def verifyFormat(formatter: String, data:String):Boolean =
@@ -54,6 +56,17 @@ object ErsValidator {
       case e: Exception =>
         Logger.warn(e.toString)
         throw e
+    }
+  }
+
+  def validateRowCsv(validator: DataValidator)(rowData: Seq[String]): Either[Throwable, Option[List[ValidationError]]] = {
+    Try {
+      validator.validateRow(Row(0, getCells(rowData,0)), Some(ValidationContext))
+    } match {
+      case Failure(e) =>
+        Logger.warn(e.toString)
+        Left(e)
+      case Success(list) => Right(list)
     }
   }
 

@@ -45,7 +45,7 @@ import scala.concurrent.{Await, Future}
 import scala.io.BufferedSource
 import scala.util.{Failure, Success}
 
-class CsvFileProcessorSpec extends UnitSpec with ErsTestHelper with GuiceOneAppPerSuite with TimeLimits with ScalaFutures {
+class ProcessCsvServiceSpec extends UnitSpec with ErsTestHelper with GuiceOneAppPerSuite with TimeLimits with ScalaFutures {
 
   private val nl: String = System.lineSeparator()
   private val timeout = 100
@@ -80,16 +80,16 @@ class CsvFileProcessorSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
 
-  def testCsvFileProcessor: CsvFileProcessor = new CsvFileProcessor(mockDataGenerator, testParserUtil, mockUploadedFileUtil, mockAppConfig)
+  def testProcessCsvService: ProcessCsvService = new ProcessCsvService(mockDataGenerator, testParserUtil, mockUploadedFileUtil, mockAppConfig)
 
-  "The CsvFileProcessor service " must {
+  "The ProcessCsvService service " must {
 
     "validate file data and return errors" in {
       when(mockDataGenerator.isBlankRow(any())).thenReturn(false)
       val source = convertToBufferedSource(new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv"))
       val fileCopied = source.getLines()
       val dataValidator = DataValidator(ConfigFactory.load.getConfig("ers-other-grants-validation-config"))
-      val result = testCsvFileProcessor.validateFile(fileCopied, "Other_Grants_V3.csv", ErsValidator.validateRow(dataValidator))
+      val result = testProcessCsvService.validateFile(fileCopied, "Other_Grants_V3.csv", ErsValidator.validateRow(dataValidator))
       source.close()
       result.size shouldBe 4
     }
@@ -103,7 +103,7 @@ class CsvFileProcessorSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
       val source = convertToBufferedSource(new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv"))
       val fileCopied = source.getLines()
       val request = Fixtures.buildFakeRequestWithSessionId("POST")
-      val result = testCsvFileProcessor.readCSVFile("Other_Grants_V3", fileCopied, "other")(request, hc = HeaderCarrier(), implicitly[Messages])
+      val result = testProcessCsvService.readCSVFile("Other_Grants_V3", fileCopied, "other")(request, hc = HeaderCarrier(), implicitly[Messages])
       source.close()
       result.errors.size shouldBe  4
     }
@@ -113,7 +113,7 @@ class CsvFileProcessorSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
         def validator(rowData:Seq[String],rowCount:Int): Option[List[ValidationError]] = throw new Exception
         val source = convertToBufferedSource(new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv"))
         val fileCopied = source.getLines()
-        testCsvFileProcessor.validateFile(fileCopied, "Other_Grants_V3.csv", validator)
+        testProcessCsvService.validateFile(fileCopied, "Other_Grants_V3.csv", validator)
         source.close()
       }
       result.getMessage shouldEqual  Messages("ers.exceptions.dataParser.fileParsingError", "Other_Grants_V3.csv")
@@ -124,7 +124,7 @@ class CsvFileProcessorSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
         val source = convertToBufferedSource(new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Acquisition_V3.csv"))
         val fileCopied = source.getLines()
         val dataValidator = DataValidator(ConfigFactory.load.getConfig("ers-other-acquisition-validation-config"))
-        testCsvFileProcessor.validateFile(fileCopied,"Other_Acquisition_V3", ErsValidator.validateRow(dataValidator))
+        testProcessCsvService.validateFile(fileCopied,"Other_Acquisition_V3", ErsValidator.validateRow(dataValidator))
         source.close()
       }
       result.getMessage shouldEqual Messages("ers_check_csv_file.noData", "Other_Acquisition_V3.csv")
@@ -133,16 +133,16 @@ class CsvFileProcessorSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
   }
 
   "converter should split by comma" in {
-    testCsvFileProcessor.converter("a,b,c") shouldBe Array("a","b","c")
+    testProcessCsvService.converter("a,b,c") shouldBe Array("a","b","c")
   }
 
   "checkRowsExist" must {
     "return true if the number of rows found is greater than zero" in {
-      testCsvFileProcessor.checkRowsExist(1, "test") shouldEqual Success(true)
+      testProcessCsvService.checkRowsExist(1, "test") shouldEqual Success(true)
     }
 
     "return an exception if the number of rows is not greater than zero" in {
-      val actual = testCsvFileProcessor.checkRowsExist(0, "test")
+      val actual = testProcessCsvService.checkRowsExist(0, "test")
       actual shouldBe a[Failure[_]]
       val throwable = actual.failed.get
       throwable shouldBe a[ERSFileProcessingException]
@@ -160,7 +160,7 @@ class CsvFileProcessorSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
       val fixture = getRowsFromFileFixture
       val source = convertToBufferedSource(createTempFile(fixture.content))
       val file = source.getLines()
-      val (_, actual) = testCsvFileProcessor.getRowsFromFile(file)
+      val (_, actual) = testProcessCsvService.getRowsFromFile(file)
       source.close()
       actual shouldEqual 3
     }
@@ -169,7 +169,7 @@ class CsvFileProcessorSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
       val fixture = getRowsFromFileFixture
       val source = convertToBufferedSource(createTempFile(fixture.content))
       val file = source.getLines()
-      val (actual, _) = testCsvFileProcessor.getRowsFromFile(file)
+      val (actual, _) = testProcessCsvService.getRowsFromFile(file)
       val expected: List[List[String]] = fixture.content.split(nl).toList.map(s => s.split(",").toList)
       source.close()
       actual shouldEqual expected
@@ -178,7 +178,7 @@ class CsvFileProcessorSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
     "handle empty files" in {
       val source = convertToBufferedSource(createTempFile(""))
       val file = source.getLines()
-      val actual = testCsvFileProcessor.getRowsFromFile(file)
+      val actual = testProcessCsvService.getRowsFromFile(file)
       source.close()
       actual shouldEqual (Nil, 0)
     }
@@ -187,10 +187,10 @@ class CsvFileProcessorSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
   "numberOfChunks method" must {
     "return the correct number of chunks" in {
       // scalastyle:off magic.number
-      testCsvFileProcessor.numberOfChunks(0, 1) shouldEqual 0
-      testCsvFileProcessor.numberOfChunks(1, 2) shouldEqual 1
-      testCsvFileProcessor.numberOfChunks(2, 2) shouldEqual 1
-      testCsvFileProcessor.numberOfChunks(9, 2) shouldEqual 5
+      testProcessCsvService.numberOfChunks(0, 1) shouldEqual 0
+      testProcessCsvService.numberOfChunks(1, 2) shouldEqual 1
+      testProcessCsvService.numberOfChunks(2, 2) shouldEqual 1
+      testProcessCsvService.numberOfChunks(9, 2) shouldEqual 5
       // scalastyle:on magic.number
     }
   }
@@ -213,7 +213,7 @@ class CsvFileProcessorSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
         Some(Nil)
       }
 
-      val actual = testCsvFileProcessor.submitChunks(fixture.rows, 3, 2, fixture.sheetName, dummyValidator)
+      val actual = testProcessCsvService.submitChunks(fixture.rows, 3, 2, fixture.sheetName, dummyValidator)
 
       actual.length shouldEqual 3
     }
@@ -229,7 +229,7 @@ class CsvFileProcessorSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
           Some(Nil)
         }
 
-        val actual: Array[Future[List[ValidationError]]] = testCsvFileProcessor.submitChunks(fixture.rows, 3, 2, fixture.sheetName, dummyValidator)
+        val actual: Array[Future[List[ValidationError]]] = testProcessCsvService.submitChunks(fixture.rows, 3, 2, fixture.sheetName, dummyValidator)
 
         Future.sequence(actual.toList).futureValue
 
@@ -256,7 +256,7 @@ class CsvFileProcessorSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
         Some(Nil)
       }
 
-      testCsvFileProcessor.processChunk(fixture.chunk, 1, fixture.sheetName, dummyValidator)
+      testProcessCsvService.processChunk(fixture.chunk, 1, fixture.sheetName, dummyValidator)
       count shouldEqual fixture.chunk.size
     }
 
@@ -282,7 +282,7 @@ class CsvFileProcessorSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
         }
       }
 
-      val actual = testCsvFileProcessor.processChunk(fixture.chunk, 1, fixture.sheetName, dummyValidator)
+      val actual = testProcessCsvService.processChunk(fixture.chunk, 1, fixture.sheetName, dummyValidator)
       actual shouldEqual expected
     }
   }
@@ -294,7 +294,7 @@ class CsvFileProcessorSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
         Future(List.empty[ValidationError])
       )
 
-      val actual = testCsvFileProcessor.getResult(submissions)
+      val actual = testProcessCsvService.getResult(submissions)
       failAfter(awaitTimeout) {
         Await.ready(actual, Duration.Inf)
       }
@@ -314,7 +314,7 @@ class CsvFileProcessorSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
 
       val expected = Some(Success(submissions.toList.flatten))
 
-      val actual = testCsvFileProcessor.getResult(submissions)
+      val actual = testProcessCsvService.getResult(submissions)
       failAfter(awaitTimeout) {
         Await.ready(actual, Duration.Inf)
       }

@@ -25,7 +25,7 @@ import play.api.Application
 import play.api.http.Status
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{DefaultMessagesControllerComponents, Request, Result}
-import services.{CsvFileProcessor, ProcessODSService}
+import services.{ProcessCsvService, ProcessODSService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -42,7 +42,7 @@ class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
   override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(app)
   val mockProcessODSService: ProcessODSService = mock[ProcessODSService]
-  val mockCsvFileProcessor: CsvFileProcessor = mock[CsvFileProcessor]
+  val mockProcessCsvService: ProcessCsvService = mock[ProcessCsvService]
 
   val uploadId: UploadId = UploadId("uploadId")
   val upscanCsvFilesCallback: UpscanCsvFilesCallback = UpscanCsvFilesCallback(uploadId: UploadId, InProgress)

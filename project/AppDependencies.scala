@@ -37,7 +37,9 @@ object AppDependencies {
     "org.pegdown" % "pegdown" % "1.6.0",
     "org.jsoup" % "jsoup" % "1.9.2",
     "com.github.tomakehurst" % "wiremock-standalone" % "2.27.2",
-    "com.typesafe.play" %% "play-test" % PlayVersion.current
+    "com.typesafe.play" %% "play-test" % PlayVersion.current,
+    "com.typesafe.akka" %% "akka-testkit" % "2.6.12"
+
   ).map(_ % "test")
 
 
