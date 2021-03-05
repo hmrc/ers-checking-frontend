@@ -28,18 +28,19 @@ import play.api.i18n
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.mvc.DefaultMessagesControllerComponents
 import services.XMLTestData._
-import utils.ParserUtil
+import utils.{CsvParserUtil, ParserUtil}
 import org.mockito.Mockito._
 
 
 class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with ErsTestHelper with BeforeAndAfter {
 
   val mockParserUtil: ParserUtil = mock[ParserUtil]
+  val mockCsvParserUtil: CsvParserUtil = mock[CsvParserUtil]
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
 
   object TestDataParser extends DataParser
-  object TestDataGenerator extends DataGenerator(mockAuditEvents, mockMetrics, mockParserUtil, mockErsUtil)
+  object TestDataGenerator extends DataGenerator(mockAuditEvents, mockMetrics, mockParserUtil, mockCsvParserUtil, mockErsUtil)
 
   when(mockErsUtil.withArticle(ArgumentMatchers.any())).thenReturn("article")
 

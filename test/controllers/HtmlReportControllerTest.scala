@@ -153,22 +153,22 @@ class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with Er
       result shouldBe (ListBuffer(), 0, 0)
     }
 
-    "return the errors and count when the sheet has errors" in {
-      val errorList = ListBuffer(
-        SheetErrors("CSOP_OptionsExercised_V3",
-          ListBuffer(
-            ValidationError(Cell("A",1,"23-07-2015"),"error.1","001","ers.upload.error.date")
-          )
-        )
-      )
-      val errorJson = Json.toJson(errorList)
-      val cacheMapWithErrors = CacheMap("uploadId",
-        Map(s"error-listUploadId(uploadId)" -> errorJson,
-            "scheme-error-countUploadId(uploadId)" -> Json.toJson(1)
-      ))
-
-      val result = buildFakeHtmlReportController().csvExtractErrors(Seq(uploadId), cacheMapWithErrors)
-      result shouldBe (errorList, 1, 1)
-    }
+//    "return the errors and count when the sheet has errors" in {
+//      val errorList = ListBuffer(
+//        SheetErrors("CSOP_OptionsExercised_V3",
+//          ListBuffer(
+//            ValidationError(Cell("A",1,"23-07-2015"),"error.1","001","ers.upload.error.date")
+//          )
+//        )
+//      )
+//      val errorJson = Json.toJson(errorList)
+//      val cacheMapWithErrors = CacheMap("uploadId",
+//        Map(s"error-listUploadId(uploadId)" -> errorJson,
+//            "scheme-error-countUploadId(uploadId)" -> Json.toJson(1)
+//      ))
+//
+//      val result = buildFakeHtmlReportController().csvExtractErrors(Seq(uploadId), cacheMapWithErrors)
+//      result shouldBe (errorList, 1, 1)
+//    }
   }
 }

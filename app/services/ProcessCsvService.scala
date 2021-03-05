@@ -94,6 +94,7 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
               getRowsWithNumbers(_, successUpload.name)(messages)
             }.flatMap{
               case Right(thing) => checkValidityOfRows(thing, successUpload.name, file)
+              case Left(exception) => Future(Left(exception))
             }
           }
         )
@@ -103,6 +104,7 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
 
   def processRow(rowBytes: List[ByteString], sheetName: String, validator: DataValidator): Either[Throwable, List[ValidationError]] = {
     val rowStrings = rowBytes.map(byteString => byteString.utf8String)
+    println("rowStrings is " + rowStrings)
     val parsedRow = parserUtil.formatDataToValidate(rowStrings, sheetName)
     Try {
       validator.validateRow(Row(0, getCells(parsedRow, 0)), Some(ValidationContext))
@@ -146,7 +148,7 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
 
   def getRowsWithNumbers(listOfErrors: Seq[Either[Throwable, List[ValidationError]]], name: String)(
     implicit messages: Messages): Either[Throwable, Seq[List[ValidationError]]] = listOfErrors match {
-    case allEmpty if allEmpty.forall(_.isRight) && allEmpty.forall(_.right.getOrElse(List.empty).isEmpty) =>
+    case allEmpty if allEmpty.isEmpty =>
       Left(ERSFileProcessingException(
         messages("ers_check_csv_file.noData", name),
         messages("ers_check_csv_file.noData"),

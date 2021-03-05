@@ -70,6 +70,11 @@ object ErsValidator {
     }
   }
 
-  def getCells(rowData:Seq[String],rowNumber:Int): Seq[Cell] = (rowData zip colNames ).map{case(cellValue,col) => Cell(col, rowNumber,cellValue)}
+  def getCells(rowData:Seq[String],rowNumber:Int): Seq[Cell] = {
+    println("rowData is " + rowData)
+    val test = (rowData zip colNames).map { case (cellValue, col) => Cell(col, rowNumber, cellValue) }
+    println("our test is " + test)
+    test
+  }
 
 }

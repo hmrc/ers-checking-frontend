@@ -29,7 +29,7 @@ import play.api.mvc.DefaultMessagesControllerComponents
 import services.headers.HeaderData
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.WithFakeApplication
-import utils.ParserUtil
+import utils.{CsvParserUtil, ParserUtil}
 
 import scala.util.Try
 
@@ -39,8 +39,9 @@ class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHe
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication)
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
   lazy val testParserUtil: ParserUtil = fakeApplication.injector.instanceOf[ParserUtil]
+  lazy val testCsvParserUtil: CsvParserUtil = fakeApplication.injector.instanceOf[CsvParserUtil]
 
-  class DataGeneratorObj(scheme: String) extends DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, mockErsUtil){
+  class DataGeneratorObj(scheme: String) extends DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, testCsvParserUtil, mockErsUtil){
     when(mockErsUtil.getSchemeName(any())).thenReturn((s"ers_pdf_error_report.${scheme.toLowerCase}", scheme))
   }
 
