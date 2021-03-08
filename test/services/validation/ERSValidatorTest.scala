@@ -17,6 +17,9 @@
 package services.validation
 
 import com.typesafe.config.ConfigFactory
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito
+import org.scalatest.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import services.validation.EMITestData.ERSValidationEMIAdjustmentsTestData
@@ -41,4 +44,20 @@ class ERSValidatorTest extends PlaySpec with WithFakeApplication with MockitoSug
     }
   }
 
+  "validatorRowCsv" should {
+    "validate a valid row" in {
+      ErsValidator.validateRowCsv(validator)(getValidRowData.map(_.value)) mustBe Right(None)
+    }
+
+    "find issues in an invalid row" in {
+      ErsValidator.validateRowCsv(validator)(getInvalidRowData.map(_.value)).right.get.get.size mustBe 14
+    }
+
+    "pass on an exception if it encounters it" in {
+      val mockValidator: DataValidator = mock[DataValidator]
+      Mockito.when(mockValidator.validateRow(any(), any())).thenThrow(new IllegalArgumentException("take that"))
+
+      ErsValidator.validateRowCsv(mockValidator)(getValidRowData.map(_.value)).left.get.getMessage mustBe "take that"
+    }
+  }
 }

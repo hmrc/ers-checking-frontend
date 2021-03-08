@@ -32,14 +32,13 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class CsvParserUtil @Inject()(val ersUtil: ERSUtil,
-                              appConfig: ApplicationConfig
+class CsvParserUtil @Inject()(appConfig: ApplicationConfig
                           )(implicit ec: ExecutionContext) {
   val HUNDRED = 100
 
   def formatDataToValidate(rowData: Seq[String], sheetName: String): Seq[String] = {
-    val sheetColSize = ERSTemplatesInfo.ersSheets(sheetName.replace(".csv", "")).headerRow.size
-    if (rowData.size < sheetColSize) {
+    val sheetColSize = ERSTemplatesInfo.ersSheets(sheetName.replace(".csv", "")).headerRow.length
+    if (rowData.length < sheetColSize) {
       Logger.debug(s"Difference between amount of columns ${rowData.size} and amount of headers $sheetColSize")
       val additionalEmptyCells: Seq[String] = Seq.fill(sheetColSize - rowData.size)("")
       (rowData ++ additionalEmptyCells).take(sheetColSize)
@@ -48,50 +47,33 @@ class CsvParserUtil @Inject()(val ersUtil: ERSUtil,
       rowData.take(sheetColSize)
     }
   }
-
-  // Not called anymore! Leaving for reference for now
-  def isFileValid(sheetErrors: SheetErrors, file: Option[UpscanCsvFilesCallback] = None)
-                 (implicit request: Request[AnyContent], hc: HeaderCarrier): Future[Try[Boolean]] = {
-    if (sheetErrors.errors.isEmpty) {
-      Future.successful(Success(true))
-    }
-    else {
-      val updatedErrorCount = sheetErrors.errors.length
-      val updatedErrorList = getSheetErrors(sheetErrors)
-      val id = file.map(_.uploadId).getOrElse("")
-
-      val result = for {
-        _ <- ersUtil.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}$id", updatedErrorCount)
-        _ <- ersUtil.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}$id",
-          new ListBuffer[SheetErrors]() :+ updatedErrorList)
-      } yield Success(false)
-
-      result recover {
-        case ex: Exception => Failure(ex)
-      }
-    }
-  }
+//
+//   Not called anymore! Leaving for reference for now
+//  def isFileValid(sheetErrors: SheetErrors, file: Option[UpscanCsvFilesCallback] = None)
+//                 (implicit request: Request[AnyContent], hc: HeaderCarrier): Future[Try[Boolean]] = {
+//    if (sheetErrors.errors.isEmpty) {
+//      Future.successful(Success(true))
+//    }
+//    else {
+//      val updatedErrorCount = sheetErrors.errors.length
+//      val updatedErrorList = getSheetErrors(sheetErrors)
+//      val id = file.map(_.uploadId).getOrElse("")
+//
+//      val result = for {
+//        _ <- ersUtil.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}$id", updatedErrorCount)
+//        _ <- ersUtil.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}$id",
+//          new ListBuffer[SheetErrors]() :+ updatedErrorList)
+//      } yield Success(false)
+//
+//      result recover {
+//        case ex: Exception => Failure(ex)
+//      }
+//    }
+//  }
 
   def getSheetErrors(schemeErrors: SheetErrors): SheetErrors = {
     val errorCount: Int = appConfig.errorCount.getOrElse(HUNDRED)
     SheetErrors(schemeErrors.sheetName, schemeErrors.errors.take(errorCount))
-  }
-
-  private val aToZ: Seq[String] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray.map(_.toString)
-  private val aaToAp: Seq[String] = for (character <- "ABCDEFGHIJKLMNOP") yield "A" + character
-  private val spreadsheetColumns: Seq[String] = aToZ ++ aaToAp
-
-  def getHeadersForSchema(schema: String): Option[Seq[String]] = ERSTemplatesInfo.ersSheets.get(schema).map(sheetInfo => {
-    Logger.info("spreadsheetColumns is " + spreadsheetColumns)
-    spreadsheetColumns.slice(0, sheetInfo.headerRow.length)
-  }
-  )
-
-  //TODO handle invalid schema correctly
-
-  implicit class FlowOps[A, B](flow: Flow[A, B, NotUsed]) {
-    def eitherFromFunction[A, B](input: A => Either[Throwable, B]): Flow[Either[Throwable, A], Either[Throwable, B], NotUsed] =
-      Flow.fromFunction(_.flatMap(input))
   }
 
 }

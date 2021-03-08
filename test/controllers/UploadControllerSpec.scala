@@ -18,6 +18,7 @@ package controllers
 
 import akka.NotUsed
 import akka.actor.ActorSystem
+import akka.http.scaladsl.model.HttpHeader.ParsingResult.Ok
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.stream.scaladsl.Source
 import akka.testkit.TestKit
@@ -26,19 +27,20 @@ import helpers.ErsTestHelper
 import models.ERSFileProcessingException
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import org.mockito.ArgumentMatchers.{any, anyString, refEq}
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.{Application, i18n}
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents}
+import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents, Request, Result}
 import play.api.test.FakeRequest
 import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success, Try}
 
 class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) with UnitSpec with ErsTestHelper with GuiceOneAppPerSuite{
@@ -87,6 +89,10 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
 
       when(mockErsUtil.cache(refEq(ersUtil.FORMAT_ERROR_CACHE), anyString())(any(), any(), any(), any()))
         .thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))
+      when(mockErsUtil.cache(refEq(ersUtil.FORMAT_ERROR_CACHE_PARAMS), any[Seq[String]])(any(), any(), any(), any()))
+        .thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))
+      when(mockErsUtil.cache(refEq(ersUtil.FORMAT_ERROR_EXTENDED_CACHE), any[Boolean])(any(), any(), any(), any()))
+        .thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))
 
       when(mockErsUtil.shortLivedCache).thenReturn(mockShortLivedCache)
       when(mockShortLivedCache.fetchAndGetEntry[UpscanCsvFilesCallbackList](any(), any())(any(),any(), any())).thenReturn(callbackList)
@@ -116,6 +122,35 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
       val result = controllerUnderTest.showUploadCSVFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
       status(result) shouldBe Status.SEE_OTHER
       result.header.headers("Location") shouldBe routes.HtmlReportController.htmlErrorReportPage(true).toString
+    }
+
+    "give a redirect status to globalErrorPage if clearErrorCache returns false" in {
+      val controllerUnderTest = buildFakeUploadControllerCsv(clearCacheResponse = false)
+      val result = controllerUnderTest.showUploadCSVFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
+      status(result) shouldBe Status.OK
+      result.body.consumeData.utf8String should include(testMessages("ers.global_errors.message"))
+
+    }
+  }
+
+  "Calling finaliseRequestAndRedirect" should {
+    "handle exception if failures are found" in {
+      val controllerUnderTest = buildFakeUploadControllerCsv()
+      val result = controllerUnderTest.finaliseRequestAndRedirect(List(
+        Future.successful(Left(ERSFileProcessingException("this is a problem", "help"))))
+      )(RequestWithOptionalEmpRef(FakeRequest("GET", ""), None), hc)
+      status(result) shouldBe Status.SEE_OTHER
+      result.header.headers("Location") shouldBe routes.CheckingServiceController.formatErrorsPage().toString
+    }
+
+    //TODO this is a valid test but the behaviour is probably wrong
+    "throw exception if unexpected exception is found" in {
+      val controllerUnderTest = buildFakeUploadControllerCsv()
+      val result = controllerUnderTest.finaliseRequestAndRedirect(List(
+        Future.successful(Left(new Exception("taste the pain"))))
+      )(RequestWithOptionalEmpRef(FakeRequest("GET", ""), None), hc)
+
+      intercept[Exception](Await.result(result, Duration.Inf)).getMessage shouldBe "taste the pain"
     }
   }
 

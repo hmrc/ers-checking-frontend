@@ -103,12 +103,12 @@ class UploadController @Inject()(authAction: AuthAction,
   }
 
   def showUploadCSVFile(scheme: String)(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
-    clearErrorCache() map {
-      case false => getGlobalErrorPage(request, messages)
-    }
-
-    ersUtil.shortLivedCache.fetchAndGetEntry[UpscanCsvFilesCallbackList](ersUtil.getCacheId, "callback_data_key_csv") flatMap { callback =>
-      finaliseRequestAndRedirect(csvFileProcessor.processFiles(callback, scheme, readFileCsv)(request, hc, messages))
+    clearErrorCache() flatMap {
+      case false => Future(getGlobalErrorPage(request, messages))
+      case _ =>
+        ersUtil.shortLivedCache.fetchAndGetEntry[UpscanCsvFilesCallbackList](ersUtil.getCacheId, "callback_data_key_csv") flatMap { callback =>
+          finaliseRequestAndRedirect(csvFileProcessor.processFiles(callback, scheme, readFileCsv)(request, hc, messages))
+        }
     }
   }
 
