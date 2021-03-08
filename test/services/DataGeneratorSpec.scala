@@ -29,6 +29,7 @@ import play.api.mvc.DefaultMessagesControllerComponents
 import services.headers.HeaderData
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.WithFakeApplication
+import uk.gov.hmrc.services.validation.DataValidator
 import utils.{CsvParserUtil, ParserUtil}
 
 import scala.util.Try
@@ -39,9 +40,9 @@ class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHe
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication)
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
   lazy val testParserUtil: ParserUtil = fakeApplication.injector.instanceOf[ParserUtil]
-  lazy val testCsvParserUtil: CsvParserUtil = fakeApplication.injector.instanceOf[CsvParserUtil]
+  lazy val testErsValidationConfigs: ERSValidationConfigs = fakeApplication.injector.instanceOf[ERSValidationConfigs]
 
-  class DataGeneratorObj(scheme: String) extends DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, testCsvParserUtil, mockErsUtil){
+  class DataGeneratorObj(scheme: String) extends DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, testErsValidationConfigs, mockErsUtil){
     when(mockErsUtil.getSchemeName(any())).thenReturn((s"ers_pdf_error_report.${scheme.toLowerCase}", scheme))
   }
 
@@ -196,4 +197,69 @@ class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHe
 
   }
 
+  "setValidatorCsv" must {
+    val mockErsValidationConfigs: ERSValidationConfigs = mock[ERSValidationConfigs]
+    class DataGeneratorCsv extends DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, mockErsValidationConfigs, mockErsUtil)
+
+    "return a Right with the validator when receiving happy response from tabular-data-validator" in new DataGeneratorCsv {
+      val returnValidator: DataValidator = mock[DataValidator]
+      when(mockErsValidationConfigs.getValidator(any())).thenReturn(returnValidator)
+
+      setValidatorCsv("CSOP_OptionsGranted_V3") mustBe Right(returnValidator)
+    }
+
+    "return a Failure with the exception when receiving an exception" in {
+      val thrownException = new RuntimeException("this is bad")
+      val testDataGen = new DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, mockErsValidationConfigs, mockErsUtil)
+      when(mockErsValidationConfigs.getValidator(any())).thenThrow(thrownException)
+      val failedValue: Either[Throwable, DataValidator] = testDataGen.setValidatorCsv("CSOP_OptionsGranted_V3")
+
+      val returnedExceptionExample: ERSFileProcessingException = ERSFileProcessingException(
+        "ers.exceptions.dataParser.configFailure",
+        Messages("ers.exceptions.dataParser.validatorError"),
+        optionalParams = Seq("CSOP_OptionsGranted_V3")
+      )
+
+      assert(failedValue.isLeft)
+      assert(failedValue.left.get.isInstanceOf[ERSFileProcessingException])
+      failedValue.left.get.asInstanceOf[ERSFileProcessingException].context mustEqual returnedExceptionExample.context
+      failedValue.left.get.asInstanceOf[ERSFileProcessingException].message mustEqual returnedExceptionExample.message
+      failedValue.left.get.asInstanceOf[ERSFileProcessingException].optionalParams mustEqual returnedExceptionExample.optionalParams
+
+      verify(mockAuditEvents, times(1))
+        .auditRunTimeError(
+          ArgumentMatchers.eq(thrownException),
+          ArgumentMatchers.eq("Could not set the validator"),
+          ArgumentMatchers.eq("CSOP_OptionsGranted_V3"))(any(), any(), any())
+    }
+  }
+
+  "identifyAndDefineSheetEither" must {
+    "return Right with the sheet name if given valid input" in new DataGeneratorObj("CSOP") {
+      identifyAndDefineSheetEither((SheetInfo("someInput",1,"anInput","","",List("")), "SOMEINPUT")) mustBe Right("anInput")
+    }
+
+    "return Left with a processing exception if given invalid input" in {
+      when(mockErsUtil.withArticle(any())).thenReturn("ersUtilReturn")
+      val testDataGen: DataGenerator = new DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, testErsValidationConfigs, mockErsUtil)
+
+      val failedValue: Either[Throwable, String] = testDataGen
+        .identifyAndDefineSheetEither((SheetInfo("differentInput",1,"aSheetName","","",List("")), "SOMEINPUT"))
+      val returnedExceptionExample: ERSFileProcessingException = ERSFileProcessingException(
+        "ers.exceptions.dataParser.incorrectSchemeType",
+        Messages("ers.exceptions.dataParser.incorrectSchemeType", "differentinput", "someinput"),
+        optionalParams = Seq("ersUtilReturn", "ersUtilReturn", "aSheetName")
+      )
+
+      assert(failedValue.isLeft)
+      assert(failedValue.left.get.isInstanceOf[ERSFileProcessingException])
+      failedValue.left.get.asInstanceOf[ERSFileProcessingException].context mustEqual returnedExceptionExample.context
+      failedValue.left.get.asInstanceOf[ERSFileProcessingException].message mustEqual returnedExceptionExample.message
+      failedValue.left.get.asInstanceOf[ERSFileProcessingException].optionalParams mustEqual returnedExceptionExample.optionalParams
+
+      verify(mockAuditEvents, times(1)).fileProcessingErrorAudit("differentInput", "aSheetName", "differentinput is not equal to someinput")
+
+
+    }
+  }
 }

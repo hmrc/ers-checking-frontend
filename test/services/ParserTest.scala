@@ -36,11 +36,12 @@ class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures wit
 
   val mockParserUtil: ParserUtil = mock[ParserUtil]
   val mockCsvParserUtil: CsvParserUtil = mock[CsvParserUtil]
+  val realErsValidationConfigs: ERSValidationConfigs = app.injector.instanceOf[ERSValidationConfigs]
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
 
   object TestDataParser extends DataParser
-  object TestDataGenerator extends DataGenerator(mockAuditEvents, mockMetrics, mockParserUtil, mockCsvParserUtil, mockErsUtil)
+  object TestDataGenerator extends DataGenerator(mockAuditEvents, mockMetrics, mockParserUtil, realErsValidationConfigs, mockErsUtil)
 
   when(mockErsUtil.withArticle(ArgumentMatchers.any())).thenReturn("article")
 

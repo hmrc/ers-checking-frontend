@@ -42,7 +42,7 @@ import scala.util.{Failure, Success, Try}
 class DataGenerator @Inject()(auditEvents: AuditEvents,
                               metrics: Metrics,
                               parserUtil: ParserUtil,
-                              csvParserUtil: CsvParserUtil,
+                              ersValidationConfigs: ERSValidationConfigs,
                               ersUtil: ERSUtil
                              )(implicit ec: ExecutionContext) extends DataParser {
 
@@ -53,7 +53,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
     implicit var sheetName :String = ""
     var sheetColSize = 0
     val schemeErrors: ListBuffer[SheetErrors] = ListBuffer()
-    var validator:DataValidator = ERSValidationConfigs.defValidator
+    var validator:DataValidator = ersValidationConfigs.defValidator
 
     def incRowNum(): Unit = rowNum =  rowNum + 1
     var rowCount : Int = 0
@@ -126,7 +126,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
 
   def setValidator(sheetName:String)(implicit hc : HeaderCarrier, request: Request[_], messages: Messages): DataValidator = {
     try {
-      ERSValidationConfigs.getValidator(ersSheets(sheetName).configFileName)
+      ersValidationConfigs.getValidator(ersSheets(sheetName).configFileName)
     }catch{
       case e: Exception =>
         auditEvents.auditRunTimeError(e,"Could not set the validator", sheetName)(hc, request, ec)
@@ -141,7 +141,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
 
   def setValidatorCsv(sheetName:String)(implicit hc : HeaderCarrier, request: Request[_], messages: Messages): Either[Throwable, DataValidator] = {
     Try {
-      ERSValidationConfigs.getValidator(ersSheets(sheetName).configFileName)
+      ersValidationConfigs.getValidator(ersSheets(sheetName).configFileName)
     } match {
       case Success(validator) => Right(validator)
       case Failure(e) =>

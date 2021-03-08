@@ -104,7 +104,6 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
 
   def processRow(rowBytes: List[ByteString], sheetName: String, validator: DataValidator): Either[Throwable, List[ValidationError]] = {
     val rowStrings = rowBytes.map(byteString => byteString.utf8String)
-    println("rowStrings is " + rowStrings)
     val parsedRow = parserUtil.formatDataToValidate(rowStrings, sheetName)
     Try {
       validator.validateRow(Row(0, getCells(parsedRow, 0)), Some(ValidationContext))

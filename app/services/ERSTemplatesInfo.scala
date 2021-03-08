@@ -52,7 +52,7 @@ object ERSTemplatesInfo extends EMITemplateInfo with CsopTemplateInfo with SipTe
   )
 }
 
-object ERSValidationConfigs {
+class ERSValidationConfigs {
 
   val defValidator: DataValidator = DataValidator(getConfig(ERSTemplatesInfo.emiSheet1ValConfig))
   def getValidator(configName:String): DataValidator = DataValidator(getConfig(configName))
