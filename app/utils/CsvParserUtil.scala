@@ -34,7 +34,6 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class CsvParserUtil @Inject()(appConfig: ApplicationConfig
                           )(implicit ec: ExecutionContext) {
-  val HUNDRED = 100
 
   def formatDataToValidate(rowData: Seq[String], sheetName: String): Seq[String] = {
     val sheetColSize = ERSTemplatesInfo.ersSheets(sheetName.replace(".csv", "")).headerRow.length
@@ -47,33 +46,9 @@ class CsvParserUtil @Inject()(appConfig: ApplicationConfig
       rowData.take(sheetColSize)
     }
   }
-//
-//   Not called anymore! Leaving for reference for now
-//  def isFileValid(sheetErrors: SheetErrors, file: Option[UpscanCsvFilesCallback] = None)
-//                 (implicit request: Request[AnyContent], hc: HeaderCarrier): Future[Try[Boolean]] = {
-//    if (sheetErrors.errors.isEmpty) {
-//      Future.successful(Success(true))
-//    }
-//    else {
-//      val updatedErrorCount = sheetErrors.errors.length
-//      val updatedErrorList = getSheetErrors(sheetErrors)
-//      val id = file.map(_.uploadId).getOrElse("")
-//
-//      val result = for {
-//        _ <- ersUtil.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}$id", updatedErrorCount)
-//        _ <- ersUtil.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}$id",
-//          new ListBuffer[SheetErrors]() :+ updatedErrorList)
-//      } yield Success(false)
-//
-//      result recover {
-//        case ex: Exception => Failure(ex)
-//      }
-//    }
-//  }
 
   def getSheetErrors(schemeErrors: SheetErrors): SheetErrors = {
-    val errorCount: Int = appConfig.errorCount.getOrElse(HUNDRED)
-    SheetErrors(schemeErrors.sheetName, schemeErrors.errors.take(errorCount))
+    SheetErrors(schemeErrors.sheetName, schemeErrors.errors.take(appConfig.errorCount))
   }
 
 }

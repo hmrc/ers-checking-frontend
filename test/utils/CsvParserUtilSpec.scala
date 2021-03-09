@@ -18,7 +18,7 @@ package utils
 
 import helpers.ErsTestHelper
 import models.SheetErrors
-import org.mockito.Mockito
+import org.mockito.Mockito.when
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.{Cell, ValidationError}
 
@@ -43,16 +43,14 @@ class CsvParserUtilSpec extends UnitSpec with ErsTestHelper {
 
   "getSheetErrors" must {
     "return valid amount of sheetErrors if errorCount is present in the appConfig" in {
-      Mockito.when(mockAppConfig.errorCount).thenReturn(Some(1))
-
+      when(mockAppConfig.errorCount).thenReturn(1)
       val validationError: ValidationError = ValidationError(Cell("A", 1, "abc"), "001", "error.1", "This entry must be 'yes' or 'no'.")
       val testSheetErrors: SheetErrors = SheetErrors("aName", new ListBuffer() ++ (1 to 100).map(_ => validationError))
       parserUtil.getSheetErrors(testSheetErrors) shouldBe SheetErrors("aName", ListBuffer(validationError))
     }
 
     "return 100 validation errors if errorCount is present in the appConfig" in {
-      Mockito.when(mockAppConfig.errorCount).thenReturn(None)
-
+      when(mockAppConfig.errorCount).thenReturn(100)
       val validationError: ValidationError = ValidationError(Cell("A", 1, "abc"), "001", "error.1", "This entry must be 'yes' or 'no'.")
       val testSheetErrors: SheetErrors = SheetErrors("aName", new ListBuffer() ++ (1 to 200).map(_ => validationError))
       parserUtil.getSheetErrors(testSheetErrors).errors.length shouldBe 100

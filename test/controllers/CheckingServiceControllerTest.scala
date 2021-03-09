@@ -120,7 +120,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val schemeTypeData = Map("schemeType" -> "1")
       val form = CSformMappings.schemeTypeForm.bind(schemeTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      contentAsString(await(controllerUnderTest.showSchemeTypeSelected(request)))shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, testMessages))
+      contentAsString(await(controllerUnderTest.showSchemeTypeSelected(request)))shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(request, testMessages))
     }
   }
 
@@ -210,7 +210,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val schemeTypeData = Map("checkFileType" -> "csv")
       val form = CSformMappings.schemeTypeForm.bind(schemeTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      contentAsString(await(controllerUnderTest.showCheckFileTypeSelected(request))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, testMessages))
+      contentAsString(await(controllerUnderTest.showCheckFileTypeSelected(request))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(request, testMessages))
     }
   }
 
@@ -227,7 +227,8 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
 			mockAnyContentAction
     }
 
-    "gives a call to showCheckFilePage if user is authenticated" in {
+    // TODO What a mess, these were hitting global error page (which used to return 200) and passing :/
+    "give a call to showCheckFilePage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
       val result = controllerUnderTest.checkODSFilePage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
@@ -243,7 +244,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
       val res: Future[Result] = controllerUnderTest.showCheckODSFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       res.map { result =>
-        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, testMessages))
+        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(request, testMessages))
       }    }
 
   }
@@ -275,7 +276,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val res: Future[Result] = controllerUnderTest.showCheckCSVFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       (Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       res.map{ result =>
-        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, testMessages))
+        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(request, testMessages))
       }}
 
   }
@@ -350,7 +351,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
       val res: Future[Result] = controllerUnderTest.showFormatErrorsPage(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
       res.map { result =>
-        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, testMessages))
+        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(request, testMessages))
       }}
   }
 }

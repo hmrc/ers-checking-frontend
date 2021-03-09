@@ -48,7 +48,7 @@ class UploadController @Inject()(authAction: AuthAction,
                                  implicit val ersUtil: ERSUtil,
                                  implicit val appConfig: ApplicationConfig
                                 )(implicit executionContext: ExecutionContext, actorSystem: ActorSystem)
-  extends FrontendController(mcc) with I18nSupport {
+  extends FrontendController(mcc) with I18nSupport with BaseController {
 
   def downloadAsInputStream(downloadUrl: String): InputStream = new URL(downloadUrl).openStream()
 
@@ -161,11 +161,5 @@ class UploadController @Inject()(authAction: AuthAction,
         }
       case _ => throw t
     }
-  }
-
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-    Ok(views.html.global_error(
-      "ers.global_errors.title",
-      "ers.global_errors.message")(request, messages, appConfig))
   }
 }

@@ -123,25 +123,25 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
   }
 
 // TODO Either re-write this or add comment to explain
-  @tailrec
-  private[services] final def listWithFirstNEntriesZippedNameTBD(n: Int, list: Seq[(List[ValidationError], Int)]): Seq[(List[ValidationError], Int)] = {
-    if (n == 0) list
-    else {
-      val indexOfFirstOccurrence: Int = list.indexWhere(entry => entry._1.nonEmpty && entry._1.exists(validationError => validationError.cell.row == 0))
-      if (indexOfFirstOccurrence != -1) {
-        val listOriginalReference = list(indexOfFirstOccurrence)._1
-        val entryReplacement = (listOriginalReference.map(validationError => {
-          val cellReplaced = validationError.cell.copy(row = indexOfFirstOccurrence + 1)
-          validationError.copy(cell = cellReplaced)
-        }), indexOfFirstOccurrence)
-        listWithFirstNEntriesZippedNameTBD(n - 1, list.updated(indexOfFirstOccurrence, entryReplacement))
-      } else list
-    }
+@tailrec
+private[services] final def processDisplayedErrors(n: Int, list: Seq[(List[ValidationError], Int)]): Seq[(List[ValidationError], Int)] = {
+  if (n == 0) list
+  else {
+    val indexOfFirstOccurrence: Int = list.indexWhere(entry => entry._1.nonEmpty && entry._1.exists(validationError => validationError.cell.row == 0))
+    if (indexOfFirstOccurrence != -1) {
+      val listOriginalReference = list(indexOfFirstOccurrence)._1
+      val entryReplacement = (listOriginalReference.map(validationError => {
+        val cellReplaced = validationError.cell.copy(row = indexOfFirstOccurrence + 1)
+        validationError.copy(cell = cellReplaced)
+      }), indexOfFirstOccurrence)
+      processDisplayedErrors(n - 1, list.updated(indexOfFirstOccurrence, entryReplacement))
+    } else list
   }
+}
 
   def giveRowNumbers(list: Seq[List[ValidationError]]): Seq[List[ValidationError]] = {
-    val numberOfErrorsToDisplay: Int = appConfig.errorCount.getOrElse(20)
-    listWithFirstNEntriesZippedNameTBD(numberOfErrorsToDisplay, list.zipWithIndex).map(_._1)
+    val numberOfErrorsToDisplay: Int = appConfig.errorCount
+    processDisplayedErrors(numberOfErrorsToDisplay, list.zipWithIndex).map(_._1)
   }
 
   def getRowsWithNumbers(listOfErrors: Seq[Either[Throwable, List[ValidationError]]], name: String)(
@@ -151,9 +151,10 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
         messages("ers_check_csv_file.noData", name),
         messages("ers_check_csv_file.noData"),
         needsExtendedInstructions = true))
-    case nonEmpty if nonEmpty.forall(_.isRight) =>
-      Right(giveRowNumbers(nonEmpty.map(_.right.get)))
-    case lefts => Left(lefts.find(_.isLeft).head.left.get)
+    case nonEmpty => nonEmpty.find(_.isLeft) match {
+      case Some(Left(issues)) => Left(issues)
+      case _ => Right(giveRowNumbers(nonEmpty.map(_.right.get)))
+    }
   }
 
   def checkValidityOfRows(listOfErrors: Seq[List[ValidationError]], name: String, file: UpscanCsvFilesCallback)(
@@ -161,7 +162,7 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
     listOfErrors.filter(rowErrors => rowErrors.nonEmpty) match {
       case allGood if allGood.isEmpty => Future.successful(Right(true))
       case errors =>
-        val errorsToCache = new ListBuffer[SheetErrors]() :+ parserUtil.getSheetErrors(SheetErrors(name, errors.flatten.to[ListBuffer]))
+        val errorsToCache = ListBuffer(parserUtil.getSheetErrors(SheetErrors(name, errors.flatten.to[ListBuffer])))
         for {
           _ <- ersUtil.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${file.uploadId.value}", errors.flatten.length)
           _ <- ersUtil.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${file.uploadId.value}",
@@ -170,6 +171,7 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
     }
   }
 }
+
 
 object FlowOps {
 

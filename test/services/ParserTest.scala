@@ -65,7 +65,7 @@ class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures wit
     val thrown = the[ERSFileProcessingException] thrownBy
       TestDataGenerator.identifyAndDefineSheet("EMI40_Taxable","EMI")(hc,Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
 
-    thrown.getMessage mustBe "ers.exceptions.dataParser.incorrectSheetName"
+    thrown.getMessage mustBe Messages("ers.exceptions.dataParser.incorrectSheetName")
     thrown.optionalParams mustBe Seq("EMI40_Taxable", "EMI")
   }
 
@@ -74,7 +74,7 @@ class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures wit
     val thrown = the[ERSFileProcessingException] thrownBy
       TestDataGenerator.validateHeaderRow(Seq("",""), "CSOP_OptionsRCL_V3", "CSOP", "CSOP_OptionsRCL_V3.csv")
 
-    thrown.getMessage mustBe "ers.exceptions.dataParser.incorrectHeader"
+    thrown.getMessage mustBe Messages("ers.exceptions.dataParser.incorrectHeader")
     thrown.optionalParams mustBe Seq("CSOP_OptionsRCL_V3", "CSOP_OptionsRCL_V3.csv")
   }
 
@@ -108,7 +108,7 @@ class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures wit
     val result = intercept[ERSFileProcessingException]{
       TestDataGenerator.getSheet("abc", "csop")
     }
-    result.message mustBe "ers.exceptions.dataParser.incorrectSheetName"
+    result.message mustBe Messages("ers.exceptions.dataParser.incorrectSheetName")
     result.optionalParams mustBe Seq("abc", "CSOP")
   }
 

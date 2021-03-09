@@ -132,7 +132,7 @@ class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with Er
       val controllerUnderTest = buildFakeHtmlReportController()
       val res: Future[Result] = controllerUnderTest.showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"), hc, testMessages)
       res.map { result =>
-        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, testMessages))}
+        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(request, testMessages))}
     }
   }
 

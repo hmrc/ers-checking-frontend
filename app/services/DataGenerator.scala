@@ -105,7 +105,9 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
 
     checkForMissingHeaders(rowNum, sheetName, fileName)
     if(rowsWithData == 0) {
-      throw ERSFileProcessingException("ers.exceptions.dataParser.noData", Messages("ers.exceptions.dataParser.noData"), needsExtendedInstructions = true)
+      throw ERSFileProcessingException(
+        Messages("ers.exceptions.dataParser.noData"),
+        Messages("ers.exceptions.dataParser.noData"), needsExtendedInstructions = true)
     }
     deliverDataIteratorMetrics(startTime)
     auditEvents.numRowsInSchemeData(scheme, rowsWithData)(hc, request, ec)
@@ -116,7 +118,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
   def checkForMissingHeaders(rowNum: Int, sheetName: String, fileName: String)(implicit messages: Messages): Unit = {
     if(rowNum > 0 && rowNum < 9) {
       throw ERSFileProcessingException(
-        "ers.exceptions.dataParser.incorrectHeader",
+        Messages("ers.exceptions.dataParser.incorrectHeader"),
         Messages("ers.exceptions.dataParser.incorrectHeader", sheetName, fileName),
         needsExtendedInstructions = true,
         optionalParams = Seq(sheetName, fileName)
@@ -132,7 +134,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
         auditEvents.auditRunTimeError(e,"Could not set the validator", sheetName)(hc, request, ec)
         Logger.error("setValidator has thrown an exception, SheetName: " + sheetName + " Exception message: " + e.getMessage)
         throw ERSFileProcessingException(
-          "ers.exceptions.dataParser.configFailure",
+          Messages("ers.exceptions.dataParser.configFailure"),
           Messages("ers.exceptions.dataParser.validatorError"),
           optionalParams = Seq(sheetName)
         )
@@ -148,7 +150,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
         auditEvents.auditRunTimeError(e, "Could not set the validator", sheetName)(hc, request, ec)
         Logger.error("setValidator has thrown an exception, SheetName: " + sheetName + " Exception message: " + e.getMessage)
         Left(ERSFileProcessingException(
-          "ers.exceptions.dataParser.configFailure",
+          Messages("ers.exceptions.dataParser.configFailure"),
           Messages("ers.exceptions.dataParser.validatorError"),
           optionalParams = Seq(sheetName)
         ))
@@ -165,7 +167,8 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
     } else {
       auditEvents.fileProcessingErrorAudit(sheetInfo.schemeType, sheetInfo.sheetName, s"${sheetInfo.schemeType.toLowerCase} is not equal to ${schemeName.toLowerCase}")
       Logger.warn(Messages("ers.exceptions.dataParser.incorrectSchemeType", sheetInfo.schemeType.toUpperCase, schemeName.toUpperCase))
-      throw ERSFileProcessingException("ers.exceptions.dataParser.incorrectSchemeType",
+      throw ERSFileProcessingException(
+        Messages("ers.exceptions.dataParser.incorrectSchemeType"),
         Messages("ers.exceptions.dataParser.incorrectSchemeType", sheetInfo.schemeType.toLowerCase, schemeName.toLowerCase),
         optionalParams = Seq(ersUtil.withArticle(sheetInfo.schemeType.toUpperCase), ersUtil.withArticle(schemeName.toUpperCase), sheetInfo.sheetName))
     }
@@ -181,7 +184,8 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
      } else {
        auditEvents.fileProcessingErrorAudit(sheetInfo.schemeType, sheetInfo.sheetName, s"${sheetInfo.schemeType.toLowerCase} is not equal to ${schemeName.toLowerCase}")
        Logger.warn(Messages("ers.exceptions.dataParser.incorrectSchemeType", sheetInfo.schemeType.toUpperCase, schemeName.toUpperCase))
-       Left(ERSFileProcessingException("ers.exceptions.dataParser.incorrectSchemeType",
+       Left(ERSFileProcessingException(
+         Messages("ers.exceptions.dataParser.incorrectSchemeType"),
          Messages("ers.exceptions.dataParser.incorrectSchemeType", sheetInfo.schemeType.toLowerCase, schemeName.toLowerCase),
          optionalParams = Seq(ersUtil.withArticle(sheetInfo.schemeType.toUpperCase), ersUtil.withArticle(schemeName.toUpperCase), sheetInfo.sheetName)))
      }
@@ -193,7 +197,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
       Logger.warn("[DataGenerator][getSheet] Couldn’t identify SheetName")
       val schemeName = ersUtil.getSchemeName(scheme)._2
       throw ERSFileProcessingException(
-        "ers.exceptions.dataParser.incorrectSheetName",
+        Messages("ers.exceptions.dataParser.incorrectSheetName"),
         Messages("ers.exceptions.dataParser.unidentifiableSheetName") + " " + sheetName,
         needsExtendedInstructions = true,
         optionalParams = Seq(sheetName, schemeName)
@@ -209,7 +213,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
         Logger.warn("[DataGenerator][getSheet] Couldn’t identify SheetName")
         val schemeName = ersUtil.getSchemeName(scheme)._2
         Left(ERSFileProcessingException(
-          "ers.exceptions.dataParser.incorrectSheetName",
+          Messages("ers.exceptions.dataParser.incorrectSheetName"),
           Messages("ers.exceptions.dataParser.unidentifiableSheetName") + " " + sheetName,
           needsExtendedInstructions = true,
           optionalParams = Seq(sheetName, schemeName)))
@@ -231,7 +235,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
       implicit val hc: HeaderCarrier = HeaderCarrier()
       Logger.warn("Error while reading File + Incorrect ERS Template")
       throw ERSFileProcessingException(
-        "ers.exceptions.dataParser.incorrectHeader",
+        Messages("ers.exceptions.dataParser.incorrectHeader"),
         Messages("ers.exceptions.dataParser.headersDontMatch"),
         needsExtendedInstructions = true,
         optionalParams = Seq(sheetName, fileName)

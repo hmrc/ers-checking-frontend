@@ -35,7 +35,7 @@ class UpscanController @Inject()(authAction: AuthAction,
                                  mcc: MessagesControllerComponents,
                                  implicit val ersUtil: ERSUtil,
                                  implicit val appConfig: ApplicationConfig
-                                )(implicit executionContext: ExecutionContext) extends FrontendController(mcc) with Retryable with I18nSupport {
+                                )(implicit executionContext: ExecutionContext) extends FrontendController(mcc) with Retryable with I18nSupport with BaseController{
 
   def failure(): Action[AnyContent] = authAction.async { implicit request =>
     Logger.error("[UpscanController][failure] Failed to upload file to Upscan")
@@ -125,12 +125,5 @@ class UpscanController @Inject()(authAction: AuthAction,
         Logger.error(s"[UpscanController][successODS] Failed to save ods file with exception ${e.getMessage}.", e)
         getGlobalErrorPage
     }
-  }
-
-  def getGlobalErrorPage()(implicit request: Request[_]): Result = {
-    Ok(views.html.global_error(
-      "ers.global_errors.title",
-      "ers.global_errors.message"
-    ))
   }
 }

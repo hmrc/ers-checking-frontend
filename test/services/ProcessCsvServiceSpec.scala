@@ -261,7 +261,7 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
     }
   }
 
-  "listWithFirstNEntriesZippedNameTBD" should {
+  "processDisplayedErrors" should {
     "correctly update the cells with the row number for as many rows as stated" in {
       val errors = Seq((List(
         ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
@@ -279,7 +279,7 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
           ValidationError(Cell("C", 0, "test"), "001", "error.1", "ers.upload.error.date")
         ), 0)
       )
-      val result = testProcessCsvService.listWithFirstNEntriesZippedNameTBD(2, errors)
+      val result = testProcessCsvService.processDisplayedErrors(2, errors)
       result.head mustBe (List(
         ValidationError(Cell("A", 1, "test"), "001", "error.1", "ers.upload.error.date"),
         ValidationError(Cell("B", 1, "test"), "001", "error.1", "ers.upload.error.date"),
