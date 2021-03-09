@@ -19,8 +19,8 @@ package controllers
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.HttpHeader.ParsingResult.Ok
-import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
-import akka.stream.scaladsl.Source
+import akka.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes}
+import akka.stream.scaladsl.{Sink, Source}
 import akka.testkit.TestKit
 import controllers.auth.RequestWithOptionalEmpRef
 import helpers.ErsTestHelper
@@ -66,7 +66,8 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
   def buildFakeUploadControllerCsv(uploadRes: Boolean = true,
                                    processFile: Boolean = true,
                                    formatRes: Boolean = true,
-                                   clearCacheResponse: Boolean = true
+                                   clearCacheResponse: Boolean = true,
+                                   mockReadFileCsv: Boolean = true
                                   ): UploadController =
     new UploadController(mockAuthAction, mockProcessODSService, mockProcessCsvService, mcc, mockErsUtil, mockAppConfig) {
 
@@ -75,7 +76,12 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
 
       val mockSource: Source[HttpResponse, NotUsed] = Source.fromIterator(() => List(HttpResponse(StatusCodes.OK)).toIterator)
 
-      override private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, _] = mockSource
+      override private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, _] = if(mockReadFileCsv)
+        mockSource
+      else
+        super.readFileCsv(downloadUrl)
+
+      override private[controllers] def makeRequest(request: HttpRequest): Future[HttpResponse] = Future.successful(HttpResponse(StatusCodes.OK))
 
       val returnValue: List[Future[Either[Throwable, Boolean]]] = {
         if (processFile) {
@@ -151,6 +157,18 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
       )(RequestWithOptionalEmpRef(FakeRequest("GET", ""), None), hc)
 
       intercept[Exception](Await.result(result, Duration.Inf)).getMessage shouldBe "taste the pain"
+    }
+  }
+
+  "Calling readFileCsv" should {
+    "process the response" in {
+      val controllerUnderTest = buildFakeUploadControllerCsv(mockReadFileCsv = false)
+      val result: Future[Seq[HttpResponse]] = controllerUnderTest.readFileCsv("http://www.test.com").runWith(Sink.seq)
+
+      val responses = Await.result(result, Duration.Inf)
+      responses.length shouldBe 1
+      responses.head shouldBe HttpResponse(StatusCodes.OK)
+
     }
   }
 

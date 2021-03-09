@@ -70,8 +70,10 @@ class UploadController @Inject()(authAction: AuthAction,
   private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, _] = {
     Source
       .single(HttpRequest(uri = downloadUrl))
-      .mapAsync(1)(Http()(actorSystem).singleRequest(_))
+      .mapAsync(1)(makeRequest)
   }
+
+  private[controllers] def makeRequest(request: HttpRequest): Future[HttpResponse] = Http()(actorSystem).singleRequest(request)
 
   private[controllers] def readFileOds(downloadUrl: String): StaxProcessor = {
     val stream: InputStream = downloadAsInputStream(downloadUrl)
