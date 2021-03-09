@@ -46,9 +46,9 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
                                   dataGenerator: DataGenerator,
-                                  appConfig: ApplicationConfig
+                                  appConfig: ApplicationConfig,
+                                  ersUtil: ERSUtil
                                  )(implicit executionContext: ExecutionContext,
-                                   ersUtil: ERSUtil,
                                    actorSystem: ActorSystem) {
 
   type RowValidator = Seq[String] => Either[Throwable, Option[List[ValidationError]]]
@@ -101,7 +101,6 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
       }
     }
 
-
   def processRow(rowBytes: List[ByteString], sheetName: String, validator: DataValidator): Either[Throwable, List[ValidationError]] = {
     val rowStrings = rowBytes.map(byteString => byteString.utf8String)
     val parsedRow = parserUtil.formatDataToValidate(rowStrings, sheetName)
@@ -125,7 +124,7 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
 
 // TODO Either re-write this or add comment to explain
   @tailrec
-  private def listWithFirstNEntriesZippedNameTBD(n: Int, list: Seq[(List[ValidationError], Int)]): Seq[(List[ValidationError], Int)] = {
+  private[services] final def listWithFirstNEntriesZippedNameTBD(n: Int, list: Seq[(List[ValidationError], Int)]): Seq[(List[ValidationError], Int)] = {
     if (n == 0) list
     else {
       val indexOfFirstOccurrence: Int = list.indexWhere(entry => entry._1.nonEmpty && entry._1.exists(validationError => validationError.cell.row == 0))
@@ -170,7 +169,6 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
         } yield Right(false)
     }
   }
-
 }
 
 object FlowOps {
