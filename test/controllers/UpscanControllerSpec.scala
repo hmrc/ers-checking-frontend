@@ -33,7 +33,7 @@ import scala.concurrent.Future
 
 class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppPerSuite {
 
-  val config = Map("application.secret" -> "test",
+  val config: Map[String, Any] = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
     "contact-frontend.host" -> "localhost",
     "contact-frontend.port" -> "9250",
@@ -58,10 +58,10 @@ class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
   }
 
   "failure" should {
-    "return a 200 when successful" in {
+    "return a 500 when called" in {
       val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET")
       val result: Future[Result] = upscanController().failure().apply(fakeRequest)
-      status(result) shouldBe Status.OK
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
   }
 
@@ -82,7 +82,8 @@ class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
       result.header.headers("Location") shouldBe routes.UploadController.uploadCSVFile(Fixtures.getMockSchemeTypeString).toString
     }
 
-    "return a 200 when a file is still in progress" in {
+    //TODO maybe consider showing the user a separate page that tells them it's still in progress instead of a global error page?
+    "send a user to the global error page when a file is still in progress" in {
       val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET")
       val upscanId: UpscanIds = UpscanIds(uploadId, "fileId", NotStarted)
       val singleCsvFile: UpscanCsvFilesList = UpscanCsvFilesList(ids = Seq(upscanId))
@@ -92,10 +93,10 @@ class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
       when(mockErsUtil.cache(any(), any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(null))
 
       val result = upscanController(upscanCsvFilesListCallbackList).successCSV(uploadId, Fixtures.getMockSchemeTypeString).apply(fakeRequest)
-      status(result) shouldBe Status.OK
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
 
-    "return a 200 when an exception occurs" in {
+    "return a 500 when an exception occurs" in {
       val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET")
       val upscanId: UpscanIds = UpscanIds(uploadId, "fileId", NotStarted)
       val singleCsvFile: UpscanCsvFilesList = UpscanCsvFilesList(ids = Seq(upscanId))
@@ -114,12 +115,12 @@ class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
         }
 
       val result = upscanControllerError().successCSV(uploadId, Fixtures.getMockSchemeTypeString).apply(fakeRequest)
-      status(result) shouldBe Status.OK
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
   }
 
   "successOds" should {
-    "redirect to the upload ods file page when the file file status is uploaded successfully" in {
+    "redirect to the upload ods file page when the file status is uploaded successfully" in {
       val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET")
       val successfully: UploadedSuccessfully = UploadedSuccessfully("thefilename", "downloadUrl", Some(1000))
 
@@ -131,20 +132,20 @@ class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
 
     }
 
-    "return a 200 when a when getCallbackRecord returns a None" in {
+    "return a 500 (getGlobalErrorPage) when getCallbackRecord returns a None" in {
       val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET")
       when(mockSessionService.getCallbackRecord(any(), any(), any())).thenReturn(Future.successful(None))
 
       val result = upscanController().successODS(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
-      status(result) shouldBe Status.OK
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
 
-    "return a 200 when a when an exception occurs" in {
+    "return a 500 (getGlobalErrorPage) when an exception occurs" in {
       val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET")
       when(mockSessionService.getCallbackRecord(any(), any(), any())).thenReturn(Future.failed(new Exception("an error occured")))
 
       val result = upscanController().successODS(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
-      status(result) shouldBe Status.OK
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
   }
 }

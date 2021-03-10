@@ -26,11 +26,12 @@ import org.scalatestplus.play.PlaySpec
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.mvc.DefaultMessagesControllerComponents
+import services.ERSTemplatesInfo._
 import services.headers.HeaderData
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.WithFakeApplication
 import uk.gov.hmrc.services.validation.DataValidator
-import utils.{CsvParserUtil, ParserUtil}
+import utils.ParserUtil
 
 import scala.util.Try
 
@@ -260,6 +261,26 @@ class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHe
       verify(mockAuditEvents, times(1)).fileProcessingErrorAudit("differentInput", "aSheetName", "differentinput is not equal to someinput")
 
 
+    }
+  }
+
+  //TODO these are not strictly unit tests, they go out to ersSheets.
+  "getSheetCsv" must {
+
+    "return Right with a tuple of sheetInfo on uploadedfile and the selected scheme name when they match" in new DataGeneratorObj("CSOP") {
+      getSheetCsv("CSOP_OptionsGranted_V3", "CSOP") mustBe Right((
+        SheetInfo(csop,  1, csopSheet1Name , csopSheet1title, csopSheet1ValConfig,  csopOptionsGrantedHeaderRow),
+        "CSOP"
+        )
+      )
+    }
+
+    "return Left with an ERSFileProcessingException if the uploaded file name isn't found" in new DataGeneratorObj("CSOP") {
+      getSheetCsv("thisIsInvalid", "CSOP") mustBe Left(ERSFileProcessingException(
+        "ers.exceptions.dataParser.incorrectSheetName",
+        Messages("ers.exceptions.dataParser.unidentifiableSheetName") + " thisIsInvalid",
+        needsExtendedInstructions = true,
+        optionalParams = Seq("thisIsInvalid", "CSOP")))
     }
   }
 }

@@ -19,7 +19,6 @@ package services
 import java.io.{File, PrintWriter}
 import java.nio.file.Files
 import java.util.concurrent.atomic.AtomicInteger
-
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
@@ -43,7 +42,7 @@ import play.api.i18n.{Messages, MessagesImpl}
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents}
 import play.api.test.FakeRequest
-
+import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.{Cell, DataValidator, ValidationError}
@@ -196,14 +195,11 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
       result.utf8String mustBe "Test response body"
     }
 
-    //TODO currently correct test for behaviour but probs don't wanna throw here
-    "throw a runtime exception if response status is not Ok (200)" in {
+    "return a failed source with an UpstreamErrorResponse if response status is not Ok (200)" in {
       val response = HttpResponse(status = StatusCodes.InternalServerError)
       val resultFuture = testProcessCsvService.extractEntityData(response).runWith(Sink.head)
 
-      assertThrows[RuntimeException] {
-        Await.result(resultFuture, Duration.Inf)
-      }
+      assert(resultFuture.failed.futureValue.getMessage.contains("Illegal response from Upscan"))
     }
   }
 
@@ -238,7 +234,8 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
       val result = Await.result(resultFuture, Duration.Inf)
       result.head.isLeft mustBe true
       result.head.left.map { x =>
-        assert(x.getMessage.contains("500 Internal Server Error"))
+        assert(x.isInstanceOf[UpstreamErrorResponse])
+        assert(x.asInstanceOf[UpstreamErrorResponse].getMessage().contains("Illegal response from Upscan"))
       }
     }
   }

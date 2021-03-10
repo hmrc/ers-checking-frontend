@@ -18,6 +18,7 @@ package controllers
 
 import helpers.ErsTestHelper
 import models.CSformMappings
+import models.upscan.{NotStarted, Reference, UploadId, UpscanCsvFilesList, UpscanIds, UpscanInitiateResponse}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -25,9 +26,11 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesImpl}
-import play.api.mvc.{DefaultMessagesControllerComponents, Result}
+import play.api.mvc.{Call, DefaultMessagesControllerComponents, Result}
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
+
 import scala.concurrent.Future
 
 
@@ -219,15 +222,18 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
 
     def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc, mockErsUtil, mockAppConfig) {
-      when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any()))
-        .thenReturn(if (schemeRes) Future.successful(null) else Future.failed(new Exception))
-      when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any(),any()))
-        .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
+        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any()))
+          .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any(),any()))
+          .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
+        when(mockUpscanService.getUpscanFormData(any(), any(), any())(any(), any(), any()))
+          .thenReturn(Future.successful(UpscanInitiateResponse(Reference("ref"), Call("GET", "/"), Map.empty)))
+        when(mockSessionService.createCallbackRecord(any(), any(), any()))
+          .thenReturn(Future.successful(CacheMap("", Map.empty)))
 
-			mockAnyContentAction
+			  mockAnyContentAction
     }
 
-    // TODO What a mess, these were hitting global error page (which used to return 200) and passing :/
     "give a call to showCheckFilePage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
       val result = controllerUnderTest.checkODSFilePage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
@@ -254,12 +260,18 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
 
     def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc, mockErsUtil, mockAppConfig) {
-      when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any(),any()))
-        .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
+        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any()))
+          .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any(),any()))
+          .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
+        when(mockErsUtil.fetch[UpscanCsvFilesList](refEq(mockErsUtil.CSV_FILES_UPLOAD), any())(any(),any(),any(),any()))
+          .thenReturn(if (schemeRes) Future.successful(UpscanCsvFilesList(Seq(UpscanIds(UploadId("id"), "fileId", NotStarted)))) else Future.failed(new Exception))
+        when(mockUpscanService.getUpscanFormData(any(), any(), any())(any(), any(), any()))
+          .thenReturn(Future.successful(UpscanInitiateResponse(Reference("ref"), Call("GET", "/"), Map.empty)))
 			mockAnyContentAction
     }
 
-    "gives a call to showCheckCSVFilePage if user is authenticated" in {
+    "give a call to showCheckCSVFilePage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
       val result = controllerUnderTest.checkCSVFilePage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
@@ -289,7 +301,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
 																					): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc, mockErsUtil, mockAppConfig) {
         when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any()))
-          .thenReturn(if (schemeRes) Future.successful(null) else Future.failed(new Exception))
+          .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
 
         when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any(),any()))
         .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
@@ -300,7 +312,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
 			mockAnyContentAction
     }
 
-    "gives a call to showCheckingSuccessPage if user is authenticated" in {
+    "give a call to showCheckingSuccessPage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
       val result = controllerUnderTest.checkingSuccessPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
@@ -323,14 +335,20 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
 																					): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc, mockErsUtil, mockAppConfig) {
 
-      when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any()))
-        .thenReturn(if (schemeRes) Future.successful(null) else Future.failed(new Exception))
+        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any()))
+          .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
+        when(mockErsUtil.getSchemeName(any())).thenReturn(("a", "b"))
 
-      when(mockErsUtil.fetch[String](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(),any(),any(),any()))
-        .thenReturn(if (schemeRes) Future.successful(fileTypeRes) else Future.failed(new Exception))
-
-      when(mockErsUtil.fetch[String](refEq(mockErsUtil.FORMAT_ERROR_CACHE))(any(),any(),any(),any()))
-        .thenReturn(if (errorRes) Future.successful(errorCount) else Future.failed(new Exception))
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(),any(),any(),any()))
+          .thenReturn(if (schemeRes) Future.successful(fileTypeRes) else Future.failed(new Exception))
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any(),any()))
+          .thenReturn(if (schemeRes) Future.successful("csop") else Future.failed(new Exception))
+        when(mockErsUtil.fetch[Boolean](refEq(mockErsUtil.FORMAT_ERROR_EXTENDED_CACHE))(any(),any(),any(),any()))
+          .thenReturn(if (errorRes) Future.successful(false) else Future.failed(new Exception))
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.FORMAT_ERROR_CACHE))(any(),any(),any(),any()))
+          .thenReturn(if (errorRes) Future.successful(errorCount) else Future.failed(new Exception))
+        when(mockErsUtil.fetch[Seq[String]](refEq(mockErsUtil.FORMAT_ERROR_CACHE_PARAMS))(any(),any(),any(),any()))
+          .thenReturn(if (errorRes) Future.successful(Seq(errorCount)) else Future.failed(new Exception))
 
 			mockAnyContentAction
     }

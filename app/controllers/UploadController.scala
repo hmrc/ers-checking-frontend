@@ -28,7 +28,7 @@ import play.api.Logger
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.ERSUtil
 
@@ -157,8 +157,15 @@ class UploadController @Inject()(authAction: AuthAction,
         } yield {
           Redirect(routes.CheckingServiceController.formatErrorsPage())
         }
+      case upstreamError: UpstreamErrorResponse =>
+        Logger.error(
+          s"[UploadController][handleException] " +
+            s"Encountered an upstream error response when processing a CSV file: " +
+            s"status ${upstreamError.statusCode} with message ${upstreamError.getMessage()}")
+        Future(getGlobalErrorPage)
       case notERSProcessingException =>
-        Logger.error(s"[UploadController][handleException] Encountered unexpected exception: ${notERSProcessingException.getClass}. Redirecting to global error page.")
+        Logger.error(s"[UploadController][handleException] " +
+          s"Encountered unexpected exception: ${notERSProcessingException.getClass}. Redirecting to global error page.")
         Future(getGlobalErrorPage)
     }
   }

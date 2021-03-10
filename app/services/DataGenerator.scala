@@ -132,7 +132,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
     }catch{
       case e: Exception =>
         auditEvents.auditRunTimeError(e,"Could not set the validator", sheetName)(hc, request, ec)
-        Logger.error("setValidator has thrown an exception, SheetName: " + sheetName + " Exception message: " + e.getMessage)
+        Logger.error("[DataGenerator][setValidator] setValidator has thrown an exception, SheetName: " + sheetName + " Exception message: " + e.getMessage)
         throw ERSFileProcessingException(
           "ers.exceptions.dataParser.configFailure",
           Messages("ers.exceptions.dataParser.validatorError"),
@@ -148,7 +148,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
       case Success(validator) => Right(validator)
       case Failure(e) =>
         auditEvents.auditRunTimeError(e, "Could not set the validator", sheetName)(hc, request, ec)
-        Logger.error("setValidator has thrown an exception, SheetName: " + sheetName + " Exception message: " + e.getMessage)
+        Logger.error("[DataGenerator][setValidatorCsv] setValidator has thrown an exception, SheetName: " + sheetName + " Exception message: " + e.getMessage)
         Left(ERSFileProcessingException(
           "ers.exceptions.dataParser.configFailure",
           Messages("ers.exceptions.dataParser.validatorError"),
@@ -174,27 +174,34 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
     }
   }
 
-   def identifyAndDefineSheetEither(informationOnInput: (SheetInfo, String))(implicit hc: HeaderCarrier, request: Request[_], messages: Messages): Either[Throwable, String] = {
+   def identifyAndDefineSheetEither(informationOnInput: (SheetInfo, String))(
+     implicit hc: HeaderCarrier, request: Request[_], messages: Messages): Either[Throwable, String] = {
      val uploadedFileInfo = informationOnInput._1
      val selectedSchemeName = informationOnInput._2
 
      if (uploadedFileInfo.schemeType.toLowerCase == selectedSchemeName.toLowerCase) {
        Right(uploadedFileInfo.sheetName)
      } else {
-       auditEvents.fileProcessingErrorAudit(uploadedFileInfo.schemeType, uploadedFileInfo.sheetName, s"${uploadedFileInfo.schemeType.toLowerCase} is not equal to ${selectedSchemeName.toLowerCase}")
-       Logger.warn(s"[DataGenerator][identifyAndDefineSheetEither] The user has selected $selectedSchemeName but actually uploaded a ${uploadedFileInfo.schemeType} file")
-       // TODO We need to re-remove the messages we added as it was using the codes as cache keys!
+       auditEvents.fileProcessingErrorAudit(uploadedFileInfo.schemeType, uploadedFileInfo.sheetName,
+         s"${uploadedFileInfo.schemeType.toLowerCase} is not equal to ${selectedSchemeName.toLowerCase}")
+       Logger.warn(
+         s"[DataGenerator][identifyAndDefineSheetEither] The user selected $selectedSchemeName but actually uploaded a ${uploadedFileInfo.schemeType} file"
+       )
        Left(ERSFileProcessingException(
          "ers.exceptions.dataParser.incorrectSchemeType",
          Messages("ers.exceptions.dataParser.incorrectSchemeType", uploadedFileInfo.schemeType.toLowerCase, selectedSchemeName.toLowerCase),
-         optionalParams = Seq(ersUtil.withArticle(uploadedFileInfo.schemeType.toUpperCase), ersUtil.withArticle(selectedSchemeName.toUpperCase), uploadedFileInfo.sheetName)))
+         optionalParams = Seq(
+           ersUtil.withArticle(uploadedFileInfo.schemeType.toUpperCase),
+           ersUtil.withArticle(selectedSchemeName.toUpperCase),
+           uploadedFileInfo.sheetName))
+       )
      }
    }
 
   def getSheet(sheetName: String, scheme: String)(implicit messages: Messages): SheetInfo = {
     Logger.info(s"[DataGenerator][getSheet] Looking for sheetName: $sheetName")
     ersSheets.getOrElse(sheetName, {
-      Logger.warn("[DataGenerator][getSheet] Couldn’t identify SheetName")
+      Logger.warn("[DataGenerator][getSheet] Couldn't identify SheetName")
       val schemeName = ersUtil.getSchemeName(scheme)._2
       throw ERSFileProcessingException(
         "ers.exceptions.dataParser.incorrectSheetName",
@@ -205,18 +212,18 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
     })
   }
 
-  def getSheetCsv(sheetName: String, scheme: String)(implicit messages: Messages): Either[Throwable, (SheetInfo, String)] = { // IS CSV
-    Logger.info(s"[DataGenerator][getSheet] Looking for sheetName: $sheetName")
+  def getSheetCsv(sheetName: String, scheme: String)(implicit messages: Messages): Either[Throwable, (SheetInfo, String)] = {
+    Logger.info(s"[DataGenerator][getSheetCsv] Looking for sheetName: $sheetName")
+    val selectedSchemeName = ersUtil.getSchemeName(scheme)._2
     ersSheets.get(sheetName) match {
-      case Some(sheetInfo) => Right((sheetInfo, ersUtil.getSchemeName(scheme)._2))
+      case Some(sheetInfo) => Right((sheetInfo, selectedSchemeName))
       case _ =>
-        Logger.warn("[DataGenerator][getSheet] Couldn’t identify SheetName")
-        val schemeName = ersUtil.getSchemeName(scheme)._2
+        Logger.warn("[DataGenerator][getSheetCsv] Couldn't identify SheetName")
         Left(ERSFileProcessingException(
           "ers.exceptions.dataParser.incorrectSheetName",
           Messages("ers.exceptions.dataParser.unidentifiableSheetName") + " " + sheetName,
           needsExtendedInstructions = true,
-          optionalParams = Seq(sheetName, schemeName)))
+          optionalParams = Seq(sheetName, selectedSchemeName)))
     }
   }
 
@@ -245,5 +252,4 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
 
   def deliverDataIteratorMetrics(startTime:Long): Unit =
     metrics.dataIteratorTimer(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
-
 }

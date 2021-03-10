@@ -94,14 +94,14 @@ class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) 
 			status(result) shouldBe Status.SEE_OTHER
 		}
 
-		"give a redirect status to checkingSuccessPage if no formating or structural errors" in {
+		"give a redirect status to checkingSuccessPage if no formatting or structural errors" in {
 			val controllerUnderTest = buildFakeUploadControllerOds()
 			val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
 			status(result) shouldBe Status.SEE_OTHER
 			result.header.headers("Location") shouldBe routes.CheckingServiceController.checkingSuccessPage().toString
 		}
 
-		"give a redirect status to checkingSuccessPage if formating errors" in {
+		"give a redirect status to checkingSuccessPage if formatting errors" in {
 			val controllerUnderTest = buildFakeUploadControllerOds(uploadRes = false)
 			val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
 			status(result) shouldBe Status.SEE_OTHER

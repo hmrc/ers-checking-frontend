@@ -33,7 +33,7 @@ import play.api.mvc.AnyContent
 import services.FlowOps.eitherFromFunction
 import services.validation.ErsValidator.getCells
 import services.validation.ValidationContext
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.services.validation.{DataValidator, Row, ValidationError}
 import utils.{CsvParserUtil, ERSUtil}
 
@@ -51,13 +51,16 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
                                  )(implicit executionContext: ExecutionContext,
                                    actorSystem: ActorSystem) {
 
-  type RowValidator = Seq[String] => Either[Throwable, Option[List[ValidationError]]]
+  private val uploadCsvSizeLimit: Int = appConfig.uploadCsvSizeLimit
 
   def extractEntityData(response: HttpResponse): Source[ByteString, _] =
     response match {
-      case HttpResponse(akka.http.scaladsl.model.StatusCodes.OK, _, entity, _) => entity.withoutSizeLimit().dataBytes // TODO investigate size limit
+      case HttpResponse(akka.http.scaladsl.model.StatusCodes.OK, _, entity, _) => entity.withSizeLimit(uploadCsvSizeLimit).dataBytes
       case notOkResponse =>
-        Source.failed(new RuntimeException(s"illegal response $notOkResponse"))
+        Source.failed(
+          UpstreamErrorResponse(
+            s"[ProcessCsvService][extractEntityData] Illegal response from Upscan: ${notOkResponse.status.intValue}, body: ${notOkResponse.entity.dataBytes}",
+            notOkResponse.status.intValue))
     }
 
   def extractBodyOfRequest: Source[HttpResponse, _] => Source[Either[Throwable, List[ByteString]], _] =
@@ -122,7 +125,6 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
       Messages("ers_check_csv_file.file_type_error", name)(messages)))
   }
 
-// TODO Either re-write this or add comment to explain
 @tailrec
 private[services] final def processDisplayedErrors(n: Int, list: Seq[(List[ValidationError], Int)]): Seq[(List[ValidationError], Int)] = {
   if (n == 0) list

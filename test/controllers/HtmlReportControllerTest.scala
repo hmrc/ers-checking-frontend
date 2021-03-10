@@ -137,10 +137,10 @@ class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with Er
   }
 
   "Calling HtmlReportController.showHtmlErrorReportPage with authentication, and error count > 0" should {
-    "give a status OK and show error report" in {
+    "give a status 500 and show error report" in {
       val controllerUnderTest = buildFakeHtmlReportController("withErrorListSchemeTypeFileTypeZeroErrorCountSummary")
       val result = controllerUnderTest.showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"),hc, testMessages)
-      status(result) shouldBe Status.OK
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
   }
 

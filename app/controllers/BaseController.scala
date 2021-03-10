@@ -19,14 +19,14 @@ package controllers
 import config.ApplicationConfig
 import play.api.i18n.Messages
 import play.api.mvc.{Request, Result}
-import play.api.mvc.Results.{InternalServerError, Ok}
+import play.api.mvc.Results.{InternalServerError}
 
 trait BaseController {
 
   implicit val appConfig: ApplicationConfig
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-    Ok(views.html.global_error(
+    InternalServerError(views.html.global_error(
       "ers.global_errors.title",
       "ers.global_errors.message")(request, messages, appConfig))
   }
