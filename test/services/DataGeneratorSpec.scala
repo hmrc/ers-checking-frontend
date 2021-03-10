@@ -139,7 +139,7 @@ class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHe
       val invalidSheet: ERSFileProcessingException = intercept[ERSFileProcessingException]{
         identifyAndDefineSheet("CSOP_OptionsExercised_V3","emi")(hc,Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
       }
-      invalidSheet.message mustBe Messages("ers.exceptions.dataParser.incorrectSchemeType")
+      invalidSheet.message mustBe "ers.exceptions.dataParser.incorrectSchemeType"
       invalidSheet.optionalParams mustBe Seq("a CSOP", "an EMI", "CSOP_OptionsExercised_V3")
     }
 
@@ -154,7 +154,7 @@ class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHe
       val result: ERSFileProcessingException = intercept[ERSFileProcessingException] {
         getErrors(XMLTestData.getInvalidCSOPWithoutHeaders,"csop","CSOP.ods")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
       }
-      result.message mustBe Messages("ers.exceptions.dataParser.incorrectHeader")
+      result.message mustBe "ers.exceptions.dataParser.incorrectHeader"
       result.optionalParams mustBe Seq("CSOP_OptionsGranted_V3", "CSOP.ods")
     }
 
@@ -162,7 +162,7 @@ class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHe
       val result: ERSFileProcessingException = intercept[ERSFileProcessingException] {
         getErrors(XMLTestData.getInvalidCSOPWith2Sheets1WithoutHeaders,"csop","CSOP.ods")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
       }
-      result.message mustBe Messages("ers.exceptions.dataParser.incorrectHeader")
+      result.message mustBe "ers.exceptions.dataParser.incorrectHeader"
       result.optionalParams mustBe Seq("CSOP_OptionsGranted_V3", "CSOP.ods")
     }
 
@@ -170,7 +170,7 @@ class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHe
       val result: ERSFileProcessingException = intercept[ERSFileProcessingException] {
         getErrors(XMLTestData.getCSOPWithoutData,"csop","CSOP.ods")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
       }
-      result.message mustBe Messages("ers.exceptions.dataParser.noData")
+      result.message mustBe "ers.exceptions.dataParser.noData"
       result.optionalParams mustBe Seq.empty[String]
     }
 
@@ -215,7 +215,7 @@ class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHe
       val failedValue: Either[Throwable, DataValidator] = testDataGen.setValidatorCsv("CSOP_OptionsGranted_V3")
 
       val returnedExceptionExample: ERSFileProcessingException = ERSFileProcessingException(
-        Messages("ers.exceptions.dataParser.configFailure"),
+        "ers.exceptions.dataParser.configFailure",
         Messages("ers.exceptions.dataParser.validatorError"),
         optionalParams = Seq("CSOP_OptionsGranted_V3")
       )
@@ -246,7 +246,7 @@ class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHe
       val failedValue: Either[Throwable, String] = testDataGen
         .identifyAndDefineSheetEither((SheetInfo("differentInput",1,"aSheetName","","",List("")), "SOMEINPUT"))
       val returnedExceptionExample: ERSFileProcessingException = ERSFileProcessingException(
-        Messages("ers.exceptions.dataParser.incorrectSchemeType"),
+        "ers.exceptions.dataParser.incorrectSchemeType",
         Messages("ers.exceptions.dataParser.incorrectSchemeType", "differentinput", "someinput"),
         optionalParams = Seq("ersUtilReturn", "ersUtilReturn", "aSheetName")
       )

@@ -107,32 +107,35 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
     }
 
   "Calling UploadController.uploadCSVFile" should {
+    implicit val fakeRequest: RequestWithOptionalEmpRef[AnyContent] = RequestWithOptionalEmpRef(Fixtures.buildFakeRequestWithSessionId("GET"), None)
 
     "give a redirect status and show checkingSuccessPage if authenticated and no validation errors" in {
-      implicit val fakeRequest: FakeRequest[AnyContent] = Fixtures.buildFakeRequestWithSessionId("GET")
       UpscanCsvFilesCallbackList
       val controllerUnderTest = buildFakeUploadControllerCsv()
-      val result = controllerUnderTest.uploadCSVFile(Fixtures.getMockSchemeTypeString)(fakeRequest)
+      val result = controllerUnderTest.uploadCSVFile(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
     }
 
     "give a redirect status to checkingSuccessPage if no formating or structural errors" in {
       val controllerUnderTest = buildFakeUploadControllerCsv()
-      val result = controllerUnderTest.showUploadCSVFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
+      val result = controllerUnderTest
+        .uploadCSVFile(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       result.header.headers("Location") shouldBe routes.CheckingServiceController.checkingSuccessPage().toString
     }
 
     "give a redirect status to checkingSuccessPage if formating errors" in {
       val controllerUnderTest = buildFakeUploadControllerCsv(uploadRes = false)
-      val result = controllerUnderTest.showUploadCSVFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
+      val result = controllerUnderTest
+        .uploadCSVFile(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       result.header.headers("Location") shouldBe routes.HtmlReportController.htmlErrorReportPage(true).toString
     }
 
     "give a redirect status to globalErrorPage if clearErrorCache returns false" in {
       val controllerUnderTest = buildFakeUploadControllerCsv(clearCacheResponse = false)
-      val result = controllerUnderTest.showUploadCSVFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
+      val result = controllerUnderTest
+        .uploadCSVFile(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.OK
       result.body.consumeData.utf8String should include(testMessages("ers.global_errors.message"))
 

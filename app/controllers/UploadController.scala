@@ -70,7 +70,7 @@ class UploadController @Inject()(authAction: AuthAction,
   private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, _] = {
     Source
       .single(HttpRequest(uri = downloadUrl))
-      .mapAsync(1)(makeRequest)
+      .mapAsync(parallelism = 1)(makeRequest)
   }
 
   private[controllers] def makeRequest(request: HttpRequest): Future[HttpResponse] = Http()(actorSystem).singleRequest(request)
@@ -101,30 +101,28 @@ class UploadController @Inject()(authAction: AuthAction,
 
   def uploadCSVFile(scheme: String): Action[AnyContent] = authAction.async {
     implicit request =>
-      showUploadCSVFile(scheme)
+      clearErrorCache() flatMap {
+        case false => Future(getGlobalErrorPage)
+        case _ =>
+          ersUtil.shortLivedCache.fetchAndGetEntry[UpscanCsvFilesCallbackList](ersUtil.getCacheId, "callback_data_key_csv") flatMap { callback =>
+            val validationResults = csvFileProcessor.processFiles(callback, scheme, readFileCsv)
+            finaliseRequestAndRedirect(validationResults)
+          }
+      }
   }
 
-  def showUploadCSVFile(scheme: String)(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
-    clearErrorCache() flatMap {
-      case false => Future(getGlobalErrorPage(request, messages))
-      case _ =>
-        ersUtil.shortLivedCache.fetchAndGetEntry[UpscanCsvFilesCallbackList](ersUtil.getCacheId, "callback_data_key_csv") flatMap { callback =>
-          finaliseRequestAndRedirect(csvFileProcessor.processFiles(callback, scheme, readFileCsv)(request, hc, messages))
-        }
-    }
-  }
-
-  def finaliseRequestAndRedirect(processedFiles: List[Future[Either[Throwable, Boolean]]])(
+  def finaliseRequestAndRedirect(validationResults: List[Future[Either[Throwable, Boolean]]])(
     implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Result] =
-    Future.sequence(processedFiles).flatMap {
+    Future.sequence(validationResults).flatMap {
       case noFailures if noFailures.forall(_.contains(true)) =>
         Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
-      case failures if failures.exists(_.isLeft) =>
-        failures.find(_.isLeft).head match { // TODO clean up and remove usage of .head
-          case Left(exception) => handleException(exception)
+      case failures  =>
+        failures.find(_.isLeft) match {
+          case Some(Left(exception)) => handleException(exception)
+          case _ =>
+            Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(true)))
         }
-      case _ =>
-        Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(true)))
+
     }
 
   def uploadODSFile(scheme: String): Action[AnyContent] = authAction.async {
@@ -159,7 +157,9 @@ class UploadController @Inject()(authAction: AuthAction,
         } yield {
           Redirect(routes.CheckingServiceController.formatErrorsPage())
         }
-      case _ => throw t
+      case notERSProcessingException =>
+        Logger.error(s"[UploadController][handleException] Encountered unexpected exception: ${notERSProcessingException.getClass}. Redirecting to global error page.")
+        Future(getGlobalErrorPage)
     }
   }
 }
