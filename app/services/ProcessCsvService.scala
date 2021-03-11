@@ -164,7 +164,7 @@ private[services] final def processDisplayedErrors(n: Int, list: Seq[(List[Valid
     listOfErrors.filter(rowErrors => rowErrors.nonEmpty) match {
       case allGood if allGood.isEmpty => Future.successful(Right(true))
       case errors =>
-        val errorsToCache = ListBuffer(parserUtil.getSheetErrors(SheetErrors(name, errors.flatten.to[ListBuffer])))
+        val errorsToCache = ListBuffer(parserUtil.getSheetErrors(SheetErrors(FilenameUtils.removeExtension(name), errors.flatten.to[ListBuffer])))
         for {
           _ <- ersUtil.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${file.uploadId.value}", errors.flatten.length)
           _ <- ersUtil.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${file.uploadId.value}",

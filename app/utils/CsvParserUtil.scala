@@ -48,7 +48,7 @@ class CsvParserUtil @Inject()(appConfig: ApplicationConfig
   }
 
   def getSheetErrors(schemeErrors: SheetErrors): SheetErrors = {
-    SheetErrors(schemeErrors.sheetName, schemeErrors.errors.take(appConfig.errorCount))
+    schemeErrors.copy(errors = schemeErrors.errors.take(appConfig.errorCount))
   }
 
 }

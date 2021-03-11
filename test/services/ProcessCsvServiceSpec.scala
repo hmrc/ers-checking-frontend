@@ -166,7 +166,6 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
     "return a throwable when an error occurs during the file processing" in {
       val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V3.csv", "no", Some(1)))))
       val data = "2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no"
-      // TODO I think 2 lines down should be wrapped in messages but in DataGenerator none of them are - worth double checking
       when(mockDataGenerator.setValidatorCsv(any())(any(), any(), any())).thenReturn(Left(ERSFileProcessingException(
         "ers.exceptions.dataParser.configFailure",
         Messages("ers.exceptions.dataParser.validatorError"),
