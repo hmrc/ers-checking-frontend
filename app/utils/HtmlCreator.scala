@@ -18,7 +18,7 @@ package utils
 
 import models.SheetErrors
 import play.api.i18n.Messages
-import uk.gov.hmrc.services.validation.ValidationError
+import uk.gov.hmrc.services.validation.models._
 import scala.collection.mutable.ListBuffer
 
 class HtmlCreator {

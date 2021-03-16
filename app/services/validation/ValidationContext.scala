@@ -17,7 +17,9 @@
 package services.validation
 
 import scala.util.matching.Regex
-import uk.gov.hmrc.services.validation.{Cell, DataValidator, Row, ValidationError}
+import uk.gov.hmrc.services.validation.DataValidator
+import uk.gov.hmrc.services.validation.models._
+
 import play.api.Logger
 
 import scala.util.{Failure, Success, Try}
@@ -51,7 +53,7 @@ object ErsValidator {
 
   def validateRow(validator: DataValidator)(rowData: Seq[String], rowNumber: Int): Option[List[ValidationError]] = {
     try {
-      validator.validateRow(Row(rowNumber, getCells(rowData,rowNumber)), Some(ValidationContext))
+      validator.validateRow(Row(rowNumber, getCells(rowData,rowNumber)))
     } catch {
       case e: Exception =>
         Logger.warn(e.toString)
@@ -61,7 +63,7 @@ object ErsValidator {
 
   def validateRowCsv(validator: DataValidator)(rowData: Seq[String]): Either[Throwable, Option[List[ValidationError]]] = {
     Try {
-      validator.validateRow(Row(0, getCells(rowData,0)), Some(ValidationContext))
+      validator.validateRow(Row(0, getCells(rowData,0)))
     } match {
       case Failure(e) =>
         Logger.warn(e.toString)

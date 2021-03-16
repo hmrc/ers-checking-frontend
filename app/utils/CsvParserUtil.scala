@@ -37,14 +37,17 @@ class CsvParserUtil @Inject()(appConfig: ApplicationConfig
 
   def formatDataToValidate(rowData: Seq[String], sheetName: String): Seq[String] = {
     val sheetColSize = ERSTemplatesInfo.ersSheets(sheetName.replace(".csv", "")).headerRow.length
+    /*
     if (rowData.length < sheetColSize) {
       Logger.debug(s"Difference between amount of columns ${rowData.size} and amount of headers $sheetColSize")
       val additionalEmptyCells: Seq[String] = Seq.fill(sheetColSize - rowData.size)("")
       (rowData ++ additionalEmptyCells).take(sheetColSize)
     }
     else {
+
+     */
       rowData.take(sheetColSize)
-    }
+
   }
 
   def getSheetErrors(schemeErrors: SheetErrors): SheetErrors = {

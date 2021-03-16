@@ -32,9 +32,9 @@ import play.api.i18n.Messages
 import play.api.mvc.AnyContent
 import services.FlowOps.eitherFromFunction
 import services.validation.ErsValidator.getCells
-import services.validation.ValidationContext
+import uk.gov.hmrc.services.validation.models._
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import uk.gov.hmrc.services.validation.{DataValidator, Row, ValidationError}
+import uk.gov.hmrc.services.validation.{DataValidator}
 import utils.{CsvParserUtil, ERSUtil}
 
 import javax.inject.{Inject, Singleton}
@@ -108,7 +108,7 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
     val rowStrings = rowBytes.map(byteString => byteString.utf8String)
     val parsedRow = parserUtil.formatDataToValidate(rowStrings, sheetName)
     Try {
-      validator.validateRow(Row(0, getCells(parsedRow, 0)), Some(ValidationContext))
+      validator.validateRow(Row(0, getCells(parsedRow, 0)))
     } match {
       case Failure(e) =>
         Logger.warn(e.toString)

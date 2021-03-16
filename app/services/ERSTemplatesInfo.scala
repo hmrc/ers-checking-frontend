@@ -53,8 +53,9 @@ object ERSTemplatesInfo extends EMITemplateInfo with CsopTemplateInfo with SipTe
 }
 
 class ERSValidationConfigs {
-
-  val defValidator: DataValidator = DataValidator(getConfig(ERSTemplatesInfo.emiSheet1ValConfig))
+  //TODO We changed the default validator so we don't have to mess with more config while testing. May want to change back after work done
+//  val defValidator: DataValidator = DataValidator(getConfig(ERSTemplatesInfo.emiSheet1ValConfig))
+  val defValidator: DataValidator = DataValidator(getConfig(ERSTemplatesInfo.otherSheet1ValConfig))
   def getValidator(configName:String): DataValidator = DataValidator(getConfig(configName))
 
   def getConfig(sheetConfig:String): Config = ConfigFactory.load.getConfig(sheetConfig) //load new config per sheet on iteration
