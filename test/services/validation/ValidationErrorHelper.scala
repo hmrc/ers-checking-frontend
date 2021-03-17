@@ -16,7 +16,7 @@
 
 package services.validation
 import play.api.i18n.Messages
-import uk.gov.hmrc.services.validation.ValidationError
+import uk.gov.hmrc.services.validation.models.ValidationError
 
 
 trait ValidationErrorHelper[A] {

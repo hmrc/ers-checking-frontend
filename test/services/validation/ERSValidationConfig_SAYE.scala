@@ -20,18 +20,19 @@ import com.typesafe.config.ConfigFactory
 import org.scalatestplus.play.PlaySpec
 import services.validation.SAYETestData.{ERSValidationSAYEExercisedTestData, ERSValidationSAYEGrantedTestData, ERSValidationSAYERCLTestData}
 import services.validation.ValidationErrorHelper._
-import uk.gov.hmrc.services.validation.{Cell, DataValidator, Row, ValidationError}
+import uk.gov.hmrc.services.validation.DataValidator
+import uk.gov.hmrc.services.validation.models.{Cell, Row, ValidationError}
 
 class ERSValidationConfig_SAYE_SayeGrantedTests extends PlaySpec with ERSValidationSAYEGrantedTestData with ValidationTestRunner {
   "SAYE Granted V3 scheme config validation" should {
 
-    val validator = DataValidator(ConfigFactory.load.getConfig("ers-saye-granted-validation-config"))
+    val validator = new DataValidator(ConfigFactory.load.getConfig("ers-saye-granted-validation-config"))
     runTests(validator, getDescriptions, getTestData, getExpectedResults)
     "make Q7 a mandatory field when Q6 is answered with no" in {
       val cellG = Cell("G", rowNumber, "")
       val cellF = Cell("F", rowNumber, "no")
       val row = Row(1, Seq(cellG, cellF))
-      val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
+      val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
       resOpt.withErrorsFromMessages mustBe Some(List(
         ValidationError(cellG, "mandatoryG", "G01", "Enter ‘yes’ or ‘no’")))
     }

@@ -16,8 +16,6 @@
 
 package services.besIntegrationTestData
 
-import uk.gov.hmrc.services.validation.Cell
-
 /**
  * Created by matt on 25/01/16.
  */

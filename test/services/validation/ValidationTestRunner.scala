@@ -25,7 +25,8 @@ import play.api.i18n.MessagesImpl
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.DefaultMessagesControllerComponents
 import services.validation.ValidationErrorHelper._
-import uk.gov.hmrc.services.validation.{Cell, DataValidator, ValidationError}
+import uk.gov.hmrc.services.validation.DataValidator
+import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 
 trait ValidationTestRunner extends PlaySpec with GuiceOneAppPerSuite with ErsTestHelper {
 
@@ -49,7 +50,7 @@ trait ValidationTestRunner extends PlaySpec with GuiceOneAppPerSuite with ErsTes
   def runTests(validator:DataValidator, descriptions: List[String], testDatas:List[Cell], expectedResults:List[Option[List[ValidationErrorData]]]): Unit = {
       for (x <- 0 until descriptions.length) {
         descriptions(x) in {
-          validator.validateCell(testDatas(x), Some(ValidationContext)).withErrorsFromMessages mustBe resultBuilder(testDatas(x), expectedResults(x))
+          validator.validateCell(testDatas(x)).withErrorsFromMessages mustBe resultBuilder(testDatas(x), expectedResults(x))
         }
       }
   }

@@ -20,7 +20,7 @@ import helpers.ErsTestHelper
 import models.SheetErrors
 import org.mockito.Mockito.when
 import uk.gov.hmrc.play.test.UnitSpec
-import uk.gov.hmrc.services.validation.{Cell, ValidationError}
+import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 
 import scala.collection.mutable.ListBuffer
 
