@@ -61,17 +61,6 @@ object ErsValidator {
     }
   }
 
-  def validateRowCsv(validator: DataValidator)(rowData: Seq[String]): Either[Throwable, Option[List[ValidationError]]] = {
-    Try {
-      validator.validateRow(Row(0, getCells(rowData,0)))
-    } match {
-      case Failure(e) =>
-        Logger.warn(e.toString)
-        Left(e)
-      case Success(list) => Right(list)
-    }
-  }
-
   def getCells(rowData:Seq[String],rowNumber:Int): Seq[Cell] = {
     (rowData zip colNames).map { case (cellValue, col) => Cell(col, rowNumber, cellValue) }
   }

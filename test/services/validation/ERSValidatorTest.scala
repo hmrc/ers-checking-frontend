@@ -28,7 +28,7 @@ import uk.gov.hmrc.services.validation.DataValidator
 
 class ERSValidatorTest extends PlaySpec with WithFakeApplication with MockitoSugar with ERSValidationEMIAdjustmentsTestData {
 
-  val validator: DataValidator = DataValidator(ConfigFactory.load.getConfig("ers-emi-adjustments-validation-config"))
+  val validator: DataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-emi-adjustments-validation-config"))
 
   val testData =  Seq("yes", "yes", "yes", "4", "2011-10-13", "Mia", "Iam", "Aim", "AB123456C", "123/XZ55555555", "10.1234", "10.14", "10.1324", "10.1244")
   "ERSValidator" should {
@@ -44,20 +44,4 @@ class ERSValidatorTest extends PlaySpec with WithFakeApplication with MockitoSug
     }
   }
 
-  "validatorRowCsv" should {
-    "validate a valid row" in {
-      ErsValidator.validateRowCsv(validator)(getValidRowData.map(_.value)) mustBe Right(None)
-    }
-
-    "find issues in an invalid row" in {
-      ErsValidator.validateRowCsv(validator)(getInvalidRowData.map(_.value)).right.get.get.size mustBe 14
-    }
-
-    "pass on an exception if it encounters it" in {
-      val mockValidator: DataValidator = mock[DataValidator]
-      Mockito.when(mockValidator.validateRow(any(), any())).thenThrow(new IllegalArgumentException("take that"))
-
-      ErsValidator.validateRowCsv(mockValidator)(getValidRowData.map(_.value)).left.get.getMessage mustBe "take that"
-    }
-  }
 }
