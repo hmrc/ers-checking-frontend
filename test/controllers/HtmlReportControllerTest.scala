@@ -34,7 +34,7 @@ import play.api.{Application, i18n}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
-import uk.gov.hmrc.services.validation.{Cell, ValidationError}
+import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 import utils.{ERSUtil, HtmlCreator}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}

@@ -18,6 +18,7 @@ package controllers
 
 import config.ApplicationConfig
 import controllers.auth.AuthAction
+
 import javax.inject.{Inject, Singleton}
 import models.SheetErrors
 import models.upscan.{UploadId, UpscanCsvFilesCallbackList}
@@ -27,8 +28,8 @@ import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import uk.gov.hmrc.services.validation.models._
 import utils.{ERSUtil, HtmlCreator, JsonParser}
+import uk.gov.hmrc.services.validation.models.ValidationError
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}

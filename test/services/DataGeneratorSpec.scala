@@ -31,6 +31,7 @@ import services.headers.HeaderData
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.WithFakeApplication
 import uk.gov.hmrc.services.validation.DataValidator
+import uk.gov.hmrc.services.validation.models.Cell
 import utils.ParserUtil
 
 import scala.util.Try

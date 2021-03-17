@@ -15,9 +15,9 @@
  */
 
 package services.validation
+
 import play.api.i18n.Messages
 import uk.gov.hmrc.services.validation.models.ValidationError
-
 
 trait ValidationErrorHelper[A] {
   def withErrorsFromMessages(a: A)(implicit messages: Messages): Option[List[ValidationError]]

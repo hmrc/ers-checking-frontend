@@ -82,7 +82,7 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
 
     "process a row and return the errors it contains" in {
       val source = convertToAkkaSource(new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V3.csv"))
-      val dataValidator = DataValidator(ConfigFactory.load.getConfig("ers-other-grants-validation-config"))
+      val dataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-other-grants-validation-config"))
       val resultFuture = source
         .runWith(Sink.seq).map { fileCopied =>
         testProcessCsvService.processRow(fileCopied.flatten.toList, "Other_Grants_V3.csv", dataValidator)
@@ -101,7 +101,7 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
 
     "process a row and return an empty list if there are no errors" in {
       val source = convertToAkkaSource(new File(System.getProperty("user.dir") + "/test/resources/copy/CSOP_OptionsGranted_V3.csv"))
-      val dataValidator = DataValidator(ConfigFactory.load.getConfig("ers-csop-granted-validation-config"))
+      val dataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-csop-granted-validation-config"))
       val resultFuture = source
         .runWith(Sink.seq).map { fileCopied =>
         testProcessCsvService.processRow(fileCopied.flatten.toList, "CSOP_OptionsGranted_V3.csv", dataValidator)
@@ -120,7 +120,7 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
     implicit val request: RequestWithOptionalEmpRef[AnyContent] = RequestWithOptionalEmpRef(FakeRequest(), None)
     when(mockDataGenerator.getSheetCsv(any(), any())(any())).thenReturn(Right((ERSTemplatesInfo.ersSheets("CSOP_OptionsGranted_V3"), "csop")))
     when(mockDataGenerator.identifyAndDefineSheetEither(any())(any(), any(), any())).thenReturn(Right("CSOP_OptionsGranted_V3"))
-    when(mockDataGenerator.setValidatorCsv(any())(any(), any(), any())).thenReturn(Right(DataValidator(ConfigFactory.load.getConfig("ers-csop-granted-validation-config"))))
+    when(mockDataGenerator.setValidatorCsv(any())(any(), any(), any())).thenReturn(Right(new DataValidator(ConfigFactory.load.getConfig("ers-csop-granted-validation-config"))))
     when(mockErsUtil.SCHEME_ERROR_COUNT_CACHE).thenReturn("10")
     when(mockErsUtil.cache[Any](any(), any())(any(), any(), any(), any())).thenReturn(Future(CacheMap("1", Map("test" -> Json.obj("test" -> "test")))))
 

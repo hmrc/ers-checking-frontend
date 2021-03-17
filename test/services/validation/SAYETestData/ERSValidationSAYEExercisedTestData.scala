@@ -16,7 +16,7 @@
 
 package services.validation.SAYETestData
 
-import uk.gov.hmrc.services.validation.Cell
+import uk.gov.hmrc.services.validation.models.Cell
 import models.ValidationErrorData
 import org.apache.commons.lang3.StringUtils
 

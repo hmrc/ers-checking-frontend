@@ -47,10 +47,14 @@ trait ValidationTestRunner extends PlaySpec with GuiceOneAppPerSuite with ErsTes
     } else None
   }
 
-  def runTests(validator:DataValidator, descriptions: List[String], testDatas:List[Cell], expectedResults:List[Option[List[ValidationErrorData]]]): Unit = {
+  def runValidationTests(validator:DataValidator, descriptions: List[String], testDatas:List[Cell], expectedResults:List[Option[List[ValidationErrorData]]]): Unit = {
       for (x <- 0 until descriptions.length) {
         descriptions(x) in {
-          validator.validateCell(testDatas(x)).withErrorsFromMessages mustBe resultBuilder(testDatas(x), expectedResults(x))
+          val validatedCell = validator.validateCell(testDatas(x)) match {
+            case Some(x) => Some(List(x))
+            case None => Option.empty[List[ValidationError]]
+          }
+          validatedCell.withErrorsFromMessages mustBe resultBuilder(testDatas(x), expectedResults(x))
         }
       }
   }

@@ -17,9 +17,6 @@
 package services.validation
 
 import com.typesafe.config.ConfigFactory
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito
-import org.scalatest.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import services.validation.EMITestData.ERSValidationEMIAdjustmentsTestData

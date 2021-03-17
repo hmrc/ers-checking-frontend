@@ -27,7 +27,7 @@ class ERSValidationConfig_SAYE_SayeGrantedTests extends PlaySpec with ERSValidat
   "SAYE Granted V3 scheme config validation" should {
 
     val validator = new DataValidator(ConfigFactory.load.getConfig("ers-saye-granted-validation-config"))
-    runTests(validator, getDescriptions, getTestData, getExpectedResults)
+    runValidationTests(validator, getDescriptions, getTestData, getExpectedResults)
     "make Q7 a mandatory field when Q6 is answered with no" in {
       val cellG = Cell("G", rowNumber, "")
       val cellF = Cell("F", rowNumber, "no")
@@ -41,7 +41,7 @@ class ERSValidationConfig_SAYE_SayeGrantedTests extends PlaySpec with ERSValidat
       val cellH = Cell("H", rowNumber, "")
       val cellG = Cell("G", rowNumber, "yes")
       val row = Row(1,Seq(cellH,cellG))
-      val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
+      val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
       resOpt.withErrorsFromMessages mustBe Some(List(
         ValidationError(cellH,"mandatoryH","G02","Enter the HMRC reference (must be less than 11 characters)")
       ))
@@ -51,14 +51,14 @@ class ERSValidationConfig_SAYE_SayeGrantedTests extends PlaySpec with ERSValidat
 
 class ERSValidationConfig_SAYE_SayeRCLTests extends PlaySpec with ERSValidationSAYERCLTestData with ValidationTestRunner {
   "ERS SAYE RLC Validation Test" should {
-    val validator = DataValidator(ConfigFactory.load.getConfig("ers-saye-rcl-validation-config"))
-    runTests(validator, getDescriptions, getTestData, getExpectedResults)
+    val validator = new DataValidator(ConfigFactory.load.getConfig("ers-saye-rcl-validation-config"))
+    runValidationTests(validator, getDescriptions, getTestData, getExpectedResults)
 
     "when Column B is answered yes, column C is a mandatory field" in {
       val cellC = Cell("C", rowNumber, "")
       val cellB = Cell("B", rowNumber, "yes")
       val row = Row(1, Seq(cellC, cellB))
-      val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
+      val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
       resOpt.withErrorsFromMessages mustBe Some(List(
         ValidationError(cellC, "mandatoryC", "C01", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)")
       ))
@@ -68,14 +68,14 @@ class ERSValidationConfig_SAYE_SayeRCLTests extends PlaySpec with ERSValidationS
 
 class ERSValidationConfig_SAYE_ExercisedTests extends PlaySpec with ERSValidationSAYEExercisedTestData with ValidationTestRunner {
   "SAYE Exercised V3 scheme config validation" should {
-    val validator = DataValidator(ConfigFactory.load.getConfig("ers-saye-exercised-validation-config"))
-    runTests(validator, getDescriptions, getTestData, getExpectedResults)
+    val validator = new DataValidator(ConfigFactory.load.getConfig("ers-saye-exercised-validation-config"))
+    runValidationTests(validator, getDescriptions, getTestData, getExpectedResults)
 
     "make Q10 a mandatory field when Q9 is answered with no" in {
       val cellJ = Cell("J", rowNumber, "")
       val cellI = Cell("I", rowNumber, "no")
       val row = Row(1, Seq(cellJ, cellI))
-      val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
+      val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
       resOpt.withErrorsFromMessages mustBe Some(List(
         ValidationError(cellJ, "mandatoryJ", "J01", "Enter ‘yes’ or ‘no’")))
     }
@@ -84,7 +84,7 @@ class ERSValidationConfig_SAYE_ExercisedTests extends PlaySpec with ERSValidatio
       val cellK = Cell("K", rowNumber, "")
       val cellJ = Cell("J", rowNumber, "yes")
       val row = Row(1, Seq(cellK, cellJ))
-      val resOpt: Option[List[ValidationError]] = validator.validateRow(row, Some(ValidationContext))
+      val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
       resOpt.withErrorsFromMessages mustBe Some(List(
         ValidationError(cellK, "mandatoryK", "K01", "Enter the HMRC reference (must be less than 11 characters)")))
     }

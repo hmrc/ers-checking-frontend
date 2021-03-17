@@ -21,7 +21,7 @@ import models.SheetErrors
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, AnyContentAsEmpty}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.services.validation.{Cell, ValidationError}
+import uk.gov.hmrc.services.validation.models._
 
 import scala.collection.mutable.ListBuffer
 

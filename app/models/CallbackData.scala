@@ -18,8 +18,8 @@ package models
 
 import java.io.File
 import java.nio.file.Path
-
 import play.api.libs.json.{JsObject, Json, OFormat}
+import uk.gov.hmrc.services.validation._
 import uk.gov.hmrc.services.validation.models._
 
 import scala.collection.mutable.ListBuffer

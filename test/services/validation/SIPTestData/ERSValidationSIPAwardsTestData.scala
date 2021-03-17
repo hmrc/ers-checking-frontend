@@ -16,8 +16,8 @@
 
 package services.validation.SIPTestData
 
-import uk.gov.hmrc.services.validation.Cell
 import models.ValidationErrorData
+import uk.gov.hmrc.services.validation.models.Cell
 
 trait ERSValidationSIPAwardsTestData {
   val rowNumber:Int = 1

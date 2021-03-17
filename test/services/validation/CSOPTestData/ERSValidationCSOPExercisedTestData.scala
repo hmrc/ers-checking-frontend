@@ -18,7 +18,7 @@ package services.validation.CSOPTestData
 
 import models.ValidationErrorData
 import org.apache.commons.lang3.StringUtils
-import uk.gov.hmrc.services.validation.Cell
+import uk.gov.hmrc.services.validation.models.Cell
 
 trait ERSValidationCSOPExercisedTestData {
   val rowNumber:Int = 1
