@@ -45,7 +45,8 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
-import uk.gov.hmrc.services.validation.{Cell, DataValidator, ValidationError}
+import uk.gov.hmrc.services.validation.DataValidator
+import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 import utils.{CsvParserUtil, UploadedFileUtil}
 
 import scala.collection.mutable.ListBuffer

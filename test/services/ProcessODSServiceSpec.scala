@@ -33,7 +33,7 @@ import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import uk.gov.hmrc.services.validation.ValidationError
+import uk.gov.hmrc.services.validation.models.ValidationError
 import utils.{ParserUtil, UploadedFileUtil}
 
 import scala.collection.mutable.ListBuffer

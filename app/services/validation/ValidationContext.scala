@@ -16,36 +16,11 @@
 
 package services.validation
 
-import scala.util.matching.Regex
 import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models._
 
 import play.api.Logger
 
-import scala.util.{Failure, Success, Try}
-
-object ValidationContext extends ERSValidationFormatters {
-
-  def verifyFormat(formatter: String, data:String):Boolean =
-    (!formatter.isEmpty) && new Regex(formatter).pattern.matcher(data).matches
-
-  def verifyDate(data:String):Boolean = {
-    try {
-      ersDateFormatter.parseDateTime(data)
-      true
-    } catch {
-      case _: IllegalArgumentException => false
-    }
-  }
-
-  def mandatoryBoolean(condition:String, dataX:String, dataY:String): Boolean = {
-    if(condition.toLowerCase.equals(dataX.toLowerCase)) notEmpty(dataY) else true
-  }
-
-  def notEmpty(data: String): Boolean = {
-    !(data == null || data.trim.isEmpty)
-  }
-}
 
 object ErsValidator {
   val colNames = List("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
@@ -58,17 +33,6 @@ object ErsValidator {
       case e: Exception =>
         Logger.warn(e.toString)
         throw e
-    }
-  }
-
-  def validateRowCsv(validator: DataValidator)(rowData: Seq[String]): Either[Throwable, Option[List[ValidationError]]] = {
-    Try {
-      validator.validateRow(Row(0, getCells(rowData,0)))
-    } match {
-      case Failure(e) =>
-        Logger.warn(e.toString)
-        Left(e)
-      case Success(list) => Right(list)
     }
   }
 
