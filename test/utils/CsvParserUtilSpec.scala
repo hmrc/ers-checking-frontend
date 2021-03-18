@@ -34,10 +34,10 @@ class CsvParserUtilSpec extends UnitSpec with ErsTestHelper {
       result.length shouldBe 4
     }
 
-    "add empty strings to match number of columns in given sheet" in {
+    "pass the columns on if there's fewer than in given sheet" in {
       val rowData: Array[String] = Array("")
       val result = parserUtil.formatDataToValidate(rowData, "Other_Grants_V3")
-      result.length shouldBe 4
+      result.length shouldBe 1
     }
   }
 

@@ -34,9 +34,9 @@ class EMIAdjustmentsV3ValidationTest extends PlaySpec with ERSValidationEMIAdjus
       val cellA = Cell("A", rowNumber, "yes")
       val row = Row(1,Seq(cellB,cellA))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
-      resOpt.withErrorsFromMessages mustBe Some(List(
+      assert(resOpt.isDefined)
+      resOpt.withErrorsFromMessages.get must contain
         ValidationError(cellB,"mandatoryB","B01","Enter ‘yes’ or ‘no’")
-      ))
     }
 
     "when Column B is answered yes, column C is a mandatory field" in {
@@ -44,9 +44,9 @@ class EMIAdjustmentsV3ValidationTest extends PlaySpec with ERSValidationEMIAdjus
       val cellB = Cell("B", rowNumber, "yes")
       val row = Row(1,Seq(cellC,cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
-      resOpt.withErrorsFromMessages mustBe Some(List(
+      assert(resOpt.isDefined)
+      resOpt.withErrorsFromMessages.get must contain
         ValidationError(cellC,"mandatoryC","C01","Enter ‘yes’ or ‘no’")
-      ))
     }
 
     "when Column C is answered yes, column D is a mandatory field" in {
@@ -54,9 +54,9 @@ class EMIAdjustmentsV3ValidationTest extends PlaySpec with ERSValidationEMIAdjus
       val cellC = Cell("C", rowNumber, "yes")
       val row = Row(1,Seq(cellD,cellC))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
-      resOpt.withErrorsFromMessages mustBe Some(List(
+      assert(resOpt.isDefined)
+      resOpt.withErrorsFromMessages.get must contain
         ValidationError(cellD,"mandatoryD","D01","Enter ‘1’, ‘2’, ‘3’, ‘4’, ‘5’, ‘6’, ‘7’ or ‘8’")
-      ))
     }
 
     "when a valid row of data is provided, no ValidationErrors should be raised" in {
@@ -132,9 +132,9 @@ class EMINonTaxableV3ValidationTest extends PlaySpec with ERSValidationEMINonTax
       val cellK = Cell("K", rowNumber, "no")
       val row = Row(1,Seq(cellL,cellK))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
-      resOpt.withErrorsFromMessages mustBe Some(List(
+      resOpt.withErrorsFromMessages.get must contain
         ValidationError(cellL,"mandatoryL","L01","Enter ‘yes’ or ‘no’")
-      ))
+
     }
 
     "when Column L is answered yes, column M is a mandatory field" in {
@@ -142,9 +142,9 @@ class EMINonTaxableV3ValidationTest extends PlaySpec with ERSValidationEMINonTax
       val cellL = Cell("L", rowNumber, "yes")
       val row = Row(1,Seq(cellM,cellL))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
-      resOpt.withErrorsFromMessages mustBe Some(List(
+      assert(resOpt.withErrorsFromMessages.isDefined)
+      resOpt.withErrorsFromMessages.get must contain
         ValidationError(cellM,"mandatoryM","M01","Enter the HMRC reference (must be less than 11 characters)")
-      ))
     }
 
     "when a valid row of data is provided, no ValidationErrors should be raised" in {

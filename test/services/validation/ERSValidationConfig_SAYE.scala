@@ -33,8 +33,10 @@ class ERSValidationConfig_SAYE_SayeGrantedTests extends PlaySpec with ERSValidat
       val cellF = Cell("F", rowNumber, "no")
       val row = Row(1, Seq(cellG, cellF))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
-      resOpt.withErrorsFromMessages mustBe Some(List(
-        ValidationError(cellG, "mandatoryG", "G01", "Enter ‘yes’ or ‘no’")))
+
+      assert(resOpt.withErrorsFromMessages.isDefined)
+      resOpt.withErrorsFromMessages.get must contain
+        ValidationError(cellG, "mandatoryG", "G01", "Enter ‘yes’ or ‘no’")
     }
 
     "make Q8 mandatory when Q6 is answered with yes" in {
@@ -42,9 +44,10 @@ class ERSValidationConfig_SAYE_SayeGrantedTests extends PlaySpec with ERSValidat
       val cellG = Cell("G", rowNumber, "yes")
       val row = Row(1,Seq(cellH,cellG))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
-      resOpt.withErrorsFromMessages mustBe Some(List(
+
+      assert(resOpt.withErrorsFromMessages.isDefined)
+      resOpt.withErrorsFromMessages.get must contain
         ValidationError(cellH,"mandatoryH","G02","Enter the HMRC reference (must be less than 11 characters)")
-      ))
     }
   }
 }
@@ -59,9 +62,10 @@ class ERSValidationConfig_SAYE_SayeRCLTests extends PlaySpec with ERSValidationS
       val cellB = Cell("B", rowNumber, "yes")
       val row = Row(1, Seq(cellC, cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
-      resOpt.withErrorsFromMessages mustBe Some(List(
+      assert(resOpt.withErrorsFromMessages.isDefined)
+
+      resOpt.withErrorsFromMessages.get must contain
         ValidationError(cellC, "mandatoryC", "C01", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)")
-      ))
     }
   }
 }
@@ -76,8 +80,9 @@ class ERSValidationConfig_SAYE_ExercisedTests extends PlaySpec with ERSValidatio
       val cellI = Cell("I", rowNumber, "no")
       val row = Row(1, Seq(cellJ, cellI))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
-      resOpt.withErrorsFromMessages mustBe Some(List(
-        ValidationError(cellJ, "mandatoryJ", "J01", "Enter ‘yes’ or ‘no’")))
+      assert(resOpt.isDefined)
+      resOpt.withErrorsFromMessages.get must contain
+        ValidationError(cellJ, "mandatoryJ", "J01", "Enter ‘yes’ or ‘no’")
     }
 
     "make Q11 a mandatory field when Q9 is answered with yes" in {
@@ -85,8 +90,9 @@ class ERSValidationConfig_SAYE_ExercisedTests extends PlaySpec with ERSValidatio
       val cellJ = Cell("J", rowNumber, "yes")
       val row = Row(1, Seq(cellK, cellJ))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
-      resOpt.withErrorsFromMessages mustBe Some(List(
-        ValidationError(cellK, "mandatoryK", "K01", "Enter the HMRC reference (must be less than 11 characters)")))
+      assert(resOpt.isDefined)
+      resOpt.withErrorsFromMessages.get must contain
+        ValidationError(cellK, "mandatoryK", "K01", "Enter the HMRC reference (must be less than 11 characters)")
     }
   }
 }
