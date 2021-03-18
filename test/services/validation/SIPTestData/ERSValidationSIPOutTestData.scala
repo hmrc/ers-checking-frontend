@@ -156,18 +156,18 @@ trait ERSValidationSIPOutTestData {
       //column A
       None,
       Some(List(ValidationErrorData("error.1", "001", "Enter a date that matches the yyyy-mm-dd pattern"))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "Enter a date that matches the yyyy-mm-dd pattern"))),
+      Some(List(ValidationErrorData("error.1", "001", "Enter a date that matches the yyyy-mm-dd pattern"))),
       // column B
       None,
       Some(List(ValidationErrorData("error.2", "002", "Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)"))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)"))),
+      Some(List(ValidationErrorData("error.2", "002", "Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)"))),
       // column C
       None,
       Some(List(ValidationErrorData("error.3", "003", "Must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes"))),
       // column D
       None,
       Some(List(ValidationErrorData("error.4", "004", "Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)"))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)"))),
+      Some(List(ValidationErrorData("error.4", "004", "Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)"))),
       //column E
       None,
       Some(List(ValidationErrorData("error.5", "005", "National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter"))),
@@ -212,7 +212,7 @@ trait ERSValidationSIPOutTestData {
       //column O
       None,
       Some(List(ValidationErrorData("error.15", "015", "Enter ‘yes’ or ‘no’"))),
-      Some(List(ValidationErrorData("MANDATORY", "100", "Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("error.15", "015", "Enter ‘yes’ or ‘no’"))),
       //column P
       None,
       Some(List(ValidationErrorData("error.16", "016", "Enter ‘yes’ or ‘no’"))),

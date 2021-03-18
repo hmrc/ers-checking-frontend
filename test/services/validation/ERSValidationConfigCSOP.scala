@@ -74,9 +74,9 @@ class CSOPOptionsRCLTest extends PlaySpec with ERSValidationCSOPRCLTestData with
       val cellB = Cell("B", rowNumber, "yes")
       val row = Row(1,Seq(cellB,cellC))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
-      resOpt.withErrorsFromMessages mustBe Some(List(
+      resOpt.withErrorsFromMessages.get must contain(
         ValidationError(cellC,"mandatoryC","C01","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)")
-      ))
+      )
     }
 
   }
