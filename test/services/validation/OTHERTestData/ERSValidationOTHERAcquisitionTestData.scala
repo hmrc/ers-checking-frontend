@@ -401,7 +401,7 @@ trait ERSValidationOTHERAcquisitionTestData {
       //AN
       None,
       Some(List(ValidationErrorData("error.40","040","Enter ‘yes’ or ‘no’"))),
-      Some(List(ValidationErrorData("error.40","040","Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("error.40","040","Enter ‘yes’ or ‘no’")))
     )
     expectedResults
   }

@@ -254,9 +254,9 @@ class OTHEROtherBenefitsV3ValidationTest extends PlaySpec with ERSValidationOTHE
     val cellB = Cell("B", rowNumber, "yes")
     val row = Row(1,Seq(cellC,cellB))
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
-    resOpt.withErrorsFromMessages mustBe Some(List(
+    resOpt.withErrorsFromMessages.get must contain(
       ValidationError(cellC,"mandatoryB","MB","Enter the scheme reference number (it should be an 8 digit number)")
-    ))
+    )
   }
 }
 
@@ -303,9 +303,9 @@ class OTHERNotionalV3ValidationTest extends PlaySpec with ERSValidationOTHERNoti
       val cellB = Cell("B", rowNumber, "yes")
       val row = Row(1, Seq(cellC, cellB))
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
-      resOpt.withErrorsFromMessages mustBe Some(List(
+      resOpt.withErrorsFromMessages.get must contain(
         ValidationError(cellC, "mandatoryC", "C01", "Enter the scheme reference number (it should be an 8 digit number)")
-      ))
+      )
     }
   }
 
