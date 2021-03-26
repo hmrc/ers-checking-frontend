@@ -16,20 +16,12 @@
 
 package utils
 
-import akka.NotUsed
-import akka.stream.scaladsl.Flow
 import config.ApplicationConfig
-import javax.inject.{Inject, Singleton}
 import models.SheetErrors
-import models.upscan.UpscanCsvFilesCallback
-import play.api.Logger
-import play.api.mvc.{AnyContent, Request}
 import services.ERSTemplatesInfo
-import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.collection.mutable.ListBuffer
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class CsvParserUtil @Inject()(appConfig: ApplicationConfig

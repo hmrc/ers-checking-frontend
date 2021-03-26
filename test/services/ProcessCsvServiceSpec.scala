@@ -70,7 +70,6 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
       .via(CsvParsing.lineScanner())
   }
 
-  val mockUploadedFileUtil: UploadedFileUtil = mock[UploadedFileUtil]
   lazy val testParserUtil: CsvParserUtil = fakeApplication.injector.instanceOf[CsvParserUtil]
   val mockDataGenerator: DataGenerator = mock[DataGenerator]
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())

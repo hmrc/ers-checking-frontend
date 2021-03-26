@@ -75,7 +75,6 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
     implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier, messages: Messages
   ): List[Future[Either[Throwable, Boolean]]] =
     callback.get.files map { file =>
-      val startTIme = System.currentTimeMillis()
 
       val successUpload = file.uploadStatus.asInstanceOf[UploadedSuccessfully]
 
@@ -96,10 +95,9 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
 
 
             futureListOfErrors.map {
-              println("End time of getting future list: " + (System.currentTimeMillis() - startTIme))
               getRowsWithNumbers(_, successUpload.name)(messages)
             }.flatMap{
-              case Right(thing) => checkValidityOfRows(thing, successUpload.name, file)
+              case Right(errorsFromRow) => checkValidityOfRows(errorsFromRow, successUpload.name, file)
               case Left(exception) => Future(Left(exception))
             }
           }
