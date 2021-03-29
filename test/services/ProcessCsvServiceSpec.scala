@@ -157,9 +157,8 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
       val result = Await.result(resultFuture, Duration.Inf)
       val boolList = Await.result(Future.sequence(result), Duration.Inf)
       assert(boolList.forall(_.isLeft))
-      boolList.head match {
-        case Left(ex) => ex.getMessage mustBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload CSOP_OptionsGranted_V3.csv as part of your annual return."
-      }
+      boolList.head.left.get
+        .getMessage mustBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload CSOP_OptionsGranted_V3.csv as part of your annual return."
     }
 
     "return a throwable when an error occurs during the file processing" in {
@@ -176,9 +175,8 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
       val result = Await.result(resultFuture, Duration.Inf)
       val boolList = Await.result(Future.sequence(result), Duration.Inf)
       assert(boolList.forall(_.isLeft))
-      boolList.head match {
-        case Left(ex) => ex.getMessage mustBe "ers.exceptions.dataParser.configFailure"
-      }
+      boolList.head.left.get
+        .getMessage mustBe "ers.exceptions.dataParser.configFailure"
     }
 
   }
@@ -242,17 +240,13 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
     "check the file is a csv and remove the extension" in {
       val result = testProcessCsvService.checkFileType("test.csv")
       result.isRight mustBe true
-      result match {
-        case Right(value) => value mustBe "test"
-      }
+      result.right.get mustBe "test"
     }
 
     "if the file is not a csv throw an ERSFileProcessingException" in {
       val result = testProcessCsvService.checkFileType("test.ods")
       result.isLeft mustBe true
-      result match {
-        case Left(ex) => ex.getMessage mustBe "You chose to check a CSV file, but test.ods isn’t a CSV file."
-      }
+      result.left.get.getMessage mustBe "You chose to check a CSV file, but test.ods isn’t a CSV file."
     }
   }
 
@@ -275,17 +269,17 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
         ), 0)
       )
       val result = testProcessCsvService.processDisplayedErrors(2, errors)
-      result.head mustBe (List(
+      result.head mustBe ((List(
         ValidationError(Cell("A", 1, "test"), "001", "error.1", "ers.upload.error.date"),
         ValidationError(Cell("B", 1, "test"), "001", "error.1", "ers.upload.error.date"),
         ValidationError(Cell("C", 1, "test"), "001", "error.1", "ers.upload.error.date")
-      ), 0)
+      ), 0))
 
-      result(1) mustBe (List(
+      result(1) mustBe ((List(
         ValidationError(Cell("A", 2, "test"), "001", "error.1", "ers.upload.error.date"),
         ValidationError(Cell("B", 2, "test"), "001", "error.1", "ers.upload.error.date"),
         ValidationError(Cell("C", 2, "test"), "001", "error.1", "ers.upload.error.date")
-      ), 1)
+      ), 1))
     }
   }
 
@@ -332,9 +326,8 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
       val result = testProcessCsvService.getRowsWithNumbers(errors, "test.csv")
 
       result.isLeft mustBe true
-      result match {
-        case Left(ex) => ex.getMessage mustBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload test.csv as part of your annual return."
-      }
+      result.left.get
+        .getMessage mustBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload test.csv as part of your annual return."
     }
 
     "return the earliest previous exception if one exists" in {
@@ -346,9 +339,7 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
       val result = testProcessCsvService.getRowsWithNumbers(errors, "test.csv")
 
       result.isLeft mustBe true
-      result match {
-        case Left(ex) => ex.getMessage mustBe "test error"
-      }
+      result.left.get.getMessage mustBe "test error"
     }
   }
 

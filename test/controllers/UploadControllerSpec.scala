@@ -43,7 +43,7 @@ import scala.concurrent.{Await, Future}
 
 class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) with UnitSpec with ErsTestHelper with GuiceOneAppPerSuite{
 
-  val config = Map("application.secret" -> "test",
+  val config: Map[String, Any] = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
     "contact-frontend.host" -> "localhost",
     "contact-frontend.port" -> "9250",

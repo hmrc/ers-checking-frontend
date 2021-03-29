@@ -17,12 +17,11 @@
 package services.validation
 
 import com.typesafe.config.ConfigFactory
-import helpers.ErsTestHelper
 import org.scalatestplus.play.PlaySpec
 import services.validation.CSOPTestData.{ERSValidationCSOPExercisedTestData, ERSValidationCSOPGrantedTestData, ERSValidationCSOPRCLTestData}
 import services.validation.ValidationErrorHelper._
-import uk.gov.hmrc.services.validation.models.{Cell, Row, ValidationError}
 import uk.gov.hmrc.services.validation.DataValidator
+import uk.gov.hmrc.services.validation.models.{Cell, Row, ValidationError}
 
 class CSOPOptionsGrantedV3ValidationCSOPTest extends PlaySpec with ERSValidationCSOPGrantedTestData with ValidationTestRunner {
 

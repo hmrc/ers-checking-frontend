@@ -18,7 +18,6 @@ package controllers
 
 import config.ERSShortLivedCache
 import helpers.ErsTestHelper
-import models.SheetErrors
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -36,12 +35,13 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 import utils.{ERSUtil, HtmlCreator}
+
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
 class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with ErsTestHelper {
 
-  val config = Map("application.secret" -> "test",
+  val config: Map[String, Any] = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
     "contact-frontend.host" -> "localhost",
     "contact-frontend.port" -> "9250",
@@ -150,7 +150,7 @@ class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with Er
       val cacheMap = CacheMap("uploadId", Map.empty)
 
       val result = buildFakeHtmlReportController().csvExtractErrors(Seq(uploadId), cacheMap)
-      result shouldBe (ListBuffer(), 0, 0)
+      result shouldBe ((ListBuffer(), 0, 0))
     }
 
 //    "return the errors and count when the sheet has errors" in {

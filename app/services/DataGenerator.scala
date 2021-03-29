@@ -16,12 +16,7 @@
 
 package services
 
-import java.util.concurrent.TimeUnit
-
-import akka.NotUsed
-import akka.stream.scaladsl.Flow
 import controllers.auth.RequestWithOptionalEmpRef
-import javax.inject.{Inject, Singleton}
 import metrics.Metrics
 import models.{ERSFileProcessingException, SheetErrors}
 import play.api.Logger
@@ -32,8 +27,10 @@ import services.audit.AuditEvents
 import services.validation.ErsValidator
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.services.validation.DataValidator
-import utils.{CsvParserUtil, ERSUtil, ParserUtil}
+import utils.{ERSUtil, ParserUtil}
 
+import java.util.concurrent.TimeUnit
+import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}

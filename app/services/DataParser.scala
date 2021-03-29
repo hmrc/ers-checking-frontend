@@ -64,7 +64,7 @@ trait DataParser {
         }
 
         cols match {
-          case Right(r: Seq[String]) if !isBlankRow(r) => Right(r, repeated(xmlRow))
+          case Right(r: Seq[String]) if !isBlankRow(r) => Right((r, repeated(xmlRow)))
           case Right(s: Seq[String]) => Right((s, 1))
         }
       case _  =>

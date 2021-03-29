@@ -16,8 +16,6 @@
 
 package services
 
-import java.util.NoSuchElementException
-
 import controllers.Fixtures
 import controllers.auth.RequestWithOptionalEmpRef
 import helpers.ErsTestHelper
@@ -26,16 +24,17 @@ import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, i18n}
 import play.api.i18n.MessagesImpl
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents}
 import play.api.test.FakeRequest
+import play.api.{Application, i18n}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.models.ValidationError
 import utils.{ParserUtil, UploadedFileUtil}
 
+import java.util.NoSuchElementException
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import scala.util.{Failure, Success}

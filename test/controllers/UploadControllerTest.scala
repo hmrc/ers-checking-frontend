@@ -16,10 +16,7 @@
 
 package controllers
 
-import akka.NotUsed
 import akka.actor.ActorSystem
-import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
-import akka.stream.scaladsl.Source
 import akka.testkit.TestKit
 import controllers.auth.RequestWithOptionalEmpRef
 import helpers.ErsTestHelper
@@ -39,11 +36,11 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) with UnitSpec with ErsTestHelper with GuiceOneAppPerSuite {
 
-	val config = Map("application.secret" -> "test",
+	val config: Map[String, Any] = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
     "contact-frontend.host" -> "localhost",
     "contact-frontend.port" -> "9250",
