@@ -16,7 +16,7 @@ object AppDependencies {
     "uk.gov.hmrc" %% "http-caching-client" % "9.2.0-play-26",
     "uk.gov.hmrc" %% "play-language" % "4.7.0-play-26",
     "uk.gov.hmrc" %% "auth-client" % "3.2.0-play-26",
-    "uk.gov.hmrc" %% "tabular-data-validator" % "0.1.1",
+    "uk.gov.hmrc" %% "tabular-data-validator" % "1.0.0-SNAPSHOT",
     "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.22",
     "commons-io" % "commons-io" % "2.6",
     "com.lightbend.akka" %% "akka-stream-alpakka-csv" % "2.0.2",
