@@ -25,7 +25,7 @@ import akka.util.ByteString
 import config.ApplicationConfig
 import controllers.auth.RequestWithOptionalEmpRef
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
-import models.{ERSFileProcessingException, SheetErrors}
+import models.{ERSFileProcessingException, RowValidationResults, SheetErrors}
 import org.apache.commons.io.FilenameUtils
 import play.api.Logger
 import play.api.i18n.Messages
@@ -34,7 +34,7 @@ import services.FlowOps.eitherFromFunction
 import services.validation.ErsValidator.getCells
 import uk.gov.hmrc.services.validation.models._
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import uk.gov.hmrc.services.validation.{DataValidator}
+import uk.gov.hmrc.services.validation.DataValidator
 import utils.{CsvParserUtil, ERSUtil}
 
 import javax.inject.{Inject, Singleton}
@@ -89,9 +89,11 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
         _.fold(
           throwable => Future.successful(Left(throwable)),
           validator => {
-            val futureListOfErrors: Future[Seq[Either[Throwable, List[ValidationError]]]] = extractBodyOfRequest(source(successUpload.downloadUrl))
+            val futureListOfErrors: Future[Seq[Either[Throwable, RowValidationResults]]] = extractBodyOfRequest(source(successUpload.downloadUrl))
               .via(eitherFromFunction(processRow(_, successUpload.name, validator)))
-              .runWith(Sink.seq[Either[Throwable, List[ValidationError]]])
+
+              //.via(countEmptyRows)
+              .runWith(Sink.seq[Either[Throwable, RowValidationResults]]) // Either[T, (List[VError], Int)]
 
 
             futureListOfErrors.map {
@@ -105,16 +107,20 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
       }
     }
 
-  def processRow(rowBytes: List[ByteString], sheetName: String, validator: DataValidator): Either[Throwable, List[ValidationError]] = {
+  def processRow(rowBytes: List[ByteString], sheetName: String, validator: DataValidator): Either[Throwable, RowValidationResults] = {
     val rowStrings = rowBytes.map(byteString => byteString.utf8String)
     val parsedRow = parserUtil.formatDataToValidate(rowStrings, sheetName)
+    val rowIsEmpty = parserUtil.rowIsEmpty(rowStrings)
+    Logger.error("the rowIsEmpty is " + rowIsEmpty)
+    Logger.error("the rowStrings is " + rowStrings)
+
     Try {
       validator.validateRow(Row(0, getCells(parsedRow, 0)))
     } match {
       case Failure(e) =>
         Logger.warn(e.toString)
         Left(e)
-      case Success(list) => Right(list.getOrElse(List.empty))
+      case Success(list) => Right(RowValidationResults(list.getOrElse(List.empty), rowIsEmpty))
     }
   }
 
@@ -147,16 +153,18 @@ private[services] final def processDisplayedErrors(n: Int, list: Seq[(List[Valid
     processDisplayedErrors(numberOfErrorsToDisplay, list.zipWithIndex).map(_._1)
   }
 
-  def getRowsWithNumbers(listOfErrors: Seq[Either[Throwable, List[ValidationError]]], name: String)(
+  def getRowsWithNumbers(listOfErrors: Seq[Either[Throwable, RowValidationResults]], name: String)(
     implicit messages: Messages): Either[Throwable, Seq[List[ValidationError]]] = listOfErrors match {
-    case allEmpty if allEmpty.isEmpty =>
+    case allEmpty if allEmpty.isEmpty || allEmpty.filter(_.isRight).forall(_.right.get.rowWasEmpty) =>
       Left(ERSFileProcessingException(
         messages("ers_check_csv_file.noData", name),
         messages("ers_check_csv_file.noData"),
         needsExtendedInstructions = true))
-    case nonEmpty => nonEmpty.find(_.isLeft) match {
+    case nonEmpty =>
+      Logger.error("THIS WAS NOT EMPTY " + nonEmpty)
+      nonEmpty.find(_.isLeft) match {
       case Some(Left(issues)) => Left(issues)
-      case _ => Right(giveRowNumbers(nonEmpty.map(_.right.get)))
+      case _ => Right(giveRowNumbers(nonEmpty.map(_.right.get.validationErrors)))
     }
   }
 

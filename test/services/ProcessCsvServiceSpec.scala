@@ -16,22 +16,19 @@
 
 package services
 
-import java.io.{File, PrintWriter}
-import java.nio.file.Files
-import java.util.concurrent.atomic.AtomicInteger
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.stream.IOResult
 import akka.stream.alpakka.csv.scaladsl.CsvParsing
-import akka.stream.scaladsl.{FileIO, Flow, Sink, Source}
+import akka.stream.scaladsl.{FileIO, Sink, Source}
 import akka.testkit.TestKit
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import controllers.auth.RequestWithOptionalEmpRef
 import helpers.ErsTestHelper
-import models.{ERSFileProcessingException, SheetErrors}
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
+import models.{ERSFileProcessingException, RowValidationResults, SheetErrors}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.MustMatchers.convertToAnyMustWrapper
@@ -47,8 +44,10 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
-import utils.{CsvParserUtil, UploadedFileUtil}
+import utils.CsvParserUtil
 
+import java.io.File
+import java.nio.file.Files
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -90,10 +89,10 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
       val result = Await.result(resultFuture, Duration.Inf)
       result match {
         case Right(validationErrorList) =>
-          validationErrorList.head.cell mustBe Cell("A", 0, "25  2015")
-          validationErrorList.head.errorId mustBe "001"
-          validationErrorList.head.errorMsg mustBe "ers.upload.error.date"
-          validationErrorList.head.ruleId mustBe "error.1"
+          validationErrorList.validationErrors.head.cell mustBe Cell("A", 0, "25  2015")
+          validationErrorList.validationErrors.head.errorId mustBe "001"
+          validationErrorList.validationErrors.head.errorMsg mustBe "ers.upload.error.date"
+          validationErrorList.validationErrors.head.ruleId mustBe "error.1"
         case Left(ex) => throw ex
       }
     }
@@ -108,7 +107,7 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
 
       val result = Await.result(resultFuture, Duration.Inf)
       result match {
-        case Right(validationErrorList) => validationErrorList.isEmpty mustBe true
+        case Right(validationErrorList) => validationErrorList.validationErrors.isEmpty mustBe true
         case Left(ex) => throw ex
         }
       }
@@ -311,11 +310,11 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
   "getRowsWithNumbers" should {
 
     "return validation errors if there are no exceptions" in {
-      val errors = Seq(Right(List(
+      val errors = Seq(Right(RowValidationResults(List(
         ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
         ValidationError(Cell("B", 0, "test"), "001", "error.1", "ers.upload.error.date"),
         ValidationError(Cell("C", 1, "test"), "001", "error.1", "ers.upload.error.date")
-      )))
+      ))))
       val result = testProcessCsvService.getRowsWithNumbers(errors, "test.csv")
 
       result.isRight mustBe true
@@ -329,7 +328,7 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
     }
 
     "return an exception if the file is empty" in {
-      val errors = Seq.empty[Either[Throwable, List[ValidationError]]]
+      val errors = Seq.empty[Either[Throwable, RowValidationResults]]
       val result = testProcessCsvService.getRowsWithNumbers(errors, "test.csv")
 
       result.isLeft mustBe true
@@ -341,7 +340,7 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with UnitSpec w
     "return the earliest previous exception if one exists" in {
       val errors = Seq(
         Left(ERSFileProcessingException("test error", "b")),
-        Right(List(ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"))),
+        Right(RowValidationResults(List(ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date")))),
         Left(ERSFileProcessingException("a", "b"))
       )
       val result = testProcessCsvService.getRowsWithNumbers(errors, "test.csv")

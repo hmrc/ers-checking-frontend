@@ -16,6 +16,7 @@
 
 package utils
 
+import akka.util.ByteString
 import config.ApplicationConfig
 import models.SheetErrors
 import services.ERSTemplatesInfo
@@ -29,11 +30,20 @@ class CsvParserUtil @Inject()(appConfig: ApplicationConfig
 
   def formatDataToValidate(rowData: Seq[String], sheetName: String): Seq[String] = {
     val sheetColSize = ERSTemplatesInfo.ersSheets(sheetName.replace(".csv", "")).headerRow.length
-    rowData.take(sheetColSize)
+    rowData.take(sheetColSize).map(_.trim)
   }
 
   def getSheetErrors(schemeErrors: SheetErrors): SheetErrors = {
     schemeErrors.copy(errors = schemeErrors.errors.take(appConfig.errorCount))
   }
 
+  def rowIsEmpty(row: List[String]): Boolean = {
+    if (row.length > 1) {
+      false
+    } else if (row.isEmpty) {
+      true
+    } else {
+      row.headOption.getOrElse("").trim.isEmpty
+    }
+  }
 }
