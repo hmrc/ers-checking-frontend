@@ -57,4 +57,25 @@ class CsvParserUtilSpec extends UnitSpec with ErsTestHelper {
     }
   }
 
+  "rowIsEmpty" must {
+    "return false if the row has more than one entry" in {
+      val list = List("col1", "col2")
+      parserUtil.rowIsEmpty(list) shouldBe false
+    }
+
+    "return true if the row is an empty list" in {
+      val list = List.empty
+      parserUtil.rowIsEmpty(list) shouldBe true
+    }
+
+    "return true if the row is a list with one item with only spaces in it" in {
+      val list = List("      ")
+      parserUtil.rowIsEmpty(list) shouldBe true
+    }
+
+    "return false if the row is a list with one valid item in it" in {
+      val list = List("i am not empty")
+      parserUtil.rowIsEmpty(list) shouldBe false
+    }
+  }
 }

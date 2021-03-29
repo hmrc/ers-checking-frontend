@@ -16,17 +16,14 @@
 
 package utils
 
-import akka.util.ByteString
 import config.ApplicationConfig
 import models.SheetErrors
 import services.ERSTemplatesInfo
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
 
 @Singleton
-class CsvParserUtil @Inject()(appConfig: ApplicationConfig
-                          )(implicit ec: ExecutionContext) {
+class CsvParserUtil @Inject()(appConfig: ApplicationConfig) {
 
   def formatDataToValidate(rowData: Seq[String], sheetName: String): Seq[String] = {
     val sheetColSize = ERSTemplatesInfo.ersSheets(sheetName.replace(".csv", "")).headerRow.length
