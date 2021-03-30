@@ -45,8 +45,6 @@ trait DataParser {
   }
 
   def parse(row:String, fileName : String)(implicit messages: Messages): Either[String, (Seq[String], Int)] = {
-    Logger.debug("DataParser: Parse: About to parse row: " + row)
-
     val xmlRow = Try(Option(XML.withSAXParser(secureSAXParser)loadString(row))).getOrElse(None)
 
     xmlRow match {

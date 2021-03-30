@@ -91,10 +91,7 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
           validator => {
             val futureListOfErrors: Future[Seq[Either[Throwable, RowValidationResults]]] = extractBodyOfRequest(source(successUpload.downloadUrl))
               .via(eitherFromFunction(processRow(_, successUpload.name, validator)))
-
-              //.via(countEmptyRows)
-              .runWith(Sink.seq[Either[Throwable, RowValidationResults]]) // Either[T, (List[VError], Int)]
-
+              .runWith(Sink.seq[Either[Throwable, RowValidationResults]])
 
             futureListOfErrors.map {
               getRowsWithNumbers(_, successUpload.name)(messages)
@@ -111,8 +108,6 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
     val rowStrings = rowBytes.map(byteString => byteString.utf8String)
     val parsedRow = parserUtil.formatDataToValidate(rowStrings, sheetName)
     val rowIsEmpty = parserUtil.rowIsEmpty(rowStrings)
-    Logger.error("the rowIsEmpty is " + rowIsEmpty)
-    Logger.error("the rowStrings is " + rowStrings)
 
     Try {
       validator.validateRow(Row(0, getCells(parsedRow, 0)))
@@ -161,7 +156,6 @@ private[services] final def processDisplayedErrors(n: Int, list: Seq[(List[Valid
         messages("ers_check_csv_file.noData"),
         needsExtendedInstructions = true))
     case nonEmpty =>
-      Logger.error("THIS WAS NOT EMPTY " + nonEmpty)
       nonEmpty.find(_.isLeft) match {
       case Some(Left(issues)) => Left(issues)
       case _ => Right(giveRowNumbers(nonEmpty.map(_.right.get.validationErrors)))

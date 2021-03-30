@@ -237,7 +237,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
       header.size
     } else {
       implicit val hc: HeaderCarrier = HeaderCarrier()
-      Logger.warn("Error while reading File + Incorrect ERS Template")
+      Logger.warn("[DataGenerator][validateHeaderRow] Error while reading File + Incorrect ERS Template")
       throw ERSFileProcessingException(
         "ers.exceptions.dataParser.incorrectHeader",
         Messages("ers.exceptions.dataParser.headersDontMatch"),
