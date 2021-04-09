@@ -30,11 +30,23 @@ class ContentUtilSpec extends UnitSpec with MockitoSugar {
       ("emi", "Enterprise Management Incentives"),
       ("other", "Other"),
       ("saye", "Save As You Earn"),
-      ("sip", "Share Incentive Plan")
+      ("sip", "Share Incentive Plan"),
+      ("", "an invalid thing")
     )
     for(schemeType <- data) {
       s"return scheme name and abbreviation for ${schemeType._2}" in {
         contentUtil.getSchemeName(schemeType._1)._2 shouldBe schemeType._1.toUpperCase
+      }
+    }
+
+    "parse withArticle" when {
+      "data starts with a consonant" in {
+        val string = "bing!"
+        contentUtil.withArticle(string) shouldBe "a bing!"
+      }
+      "data starts with a vowel" in {
+        val string = "apple"
+        contentUtil.withArticle(string) shouldBe "an apple"
       }
     }
   }

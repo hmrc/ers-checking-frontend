@@ -22,7 +22,7 @@ import com.typesafe.config.{Config, ConfigFactory, ConfigValue}
 import services.ersTemplatesInfo._
 import uk.gov.hmrc.services.validation.DataValidator
 
-case class SheetInfo (schemeType:String, sheetId: Int, sheetName:String, sheetTitle:String,configFileName: String, headerRow:List[String])
+case class SheetInfo (schemeType: String, sheetId: Int, sheetName: String, sheetTitle: String, configFileName: String, headerRow: List[String])
 
 object ERSTemplatesInfo extends EMITemplateInfo with CsopTemplateInfo with SipTemplateInfo with OtherTemplateInfo with SayeTemplateInfo{
 
@@ -52,10 +52,9 @@ object ERSTemplatesInfo extends EMITemplateInfo with CsopTemplateInfo with SipTe
   )
 }
 
-object ERSValidationConfigs {
-
-  val defValidator: DataValidator = DataValidator(getConfig(ERSTemplatesInfo.emiSheet1ValConfig))
-  def getValidator(configName:String): DataValidator = DataValidator(getConfig(configName))
+class ERSValidationConfigs {
+  val defValidator: DataValidator = new DataValidator(getConfig(ERSTemplatesInfo.emiSheet1ValConfig))
+  def getValidator(configName:String): DataValidator = new DataValidator(getConfig(configName))
 
   def getConfig(sheetConfig:String): Config = ConfigFactory.load.getConfig(sheetConfig) //load new config per sheet on iteration
 

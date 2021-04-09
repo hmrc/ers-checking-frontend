@@ -16,10 +16,7 @@
 
 package services
 
-import java.util.concurrent.TimeUnit
-
 import controllers.auth.RequestWithOptionalEmpRef
-import javax.inject.{Inject, Singleton}
 import metrics.Metrics
 import models.{ERSFileProcessingException, SheetErrors}
 import play.api.Logger
@@ -32,13 +29,17 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.services.validation.DataValidator
 import utils.{ERSUtil, ParserUtil}
 
+import java.util.concurrent.TimeUnit
+import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class DataGenerator @Inject()(auditEvents: AuditEvents,
                               metrics: Metrics,
                               parserUtil: ParserUtil,
+                              ersValidationConfigs: ERSValidationConfigs,
                               ersUtil: ERSUtil
                              )(implicit ec: ExecutionContext) extends DataParser {
 
@@ -49,7 +50,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
     implicit var sheetName :String = ""
     var sheetColSize = 0
     val schemeErrors: ListBuffer[SheetErrors] = ListBuffer()
-    var validator:DataValidator = ERSValidationConfigs.defValidator
+    var validator: DataValidator = ersValidationConfigs.defValidator
 
     def incRowNum(): Unit = rowNum =  rowNum + 1
     var rowCount : Int = 0
@@ -82,7 +83,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
               incRowNum()
             case _ =>
               val foundData = rowData.right.get._1
-              rowCount = rowData.right.get._1.size
+              rowCount = foundData.size
               val data = parserUtil.formatDataToValidate(foundData, sheetName)
               if (!isBlankRow(data)) {
                 rowsWithData += 1
@@ -101,7 +102,9 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
 
     checkForMissingHeaders(rowNum, sheetName, fileName)
     if(rowsWithData == 0) {
-      throw ERSFileProcessingException("ers.exceptions.dataParser.noData", Messages("ers.exceptions.dataParser.noData"), needsExtendedInstructions = true)
+      throw ERSFileProcessingException(
+        "ers.exceptions.dataParser.noData",
+        Messages("ers.exceptions.dataParser.noData"), needsExtendedInstructions = true)
     }
     deliverDataIteratorMetrics(startTime)
     auditEvents.numRowsInSchemeData(scheme, rowsWithData)(hc, request, ec)
@@ -122,11 +125,11 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
 
   def setValidator(sheetName:String)(implicit hc : HeaderCarrier, request: Request[_], messages: Messages): DataValidator = {
     try {
-      ERSValidationConfigs.getValidator(ersSheets(sheetName).configFileName)
+      ersValidationConfigs.getValidator(ersSheets(sheetName).configFileName)
     }catch{
-      case e:Exception =>
+      case e: Exception =>
         auditEvents.auditRunTimeError(e,"Could not set the validator", sheetName)(hc, request, ec)
-        Logger.error("setValidator has thrown an exception, SheetName: " + sheetName + " Exception message: " + e.getMessage)
+        Logger.error("[DataGenerator][setValidator] setValidator has thrown an exception, SheetName: " + sheetName + " Exception message: " + e.getMessage)
         throw ERSFileProcessingException(
           "ers.exceptions.dataParser.configFailure",
           Messages("ers.exceptions.dataParser.validatorError"),
@@ -135,26 +138,66 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
     }
   }
 
-  def identifyAndDefineSheet(data:String,scheme:String)(implicit headerCarrier: HeaderCarrier, request: Request[_], messages: Messages): String = {
-    Logger.debug("5.1  case 0 identifyAndDefineSheet  " )
-    val res = getSheet(data, scheme)
-    val schemeName = ersUtil.getSchemeName(scheme)._2
-    if (res.schemeType.toLowerCase == schemeName.toLowerCase) {
-      Logger.debug("****5.1.1  data contains data:  *****" + data)
-      data
-    } else {
-      auditEvents.fileProcessingErrorAudit(res.schemeType, res.sheetName, s"${res.schemeType.toLowerCase} is not equal to ${schemeName.toLowerCase}")
-      Logger.warn(Messages("ers.exceptions.dataParser.incorrectSchemeType", res.schemeType.toUpperCase, schemeName.toUpperCase))
-      throw ERSFileProcessingException("ers.exceptions.dataParser.incorrectSchemeType",
-        Messages("ers.exceptions.dataParser.incorrectSchemeType", res.schemeType.toLowerCase, schemeName.toLowerCase),
-        optionalParams = Seq(ersUtil.withArticle(res.schemeType.toUpperCase), ersUtil.withArticle(schemeName.toUpperCase), res.sheetName))
+  def setValidatorCsv(sheetName:String)(implicit hc : HeaderCarrier, request: Request[_], messages: Messages): Either[Throwable, DataValidator] = {
+    Try {
+      ersValidationConfigs.getValidator(ersSheets(sheetName).configFileName)
+    } match {
+      case Success(validator) => Right(validator)
+      case Failure(e) =>
+        auditEvents.auditRunTimeError(e, "Could not set the validator", sheetName)(hc, request, ec)
+        Logger.error("[DataGenerator][setValidatorCsv] setValidator has thrown an exception, SheetName: " + sheetName + " Exception message: " + e.getMessage)
+        Left(ERSFileProcessingException(
+          "ers.exceptions.dataParser.configFailure",
+          Messages("ers.exceptions.dataParser.validatorError"),
+          optionalParams = Seq(sheetName)
+        ))
     }
   }
 
-  def getSheet(sheetName:String, scheme:String)(implicit messages: Messages): SheetInfo = {
+  def identifyAndDefineSheet(filename: String, scheme: String)(implicit hc: HeaderCarrier, request: Request[_], messages: Messages): String = {
+    Logger.debug("5.1  case 0 identifyAndDefineSheet  " )
+    val sheetInfo = getSheet(filename, scheme)
+    val schemeName = ersUtil.getSchemeName(scheme)._2
+    if (sheetInfo.schemeType.toLowerCase == schemeName.toLowerCase) {
+      Logger.debug("****5.1.1  data contains data:  *****" + filename)
+      filename
+    } else {
+      auditEvents.fileProcessingErrorAudit(sheetInfo.schemeType, sheetInfo.sheetName, s"${sheetInfo.schemeType.toLowerCase} is not equal to ${schemeName.toLowerCase}")
+      Logger.warn(Messages("ers.exceptions.dataParser.incorrectSchemeType", sheetInfo.schemeType.toUpperCase, schemeName.toUpperCase))
+      throw ERSFileProcessingException(
+        "ers.exceptions.dataParser.incorrectSchemeType",
+        Messages("ers.exceptions.dataParser.incorrectSchemeType", sheetInfo.schemeType.toLowerCase, schemeName.toLowerCase),
+        optionalParams = Seq(ersUtil.withArticle(sheetInfo.schemeType.toUpperCase), ersUtil.withArticle(schemeName.toUpperCase), sheetInfo.sheetName))
+    }
+  }
+
+   def identifyAndDefineSheetCsv(informationOnInput: (SheetInfo, String))(
+     implicit hc: HeaderCarrier, request: Request[_], messages: Messages): Either[Throwable, String] = {
+     val (uploadedFileInfo, selectedSchemeName) = informationOnInput
+
+     if (uploadedFileInfo.schemeType.toLowerCase == selectedSchemeName.toLowerCase) {
+       Right(uploadedFileInfo.sheetName)
+     } else {
+       auditEvents.fileProcessingErrorAudit(uploadedFileInfo.schemeType, uploadedFileInfo.sheetName,
+         s"${uploadedFileInfo.schemeType.toLowerCase} is not equal to ${selectedSchemeName.toLowerCase}")
+       Logger.warn(
+         s"[DataGenerator][identifyAndDefineSheetEither] The user selected $selectedSchemeName but actually uploaded a ${uploadedFileInfo.schemeType} file"
+       )
+       Left(ERSFileProcessingException(
+         "ers.exceptions.dataParser.incorrectSchemeType",
+         Messages("ers.exceptions.dataParser.incorrectSchemeType", uploadedFileInfo.schemeType.toLowerCase, selectedSchemeName.toLowerCase),
+         optionalParams = Seq(
+           ersUtil.withArticle(uploadedFileInfo.schemeType.toUpperCase),
+           ersUtil.withArticle(selectedSchemeName.toUpperCase),
+           uploadedFileInfo.sheetName))
+       )
+     }
+   }
+
+  def getSheet(sheetName: String, scheme: String)(implicit messages: Messages): SheetInfo = {
     Logger.info(s"[DataGenerator][getSheet] Looking for sheetName: $sheetName")
     ersSheets.getOrElse(sheetName, {
-      Logger.warn("[DataGenerator][getSheet] Couldn’t identify SheetName")
+      Logger.warn("[DataGenerator][getSheet] Couldn't identify SheetName")
       val schemeName = ersUtil.getSchemeName(scheme)._2
       throw ERSFileProcessingException(
         "ers.exceptions.dataParser.incorrectSheetName",
@@ -163,6 +206,21 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
         optionalParams = Seq(sheetName, schemeName)
       )
     })
+  }
+
+  def getSheetCsv(sheetName: String, scheme: String)(implicit messages: Messages): Either[Throwable, (SheetInfo, String)] = {
+    Logger.info(s"[DataGenerator][getSheetCsv] Looking for sheetName: $sheetName")
+    val selectedSchemeName = ersUtil.getSchemeName(scheme)._2
+    ersSheets.get(sheetName) match {
+      case Some(sheetInfo) => Right((sheetInfo, selectedSchemeName))
+      case _ =>
+        Logger.warn("[DataGenerator][getSheetCsv] Couldn't identify SheetName")
+        Left(ERSFileProcessingException(
+          "ers.exceptions.dataParser.incorrectSheetName",
+          Messages("ers.exceptions.dataParser.unidentifiableSheetName") + " " + sheetName,
+          needsExtendedInstructions = true,
+          optionalParams = Seq(sheetName, selectedSchemeName)))
+    }
   }
 
   def validateHeaderRow(rowData:Seq[String], sheetName:String, scheme:String, fileName: String)(implicit messages: Messages): Int =
@@ -177,8 +235,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
     if (dataTrim == header) {
       header.size
     } else {
-      implicit val hc: HeaderCarrier = HeaderCarrier()
-      Logger.warn("Error while reading File + Incorrect ERS Template")
+      Logger.warn("[DataGenerator][validateHeaderRow] Error while reading File + Incorrect ERS Template")
       throw ERSFileProcessingException(
         "ers.exceptions.dataParser.incorrectHeader",
         Messages("ers.exceptions.dataParser.headersDontMatch"),
@@ -190,5 +247,4 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
 
   def deliverDataIteratorMetrics(startTime:Long): Unit =
     metrics.dataIteratorTimer(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
-
 }

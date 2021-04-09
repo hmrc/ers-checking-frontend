@@ -37,7 +37,7 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
                                         mcc: MessagesControllerComponents,
                                         implicit val ersUtil: ERSUtil,
                                         implicit val appConfig: ApplicationConfig)
-                                       (implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+                                       (implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport with BaseController {
 
   def selectCsvFilesPage(): Action[AnyContent] = authAction.async {
     implicit request =>
@@ -109,9 +109,4 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
     )
   }
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-    Ok(views.html.global_error(
-      "ers.global_errors.title",
-      "ers.global_errors.message")(request, messages, appConfig))
-  }
 }

@@ -97,8 +97,8 @@ trait ErsTestHelper extends MockitoSugar {
 
 	import scala.concurrent.duration._
 	when(mockAppConfig.retryDelay).thenReturn(3 milliseconds)
-	when(mockAppConfig.errorCount).thenReturn(Option(20))
-	when(mockAppConfig.chunkSize).thenReturn(Option(25000))
+	when(mockAppConfig.errorCount).thenReturn(20)
+	when(mockAppConfig.uploadCsvSizeLimit).thenReturn(1000000)
 	when(mockAppConfig.allCsvFilesCacheRetryAmount).thenReturn(3)
 
 	//PageBuilder

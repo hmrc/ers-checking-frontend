@@ -45,8 +45,6 @@ trait DataParser {
   }
 
   def parse(row:String, fileName : String)(implicit messages: Messages): Either[String, (Seq[String], Int)] = {
-    Logger.debug("DataParser: Parse: About to parse row: " + row)
-
     val xmlRow = Try(Option(XML.withSAXParser(secureSAXParser)loadString(row))).getOrElse(None)
 
     xmlRow match {
@@ -64,7 +62,7 @@ trait DataParser {
         }
 
         cols match {
-          case Right(r: Seq[String]) if !isBlankRow(r) => Right(r, repeated(xmlRow))
+          case Right(r: Seq[String]) if !isBlankRow(r) => Right((r, repeated(xmlRow)))
           case Right(s: Seq[String]) => Right((s, 1))
         }
       case _  =>

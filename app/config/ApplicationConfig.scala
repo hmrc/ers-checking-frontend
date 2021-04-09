@@ -53,8 +53,8 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
   lazy val reportAProblemNonJSUrl = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
 
 
-  lazy val chunkSize: Option[Int] = Option(config.getInt("validationChunkSize"))
-  lazy val errorCount: Option[Int] = Option(config.getInt("errorDisplayCount"))
+  lazy val errorCount: Int = config.getInt("errorDisplayCount")
+  lazy val uploadCsvSizeLimit: Int = config.getInt("csv.uploadSizeLimit")
 
   //ExternalUrls
   lazy val basGatewayHost: String = config.getString("govuk-tax.auth.bas-gateway.host")

@@ -34,14 +34,15 @@ import play.api.{Application, i18n}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
-import uk.gov.hmrc.services.validation.{Cell, ValidationError}
+import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 import utils.{ERSUtil, HtmlCreator}
+
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
 class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with ErsTestHelper {
 
-  val config = Map("application.secret" -> "test",
+  val config: Map[String, Any] = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
     "contact-frontend.host" -> "localhost",
     "contact-frontend.port" -> "9250",
@@ -132,15 +133,15 @@ class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with Er
       val controllerUnderTest = buildFakeHtmlReportController()
       val res: Future[Result] = controllerUnderTest.showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"), hc, testMessages)
       res.map { result =>
-        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage()(request, testMessages))}
+        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(request, testMessages))}
     }
   }
 
   "Calling HtmlReportController.showHtmlErrorReportPage with authentication, and error count > 0" should {
-    "give a status OK and show error report" in {
+    "give a status 500 and show error report" in {
       val controllerUnderTest = buildFakeHtmlReportController("withErrorListSchemeTypeFileTypeZeroErrorCountSummary")
       val result = controllerUnderTest.showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"),hc, testMessages)
-      status(result) shouldBe Status.OK
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
   }
 
@@ -150,7 +151,7 @@ class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with Er
       val cacheMap = CacheMap("uploadId", Map.empty)
 
       val result = buildFakeHtmlReportController().csvExtractErrors(Seq(uploadId), cacheMap)
-      result shouldBe (ListBuffer(), 0, 0)
+      result shouldBe ((ListBuffer(), 0, 0))
     }
 
     "return the errors and count when the sheet has errors" in {
@@ -163,8 +164,8 @@ class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with Er
       )
       val errorJson = Json.toJson(errorList)
       val cacheMapWithErrors = CacheMap("uploadId",
-        Map(s"error-listUploadId(uploadId)" -> errorJson,
-            "scheme-error-countUploadId(uploadId)" -> Json.toJson(1)
+        Map(s"error-list${uploadId.value}" -> errorJson,
+           s"scheme-error-count${uploadId.value}" -> Json.toJson(1)
       ))
 
       val result = buildFakeHtmlReportController().csvExtractErrors(Seq(uploadId), cacheMapWithErrors)

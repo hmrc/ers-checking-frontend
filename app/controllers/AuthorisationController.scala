@@ -30,6 +30,6 @@ class AuthorisationController @Inject()(mcc: MessagesControllerComponents,
                                        ) extends FrontendController(mcc) with I18nSupport {
   def notAuthorised: Action[AnyContent] = Action.async {
     implicit request =>
-      Future.successful(Ok(views.html.not_authorised(request, request2Messages, appConfig)))
+      Future.successful(Unauthorized(views.html.not_authorised(request, request2Messages, appConfig)))
   }
 }

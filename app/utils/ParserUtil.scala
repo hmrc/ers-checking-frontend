@@ -84,9 +84,8 @@ class ParserUtil @Inject()(val ersUtil: ERSUtil,
   }
 
   def getSheetErrors(schemeErrors: ListBuffer[SheetErrors]): ListBuffer[SheetErrors] = {
-    val errorCount: Int = appConfig.errorCount.getOrElse(HUNDRED)
     schemeErrors.map { schemeError =>
-      SheetErrors(schemeError.sheetName,schemeError.errors.take(errorCount))
+      SheetErrors(schemeError.sheetName, schemeError.errors.take(appConfig.errorCount))
     }
   }
 }
