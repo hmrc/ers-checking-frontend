@@ -5,7 +5,7 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
 val appName = "ers-checking-frontend"
 
-lazy val plugins: Seq[Plugins] = Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
+lazy val plugins: Seq[Plugins] = Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin)
 
 lazy val scoverageSettings: Seq[Def.Setting[_]] =
   Seq(
@@ -49,7 +49,7 @@ lazy val microservice = Project(appName, file("."))
     sources in doc in Compile := List(),
     sources in doc in Test := List()
   )
-  .settings(resolvers ++= Seq(Resolver.bintrayRepo("hmrc", "releases"), Resolver.jcenterRepo))
+  .settings(resolvers ++= Seq(Resolver.jcenterRepo))
   .settings(evictionWarningOptions in update := EvictionWarningOptions.default.withWarnTransitiveEvictions(false).withWarnDirectEvictions(false).withWarnScalaVersionEviction(false))
   .settings(majorVersion :=4)
 
