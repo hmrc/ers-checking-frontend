@@ -15,68 +15,17 @@
  *@
 
 @import config.ApplicationConfig
-@(pageTitle: String, message: String)(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
+@this(ers_main: views.html.ers_main,
+        hmrcPageHeading: HmrcPageHeading)
 
-@import layouts.{govuk_template => hmrcGovUkTemplate}
-@import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
-@import uk.gov.hmrc.play.views.html.{helpers => uiHelpers}
+@(pageTitle: String, message: String)(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
 
-@commonLinkElement = {
-    @includes.commonLinkElements()
+
+    @ers_main(title = messages(pageTitle)) {
+    @hmrcPageHeading(PageHeading(
+        messages(message)
+    ))
+
+    <p class="govuk-body">@messages("ers.global.errors.try.later")</p>
+
 }
-
-@commonScriptElement = {
-    @includes.commonScriptElements(appConfig = appConfig)
-}
-
-@contentHeader = {
-    @if(appConfig.languageTranslationEnabled) {
-       @views.html.language_selection(
-         appConfig.languageMap,
-         appConfig.routeToSwitchLanguage,
-         Some("text--right"))
-    }
-}
-
-@mainContent = {
-  <h1>@messages(message)</h1>
-
-  <p>@messages("ers.global.errors.try.later")</p>
-}
-
-@head = {
-   @uiLayouts.head(
-     linkElem = None,
-     headScripts = None)
-     <meta name="format-detection" content="telephone=no" />
-}
-
-@getHelpForm = {
-    @{uiHelpers.reportAProblemLink(appConfig.reportAProblemPartialUrl,appConfig.reportAProblemNonJSUrl)}
-}
-
-@content = {
-    @uiLayouts.main_content(
-    article = uiLayouts.article(mainContent),
-    mainContentHeader = contentHeader,
-    getHelpForm = getHelpForm)
-}
-
-@bodyEnd = {
-      @uiLayouts.footer(
-           analyticsToken = None,
-           analyticsHost = "",
-           ssoUrl = None,
-           scriptElem = Some(commonScriptElement),
-           gaCalls = None)
-}
-
-@footerTop = {}
-@footerLinks = {}
-
-
-@insideHeader = @{uiLayouts.header_nav(navTitle = Some(messages("ers.global_errors.heading")),None,None,None)}
-@afterHeader = {}
-
-
-@hmrcGovUkTemplate(Some(messages(pageTitle)), None)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(uiLayouts.footer_links()), nav = true)(content)

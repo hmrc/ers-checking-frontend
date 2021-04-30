@@ -15,23 +15,53 @@
  *@
 
 @import config.ApplicationConfig
-@(title: String,
-        scripts: Html = Html(""),
-        showSignOutLink: Boolean = false)(mainContent: Html)(implicit request: Request[AnyRef], appConfig: ApplicationConfig, messages: Messages)
+@import play.twirl.api.HtmlFormat
+@import uk.gov.hmrc.hmrcfrontend.config.AssetsConfig
+@this(
+        govUkLayout: GovukLayout,
+        header: GovukHeader,
+        hmrcHead: HmrcHead,
+        hmrcStandardHeader: HmrcStandardHeader,
+        hmrcStandardFooter: HmrcStandardFooter,
+        hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
+        hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
+        assetsConfig: AssetsConfig
+)
 
-@commonLinkElement = {
-    @includes.commonLinkElements()
+@(title: String, otherScripts: Html = Html(""))(mainContent: Html)(implicit request: Request[AnyRef], messages: Messages, applicationConfig: ApplicationConfig)
+
+@head = {
+    <meta name="format-detection" content="telephone=no"/>
+    <meta http-equiv='Pragma' content='no-cache'/>
+    <meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate, private'/>
 }
 
-@commonScriptElement = {
-    @includes.commonScriptElements(scripts, appConfig)
+@scripts = {
+    <script src="@assetsConfig.hmrcFrontendJsUrl"></script>
+    <script src='@routes.Assets.versioned("javascripts/welsh_translation.js")'> </script>
+    <script src='@routes.Assets.versioned("javascripts/ers_scripts.js")'> </script>
+    @otherScripts
 }
 
-@main(title,
-	headerNav = Some(views.helpers.HeaderNav(title = Some(messages("ers.header")),
-	showBetaLink = false,
-	links = Some(views.html.templates.header_links(showSignOutLink)))),
-	linkElement = Some(commonLinkElement),
-	scriptElement = Some(commonScriptElement)) {
-	@mainContent
+@content = {
+    <div id="content">
+        <article class="content__body">
+        @mainContent
+        </article>
+
+        @hmrcReportTechnicalIssueHelper()
+    </div>
 }
+
+@govUkLayout(
+    pageTitle = Some(title),
+    headBlock = Some(hmrcHead(Some(head))),
+    headerBlock = Some(hmrcStandardHeader(
+        serviceName = Some(messages("service.name")),
+        signOutUrl = None,
+        serviceUrl = Some(controllers.routes.CheckingServiceController.startPage.url)
+    )),
+    beforeContentBlock = Some(hmrcLanguageSelectHelper()),
+    scriptsBlock = Some(scripts),
+    footerBlock = Some(hmrcStandardFooter())
+)(content)

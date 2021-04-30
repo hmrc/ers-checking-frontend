@@ -15,40 +15,43 @@
  *@
 
 @import models.upscan.UpscanInitiateResponse
-@import views.html.includes.upscan_file_upload_form
 @import config.ApplicationConfig
 @import _root_.utils.ERSUtil
-@(scheme: String, invalidChars: String, fileId: String)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, upscanResponse: UpscanInitiateResponse, appConfig: ApplicationConfig, ersUtil: ERSUtil)
-@* check return file Template *@
 
-@import _root_.views.html.templates._
+@this(ers_main: views.html.ers_main,
+        upscan_file_upload_form: views.html.includes.upscan_file_upload_form,
+        govukErrorSummary: GovukErrorSummary,
+        govukBackLink: GovukBackLink,
+        hmrcPageHeading: HmrcPageHeading
+)
+
+@(scheme: String, invalidChars: String, fileId: String)(implicit request: Request[AnyRef], messages: Messages, upscanResponse: UpscanInitiateResponse, appConfig: ApplicationConfig, ersUtil: ERSUtil)
 
 @scripts = {
-	<script>var INVALID_CHARACTERS=/@Html(invalidChars)/</script>
-	<script src='@routes.Assets.at("javascripts/ers_csv_scripts.js")'> </script>
+    <script>var INVALID_CHARACTERS =/@Html(invalidChars)/</script>
+    <script src='@routes.Assets.versioned("javascripts/ers_csv_scripts.js")'> </script>
 }
 
 @ers_main(title = messages("ers.upload_csv.page_title"), scripts) {
+    @govukBackLink(BackLink(
+        href = routes.CheckCsvFilesController.selectCsvFilesPage.url,
+        content = Text(messages("ers.back"))
+    ))
 
-		<p class="font-xsmall"><a href="@routes.CheckCsvFilesController.selectCsvFilesPage()" class="link-back">@messages("ers.back")</a></p>
-		<div id="errors" class="validation-summary visibility" role="group" aria-labelledby="error-summary-heading" tabindex="-1">
-			<h1 class="heading-medium error-summary-heading" id="error-summary-heading">
-				@messages("validation.summary.heading")
-			</h1>
-			<ul class="error-summary-list">
-				<li class="validation-summary-message"><a href="#error-summary" data-focuses="error-summary">@Html(messages("csv_file_upload.summary_error"))</a></li>
-			</ul>
-		</div>
-		@header(messages("csv_file_upload.upload_your_file_header", messages(s"${ersUtil.PAGE_CHECK_CSV_FILE}.$scheme.$fileId")))
+    @govukErrorSummary(ErrorSummary(
+        classes = "validation-summary govuk-!-display-none",
+        errorList = Seq(
+            ErrorLink(
+                href = Some("#input-file-name"),
+                content = Text(messages("csv_file_upload.summary_error"))
+            )
+        ),
+        title = Text(messages("validation.summary.heading")),
+        attributes = Map("id" -> "errors")
+    ))
 
-			<div class="form-field form-field--submit">
-				<label class="input-csv-file-name-heading" for="fileUpload[@fileId]">@messages(s"${ersUtil.PAGE_CHECK_CSV_FILE}.$scheme.$fileId")</label>
-				@upscan_file_upload_form(".csv", upscanResponse.formFields, upscanResponse.postTarget)
-			</div>
+    @hmrcPageHeading(PageHeading(text = messages("csv_file_upload.upload_your_file_header", messages(s"${ersUtil.PAGE_CHECK_CSV_FILE}.$scheme.$fileId"))))
 
-			@if(flash.get("filetype-error").isDefined) {
-				<div aria-labelledby="error-heading" class="error-message" id="error-summary" role="alert" tabindex="-1">
-				@flash.get("filetype-error")
-				</div>
-			}
+    @upscan_file_upload_form(".csv", upscanResponse.formFields, upscanResponse.postTarget, s"${ersUtil.PAGE_CHECK_CSV_FILE}.$scheme.$fileId")
+
 }

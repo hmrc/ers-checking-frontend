@@ -30,17 +30,19 @@ import play.api.libs.json
 import play.api.libs.json._
 import play.api.mvc.{DefaultMessagesControllerComponents, Request, Result}
 import play.api.test.Helpers._
+import play.api.test.Injecting
 import play.api.{Application, i18n}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
-import utils.{ERSUtil, HtmlCreator}
+import utils.ERSUtil
+import views.html.{global_error, html_error_report}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
-class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with ErsTestHelper {
+class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with ErsTestHelper with Injecting {
 
   val config: Map[String, Any] = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
@@ -48,16 +50,18 @@ class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with Er
     "contact-frontend.port" -> "9250",
     "metrics.enabled" -> false)
 
+
   override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(app)
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
-  val mockHtmlCreator: HtmlCreator = mock[HtmlCreator]
   val mockErsShortLivedCache: ERSShortLivedCache = mock[ERSShortLivedCache]
+  val view: html_error_report = inject[html_error_report]
+  val globalErrorView: global_error = inject[global_error]
 
   "html Error Report Page GET" should {
 
     "gives a call to showHtmlErrorReportPage if user is authenticated" in {
-      lazy val controllerUnderTest = new HtmlReportController(mockAuthAction, mcc, mockHtmlCreator, mockErsUtil, mockAppConfig)
+      lazy val controllerUnderTest = new HtmlReportController(mockAuthAction, mcc, view, globalErrorView)
       val successfully: UploadedSuccessfully = UploadedSuccessfully("thefilename", "downloadUrl", Some(1000))
       val upscanCsvFilesCallback= UpscanCsvFilesCallback(UploadId("uploadId"), successfully)
       val upscanCsvFilesListCallbackList = UpscanCsvFilesCallbackList(files = List(upscanCsvFilesCallback))
@@ -72,7 +76,6 @@ class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with Er
       mockAnyContentAction
       when(mockErsUtil.getSchemeName(any())).thenReturn(("ers_pdf_error_report.csop", "CSOP"))
       when(mockErsUtil.fetchAll()(any(), any(), any())).thenReturn(Future.successful(CacheMap("test", storedValues)))
-      when(mockHtmlCreator.getSheets(any())(any())).thenReturn("something")
 
       lazy val result = controllerUnderTest.htmlErrorReportPage(true).apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
@@ -123,7 +126,8 @@ class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with Er
       }
     }
 
-    new HtmlReportController(mockAuthAction, mcc, mockHtmlCreator, new TestERSUtil, mockAppConfig) {
+    new HtmlReportController(mockAuthAction, mcc, view, globalErrorView)(
+      implicitly, new TestERSUtil, mockAppConfig) {
       mockAnyContentAction
     }
   }

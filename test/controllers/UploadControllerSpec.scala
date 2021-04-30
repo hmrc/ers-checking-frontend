@@ -32,16 +32,17 @@ import play.api.http.Status
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents, Request, Result}
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, i18n}
 import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.test.UnitSpec
+import views.html.global_error
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) with UnitSpec with ErsTestHelper with GuiceOneAppPerSuite{
+class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) with UnitSpec with ErsTestHelper with GuiceOneAppPerSuite with Injecting {
 
   val config: Map[String, Any] = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
@@ -59,6 +60,7 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
     Some(UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId.generate, uploadedSuccessfully.get))))
   }
   val mockStaxProcessor: StaxProcessor = mock[StaxProcessor]
+  val globalErrorView: global_error = inject[global_error]
 
 
   def buildFakeUploadControllerCsv(uploadRes: Boolean = true,
@@ -67,12 +69,12 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
                                    clearCacheResponse: Boolean = true,
                                    mockReadFileCsv: Boolean = true
                                   ): UploadController =
-    new UploadController(mockAuthAction, mockProcessODSService, mockProcessCsvService, mcc, mockErsUtil, mockAppConfig) {
+    new UploadController(mockAuthAction, mockProcessODSService, mockProcessCsvService, mcc, globalErrorView) {
 
       override def clearErrorCache()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Boolean] =
         Future.successful(clearCacheResponse)
 
-      override def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
+      override def getGlobalErrorPage(implicit request: Request[AnyRef], messages: Messages): Result = {
         InternalServerError("Test body")
       }
 

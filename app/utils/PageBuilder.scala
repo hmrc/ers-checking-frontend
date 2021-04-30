@@ -67,40 +67,40 @@ trait PageBuilder {
 	val CSVFilesList = Map(
 		(
 			SCHEME_EMI, List(
-			CsvFiles("EMI_ADJUSTMENTS", None),
-			CsvFiles("EMI_REPLACED", None),
-			CsvFiles("EMI_RCL", None),
-			CsvFiles("EMI_NONTAXABLE", None),
-			CsvFiles("EMI_TAXABLE", None)
+			CsvFiles("EMI_ADJUSTMENTS"),
+			CsvFiles("EMI_REPLACED"),
+			CsvFiles("EMI_RCL"),
+			CsvFiles("EMI_NONTAXABLE"),
+			CsvFiles("EMI_TAXABLE")
 		)),
 		(
 			SCHEME_CSOP, List(
-			CsvFiles("CSOP_GRANTED", None),
-			CsvFiles("CSOP_RCL", None),
-			CsvFiles("CSOP_Exercised", None)
+			CsvFiles("CSOP_GRANTED"),
+			CsvFiles("CSOP_RCL"),
+			CsvFiles("CSOP_Exercised")
 		)),
 		(
 			SCHEME_OTHER, List(
-			CsvFiles("OTHER_GRANTS", None),
-			CsvFiles("OTHER_OPTIONS", None),
-			CsvFiles("OTHER_ACQUISITION", None),
-			CsvFiles("OTHER_RESTRICTED", None),
-			CsvFiles("OTHER_BENEFITS", None),
-			CsvFiles("OTHER_CONVERTABLE", None),
-			CsvFiles("OTHER_NOTIONAL", None),
-			CsvFiles("OTHER_ENCHANCEMENT", None),
-			CsvFiles("OTHER_SOLD", None)
+			CsvFiles("OTHER_GRANTS"),
+			CsvFiles("OTHER_OPTIONS"),
+			CsvFiles("OTHER_ACQUISITION"),
+			CsvFiles("OTHER_RESTRICTED"),
+			CsvFiles("OTHER_BENEFITS"),
+			CsvFiles("OTHER_CONVERTABLE"),
+			CsvFiles("OTHER_NOTIONAL"),
+			CsvFiles("OTHER_ENCHANCEMENT"),
+			CsvFiles("OTHER_SOLD")
 		)),
 		(
 			SCHEME_SAYE, List(
-			CsvFiles("SAYE_GRANTED", None),
-			CsvFiles("SAYE_RCL", None),
-			CsvFiles("SAYE_EXERCISED", None)
+			CsvFiles("SAYE_GRANTED"),
+			CsvFiles("SAYE_RCL"),
+			CsvFiles("SAYE_EXERCISED")
 		)),
 		(
 			SCHEME_SIP, List(
-			CsvFiles("SIP_AWARDS", None),
-			CsvFiles("SIP_OUT", None)
+			CsvFiles("SIP_AWARDS"),
+			CsvFiles("SIP_OUT")
 		))
 	)
 

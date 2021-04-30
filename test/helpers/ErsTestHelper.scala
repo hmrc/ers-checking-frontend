@@ -43,6 +43,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ErsTestHelper extends MockitoSugar {
 
+
 	def doc(result: Html): Document = Jsoup.parse(contentAsString(result))
 
 	val messagesActionBuilder: MessagesActionBuilder = new DefaultMessagesActionBuilderImpl(stubBodyParser[AnyContent](), stubMessagesApi())
@@ -76,13 +77,13 @@ trait ErsTestHelper extends MockitoSugar {
 			.thenReturn(Future.successful(authResultDefault))
 	}
 
-	implicit val request: Request[_] = FakeRequest()
+	implicit val request: Request[AnyRef] = FakeRequest()
 	implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId("testSessionId")))
 	implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
 	val mockHttp: DefaultHttpClient = mock[DefaultHttpClient]
-	val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
-	val mockErsUtil: ERSUtil = mock[ERSUtil]
+	implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
+	implicit val mockErsUtil: ERSUtil = mock[ERSUtil]
 	val mockMetrics: Metrics = mock[Metrics]
 	val mockAuditEvents: AuditEvents = mock[AuditEvents]
 	val mockShortLivedCache: ERSShortLivedCache = mock[ERSShortLivedCache]

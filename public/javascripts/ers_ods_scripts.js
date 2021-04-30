@@ -1,65 +1,46 @@
-	/***********************/
-	/* Check ODS file page */
-	/***********************/
+/***********************/
+/* Check ODS file page */
+/***********************/
 
-	var MAX_ODS_FILESIZE = 10000000// 100 MB
+const MAX_ODS_FILESIZE = 10000000// 10 MB
 
-	function showODSErrorMsg(msg) {
-    	if ($("#error-summary").length) {
-    		$("#error-summary").remove();
-    	}
-    	$("#check-file-button").attr("disabled",true);
-    	$("#file-input").addClass("fileAlert");
-    	$(".visibility").show();
-	    $("#input-file-name").before("<p id='error-summary' class='field-error clear' tabindex'-1' role='alert' aria-labelledby='error-heading'>"+msg+".</p>");
-	    $(".validation-summary-message a").html(msg);
-	    $("#errors").focus();
-	}
+document.getElementById("input-file-name").onchange = function (e) {
+    const input = document.getElementById('input-file-name');
+    document.getElementsByClassName("visibility")[0].classList.add("govuk-!-display-none")
+    if (input.files.length !== 0 ) {
+        let fileName
+        if (ie < 10) {
+            fileName = input.value.substr(input.value.lastIndexOf("\\") + 1, input.value.length);
+        } else {
+            fileName = input.files[0].name;
+        }
 
-	$("#input-file-name").change(function(e){
-		var $el = $('#input-file-name');
-		// extract file name for validation
-		$(".visibility").hide();
-		if (ie<10) {
-			var fileName = $el.val().substr($el.val().lastIndexOf("\\")+1, $el.val().length);
-		} else {
-			var fileName = $("#input-file-name")[0].files[0].name;
-		}
-
-		// Check file name
-		if (validFileName(fileName)) {
-			// check file name length
-			if (fileName.length <= MAX_FILENAME_LENGTH) {
-				// Check file extn
-				if (getFileNameExtension(fileName) == "ods") {
-					if (fileSizeOK()) {
-						// file ok
-				    	removeErrorMsg();
-					} else {
-						showODSErrorMsg(GOVUK.getLocalisedContent("ods.file.too.large", [MAX_ODS_FILESIZE/1000000]));
-					}
-				} else {
-					showODSErrorMsg(GOVUK.getLocalisedContent("ods.file.wrong.type"));
-				}
-			} else {
-				showODSErrorMsg(GOVUK.getLocalisedContent("ods.file.name.too.long", [MAX_FILENAME_LENGTH]));
-			}
-		} else {
-			showODSErrorMsg(GOVUK.getLocalisedContent("ods.file.name.invalid.chars"));
-		}
-
-		// extract filename for display
-		$("#file-name").text(fileName);
-
-		// show page elements
-		$("#file-header-bar").show();
-
-		if (ie<11) {
-			$("#remove-file-link").insertAfter("#input-file-name")
-			$("#file-header-bar").css("padding-left","3px")
-		}
-		$("#remove-file-link").show();
-	});
+        // Check file name
+        if (validFileName(fileName)) {
+            // check file name length
+            if (fileName.length <= MAX_FILENAME_LENGTH) {
+                // Check file extn
+                if (getFileNameExtension(fileName, "ods")) {
+                    if (fileSizeOK()) {
+                        // file ok
+                        removeErrorMsg();
+                    } else {
+                        showErrorMsg(getLocalisedContent("ods.file.too.large", [MAX_ODS_FILESIZE / 1000000]));
+                    }
+                } else {
+                    showErrorMsg(getLocalisedContent("ods.file.wrong.type"));
+                }
+            } else {
+                showErrorMsg(getLocalisedContent("ods.file.name.too.long", [MAX_FILENAME_LENGTH]));
+            }
+        } else {
+            showErrorMsg(getLocalisedContent("ods.file.name.invalid.chars"));
+        }
+    } else {
+        // this should display the 'you didn't select a file' error message
+        removeErrorMsg()
+    }
+};
 
 
 

@@ -2,6 +2,8 @@
 # General messages
 #********************************************************************
 
+service.name = Gwirio’ch ffeiliau ERS
+
 ers.csop = Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni
 ers.emi = Cymhellion Rheoli Mentrau
 ers.saye = Cynilo Wrth Ennill
@@ -12,6 +14,7 @@ ers.finish = Wedi gorffen
 ers.signout =  Allgofnodi
 ers.continue = Yn eich blaen
 ers.back = Yn ôl
+
 
 ers.start.page_title = Gwirio’ch ffeiliau ERS – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.scheme_types.page_title = Dewis math o gynllun neu drefniant – Gwarantau ar Sail Cyflogaeth – GOV.UK
@@ -57,26 +60,33 @@ ers_check_file_type.title =Pa fath o ffeil rydych am ei gwirio?
 ers_check_file_type.option_1 =Gwerthoedd wedi’u gwahanu gan goma (.csv)
 ers_check_file_type.option_2 =Taenlen OpenDocument (.ods)
 ers_check_file_type.alert =Dewiswch y math o ffeil rydych am ei gwirio
+
 ers_check_csv_file.title =Dewiswch y ffeiliau .csv rydych am eu gwirio am wallau
 ers_check_csv_file.check_file_button =Gwirio am wallau
 ers_check_csv_file.file_type_error =Gwnaethoch ddewis gwirio ffeil CSV, ond nid yw {0} yn ffeil CSV.
-ers_check_csv_file.invalidCharacters = Dileu cymeriadau annilys
 ers_check_csv_file.noData =Nid yw’r ffeil a ddewisoch yn cynnwys unrhyw ddata.<br/><br/>Ni fyddwch yn gallu uwchlwytho {0} fel rhan o’ch Datganiad Blynyddol.
 ers_check_csv_file.no_file_error =Dim ffeil wedi’i dewis. Dewiswch eich ffeiliau.
+ers_check_csv_file.invalidCharacters = Dileu cymeriadau annilys
+
 ers_check_csv_file.clear_all_link =Clirio pob un
+
 ers_check_csv_file.csop.CSOP_GRANTED =Opsiynau wedi’u caniatáu
 ers_check_csv_file.csop.CSOP_RCL =Opsiynau sydd, yn ystod y flwyddyn, wedi’u rhyddhau (gan gynnwys cyfnewidiadau), wedi’u dileu neu wedi dod i ben
 ers_check_csv_file.csop.CSOP_Exercised =Opsiynau ac opsiynau newydd wedi’u harfer
+
 ers_check_csv_file.emi.EMI_ADJUSTMENTS =Addasu opsiynau
 ers_check_csv_file.emi.EMI_REPLACED =Disodli opsiynau
 ers_check_csv_file.emi.EMI_RCL =Opsiynau sydd wedi’u rhyddhau, wedi dod i ben neu wedi’u dileu
 ers_check_csv_file.emi.EMI_NONTAXABLE =Arfer opsiynau nad ydynt yn drethadwy
 ers_check_csv_file.emi.EMI_TAXABLE =Arfer opsiynau trethadwy
+
 ers_check_csv_file.saye.SAYE_GRANTED =Opsiynau wedi’u caniatáu
 ers_check_csv_file.saye.SAYE_RCL =Opsiynau sydd, yn ystod y flwyddyn, wedi’u rhyddhau (gan gynnwys cyfnewidiadau), wedi’u dileu neu wedi dod i ben
 ers_check_csv_file.saye.SAYE_EXERCISED =Opsiynau wedi’u harfer
+
 ers_check_csv_file.sip.SIP_AWARDS =Dyfarniadau cyfranddaliadau
 ers_check_csv_file.sip.SIP_OUT =Cyfranddaliadau wedi’u tynnu’n ôl o’r cynllun
+
 ers_check_csv_file.other.OTHER_GRANTS =Caniatáu opsiynau
 ers_check_csv_file.other.OTHER_OPTIONS =Digwyddiadau opsiynau eraill
 ers_check_csv_file.other.OTHER_ACQUISITION =Caffael gwarantau
@@ -86,6 +96,7 @@ ers_check_csv_file.other.OTHER_CONVERTABLE =Gwarantau trosadwy ar ôl caffael
 ers_check_csv_file.other.OTHER_NOTIONAL =Rhyddhau benthyciadau tybiannol ar ôl caffael
 ers_check_csv_file.other.OTHER_ENCHANCEMENT =Gwelliant artiffisial y gwerth marchnad. Gwerth gwarantau ar ôl caffael
 ers_check_csv_file.other.OTHER_SOLD =Gwarantau sydd wedi’u gwerthu am fwy na’r gwerth marchnadol ar ôl caffael
+
 ers_check_file.title =Dewiswch y ffeil .ods rydych am ei gwirio am wallau
 ers_check_file.file_upload_label =Dewis y ffeil i’w huwchlwytho.
 ers_check_file.check_file_button =Gwirio am wallau
@@ -103,8 +114,10 @@ ers_error_report.sub_heading =Yr hyn sy’n digwydd nesaf
 ers_error_report.view_as_html2 =Tarwch olwg ar yr adroddiad o wallau fel tudalen we
 ers_error_report.instructions1 =Cywirwch y gwallau cyn i chi ddefnyddio’r gwasanaeth hwn eto neu
 ers_error_report.instructions2 =dewiswch ffeil wahanol i’w gwirio
+
 ers_format_errors.page_title =Adroddiad o wallau
 ers_format_errors.sub_heading =Yr hyn sy’n digwydd nesaf
+
 ers_file_format_successful.page_title =Gwiriad wedi’i gwblhau
 ers_file_format_successful.sub_heading =Yr hyn sy’n digwydd nesaf
 ers_file_format_successful.instructions =Gwiriwch eich ffeiliau bob tro y byddwch yn eu diweddaru (bydd gwiriadau rheolaidd yn eich helpu i ddod o hyd i wallau, a’u cywiro, yn gynt).
@@ -112,24 +125,29 @@ ers_file_format_successful.return_to_start_page_link =Gwirio ffeil wahanol
 ers_file_format_successful.banner =Ni ddarganfuwyd unrhyw wallau.
 ers_file_format_successful.feedback =Beth oedd eich barn ar y gwasanaeth hwn?
 ers_file_format_successful.feedback_time =(mae’n cymryd 30 eiliad)
+
 ers_service_unavailable.page_title =Gwirio’ch ffeiliau ERS
 ers_service_unavailable.para1 =Nid yw’r Gwasanaeth Gwirio ar gael ar hyn o bryd, rhowch gynnig arall arni’n nes ymlaen.
-ers_not_authorised.page_title =Gwirio’ch ffeiliau ERS
-ers_not_authorised.para1 =Nid ydych wedi’ch awdurdodi i gyrchu’r gwasanaeth gwirio ERS
+
+ers_not_authorised.page_title = Gwirio’ch ffeiliau ERS
+ers_not_authorised.para1 = Nid ydych wedi’ch awdurdodi i gyrchu’r gwasanaeth gwirio ERS
+ers_not_authorised.warning = Rhybudd
+
 ers_html_error_report.report_title =Adroddiad o wallau {0} ({1})
 ers_html_error_report.number_of_errors_sing =Dangos {0} o’r {1} gwall a ddarganfuwyd.
 ers_html_error_report.number_of_errors =Dangos {0} o’r {1} o wallau a ddarganfuwyd.
 ers_html_error_report.errors_title =Gwallau yn ôl enw (teitl) {0}
 ers_html_error_report.errors_sheet =dalen
-ers_html_error_report.table_column_names =<tr><th class='column' scope='col'>Colofn</th><th class='row' scope='col'>Rhes</th><th class='errorTitle' scope='col'>Gwall</th></tr>
-ers_html_error_report.sheet_name =<h3 class='sheet-title'><span class='font-small'>{0}</span></h3>
-ers_html_error_report.table_row =<tr><td>{0}</td><td>{1}</td><td class='errorMsg'>{2}</td></tr>
-ers_html_error_report.sheet ={0}<table id={3}>{1}{2}</table>
+ers_html_error_report.column = Colofn
+ers_html_error_report.row = Rhes
+ers_html_error_report.error = Gwall
+
 ers_pdf_error_report.csop =Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni
 ers_pdf_error_report.emi =Cymhellion Rheoli Mentrau
 ers_pdf_error_report.saye =Cynilo Wrth Ennill
 ers_pdf_error_report.sip =Cynllun Cymell Cyfranddaliadau
 ers_pdf_error_report.other =Arall
+
 ers_format_errors.instructions =Dewis ffeil wahanol i’w gwirio
 ers.exceptions.dataParser.fileRetrievalFailed =Ymddengys fod y ffeil a ddewisoch i’w gwirio wedi torri.<br/><br/>Ni fyddwch yn gallu uwchlwytho {0} fel rhan o’ch Datganiad Blynyddol.
 ers.exceptions.dataParser.parserFailure =Ymddengys fod y ffeil a ddewisoch i’w gwirio wedi torri.<br/><br/>Ni fyddwch yn gallu uwchlwytho {0} fel rhan o’ch Datganiad Blynyddol.

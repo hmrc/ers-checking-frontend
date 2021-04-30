@@ -25,13 +25,15 @@ import play.api.Application
 import play.api.http.Status
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{DefaultMessagesControllerComponents, Request, Result}
+import play.api.test.Injecting
 import services.{ProcessCsvService, ProcessODSService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
+import views.html.global_error
 
 import scala.concurrent.Future
 
-class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppPerSuite {
+class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppPerSuite with Injecting {
 
   val config: Map[String, Any] = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
@@ -43,13 +45,14 @@ class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(app)
   val mockProcessODSService: ProcessODSService = mock[ProcessODSService]
   val mockProcessCsvService: ProcessCsvService = mock[ProcessCsvService]
+  val globalErrorView: global_error = inject[global_error]
 
   val uploadId: UploadId = UploadId("uploadId")
   val upscanCsvFilesCallback: UpscanCsvFilesCallback = UpscanCsvFilesCallback(uploadId: UploadId, InProgress)
   val upscanCsvFilesListCallbackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(files = List(upscanCsvFilesCallback))
 
   def upscanController(csvList: UpscanCsvFilesCallbackList = upscanCsvFilesListCallbackList): UpscanController =
-    new UpscanController(mockAuthAction, mockSessionService, mcc, mockErsUtil, mockAppConfig) {
+    new UpscanController(mockAuthAction, mockSessionService, mcc, globalErrorView) {
     override def fetchCsvCallbackList(list: UpscanCsvFilesList, sessionId: String)
                                      (implicit hc: HeaderCarrier, request: Request[_]): Future[Seq[UpscanCsvFilesCallback]] = {
       Future.successful(csvList.files)
@@ -105,7 +108,7 @@ class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
       when(mockErsUtil.cache(any(), any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(null))
 
       def upscanControllerError(): UpscanController =
-        new UpscanController(mockAuthAction, mockSessionService, mcc, mockErsUtil, mockAppConfig) {
+        new UpscanController(mockAuthAction, mockSessionService, mcc, globalErrorView) {
           override def fetchCsvCallbackList(list: UpscanCsvFilesList, sessionId: String)
                                            (implicit hc: HeaderCarrier, request: Request[_]): Future[Seq[UpscanCsvFilesCallback]] = {
             Future.failed(new Exception("error"))
