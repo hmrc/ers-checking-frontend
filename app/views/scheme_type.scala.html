@@ -15,31 +15,81 @@
  *@
 
 @import config.ApplicationConfig
+
+@this(ers_main: views.html.ers_main,
+        govukButton: GovukButton,
+        govukRadios: GovukRadios,
+        govukErrorSummary: GovukErrorSummary,
+        govukBackLink: GovukBackLink,
+        formWithCSRF: FormWithCSRF
+)
+
 @(form: Form[CS_schemeType])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, appConfig: ApplicationConfig)
-    @* type of scheme template *@
-    @import views.html.templates._
-    @import uk.gov.hmrc.play.views.html.helpers
+@* type of scheme template *@
+@ers_main(title = messages("ers.scheme_types.page_title")) {
 
-    @ers_main(title = messages("ers.scheme_types.page_title")) {
+    @govukBackLink(BackLink(
+        href = routes.CheckingServiceController.startPage().url,
+        content = Text(messages("ers.back"))
+    ))
 
-        <p class="font-xsmall"><a href="@routes.CheckingServiceController.startPage()" class="link-back">@messages("ers.back")</a></p>
-        @helpers.errorSummary(messages("validation.summary.heading"), form, forceDivToAppear = false)
-        @header(messages("ers_scheme_type.page_title"))
-        @helpers.form(action = routes.CheckingServiceController.schemeTypeSelected()) {
-            @helpers.input_radio_group(form("schemeType"), Seq(
-                ("csop", messages("ers_scheme_type.csop")),
-                ("emi", messages("ers_scheme_type.emi")),
-                ("saye", messages("ers_scheme_type.saye")),
-                ("sip", messages("ers_scheme_type.sip")),
-                ("other", messages("ers_scheme_type.other"))
+    @if(form.hasErrors) {
+        @govukErrorSummary(ErrorSummary(
+            errorList = Seq(
+                ErrorLink(
+                    href = Some("#schemeType-csop"),
+                    content = Text(messages("ers_scheme_type.select_scheme_type"))
+                )
             ),
-                '_legend -> messages("ers_scheme_type.page_title"),
-                '_legendClass -> "visuallyhidden",
-                '_fieldsetAttributes -> Html("""id='schemeType'""")
-            )
-
-            <div class="form-field form-field--submit">
-                <input type="submit" id="continue" class="button" value="@messages("ers_scheme_type.continue")">
-            </div>
-        }
+            title = Text(messages("validation.summary.heading"))
+        ))
     }
+
+    @formWithCSRF(action = routes.CheckingServiceController.schemeTypeSelected()) {
+        @govukRadios(Radios(
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    content = Text(messages("ers_scheme_type.page_title")),
+                    classes = "govuk-fieldset__legend--xl",
+                    isPageHeading = true
+                ))
+            )),
+            errorMessage = if(form.hasErrors) Some(ErrorMessage(
+                content = Text(messages("ers_scheme_type.select_scheme_type"))
+            )) else None,
+            idPrefix = Some("schemeType"),
+            name = "schemeType",
+            items = Seq(
+                RadioItem(
+                    id = Some("schemeType-csop"),
+                    content = Text(messages("ers_scheme_type.csop")),
+                    value = Some("csop")
+                ),
+                RadioItem(
+                    id = Some("schemeType-emi"),
+                    content = Text(messages("ers_scheme_type.emi")),
+                    value = Some("emi")
+                ),
+                RadioItem(
+                    id = Some("schemeType-saye"),
+                    content = Text(messages("ers_scheme_type.saye")),
+                    value = Some("saye")
+                ),
+                RadioItem(
+                    id = Some("schemeType-sip"),
+                    content = Text(messages("ers_scheme_type.sip")),
+                    value = Some("sip")
+                ),
+                RadioItem(
+                    id = Some("schemeType-other"),
+                    content = Text(messages("ers_scheme_type.other")),
+                    value = Some("other")
+                )
+            )
+        ))
+
+        @govukButton(Button(
+            content = Text(messages("ers_scheme_type.continue"))
+        ))
+    }
+}

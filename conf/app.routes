@@ -1,4 +1,6 @@
-->          /template                                       template.Routes
+->          /template                                   template.Routes
+->          /govuk-frontend                             govuk.Routes
+->          /hmrc-frontend                              hmrcfrontend.Routes
 
 GET 		/								            controllers.CheckingServiceController.startPage()
 

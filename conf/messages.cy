@@ -2,6 +2,8 @@
 # General messages
 #********************************************************************
 
+service.name = Gwirio’ch ffeiliau ERS
+
 ers.csop = Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni
 ers.emi = Cymhellion Rheoli Mentrau
 ers.saye = Cynilo Wrth Ennill
@@ -116,6 +118,7 @@ ers_service_unavailable.page_title =Gwirio’ch ffeiliau ERS
 ers_service_unavailable.para1 =Nid yw’r Gwasanaeth Gwirio ar gael ar hyn o bryd, rhowch gynnig arall arni’n nes ymlaen.
 ers_not_authorised.page_title =Gwirio’ch ffeiliau ERS
 ers_not_authorised.para1 =Nid ydych wedi’ch awdurdodi i gyrchu’r gwasanaeth gwirio ERS
+ers_not_authorised.warning = TODO NEEDS TRANSLATION
 ers_html_error_report.report_title =Adroddiad o wallau {0} ({1})
 ers_html_error_report.number_of_errors_sing =Dangos {0} o’r {1} gwall a ddarganfuwyd.
 ers_html_error_report.number_of_errors =Dangos {0} o’r {1} o wallau a ddarganfuwyd.

@@ -9,7 +9,7 @@ object AppDependencies {
   val compile: Seq[ModuleID] = Seq(
     ws,
     "uk.gov.hmrc" %% "bootstrap-play-26" % "2.3.0",
-    "uk.gov.hmrc" %% "govuk-template" % "5.61.0-play-26",
+    "uk.gov.hmrc" %% "govuk-template" % "5.66.0-play-26",
     "uk.gov.hmrc" %% "play-ui" % "8.21.0-play-26",
     "uk.gov.hmrc" %% "domain" % "5.10.0-play-26",
     "uk.gov.hmrc" %% "play-partials" % "7.1.0-play-26",
@@ -25,7 +25,9 @@ object AppDependencies {
     "com.typesafe.akka" %% "akka-protobuf" % "2.6.12",
     "com.typesafe.akka" %% "akka-http-spray-json" % "10.1.12",
     compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
-    "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
+    "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full,
+
+    "uk.gov.hmrc" %% "play-frontend-hmrc" % "0.59.0-play-26"
 
   )
 

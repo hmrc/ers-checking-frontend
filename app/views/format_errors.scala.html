@@ -16,29 +16,36 @@
 
 @import _root_.utils.ERSUtil
 @import config.ApplicationConfig
-
-@(fileType: String,
-  schemeName: String,
-  schemeNameShort: String,
-  errorMsg: String,
-  errorMsgParams: Seq[String],
-  showExtendedInstructions: Boolean)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, appConfig: ApplicationConfig, ersUtil: ERSUtil)
-
 @import views.html.templates._
 
+@this(ers_main: views.html.ers_main,
+        govukBackLink: GovukBackLink,
+        formWithCSRF: FormWithCSRF,
+        hmrcPageHeading: HmrcPageHeading,
+        govukInsetText: GovukInsetText)
+
+@(fileType: String,
+        schemeName: String,
+        schemeNameShort: String,
+        errorMsg: String,
+        errorMsgParams: Seq[String],
+        showExtendedInstructions: Boolean)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, appConfig: ApplicationConfig, ersUtil: ERSUtil)
+
 @ers_main(title = messages("ers.error_report.page_title")) {
-<p class="font-xsmall"><a href="@ersUtil.getPageBackLink(messages(fileType))" class="link-back">@Html(messages("ers.back"))</a></p>
-@header(messages("ers_format_errors.page_title", schemeName, schemeNameShort))
-    <div class="panel panel-border-wide">
-        <p>@Html(messages(errorMsg, errorMsgParams:_*))</p>
-    </div>
-    <div class="bottom-grey"></div>
-    <h2 class="heading-medium">@Html(messages("ers_format_errors.sub_heading"))</h2>
-    <p>
-        @if(showExtendedInstructions) {
-            @Html(messages("ers_error_report.instructions1")) <a href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@Html(messages("ers_error_report.instructions2"))</a>.
-        } else {
-            <a href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@Html(messages("ers_format_errors.instructions"))</a>
-        }
+
+    @govukBackLink(BackLink(
+        href = ersUtil.getPageBackLink(messages(fileType)),
+        content = Text(messages("ers.back"))
+    ))
+
+    @hmrcPageHeading(PageHeading(text = messages("ers_format_errors.page_title", schemeName, schemeNameShort)))
+    @govukInsetText(InsetText(content = HtmlContent(messages(errorMsg, errorMsgParams: _*))))
+    <h2 class="govuk-heading-m">@Html(messages("ers_format_errors.sub_heading"))</h2>
+    <p class="govuk-body">
+    @if(showExtendedInstructions) {
+        @Html(messages("ers_error_report.instructions1")) <a href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@Html(messages("ers_error_report.instructions2"))</a>.
+    } else {
+        <a href="@routes.CheckingServiceController.schemeTypePage()" class="govuk-link" id="check-another-return-file-link">@Html(messages("ers_format_errors.instructions"))</a>
+    }
     </p>
 }

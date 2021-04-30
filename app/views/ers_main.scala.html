@@ -14,24 +14,16 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
+@this(main: views.html.main)
+
 @(title: String,
         scripts: Html = Html(""),
-        showSignOutLink: Boolean = false)(mainContent: Html)(implicit request: Request[AnyRef], appConfig: ApplicationConfig, messages: Messages)
-
-@commonLinkElement = {
-    @includes.commonLinkElements()
-}
+        showSignOutLink: Boolean = false)(mainContent: Html)(implicit request: Request[AnyRef], messages: Messages)
 
 @commonScriptElement = {
-    @includes.commonScriptElements(scripts, appConfig)
+    @includes.commonScriptElements(scripts)
 }
 
-@main(title,
-	headerNav = Some(views.helpers.HeaderNav(title = Some(messages("ers.header")),
-	showBetaLink = false,
-	links = Some(views.html.templates.header_links(showSignOutLink)))),
-	linkElement = Some(commonLinkElement),
-	scriptElement = Some(commonScriptElement)) {
+@main(title, Some(commonScriptElement)) {
 	@mainContent
 }

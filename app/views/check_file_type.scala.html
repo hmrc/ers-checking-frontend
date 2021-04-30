@@ -14,27 +14,65 @@
  * limitations under the License.
  *@
 
-@import config.ApplicationConfig
-@(form: Form[CS_checkFileType])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, appConfig: ApplicationConfig)
-    @* type of activity template *@
-    @import views.html.templates._
-    @import uk.gov.hmrc.play.views.html.helpers
-    @ers_main(title = messages("ers.file_type.page_title")) {
+@this(ers_main: views.html.ers_main,
+        govukButton: GovukButton,
+        govukRadios: GovukRadios,
+        govukErrorSummary: GovukErrorSummary,
+        govukBackLink: GovukBackLink,
+        formWithCSRF: FormWithCSRF
+)
 
-        <p class="font-xsmall"><a href="@routes.CheckingServiceController.schemeTypePage()" class="link-back">@messages("ers.back")</a></p>
-        @helpers.errorSummary(messages("validation.summary.heading"), form, forceDivToAppear = false)
-        @header(messages("ers_check_file_type.title"))
-        @helpers.form(action = routes.CheckingServiceController.checkFileTypeSelected()) {
-            @helpers.input_radio_group(form("checkFileType"), Seq(
-                ("csv", messages("ers_check_file_type.option_1")),
-                ("ods", messages("ers_check_file_type.option_2"))
+@(form: Form[CS_checkFileType])(implicit request: Request[AnyRef], messages: Messages)
+@* type of activity template *@
+@ers_main(title = messages("ers.file_type.page_title")) {
+
+    @govukBackLink(BackLink(
+        href = routes.CheckingServiceController.schemeTypePage().url,
+        content = Text(messages("ers.back"))
+    ))
+
+    @if(form.hasErrors) {
+        @govukErrorSummary(ErrorSummary(
+            errorList = Seq(
+                ErrorLink(
+                    href = Some("#checkFileType-csv"),
+                    content = Text(messages("ers_check_file_type.alert"))
+                )
             ),
-                '_legend -> messages("ers_check_file_type.title"),
-                '_legendClass -> "visuallyhidden",
-                '_fieldsetAttributes -> Html("""id='checkFileType'""")
-            )
-            <div class="form-field form-field--submit">
-                <input role="button" id="continue" class="button" type="submit" value="@messages("ers.continue")">
-            </div>
-        }
+            title = Text(messages("validation.summary.heading"))
+        ))
     }
+
+    @formWithCSRF(action = routes.CheckingServiceController.checkFileTypeSelected()) {
+        @govukRadios(Radios(
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    content = Text(messages("ers_check_file_type.title")),
+                    classes = "govuk-fieldset__legend--xl",
+                    isPageHeading = true
+                ))
+            )),
+            errorMessage = if(form.hasErrors) Some(ErrorMessage(
+                content = Text(messages("ers_check_file_type.alert"))
+            )) else None,
+            idPrefix = Some("checkFileType"),
+            name = "checkFileType",
+            items = Seq(
+                RadioItem(
+                    id = Some("checkFileType-csv"),
+                    content = Text(messages("ers_check_file_type.option_1")),
+                    value = Some("csv")
+                ),
+                RadioItem(
+                    id = Some("checkFileType-ods"),
+                    content = Text(messages("ers_check_file_type.option_2")),
+                    value = Some("ods")
+                )
+            )
+        ))
+
+        @govukButton(Button(
+            content = Text(messages("ers.continue"))
+        ))
+    }
+}

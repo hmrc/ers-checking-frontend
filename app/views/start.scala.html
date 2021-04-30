@@ -15,21 +15,29 @@
  *@
 
 @import config.ApplicationConfig
+@this(ers_main: views.html.ers_main,
+        govukButton: GovukButton,
+        hmrcPageHeading: HmrcPageHeading,
+        govukInsetText: GovukInsetText
+)
+
 @(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
 
-@import views.html.templates._
-
 @ers_main(title = messages("ers.start.page_title")) {
-	@header(messages("ers_start.page_title"))
-	<p class="font-medium">@messages("ers_start.intro_para_1")</p>
-	<h2 class="heading-medium">@messages("ers_start.sub_title")</h2>
-	<p>@messages("ers_start.intro_para_3")</p>
-	<p>@messages("ers_start.intro_para_4")</p>
-	<p>@messages("ers_start.intro_para_5")</p>
-	<div class="panel panel-border-wide">
-		<p>@Html(messages("ers_start.ers_help"))</p>
-	</div>
-	<div class="form-group">
-		<a role="button" href="@routes.CheckingServiceController.schemeTypePage()" class="button button-get-started" id="start-now-button">@messages("ers_start.start_now_button")</a>
-	</div>
+
+    @hmrcPageHeading(PageHeading(
+        text = messages("ers_start.page_title")
+    ))
+	<p class="govuk-body-l">@messages("ers_start.intro_para_1")</p>
+	<h2 class="govuk-heading-m">@messages("ers_start.sub_title")</h2>
+	<p class="govuk-body">@messages("ers_start.intro_para_3")</p>
+	<p class="govuk-body">@messages("ers_start.intro_para_4")</p>
+	<p class="govuk-body">@messages("ers_start.intro_para_5")</p>
+    @govukInsetText(InsetText(
+        content = HtmlContent(messages("ers_start.ers_help"))
+    ))
+    @govukButton(Button(content = Text(messages("ers_start.start_now_button")),
+        classes = "form-group",
+        isStartButton = true,
+        href = Some(routes.CheckingServiceController.schemeTypePage().url)))
 }

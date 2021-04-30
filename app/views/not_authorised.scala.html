@@ -15,15 +15,18 @@
  *@
 
 @import config.ApplicationConfig
+
+@this(ers_main: views.html.ers_main,
+        govukWarningText: GovukWarningText,
+        hmrcPageHeading: HmrcPageHeading)
+
 @(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
 
 @ers_main(title = messages("ers.start.page_title")) {
-<header id="page-header">
+    @hmrcPageHeading(PageHeading(text = messages("ers_not_authorised.page_title")))
+    @govukWarningText(WarningText(
+        iconFallbackText = messages("ers_not_authorised.warning"),
+        content = Text(messages("ers_not_authorised.para1"))
+    ))
 
-	<h1>@messages("ers_not_authorised.page_title")</h1>
-
-	<div class="application-notice help-notice">
-		<p>@messages("ers_not_authorised.para1")</p>
-	</div>
-</header>
 }

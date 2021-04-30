@@ -1,122 +1,100 @@
-	/***********************/
-	/* Check CSV file page */
-	/***********************/
+/***********************/
+/* Check CSV file page */
+/***********************/
 
-	var MAX_CSV_FILESIZE = 100000000// 100 MB
+//var MAX_CSV_FILESIZE = 100000000// 100 MB
+var MAX_CSV_FILESIZE = 1000000    // 1 MB
+document.getElementById("check-file-button").disabled = true;
 
-	function csvFileSizeOK (fileSize) {
-		if (ie<10) {
-			return true
-		} else {
-			if (fileSize > MAX_CSV_FILESIZE) {
-				return false
-			} else {
-				return true
-			}
-		}
-	}
+function csvFileSizeOK(fileSize) {
+    if (ie < 10) {
+        return true
+    } else {
+        return fileSize <= MAX_CSV_FILESIZE;
+    }
+}
 
-	function duplicateFileName (fileName) {
-		var duplicateNameCount = 0
-		$(".input-file-name").each(function(index){
-			if ($(this).val() != "") {
-				if (ie<10) {
-					if ($(this).val().substr($(this).val().lastIndexOf("\\")+1, $(this).val().length) == fileName) {
-						duplicateNameCount++;
-						if (duplicateNameCount > 1) $(this).parent("Div").addClass("fileAlert")
-					}
-				} else {
-					if ($(this)[0].files[0].name == fileName) {
-						duplicateNameCount++;
-						if (duplicateNameCount > 1) $(this).parent("Div").addClass("fileAlert")
-					}
-				}
-			}
-		});
-		if (duplicateNameCount > 1) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+function removeFileAlert() {
+	document.getElementById("input-file-name").parentNode.classList.remove("fileAlert")
+    // $(".input-file-name").each(function (index) {
+    //     $(this).parent("Div").removeClass("fileAlert")
+    // });
+}
 
-	function removeFileAlert () {
-		$(".input-file-name").each(function(index){
-			$(this).parent("Div").removeClass("fileAlert")
-		});
-	}
+function showCSVErrorMsg(e, msg) {
+    const button = document.getElementById("check-file-button");
 
-	function showCSVErrorMsg(e, msg) {
-    	if ($("#error-summary").length) {
-    		$("#error-summary").remove();
-    	}
-    	$(".visibility").show();
-    	$("#check-file-button").attr("disabled",true);
-	    $(e).before("<p id='error-summary' class='field-error clear' tabindex'-1' role='alert' aria-labelledby='error-heading'>"+msg+".</p>")
-	    $(".validation-summary-message a").html(msg)
-	    $("#errors").focus();
-	}
+    if (document.getElementById("error-summary")) {
+        document.getElementById("error-summary").remove()
+    }
 
-	function validateFile(fileName, fileSize, e) {
-		// Check file name
-		if (validFileName(fileName)) {
-			// check file name length
-			if (fileName.length <= MAX_FILENAME_LENGTH) {
-				// Check file extn
-				if (getFileNameExtension(fileName) == "csv") {
-					if (csvFileSizeOK(fileSize)) {
-						if (!duplicateFileName(fileName)) {
-							// file ok
-							return true;
-						} else {
-							showCSVErrorMsg(e, GOVUK.getLocalisedContent("csv.already.chosen"));
-					    	errors++;
-							return false;
-						}
-					} else {
-						showCSVErrorMsg(e, GOVUK.getLocalisedContent("csv.file.too.large", [MAX_CSV_FILESIZE/1000000]));
-						errors++;
-						return false;
-					}
-				} else {
-					showCSVErrorMsg(e, GOVUK.getLocalisedContent("csv.file.wrong.type"));
-					errors++;
-					return false;
-				}
-			} else {
-				showCSVErrorMsg(e, GOVUK.getLocalisedContent("csv.file.name.too.long", [MAX_FILENAME_LENGTH]));
-				errors++;
-				return false;
-			}
-		} else {
-			showCSVErrorMsg(e, GOVUK.getLocalisedContent("csv.file.name.invalid.chars"));
-			errors++;
-			return false;
-		}
-	}
+    document.querySelector(".visibility").style.display = "block";
+    button.disabled = true
+    e.insertAdjacentHTML('beforebegin',"<p id='error-summary' class='field-error clear' tabindex'-1' role='alert' aria-labelledby='error-heading'>" + msg + ".</p>")
+    // $(e).before("<p id='error-summary' class='field-error clear' tabindex'-1' role='alert' aria-labelledby='error-heading'>" + msg + ".</p>")
+    document.querySelector(".validation-summary-message a").innerHTML = msg
+    // $(".validation-summary-message a").html(msg)
+    // $("#errors").focus();
+    document.getElementById("errors").focus();
+}
 
-	$("#input-file-name").change(function(e){
-		$(".visibility").hide();
-		errors = 0;
-		if ($(this).val() != "") {
-			// extract file name for validation
-			if (ie<10) {
-				var fileName = $(this).val().substr($(this).val().lastIndexOf("\\")+1, $(this).val().length);
-			} else {
-				var fileName = $(this)[0].files[0].name;
-				var fileSize = $(this)[0].files[0].size;
-			}
-			if (fileName != undefined) {
-				if (!validateFile(fileName, fileSize, this)) {
-					removeFileAlert();
-					$(this).parent("Div").addClass("fileAlert");
-				}
-			}
-		}
-		if (errors == 0) {
-			removeFileAlert();
-			removeErrorMsg();
-		}
-	});
+function validateFile(fileName, fileSize, e) {
+    // Check file name
+    if (validFileName(fileName)) {
+        // check file name length
+        if (fileName.length <= MAX_FILENAME_LENGTH) {
+            // Check file extn
+            if (getFileNameExtension(fileName, "csv")) {
+                if (csvFileSizeOK(fileSize)) {
+                    // file ok
+                    return true;
+                } else {
+                    showCSVErrorMsg(e, getLocalisedContent("csv.file.too.large", [MAX_CSV_FILESIZE / 1000000]));
+                    errors++;
+                    return false;
+                }
+            } else {
+                showCSVErrorMsg(e, getLocalisedContent("csv.file.wrong.type"));
+                errors++;
+                return false;
+            }
+        } else {
+            showCSVErrorMsg(e, getLocalisedContent("csv.file.name.too.long", [MAX_FILENAME_LENGTH]));
+            errors++;
+            return false;
+        }
+    } else {
+        showCSVErrorMsg(e, getLocalisedContent("csv.file.name.invalid.chars"));
+        errors++;
+        return false;
+    }
+}
+
+document.getElementById("input-file-name").onchange = function (e) {
+    document.getElementsByClassName("visibility")[0].style.display = 'none';
+    errors = 0;
+    if (e.target.value.length > 0) {
+        // extract file name for validation
+        if (ie < 10) {
+            var fileName = e.target.value.substr(
+                e.target.value.lastIndexOf("\\") + 1,
+                e.target.value.length);
+        } else {
+            const file = e.target.files.item(0);
+            var fileName = file.name;
+            var fileSize = file.size;
+        }
+        if (fileName != undefined) {
+            if (!validateFile(fileName, fileSize, document.getElementById("input-file-name"))) {
+                removeFileAlert();
+                e.target.parentNode.classList.add("fileAlert");
+            }
+        }
+    }
+    if (errors == 0) {
+        removeFileAlert();
+        removeErrorMsg();
+    }
+};
 
 

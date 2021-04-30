@@ -26,10 +26,11 @@ import scala.concurrent.Future
 
 @Singleton
 class AuthorisationController @Inject()(mcc: MessagesControllerComponents,
-                                        implicit val appConfig: ApplicationConfig
+                                        implicit val appConfig: ApplicationConfig,
+                                        not_authorised: views.html.not_authorised
                                        ) extends FrontendController(mcc) with I18nSupport {
   def notAuthorised: Action[AnyContent] = Action.async {
     implicit request =>
-      Future.successful(Unauthorized(views.html.not_authorised(request, request2Messages, appConfig)))
+      Future.successful(Unauthorized(not_authorised(request, request2Messages, appConfig)))
   }
 }

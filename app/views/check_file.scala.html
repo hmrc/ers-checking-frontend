@@ -17,10 +17,23 @@
 @import models.upscan.UpscanInitiateResponse
 @import views.html.includes.upscan_file_upload_form
 @import config.ApplicationConfig
+@import views.html.templates._
+
+@this(ers_main: views.html.ers_main,
+		upscan_file_upload_form: views.html.includes.upscan_file_upload_form,
+		govukButton: GovukButton,
+		govukRadios: GovukRadios,
+		govukErrorSummary: GovukErrorSummary,
+		govukBackLink: GovukBackLink,
+		formWithCSRF: FormWithCSRF,
+		hmrcPageHeading: HmrcPageHeading,
+		govukFileUpload: GovukFileUpload
+)
+
 @(param: String, invalidChars: String)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, upscanResponse: UpscanInitiateResponse, appConfig: ApplicationConfig)
 @* check return file Template *@
 
-@import views.html.templates._
+
 
 @scripts = {
 	<script>var INVALID_CHARACTERS=/@Html(invalidChars)/</script>
@@ -28,27 +41,35 @@
 }
 
 @ers_main(title = messages("ers.upload_ods.page_title"), scripts) {
-	<p class="font-xsmall"><a href="@routes.CheckingServiceController.checkFileTypePage()" class="link-back">@Html(messages("ers.back"))</a></p>
-	<div id="errors" class="validation-summary visibility" role="group" aria-labelledby="error-summary-heading" tabindex="-1">
-		<h1 class="heading-medium error-summary-heading" id="error-summary-heading">
-		@messages("validation.summary.heading")
-		</h1>
-		<ul class="error-summary-list">
-			<li class="validation-summary-message"><a href="#error-summary" data-focuses="error-summary">@Html(messages("ods_file_upload.summary_error"))</a></li>
-		</ul>
-	</div>
 
-	@header(messages("ers_check_file.title"))
+	@govukBackLink(BackLink(
+		href = routes.CheckingServiceController.checkFileTypePage().url,
+		content = Text(messages("ers.back"))
+	))
+
+	@govukErrorSummary(ErrorSummary(
+		classes = "validation-summary visibility",
+		errorList = Seq(
+			ErrorLink(
+				href = Some("#error-summary"),
+				content = Text(messages("ods_file_upload.summary_error"))
+			)
+		),
+		title = Text(messages("validation.summary.heading")),
+		attributes = Map("id" -> "errors")
+	))
+
+	@hmrcPageHeading(PageHeading(text = messages("ers_check_file.title")))
 
 	<div id="file-wrapper">
 			<div id="file-input" class="form-field">
-				<label for="input-file-name" class="form-label visuallyhidden" id="input-file-name-label">@Html(messages("ers_check_file.file_upload_label"))</label>
 				@if(flash.get("filetype-error").isDefined) {
 				<div aria-labelledby="error-heading" class="validation-message" id="error-summary" role="alert" tabindex="-1">
 					@flash.get("filetype-error")
 				</div>
 				}
-			@upscan_file_upload_form(".ods", upscanResponse.formFields, upscanResponse.postTarget)
+
+				@upscan_file_upload_form(".ods", upscanResponse.formFields, upscanResponse.postTarget, "ers_check_file.file_upload_label")
 			</div>
 	</div>
 }

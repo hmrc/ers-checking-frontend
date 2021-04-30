@@ -21,12 +21,8 @@
 @import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
 @import uk.gov.hmrc.play.views.html.{helpers => uiHelpers}
 
-@commonLinkElement = {
-    @includes.commonLinkElements()
-}
-
 @commonScriptElement = {
-    @includes.commonScriptElements(appConfig = appConfig)
+    @includes.commonScriptElements()
 }
 
 @contentHeader = {

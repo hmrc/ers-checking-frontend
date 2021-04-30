@@ -15,17 +15,24 @@
  *@
 
 @import config.ApplicationConfig
+
+@this(ers_main: views.html.ers_main,
+        govukPanel: GovukPanel
+)
+
 @(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
 
 @ers_main(title = messages("ers.confirmation.page_title")) {
-	<div class="transaction-banner--complete"  id="success-message">
-			<h1 class="transaction-banner__heading" id="title">
-				@messages("ers_file_format_successful.page_title")
-			</h1>
-		<p class="transaction-banner__subheading">@Html(messages("ers_file_format_successful.banner"))</p>
-	</div>
-		<h2 class="heading-medium">@messages("ers_file_format_successful.sub_heading")</h2>
-		<p>@messages("ers_file_format_successful.instructions")</p>
-		<p><a href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@messages("ers_file_format_successful.return_to_start_page_link")</a></p>
-		<a href="https://www.gov.uk/done/employment-related-securities-files" id="finished">@messages("ers_file_format_successful.feedback")</a>&nbsp;@messages("ers_file_format_successful.feedback_time")
+    @govukPanel(Panel(
+        title = Text(messages("ers_file_format_successful.page_title")),
+        content = HtmlContent(messages("ers_file_format_successful.banner"))
+    ))
+
+    <h2 class="govuk-heading-m">@messages("ers_file_format_successful.sub_heading")</h2>
+    <p class="govuk-body">@messages("ers_file_format_successful.instructions")</p>
+    <p class="govuk-body"><a class="govuk-link" href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@messages("ers_file_format_successful.return_to_start_page_link")</a></p>
+    <p class="govuk-body">
+        <a class="govuk-link" href="https://www.gov.uk/done/employment-related-securities-files" id="finished">@messages("ers_file_format_successful.feedback")</a>
+        @messages("ers_file_format_successful.feedback_time")
+    </p>
 }

@@ -28,7 +28,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.i18n.MessagesApi
 import play.api.mvc._
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, Injecting}
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessagesApi}
 import play.twirl.api.Html
 import services.audit.AuditEvents
@@ -38,10 +38,12 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import utils.ERSUtil
+import views.html.{check_csv_file, check_file, check_file_type, checking_success, format_errors, scheme_type, select_csv_file_types, start}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait ErsTestHelper extends MockitoSugar {
+
 
 	def doc(result: Html): Document = Jsoup.parse(contentAsString(result))
 
