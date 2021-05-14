@@ -35,9 +35,10 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class CheckCsvFilesController @Inject()(authAction: AuthAction,
                                         mcc: MessagesControllerComponents,
-                                        implicit val ersUtil: ERSUtil,
-                                        implicit val appConfig: ApplicationConfig)
-                                       (implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport with BaseController {
+                                        select_csv_file_types: views.html.select_csv_file_types,
+                                        override val global_error: views.html.global_error)
+                                       (implicit ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+  extends FrontendController(mcc) with I18nSupport with BaseController {
 
   def selectCsvFilesPage(): Action[AnyContent] = authAction.async {
     implicit request =>
@@ -50,7 +51,7 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
       scheme      <- ersUtil.fetch[String](ersUtil.SCHEME_CACHE)
     } yield {
       val csvFilesList: Seq[CsvFiles] = ersUtil.getCsvFilesList(scheme)
-      Ok(views.html.select_csv_file_types(scheme, csvFilesList))
+      Ok(select_csv_file_types(scheme, csvFilesList))
     }) recover {
       case _: Throwable => getGlobalErrorPage
     }
@@ -95,7 +96,7 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
   }
 
   def createCacheData(csvFilesList: Seq[CsvFiles]): UpscanCsvFilesList = {
-    val ids = for(fileData <- csvFilesList if fileData.isSelected.contains(ersUtil.OPTION_YES)) yield {
+    val ids = for(fileData <- csvFilesList) yield {
       UpscanIds(UploadId.generate, fileData.fileId, NotStarted)
     }
     UpscanCsvFilesList(ids)

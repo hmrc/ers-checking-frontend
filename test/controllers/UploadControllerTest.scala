@@ -29,16 +29,17 @@ import play.api.http.Status
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents}
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, i18n}
 import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
+import views.html.global_error
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) with UnitSpec with ErsTestHelper with GuiceOneAppPerSuite {
+class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) with UnitSpec with ErsTestHelper with GuiceOneAppPerSuite with Injecting {
 
 	val config: Map[String, Any] = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
@@ -56,13 +57,15 @@ class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) 
 		Some(UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId.generate, uploadedSuccessfully.get))))
 	}
 	val mockStaxProcessor: StaxProcessor = mock[StaxProcessor]
+	val globalErrorView: global_error = inject[global_error]
 
-  def buildFakeUploadControllerOds(uploadRes: Boolean = true,
+
+	def buildFakeUploadControllerOds(uploadRes: Boolean = true,
 																	 processFile: Boolean = true,
 																	 formatRes: Boolean = true,
 																	 clearCacheResponse: Boolean = true
 																	): UploadController =
-		new UploadController(mockAuthAction, mockProcessODSService, mockProcessCsvService, mcc, mockErsUtil, mockAppConfig) {
+		new UploadController(mockAuthAction, mockProcessODSService, mockProcessCsvService, mcc, globalErrorView) {
 
 		override def clearErrorCache()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Boolean] =
 			Future.successful(clearCacheResponse)

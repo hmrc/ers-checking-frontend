@@ -14,29 +14,35 @@
  * limitations under the License.
  *@
 
-@import views.html.templates.spinner
+@this(
+        govukFileUpload: GovukFileUpload,
+        govukButton: GovukButton
+)
 
-@(fileType: String, formFields: Map[String, String], postTarget: Call)(implicit messages: Messages, flash: Flash)
+@(fileType: String, formFields: Map[String, String], postTarget: Call, messageKey: String)(implicit messages: Messages)
 
-<div id="uploadForm">
-  <form action="@postTarget" method="post" enctype="multipart/form-data" id="upload-file-form">
+<div id="uploadForm" class="govuk-form-group">
+    <form action=@postTarget method="post" enctype="multipart/form-data" id="upload-file-form">
 
-    @for(field <- formFields) {
-      <input type="hidden" name="@field._1" value="@field._2"/>
-    }
+        @for(field <- formFields) {
+            <input type="hidden" name="@field._1" value="@field._2"/>
+        }
 
-    <div class="js-visible mt-3 form-group form-control-wrapper">
-          <input
-            type="file"
-			id="input-file-name"
-            class="fileToUpload"
-            name="file"
-            accept="@fileType"
-          />
-    </div>
-	  <div id="csv-files-button" class="form-field form-field--submit">
-		  <button role="button" id="check-file-button" class="button">@messages("ers_check_file.check_file_button")</button>
-	  </div>
-  </form>
+        @govukFileUpload(FileUpload(
+            name = "file",
+            id = "input-file-name",
+            attributes = Map("accept" -> fileType),
+            label = Label(
+                content = Text(messages(messageKey))
+            )
+
+        ))
+
+        @govukButton(Button(
+            content = Text(messages("ers_check_file.check_file_button")),
+            attributes = Map("id" -> "check-file-button")
+        ))
+        <div class="govuk-!-display-none" id="progress-spinner"><img id="progress-spinner-img" src="@routes.Assets.versioned("images/spinner.gif")" alt="Loading ..."/></div>
+    </form>
 </div>
-@spinner()
+

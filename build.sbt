@@ -5,7 +5,7 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
 val appName = "ers-checking-frontend"
 
-lazy val plugins: Seq[Plugins] = Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin)
+lazy val plugins: Seq[Plugins] = Seq(play.sbt.PlayScala, SbtGitVersioning, SbtDistributablesPlugin)
 
 lazy val scoverageSettings: Seq[Def.Setting[_]] =
   Seq(
@@ -55,4 +55,11 @@ lazy val microservice = Project(appName, file("."))
 
 scalacOptions ++= Seq(
   "-P:silencer:pathFilters=views;routes"
+)
+
+TwirlKeys.templateImports ++= Seq(
+  "uk.gov.hmrc.govukfrontend.views.html.components._",
+  "uk.gov.hmrc.govukfrontend.views.html.helpers._",
+  "uk.gov.hmrc.hmrcfrontend.views.html.components._",
+  "uk.gov.hmrc.hmrcfrontend.views.html.helpers._"
 )

@@ -5,27 +5,30 @@ import sbt._
 object AppDependencies {
 
   val silencerVersion = "1.7.1"
+  val akkaVersion = "2.6.14"
 
   val compile: Seq[ModuleID] = Seq(
     ws,
     "uk.gov.hmrc" %% "bootstrap-play-26" % "2.3.0",
-    "uk.gov.hmrc" %% "govuk-template" % "5.61.0-play-26",
+    "uk.gov.hmrc" %% "govuk-template" % "5.66.0-play-26",
     "uk.gov.hmrc" %% "play-ui" % "8.21.0-play-26",
-    "uk.gov.hmrc" %% "domain" % "5.10.0-play-26",
+    "uk.gov.hmrc" %% "domain" % "5.11.0-play-26",
     "uk.gov.hmrc" %% "play-partials" % "7.1.0-play-26",
     "uk.gov.hmrc" %% "http-caching-client" % "9.2.0-play-26",
     "uk.gov.hmrc" %% "play-language" % "4.7.0-play-26",
-    "uk.gov.hmrc" %% "auth-client" % "3.2.0-play-26",
-    "uk.gov.hmrc" %% "tabular-data-validator" % "1.3.0",
+    "uk.gov.hmrc" %% "auth-client" % "3.3.0-play-26",
+    "uk.gov.hmrc" %% "tabular-data-validator" % "1.4.0",
     "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.22",
     "commons-io" % "commons-io" % "2.6",
     "com.lightbend.akka" %% "akka-stream-alpakka-csv" % "2.0.2",
-    "com.typesafe.akka" %% "akka-stream" % "2.6.12",
-    "com.typesafe.akka" %% "akka-slf4j" % "2.6.12",
-    "com.typesafe.akka" %% "akka-protobuf" % "2.6.12",
-    "com.typesafe.akka" %% "akka-http-spray-json" % "10.1.12",
+    "com.typesafe.akka" %% "akka-stream" % akkaVersion,
+    "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
+    "com.typesafe.akka" %% "akka-protobuf" % akkaVersion,
+    "com.typesafe.akka" %% "akka-http-spray-json" % "10.1.14",
     compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
-    "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
+    "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full,
+
+    "uk.gov.hmrc" %% "play-frontend-hmrc" % "0.61.0-play-26"
 
   )
 
@@ -38,7 +41,7 @@ object AppDependencies {
     "org.jsoup" % "jsoup" % "1.9.2",
     "com.github.tomakehurst" % "wiremock-standalone" % "2.27.2",
     "com.typesafe.play" %% "play-test" % PlayVersion.current,
-    "com.typesafe.akka" %% "akka-testkit" % "2.6.12"
+    "com.typesafe.akka" %% "akka-testkit" % akkaVersion
 
   ).map(_ % "test")
 

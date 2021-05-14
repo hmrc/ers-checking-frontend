@@ -37,16 +37,22 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
                                           upscanService: UpscanService,
                                           sessionService: SessionService,
                                           mcc: MessagesControllerComponents,
-                                          implicit val ersUtil: ERSUtil,
-                                          implicit val appConfig: ApplicationConfig
-                                          )(implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport with BaseController {
+                                          format_errors: views.html.format_errors,
+                                          start: views.html.start,
+                                          scheme_type: views.html.scheme_type,
+                                          check_file_type: views.html.check_file_type,
+                                          check_csv_file: views.html.check_csv_file,
+                                          check_file: views.html.check_file,
+                                          checking_success: views.html.checking_success,
+                                          override val global_error: views.html.global_error
+                                          )(implicit ec: ExecutionContext, ersUtil: ERSUtil, override val appConfig: ApplicationConfig) extends FrontendController(mcc) with I18nSupport with BaseController {
 
 	def startPage(): Action[AnyContent] = authAction.async { implicit request =>
     showStartPage()
   }
 
   def showStartPage()(implicit request: Request[AnyRef], messages: Messages): Future[Result] = {
-    Future.successful(Ok(views.html.start(request, messages, appConfig)))
+    Future.successful(Ok(start(request, messages, appConfig)))
   }
 
   def schemeTypePage(form: Form[CS_schemeType] = CSformMappings.schemeTypeForm): Action[AnyContent] = authAction.async {
@@ -55,7 +61,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
   }
 
   def showSchemeTypePage(form: Form[CS_schemeType])(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
-    Future(Ok(views.html.scheme_type(form)))
+    Future(Ok(scheme_type(form)))
   }
 
   def schemeTypeSelected(): Action[AnyContent] = authAction.async {
@@ -66,7 +72,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
   def showSchemeTypeSelected(implicit request: Request[AnyContent]): Future[Result] = {
     CSformMappings.schemeTypeForm.bindFromRequest.fold(
       formWithErrors => {
-        Future.successful(BadRequest(views.html.scheme_type(formWithErrors)))
+        Future.successful(BadRequest(scheme_type(formWithErrors)))
       },
       formData => {
         ersUtil.cache[String](ersUtil.SCHEME_CACHE, formData.getSchemeType).map { _ =>
@@ -87,7 +93,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
   }
 
   def showCheckFileTypePage(form: Form[CS_checkFileType])(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
-      Future.successful(Ok(views.html.check_file_type(form)))
+      Future.successful(Ok(check_file_type(form)))
   }
 
   def checkFileTypeSelected(): Action[AnyContent] = authAction.async {
@@ -98,7 +104,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
   def showCheckFileTypeSelected(implicit request: Request[AnyContent]): Future[Result] = {
     CSformMappings.checkFileTypeForm.bindFromRequest.fold(
       formWithErrors => {
-        Future.successful(BadRequest(views.html.check_file_type(formWithErrors)))
+        Future.successful(BadRequest(check_file_type(formWithErrors)))
       },
       formData => {
         ersUtil.cache[String](ersUtil.FILE_TYPE_CACHE, formData.getFileType).map { _ =>
@@ -130,7 +136,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
 			upscanResponse <- upscanService.getUpscanFormData(isCSV = true, scheme, currentCsvFile)
 		} yield {
 			val invalidChars: String = "[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]"
-			Ok(views.html.check_csv_file(scheme, invalidChars, currentCsvFile.get.fileId)(request, request.flash, messages, upscanResponse, appConfig, ersUtil))
+			Ok(check_csv_file(scheme, invalidChars, currentCsvFile.get.fileId)(request, messages, upscanResponse, appConfig, ersUtil))
 		}) recover {
 			case e: Exception =>
 				Logger.error("[CheckingServiceController][showCheckCSVFilePage]: Unable to fetch scheme. Error: " + e.getMessage)
@@ -151,7 +157,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
 			_ <- sessionService.createCallbackRecord
 		} yield {
 			val invalidChars: String = "[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]"
-			Ok(views.html.check_file(scheme, invalidChars)(request, request.flash, messages, upscanResponse, appConfig))
+			Ok(check_file(scheme, invalidChars)(request, messages, upscanResponse, appConfig))
 		}) recover {
       case e: Exception =>
 				Logger.error("[CheckingServiceController][showCheckODSFilePage] Unable to fetch scheme. Error: " + e.getMessage)
@@ -165,7 +171,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
   }
 
   def showCheckingSuccessPage()(implicit request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
-    Future.successful(Ok(views.html.checking_success(request, messages, appConfig)))
+    Future.successful(Ok(checking_success(request, messages, appConfig)))
   }
 
   def formatErrorsPage(): Action[AnyContent] = authAction.async {
@@ -181,7 +187,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
       errorMsg <- ersUtil.fetch[String](ersUtil.FORMAT_ERROR_CACHE)
       errorParams <- ersUtil.fetch[Seq[String]](ersUtil.FORMAT_ERROR_CACHE_PARAMS)
     } yield {
-      Ok(views.html.format_errors(
+      Ok(format_errors(
         fileType,
         ersUtil.getSchemeName(schemeName)._1,
         ersUtil.getSchemeName(schemeName)._2,

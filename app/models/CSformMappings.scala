@@ -43,8 +43,8 @@ object CSformMappings {
 		mapping(
 		"files" -> list(
 			mapping(
-				"fileId" -> text.verifying("no_file_error", _.nonEmpty).verifying("invalidCharacters", id => fileIdList.contains(id)),
-				"isSelected" -> optional(text.verifying("no_file_error", _.nonEmpty)))
+				"fileId" -> text.verifying("no_file_error", _.nonEmpty).verifying("invalidCharacters", id => fileIdList.contains(id))
+			)
 			(CsvFiles.apply)(CsvFiles.unapply)
 		))(List[CsvFiles])(Option[List[CsvFiles]]))
 

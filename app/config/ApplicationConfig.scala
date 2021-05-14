@@ -28,8 +28,6 @@ import scala.concurrent.duration._
 class ApplicationConfig @Inject()(config: ServicesConfig) {
 
   lazy val appName: String = config.getString("appName")
-  lazy val contactHost: String = config.getString("contact-frontend.host")
-  private val contactFormServiceIdentifier = "ERS-CHECKING"
 
   lazy val upscanProtocol: String = config.getConfString("upscan.protocol","http").toLowerCase()
   lazy val upscanInitiateHost: String = config.baseUrl("upscan")
@@ -40,18 +38,12 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
   lazy val allCsvFilesCacheRetryAmount: Int = config.getInt("retry.csv-success-cache.all-files-complete.amount")
   lazy val retryDelay: FiniteDuration = FiniteDuration(config.getString("retry.delay").toInt, "ms")
 
-  lazy val assetsPrefix: String = config.getString("govuk-tax.assets.url") + config.getString("govuk-tax.assets.version")
-
   lazy val shortLivedCacheBaseUri: String = config.baseUrl("cachable.short-lived-cache")
   lazy val shortLivedCacheDomain: String = config.getString("microservice.services.cachable.short-lived-cache.domain")
 
   lazy val languageTranslationEnabled: Boolean = config.getConfBool("features.welsh-translation", defBool = true)
   def languageMap: Map[String, Lang] = Map("english" -> Lang("en"), "cymraeg" -> Lang("cy"))
   def routeToSwitchLanguage: String => Call = (lang: String) => routes.LanguageSwitchController.switchToLanguage(lang)
-
-  lazy val reportAProblemPartialUrl = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
-  lazy val reportAProblemNonJSUrl = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
-
 
   lazy val errorCount: Int = config.getInt("errorDisplayCount")
   lazy val uploadCsvSizeLimit: Int = config.getInt("csv.uploadSizeLimit")

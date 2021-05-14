@@ -33,9 +33,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class UpscanController @Inject()(authAction: AuthAction,
                                  sessionService: SessionService,
                                  mcc: MessagesControllerComponents,
-                                 implicit val ersUtil: ERSUtil,
-                                 implicit val appConfig: ApplicationConfig
-                                )(implicit executionContext: ExecutionContext)
+                                 override val global_error: views.html.global_error
+                                )(implicit executionContext: ExecutionContext, ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
   extends FrontendController(mcc) with Retryable with I18nSupport with BaseController {
 
   def failure(): Action[AnyContent] = authAction.async { implicit request =>

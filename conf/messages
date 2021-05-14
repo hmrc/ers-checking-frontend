@@ -2,6 +2,8 @@
 # General messages
 #********************************************************************
 
+service.name = Check your ERS files
+
 ers.csop = Company Share Option Plan
 ers.emi = Enterprise Management Incentives
 ers.saye = Save As You Earn
@@ -48,6 +50,7 @@ ers_scheme_type.sip = Share Incentive Plan (SIP - Form 39)
 ers_scheme_type.other = Other (Form 42)
 ers_scheme_type.continue = Continue
 ers_scheme_type.select_scheme_type = Select the type of ERS scheme or arrangement
+
 #********************************************************************
 # File type messages
 #********************************************************************
@@ -128,16 +131,16 @@ ers_service_unavailable.para1 = The Checking Service is currently unavailable, p
 
 ers_not_authorised.page_title = Check your ERS files
 ers_not_authorised.para1 = You aren’t authorised to access ERS checking service
+ers_not_authorised.warning = Warning
 
 ers_html_error_report.report_title = {0} ({1}) error report
 ers_html_error_report.number_of_errors_sing = Showing {0} of {1} error found.
 ers_html_error_report.number_of_errors = Showing {0} of {1} errors found.
 ers_html_error_report.errors_title = Errors by {0} name (title)
-ers_html_error_report.errors_sheet =sheet
-ers_html_error_report.table_column_names = <tr><th class='column' scope='col'>Column</th><th class='row' scope='col'>Row</th><th class='errorTitle' scope='col'>Error</th></tr>
-ers_html_error_report.sheet_name = <h3 class='sheet-title'><span class='font-small'>{0}</span></h3>
-ers_html_error_report.table_row = <tr><td>{0}</td><td>{1}</td><td class='errorMsg'>{2}</td></tr>
-ers_html_error_report.sheet = {0}<table id={3}>{1}{2}</table>
+ers_html_error_report.errors_sheet = sheet
+ers_html_error_report.column = Column
+ers_html_error_report.row = Row
+ers_html_error_report.error = Error
 
 ers_pdf_error_report.csop = Company Share Option Plan
 ers_pdf_error_report.emi = Enterprise Management Incentives

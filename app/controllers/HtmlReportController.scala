@@ -28,7 +28,7 @@ import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import utils.{ERSUtil, HtmlCreator, JsonParser}
+import utils.{ERSUtil, JsonParser}
 import uk.gov.hmrc.services.validation.models.ValidationError
 
 import scala.collection.mutable.ListBuffer
@@ -37,10 +37,10 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class HtmlReportController @Inject()(authAction: AuthAction,
                                      mcc: MessagesControllerComponents,
-                                     htmlCreator: HtmlCreator,
-                                     implicit val ersUtil: ERSUtil,
-                                     implicit val appConfig: ApplicationConfig
-                                    )(implicit executionContext: ExecutionContext) extends FrontendController(mcc) with JsonParser with I18nSupport with BaseController {
+                                     html_error_report: views.html.html_error_report,
+                                     override val global_error: views.html.global_error
+                                    )(implicit executionContext: ExecutionContext, ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
+  extends FrontendController(mcc) with JsonParser with I18nSupport with BaseController {
 
   def htmlErrorReportPage(isCsv: Boolean): Action[AnyContent] = authAction.async {
       implicit request =>
@@ -88,8 +88,7 @@ class HtmlReportController @Inject()(authAction: AuthAction,
 
       val (schemeName, schemeNameShort) = scheme
 
-      val sheets: String = htmlCreator.getSheets(errorsList)(messages)
-      Ok(views.html.html_error_report(schemeName, sheets, schemeNameShort, totalErrorsCount, errorCountLong)(request, messages, appConfig, ersUtil))
+      Ok(html_error_report(schemeName, schemeNameShort, totalErrorsCount, errorCountLong, errorsList)(request, messages, appConfig, ersUtil))
     } recover {
       case e: NoSuchElementException =>
         Logger.error("Unable to display error report in HtmlReportController.showHtmlErrorReportPage. Error: " + e.getMessage, e)
