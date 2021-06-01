@@ -32,10 +32,10 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessagesApi}
 import play.twirl.api.Html
 import services.audit.AuditEvents
+import services.validation.ErsValidator
 import services.{SessionService, UpscanService}
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, EnrolmentIdentifier, Enrolments}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.SessionId
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import utils.ERSUtil
 
@@ -84,6 +84,8 @@ trait ErsTestHelper extends MockitoSugar {
 	val mockHttp: DefaultHttpClient = mock[DefaultHttpClient]
 	implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
 	implicit val mockErsUtil: ERSUtil = mock[ERSUtil]
+	val mockErsValidator: ErsValidator = mock[ErsValidator]
+	val realErsValidator: ErsValidator = new ErsValidator
 	val mockMetrics: Metrics = mock[Metrics]
 	val mockAuditEvents: AuditEvents = mock[AuditEvents]
 	val mockShortLivedCache: ERSShortLivedCache = mock[ERSShortLivedCache]

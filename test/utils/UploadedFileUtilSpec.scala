@@ -17,9 +17,9 @@
 package utils
 
 import org.scalatestplus.mockito.MockitoSugar
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 
-class UploadedFileUtilSpec extends UnitSpec with MockitoSugar {
+class UploadedFileUtilSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar {
 
   class TestUtil extends UploadedFileUtil
   val uploadedFileUtil = new TestUtil

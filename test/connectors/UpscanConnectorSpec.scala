@@ -18,17 +18,18 @@ package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import models.upscan.{PreparedUpload, Reference, UploadForm, UpscanInitiateRequest}
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UpstreamErrorResponse}
-import uk.gov.hmrc.play.test.UnitSpec
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import utils.WireMockHelper
 
-class UpscanConnectorSpec extends UnitSpec with GuiceOneAppPerSuite with MockitoSugar with WireMockHelper {
+class UpscanConnectorSpec extends WordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite with MockitoSugar with WireMockHelper {
 
 	lazy val connector: UpscanConnector = app.injector.instanceOf[UpscanConnector]
 	implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -64,7 +65,12 @@ class UpscanConnectorSpec extends UnitSpec with GuiceOneAppPerSuite with Mockito
                 .withStatus(BAD_REQUEST)
             )
         )
-        a[BadRequestException] should be thrownBy await(connector.getUpscanFormData(request))
+        val caughtException = intercept[UpstreamErrorResponse] {
+          await(connector.getUpscanFormData(request))
+        }
+
+        caughtException shouldBe a[UpstreamErrorResponse]
+        caughtException.statusCode shouldBe BAD_REQUEST
       }
 
       "upscan returns 5xx response" in {

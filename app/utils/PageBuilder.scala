@@ -18,7 +18,6 @@ package utils
 
 import controllers.routes
 import models.CsvFiles
-import play.api.i18n.Messages
 
 trait PageBuilder {
 
@@ -64,51 +63,51 @@ trait PageBuilder {
   val SIP_CSV_FILES: Int = 2
   val OTHER_CSV_FILES: Int = 9
 
-	val CSVFilesList = Map(
-		(
-			SCHEME_EMI, List(
-			CsvFiles("EMI_ADJUSTMENTS"),
-			CsvFiles("EMI_REPLACED"),
-			CsvFiles("EMI_RCL"),
-			CsvFiles("EMI_NONTAXABLE"),
-			CsvFiles("EMI_TAXABLE")
-		)),
-		(
-			SCHEME_CSOP, List(
-			CsvFiles("CSOP_GRANTED"),
-			CsvFiles("CSOP_RCL"),
-			CsvFiles("CSOP_Exercised")
-		)),
-		(
-			SCHEME_OTHER, List(
-			CsvFiles("OTHER_GRANTS"),
-			CsvFiles("OTHER_OPTIONS"),
-			CsvFiles("OTHER_ACQUISITION"),
-			CsvFiles("OTHER_RESTRICTED"),
-			CsvFiles("OTHER_BENEFITS"),
-			CsvFiles("OTHER_CONVERTABLE"),
-			CsvFiles("OTHER_NOTIONAL"),
-			CsvFiles("OTHER_ENCHANCEMENT"),
-			CsvFiles("OTHER_SOLD")
-		)),
-		(
-			SCHEME_SAYE, List(
-			CsvFiles("SAYE_GRANTED"),
-			CsvFiles("SAYE_RCL"),
-			CsvFiles("SAYE_EXERCISED")
-		)),
-		(
-			SCHEME_SIP, List(
-			CsvFiles("SIP_AWARDS"),
-			CsvFiles("SIP_OUT")
-		))
-	)
+  val CSVFilesList = Map(
+    (
+      SCHEME_EMI, List(
+      CsvFiles("EMI_ADJUSTMENTS"),
+      CsvFiles("EMI_REPLACED"),
+      CsvFiles("EMI_RCL"),
+      CsvFiles("EMI_NONTAXABLE"),
+      CsvFiles("EMI_TAXABLE")
+    )),
+    (
+      SCHEME_CSOP, List(
+      CsvFiles("CSOP_GRANTED"),
+      CsvFiles("CSOP_RCL"),
+      CsvFiles("CSOP_Exercised")
+    )),
+    (
+      SCHEME_OTHER, List(
+      CsvFiles("OTHER_GRANTS"),
+      CsvFiles("OTHER_OPTIONS"),
+      CsvFiles("OTHER_ACQUISITION"),
+      CsvFiles("OTHER_RESTRICTED"),
+      CsvFiles("OTHER_BENEFITS"),
+      CsvFiles("OTHER_CONVERTABLE"),
+      CsvFiles("OTHER_NOTIONAL"),
+      CsvFiles("OTHER_ENCHANCEMENT"),
+      CsvFiles("OTHER_SOLD")
+    )),
+    (
+      SCHEME_SAYE, List(
+      CsvFiles("SAYE_GRANTED"),
+      CsvFiles("SAYE_RCL"),
+      CsvFiles("SAYE_EXERCISED")
+    )),
+    (
+      SCHEME_SIP, List(
+      CsvFiles("SIP_AWARDS"),
+      CsvFiles("SIP_OUT")
+    ))
+  )
 
-	def getCsvFilesList(scheme: String): Seq[CsvFiles] = {
-		CSVFilesList.getOrElse(scheme.toLowerCase, Seq[CsvFiles]())
-	}
+  def getCsvFilesList(scheme: String): Seq[CsvFiles] = {
+    CSVFilesList.getOrElse(scheme.toLowerCase, Seq[CsvFiles]())
+  }
 
-  def getPageElement(scheme: String, pageId: String, element: String)(implicit messages: Messages) : String = {
+  def getPageElement(scheme: String, pageId: String, element: String): String = {
     scheme match {
       case SCHEME_CSOP => pageId + MSG_CSOP + element
       case SCHEME_EMI => pageId + MSG_EMI + element
@@ -120,7 +119,7 @@ trait PageBuilder {
   }
 
 
-  def getPageBackLink(fileType: String) : String = {
+  def getPageBackLink(fileType: String): String = {
     fileType match {
       case OPTION_ODS => routes.CheckingServiceController.checkODSFilePage().toString
       case OPTION_CSV => routes.CheckingServiceController.checkCSVFilePage().toString

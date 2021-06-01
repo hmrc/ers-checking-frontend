@@ -18,14 +18,14 @@ package controllers.auth
 
 import config.ApplicationConfig
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
+import play.api.Logging
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import uk.gov.hmrc.domain.EmpRef
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,7 +37,7 @@ trait AuthIdentifierAction extends ActionBuilder[RequestWithOptionalEmpRef, AnyC
 class AuthAction @Inject()(override val authConnector: AuthConnector,
                            appConfig: ApplicationConfig,
                            val parser: BodyParsers.Default
-                          )(implicit val executionContext: ExecutionContext) extends AuthorisedFunctions with AuthIdentifierAction {
+                          )(implicit val executionContext: ExecutionContext) extends AuthorisedFunctions with AuthIdentifierAction with Logging {
 
   val origin: String = "ers-checking-frontend"
 
@@ -48,7 +48,7 @@ class AuthAction @Inject()(override val authConnector: AuthConnector,
 
   override def invokeBlock[A](request: Request[A], block: RequestWithOptionalEmpRef[A] => Future[Result]): Future[Result] = {
     implicit val hc: HeaderCarrier =
-      HeaderCarrierConverter.fromHeadersAndSessionAndRequest(request.headers, Some(request.session), Some(request))
+      HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
     def getIdentifierValue(identifiers: Seq[EnrolmentIdentifier])(key: String): Option[String] = identifiers.collectFirst{
       case EnrolmentIdentifier(`key`, value) => value
@@ -71,10 +71,10 @@ class AuthAction @Inject()(override val authConnector: AuthConnector,
         block(RequestWithOptionalEmpRef(request, optionalEmpRef))
     } recover {
       case er: NoActiveSession =>
-        Logger.warn(s"[AuthAction][invokeBlock] no active session for uri: ${request.uri} with message: ${er.getMessage}", er)
+        logger.warn(s"[AuthAction][invokeBlock] no active session for uri: ${request.uri} with message: ${er.getMessage}", er)
         Redirect(appConfig.signIn, loginParams)
       case er: AuthorisationException =>
-        Logger.warn(s"[AuthAction][invokeBlock] Auth exception: ${er.getMessage} for  uri ${request.uri}")
+        logger.warn(s"[AuthAction][invokeBlock] Auth exception: ${er.getMessage} for  uri ${request.uri}")
         Redirect(controllers.routes.AuthorisationController.notAuthorised().url)
     }
   }

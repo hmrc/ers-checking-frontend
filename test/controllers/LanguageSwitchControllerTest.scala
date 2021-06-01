@@ -20,10 +20,10 @@ import play.api.mvc.{ControllerComponents, Cookie, Cookies}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.language.LanguageUtils
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 
 
-class LanguageSwitchControllerTest extends UnitSpec with GuiceOneAppPerSuite {
+class LanguageSwitchControllerTest extends WordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite {
   val controllerComponents: ControllerComponents = app.injector.instanceOf[ControllerComponents]
   val langUtils : LanguageUtils = app.injector.instanceOf[LanguageUtils]
   val testLanguageSwitchController = new LanguageSwitchController(langUtils : LanguageUtils, controllerComponents : ControllerComponents)

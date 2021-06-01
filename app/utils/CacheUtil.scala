@@ -28,6 +28,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait CacheUtil {
   val shortLivedCache: ERSShortLivedCache
+  val logger: Logger
 
   // Cache Ids
   val SCHEME_CACHE: String = "scheme-type"
@@ -40,52 +41,52 @@ trait CacheUtil {
   val FORMAT_ERROR_CACHE_PARAMS: String = "format_error_params"
   val FORMAT_ERROR_EXTENDED_CACHE: String = "format_extended_error"
   val FILE_NAME_CACHE: String = "file-name"
-	val CSV_FILES_UPLOAD: String = "csv-files-upload"
+  val CSV_FILES_UPLOAD: String = "csv-files-upload"
 
-  def cache[T](key:String, body:T)
-              (implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[_]): Future[CacheMap] = {
+  def cache[T](key: String, body: T)
+              (implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[CacheMap] = {
     shortLivedCache.cache[T](getCacheId, key, body)
   }
 
-  def cache[T](key:String, body:T, cacheId : String)
-              (implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[_]): Future[CacheMap] = {
+  def cache[T](key: String, body: T, cacheId: String)
+              (implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[CacheMap] = {
     shortLivedCache.cache[T](cacheId, key, body)
   }
 
-	def remove(cacheId: String)(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[HttpResponse] = {
-		shortLivedCache.remove(cacheId)
-	}
+  def remove(cacheId: String)(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[HttpResponse] = {
+    shortLivedCache.remove(cacheId)
+  }
 
-	@throws(classOf[NoSuchElementException])
-  def fetch[T](key:String)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[AnyRef]): Future[T] = {
-    shortLivedCache.fetchAndGetEntry[JsValue](getCacheId, key).map{ res =>
+  @throws(classOf[NoSuchElementException])
+  def fetch[T](key: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[T] = {
+    shortLivedCache.fetchAndGetEntry[JsValue](getCacheId, key).map { res =>
       res.get.as[T]
-    }recover{
+    } recover {
       case e: NoSuchElementException =>
-        Logger.warn(s"[CacheUtil][fetch] fetch failed to get key $key with exception $e, timestamp: ${java.time.LocalTime.now()}.")
+        logger.warn(s"[CacheUtil][fetch] fetch failed to get key $key with exception $e, timestamp: ${java.time.LocalTime.now()}.")
         throw new NoSuchElementException
-      case _ : Throwable =>
-        Logger.error(s"[CacheUtil][fetch] fetch failed to get key $key for ${hc.sessionId} with exception, timestamp: ${java.time.LocalTime.now()}.")
+      case _: Throwable =>
+        logger.error(s"[CacheUtil][fetch] fetch failed to get key $key for ${hc.sessionId} with exception, timestamp: ${java.time.LocalTime.now()}.")
         throw new Exception
     }
   }
 
   @throws(classOf[NoSuchElementException])
-  def fetch[T](key:String, cacheId: String)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[_]): Future[T] = {
-    shortLivedCache.fetchAndGetEntry[JsValue](cacheId, key).map{ res =>
+  def fetch[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[T] = {
+    shortLivedCache.fetchAndGetEntry[JsValue](cacheId, key).map { res =>
       res.get.as[T]
-    }recover{
-      case e:NoSuchElementException =>
-        Logger.warn(s"[CacheUtil][fetch] fetch with 2 params failed to get key [$key] for cacheId [$cacheId] with exception - $e")
+    } recover {
+      case e: NoSuchElementException =>
+        logger.warn(s"[CacheUtil][fetch] fetch with 2 params failed to get key [$key] for cacheId [$cacheId] with exception - $e")
         throw new NoSuchElementException
-      case t : Throwable =>
-        Logger.error(s"[CacheUtil][fetch] fetch with 2 params failed to get key [$key] for cacheId [$cacheId] with exception - $t")
+      case t: Throwable =>
+        logger.error(s"[CacheUtil][fetch] fetch with 2 params failed to get key [$key] for cacheId [$cacheId] with exception - $t")
         throw new Exception
     }
   }
 
   @throws(classOf[NoSuchElementException])
-  def fetchAll()(implicit hc:HeaderCarrier, ec:ExecutionContext, request: Request[AnyRef]): Future[CacheMap] = {
+  def fetchAll()(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[AnyRef]): Future[CacheMap] = {
 
     shortLivedCache.fetch(getCacheId).map { res =>
       try {
@@ -94,24 +95,24 @@ trait CacheUtil {
 
       } catch {
         case e: NoSuchElementException =>
-          Logger.warn(s"[CacheUtil][fetchAll] failed to get all keys with exception. " +
+          logger.warn(s"[CacheUtil][fetchAll] failed to get all keys with exception. " +
             s"Method: ${request.method} req: ${request.path}, param: ${request.rawQueryString}", e)
 
           throw new NoSuchElementException
         case t: Throwable =>
-          Logger.error(s"[CacheUtil][fetchAll] failed to get all keys with exception. " +
+          logger.error(s"[CacheUtil][fetchAll] failed to get all keys with exception. " +
             s"Method: ${request.method} req: ${request.path}, param: ${request.rawQueryString}", t)
           throw new Exception
       }
     } recover {
-      case e:NoSuchElementException =>
-        Logger.error(s"[CacheUtil][fetchAll] failed to get all keys with " +
+      case e: NoSuchElementException =>
+        logger.error(s"[CacheUtil][fetchAll] failed to get all keys with " +
           s"exception ${e.getMessage} method: ${request.method}  req: ${request.path}, param: ${request.rawQueryString}", e)
         throw new Exception
     }
   }
 
-	def getCacheId (implicit hc: HeaderCarrier): String = {
+  def getCacheId(implicit hc: HeaderCarrier): String = {
     hc.sessionId.getOrElse(throw new RuntimeException("")).value
   }
 }

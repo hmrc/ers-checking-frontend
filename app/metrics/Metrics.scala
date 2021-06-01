@@ -16,12 +16,12 @@
 
 package metrics
 
+import com.codahale.metrics.MetricRegistry
+import play.api.Logging
+
 import java.util.concurrent.TimeUnit
 
-import com.codahale.metrics.MetricRegistry
-import play.api.Logger
-
-class Metrics {
+class Metrics extends Logging {
 
   lazy val registry: MetricRegistry = new MetricRegistry
 
@@ -29,6 +29,6 @@ class Metrics {
     try {
       registry.timer("data-iterator-time").update(diff, unit)
     } catch {
-      case t: Throwable => Logger.warn("[Metrics][dataIteratorTimer] Unable to initialise MetricRegistry, timer will not be created.", t)
+      case t: Throwable => logger.warn("[Metrics][dataIteratorTimer] Unable to initialise MetricRegistry, timer will not be created.", t)
     }
 }

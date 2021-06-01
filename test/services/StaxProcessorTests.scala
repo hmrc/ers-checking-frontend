@@ -36,7 +36,7 @@ class StaxProcessorTests extends PlaySpec with CSOPStaxIntegrationTestData {
     "say that the table name is CSOP_OptionsGranted_V3" in {
       val inputXml = xmlHeader + documentHeader + simpleXml.toString() + documentHeaderClosingTag
       val processor = new StaxProcessor(new ByteArrayInputStream(inputXml.getBytes("utf-8")))
-      val hasnext = processor.hasNext
+      processor.hasNext
       processor.next() must equal("CSOP_OptionsGranted_V3")
     }
 
@@ -57,7 +57,7 @@ class StaxProcessorTests extends PlaySpec with CSOPStaxIntegrationTestData {
       processor.hasNext
       processor.next
 
-      val nextTableName = processor.hasNext
+      processor.hasNext
       processor.next() must equal("table2")
     }
 

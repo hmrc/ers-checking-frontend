@@ -34,7 +34,7 @@ import play.api.test.Injecting
 import play.api.{Application, i18n}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 import utils.ERSUtil
 import views.html.{global_error, html_error_report}
@@ -42,7 +42,7 @@ import views.html.{global_error, html_error_report}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
-class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with ErsTestHelper with Injecting {
+class HtmlReportControllerTest extends WordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite with ErsTestHelper with Injecting {
 
   val config: Map[String, Any] = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
@@ -91,7 +91,7 @@ class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with Er
       data += ValidationError(Cell("D",FIVE,"abc"),"002", "error.2", "This entry must be within the specified number range.")
       data += ValidationError(Cell("F",ELEVEN,"abc"),"003", "error.3", "This entry must contain 35 characters or less.")
 
-      override def cache[T](key:String, body:T)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[_]) = {
+      override def cache[T](key:String, body:T)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T]) = {
         Future.successful(null)
       }
 
@@ -137,7 +137,7 @@ class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with Er
       val controllerUnderTest = buildFakeHtmlReportController()
       val res: Future[Result] = controllerUnderTest.showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"), hc, testMessages)
       res.map { result =>
-        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(request, testMessages))}
+        result shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request, testMessages)))}
     }
   }
 
@@ -173,7 +173,7 @@ class HtmlReportControllerTest extends UnitSpec with GuiceOneAppPerSuite with Er
       ))
 
       val result = buildFakeHtmlReportController().csvExtractErrors(Seq(uploadId), cacheMapWithErrors)
-      result shouldBe (errorList, 1, 1)
+      result shouldBe ((errorList, 1, 1))
     }
   }
 }

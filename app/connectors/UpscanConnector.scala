@@ -17,12 +17,12 @@
 package connectors
 
 import config.ApplicationConfig
+
 import javax.inject.{Inject, Singleton}
 import models.upscan.{PreparedUpload, UpscanInitiateRequest, UpscanInitiateResponse}
 import play.api.http.HeaderNames
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
-
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

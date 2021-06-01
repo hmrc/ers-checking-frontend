@@ -17,9 +17,9 @@
 package services
 
 import services.besIntegrationTestData.BESIntegrationTestData
-import headers.HeaderData
+import services.headers.HeaderData
+
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.Future
 import scala.xml.Elem
 
 object XMLTestData extends BESIntegrationTestData with HeaderData{

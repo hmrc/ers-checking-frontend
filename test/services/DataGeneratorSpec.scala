@@ -23,19 +23,20 @@ import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.mvc.DefaultMessagesControllerComponents
 import services.ERSTemplatesInfo._
 import services.headers.HeaderData
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.WithFakeApplication
 import uk.gov.hmrc.services.validation.DataValidator
+import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 import utils.ParserUtil
 
 import scala.util.Try
 
-class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHelper with HeaderData {
+class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ErsTestHelper with HeaderData {
 
   lazy val mockParserUtil: ParserUtil = mock[ParserUtil]
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication)
@@ -43,7 +44,8 @@ class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHe
   lazy val testParserUtil: ParserUtil = fakeApplication.injector.instanceOf[ParserUtil]
   lazy val testErsValidationConfigs: ERSValidationConfigs = fakeApplication.injector.instanceOf[ERSValidationConfigs]
 
-  class DataGeneratorObj(scheme: String) extends DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, testErsValidationConfigs, mockErsUtil){
+  class DataGeneratorObj(scheme: String) extends DataGenerator(mockAuditEvents, mockMetrics,
+    testParserUtil, testErsValidationConfigs, mockErsUtil, mockErsValidator){
     when(mockErsUtil.getSchemeName(any())).thenReturn((s"ers_pdf_error_report.${scheme.toLowerCase}", scheme))
   }
 
@@ -127,8 +129,8 @@ class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHe
 
     "identifyAndDefineSheet with correct scheme type" in new DataGeneratorObj("EMI") {
       val hc: HeaderCarrier = HeaderCarrier()
-      identifyAndDefineSheet("EMI40_Adjustments_V3","emi")(hc,Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages]) must be ("EMI40_Adjustments_V3")
-      val result: Try[String] = Try(identifyAndDefineSheet("EMI40_Adjustments","emi")(hc,Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages]))
+      identifyAndDefineSheet("EMI40_Adjustments_V3","emi")(hc, implicitly[Messages]) must be ("EMI40_Adjustments_V3")
+      val result: Try[String] = Try(identifyAndDefineSheet("EMI40_Adjustments","emi")(hc, implicitly[Messages]))
       result.isFailure must be (true)
     }
 
@@ -138,7 +140,7 @@ class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHe
 
       val hc: HeaderCarrier = HeaderCarrier()
       val invalidSheet: ERSFileProcessingException = intercept[ERSFileProcessingException]{
-        identifyAndDefineSheet("CSOP_OptionsExercised_V3","emi")(hc,Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
+        identifyAndDefineSheet("CSOP_OptionsExercised_V3","emi")(hc, implicitly[Messages])
       }
       invalidSheet.message mustBe "ers.exceptions.dataParser.incorrectSchemeType"
       invalidSheet.optionalParams mustBe Seq("a CSOP", "an EMI", "CSOP_OptionsExercised_V3")
@@ -181,16 +183,29 @@ class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHe
     }
 
     "collect errors in the first sheet of EMI" in new DataGeneratorObj("EMI") {
-      val result = getErrors(XMLTestData.getInvalidEMIAdjustmentsTemplate,"emi","")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
+      when(mockErsValidator.validateRow(any())(any(), any()))
+        .thenReturn(Some(List(ValidationError(Cell("A", 1, "badValue"), "rule", "error", "errorMessage"))))
+        .thenReturn(None)
+      val result = getErrors(XMLTestData.getInvalidEMIAdjustmentsTemplate,"emi","")(
+        hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
       result.head.errors.size mustBe 1
     }
 
     "collect errors in second sheet of EMI" in new DataGeneratorObj("EMI") {
+      when(mockErsValidator.validateRow(any())(any(), any()))
+        .thenReturn(None)
+        .thenReturn(Some(List(
+            ValidationError(Cell("A", 1, "badValue"), "rule", "error", "errorMessage")
+          )))
+        .thenReturn(None)
       val result = getErrors(XMLTestData.getEMIAdjustmentsTemplate ++ XMLTestData.getInvalidEMIReplacedTemplate,"emi","")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
       result(1).errors.size mustBe 1
     }
 
     "expand repeated rows and report correct error row" in new DataGeneratorObj("EMI") {
+      when(mockErsValidator.validateRow(any())(any(), any()))
+        .thenReturn(Some(List(ValidationError(Cell("A", 13, "badValue"), "rule", "error", "errorMessage"))))
+        .thenReturn(None)
       val result = getErrors(XMLTestData.getInvalidEMIWithRepeats,"emi","")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
       result.head.errors.size mustBe 1
       result.head.errors.head.cell.row mustBe 13
@@ -200,7 +215,7 @@ class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHe
 
   "setValidatorCsv" must {
     val mockErsValidationConfigs: ERSValidationConfigs = mock[ERSValidationConfigs]
-    class DataGeneratorCsv extends DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, mockErsValidationConfigs, mockErsUtil)
+    class DataGeneratorCsv extends DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, mockErsValidationConfigs, mockErsUtil, mockErsValidator)
 
     "return a Right with the validator when receiving happy response from tabular-data-validator" in new DataGeneratorCsv {
       val returnValidator: DataValidator = mock[DataValidator]
@@ -211,7 +226,7 @@ class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHe
 
     "return a Failure with the exception when receiving an exception" in {
       val thrownException = new RuntimeException("this is bad")
-      val testDataGen = new DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, mockErsValidationConfigs, mockErsUtil)
+      val testDataGen = new DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, mockErsValidationConfigs, mockErsUtil, mockErsValidator)
       when(mockErsValidationConfigs.getValidator(any())).thenThrow(thrownException)
       val failedValue: Either[Throwable, DataValidator] = testDataGen.setValidatorCsv("CSOP_OptionsGranted_V3")
 
@@ -231,7 +246,7 @@ class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHe
         .auditRunTimeError(
           ArgumentMatchers.eq(thrownException),
           ArgumentMatchers.eq("Could not set the validator"),
-          ArgumentMatchers.eq("CSOP_OptionsGranted_V3"))(any(), any(), any())
+          ArgumentMatchers.eq("CSOP_OptionsGranted_V3"))(any(), any())
     }
   }
 
@@ -242,7 +257,7 @@ class DataGeneratorSpec extends PlaySpec with WithFakeApplication with ErsTestHe
 
     "return Left with a processing exception if given invalid input" in {
       when(mockErsUtil.withArticle(any())).thenReturn("ersUtilReturn")
-      val testDataGen: DataGenerator = new DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, testErsValidationConfigs, mockErsUtil)
+      val testDataGen: DataGenerator = new DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, testErsValidationConfigs, mockErsUtil, mockErsValidator)
 
       val failedValue: Either[Throwable, String] = testDataGen
         .identifyAndDefineSheetCsv((SheetInfo("differentInput",1,"aSheetName","","",List("")), "SOMEINPUT"))

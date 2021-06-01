@@ -29,11 +29,11 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.SessionService
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 
 import scala.concurrent.Future
 
-class UpscanCallbackControllerSpec extends UnitSpec with ErsTestHelper
+class UpscanCallbackControllerSpec extends WordSpecLike with Matchers with OptionValues with ErsTestHelper
                                                     with GuiceOneAppPerSuite
                                                     with BeforeAndAfterEach {
 
@@ -72,13 +72,13 @@ class UpscanCallbackControllerSpec extends UnitSpec with ErsTestHelper
         val upscanId = UpscanIds(uploadId, "fileId", uploadedSuccessfully)
 
         when(mockSessionService.ersUtil).thenReturn(mockErsUtil)
-        when(mockErsUtil.fetch[UpscanIds](any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(upscanId))
-        when(mockErsUtil.cache(any(), any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(CacheMap("id", Map())))
+        when(mockErsUtil.fetch[UpscanIds](any(), any())(any(), any(), any())).thenReturn(Future.successful(upscanId))
+        when(mockErsUtil.cache(any(), any(), any())(any(), any(), any())).thenReturn(Future.successful(CacheMap("id", Map())))
 
         val result = upscanCallbackController.callbackCsv(uploadId, sessionId)(request(Json.toJson(readyCallback)))
         status(result) shouldBe OK
-        verify(mockErsUtil, times(1)).fetch[UpscanIds](any(), any())(any(), any(), any(), any())
-        verify(mockErsUtil, times(1)).cache(any(), any(), any())(any(), any(), any(), any())
+        verify(mockErsUtil, times(1)).fetch[UpscanIds](any(), any())(any(), any(), any())
+        verify(mockErsUtil, times(1)).cache(any(), any(), any())(any(), any(), any())
       }
     }
 
@@ -87,14 +87,14 @@ class UpscanCallbackControllerSpec extends UnitSpec with ErsTestHelper
         val upscanId = UpscanIds(uploadId, "fileId", Failed)
 
         when(mockSessionService.ersUtil).thenReturn(mockErsUtil)
-        when(mockErsUtil.fetch[UpscanIds](any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(upscanId))
-        when(mockErsUtil.cache(any(), any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(CacheMap("id", Map())))
+        when(mockErsUtil.fetch[UpscanIds](any(), any())(any(), any(), any())).thenReturn(Future.successful(upscanId))
+        when(mockErsUtil.cache(any(), any(), any())(any(), any(), any())).thenReturn(Future.successful(CacheMap("id", Map())))
 
         val result = upscanCallbackController.callbackCsv(uploadId, sessionId)(request(Json.toJson(failedCallback)))
 
         status(result) shouldBe OK
-        verify(mockErsUtil, times(1)).fetch[UpscanIds](any(), any())(any(), any(), any(), any())
-        verify(mockErsUtil, times(1)).cache(any(), any(), any())(any(), any(), any(), any())
+        verify(mockErsUtil, times(1)).fetch[UpscanIds](any(), any())(any(), any(), any())
+        verify(mockErsUtil, times(1)).cache(any(), any(), any())(any(), any(), any())
       }
     }
 
@@ -103,25 +103,25 @@ class UpscanCallbackControllerSpec extends UnitSpec with ErsTestHelper
         val body = UpscanFailedCallback(Reference("ref"), ErrorDetails("failed", "message"))
 
         when(mockSessionService.ersUtil).thenReturn(mockErsUtil)
-        when(mockErsUtil.fetch[UpscanIds](any(), any())(any(), any(), any(), any())).thenReturn(Future.failed(new Exception("Test Exception")))
+        when(mockErsUtil.fetch[UpscanIds](any(), any())(any(), any(), any())).thenReturn(Future.failed(new Exception("Test Exception")))
 
-        val result = await(upscanCallbackController.callbackCsv(uploadId, sessionId)(request(Json.toJson(body))))
+        val result = upscanCallbackController.callbackCsv(uploadId, sessionId)(request(Json.toJson(body)))
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockErsUtil, times(1)).fetch[UpscanIds](any(), any())(any(), any(), any(), any())
+        verify(mockErsUtil, times(1)).fetch[UpscanIds](any(), any())(any(), any(), any())
       }
     }
 
     "return a BadRequest" when {
       "callback data is not in the correct format" in {
         val jsonBody = Json.parse("""{"key":"value"}""")
-        val result = await(upscanCallbackController.callbackCsv(uploadId, sessionId)(request(jsonBody)))
+        val result = upscanCallbackController.callbackCsv(uploadId, sessionId)(request(jsonBody))
 
         when(mockSessionService.ersUtil).thenReturn(mockErsUtil)
 
         status(result) shouldBe BAD_REQUEST
-        verify(mockErsUtil, never()).fetch[UpscanIds](any(), any())(any(), any(), any(), any())
-        verify(mockErsUtil, never()).cache(any(), any(), any())(any(), any(), any(), any())
+        verify(mockErsUtil, never()).fetch[UpscanIds](any(), any())(any(), any(), any())
+        verify(mockErsUtil, never()).cache(any(), any(), any())(any(), any(), any())
       }
     }
   }
@@ -130,39 +130,39 @@ class UpscanCallbackControllerSpec extends UnitSpec with ErsTestHelper
 
     "update callback" when {
       "Upload status is UpscanReadyCallback" in {
-        when(mockSessionService.updateCallbackRecord(any())(any(), any(), any())).thenReturn(Future.successful(mock[CacheMap]))
+        when(mockSessionService.updateCallbackRecord(any())(any(), any())).thenReturn(Future.successful(mock[CacheMap]))
 
         val result = upscanCallbackController.callbackOds(sessionId)(request(Json.toJson(readyCallback)))
         status(result) shouldBe OK
-        verify(mockSessionService, times(1)).updateCallbackRecord(any())(any(), any(), any())
+        verify(mockSessionService, times(1)).updateCallbackRecord(any())(any(), any())
       }
 
       "Upload status is failed" in {
-        when(mockSessionService.updateCallbackRecord(any())(any(), any(), any())).thenReturn(Future.successful(mock[CacheMap]))
+        when(mockSessionService.updateCallbackRecord(any())(any(), any())).thenReturn(Future.successful(mock[CacheMap]))
         val result = upscanCallbackController.callbackOds(sessionId)(request(Json.toJson(failedCallback)))
 
         status(result) shouldBe OK
-        verify(mockSessionService, times(1)).updateCallbackRecord(any())(any(), any(), any())
+        verify(mockSessionService, times(1)).updateCallbackRecord(any())(any(), any())
       }
     }
 
     "return InternalServerError" when {
       "updating the cache fails" in {
-        when(mockSessionService.updateCallbackRecord(any())(any(), any(), any())).thenReturn(Future.failed(new Exception("Test exception")))
-        val result = await(upscanCallbackController.callbackOds(sessionId)(request(Json.toJson(readyCallback))))
+        when(mockSessionService.updateCallbackRecord(any())(any(), any())).thenReturn(Future.failed(new Exception("Test exception")))
+        val result = upscanCallbackController.callbackOds(sessionId)(request(Json.toJson(readyCallback)))
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockSessionService, times(1)).updateCallbackRecord(any())(any(), any(), any())
+        verify(mockSessionService, times(1)).updateCallbackRecord(any())(any(), any())
       }
     }
 
     "return a BadRequest" when {
       "callback data is not in the correct format" in {
         val jsonBody = Json.parse("""{"key":"value"}""")
-        val result = await(upscanCallbackController.callbackOds(sessionId)(request(jsonBody)))
+        val result = upscanCallbackController.callbackOds(sessionId)(request(jsonBody))
 
         status(result) shouldBe BAD_REQUEST
-        verify(mockSessionService, never()).updateCallbackRecord(any())(any(), any(), any())
+        verify(mockSessionService, never()).updateCallbackRecord(any())(any(), any())
       }
     }
   }

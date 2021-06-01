@@ -17,19 +17,19 @@
 package controllers
 
 import config.ApplicationConfig
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Play.materializer
 import play.api.mvc.MessagesControllerComponents
+import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout}
 import play.api.test.{FakeRequest, Injecting}
 import play.mvc.Http.Status
-import uk.gov.hmrc.play.test.UnitSpec
 import views.html.not_authorised
 
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
-
-class AuthorisationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with MockitoSugar with Injecting {
+class AuthorisationControllerSpec extends WordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite
+  with MockitoSugar with Injecting with ScalaFutures {
   val controllerComponents: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
   val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
   val view: not_authorised = inject[not_authorised]
@@ -38,10 +38,10 @@ class AuthorisationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
 
   "AuthorisationController" should {
     "call notAuthorised" in {
-      val result = Await.result(authController.notAuthorised.apply(FakeRequest()), Duration.Inf)
+      val result = authController.notAuthorised.apply(FakeRequest())
 
-      result.header.status shouldBe Status.UNAUTHORIZED
-      assert(result.body.consumeData.utf8String.contains("You aren’t authorised to access ERS checking service"))
+      result.futureValue.header.status shouldBe Status.UNAUTHORIZED
+      assert(contentAsString(result) contains "You aren’t authorised to access ERS checking service")
     }
   }
 }

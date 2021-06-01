@@ -23,6 +23,7 @@ import models.{ERSFileProcessingException, SheetErrors}
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.MessagesImpl
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -30,7 +31,7 @@ import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.{Application, i18n}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import uk.gov.hmrc.services.validation.models.ValidationError
 import utils.{ParserUtil, UploadedFileUtil}
 
@@ -39,7 +40,7 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class ProcessODSServiceSpec extends UnitSpec with ErsTestHelper with GuiceOneAppPerSuite {
+class ProcessODSServiceSpec extends WordSpecLike with Matchers with OptionValues with ErsTestHelper with GuiceOneAppPerSuite with ScalaFutures {
 
   val mockUploadedFileUtil: UploadedFileUtil = mock[UploadedFileUtil]
   val mockDataGenerator: DataGenerator = mock[DataGenerator]
@@ -64,7 +65,7 @@ class ProcessODSServiceSpec extends UnitSpec with ErsTestHelper with GuiceOneApp
     def buildProcessODSService(checkODSFileTypeResult: Boolean = true, isValid: Boolean = true): ProcessODSService = {
       lazy val result = if(isValid) Future.successful(Success(true)) else Future.successful(Success(false))
       new ProcessODSService(mockUploadedFileUtil, mockParserUtil, mockDataGenerator, mockErsUtil){
-        when(mockParserUtil.isFileValid(any(), any())(any(), any())).thenReturn(result)
+        when(mockParserUtil.isFileValid(any(), any())(any())).thenReturn(result)
         when(mockUploadedFileUtil.checkODSFileType(anyString())).thenReturn(checkODSFileTypeResult)
       }
     }
@@ -73,35 +74,37 @@ class ProcessODSServiceSpec extends UnitSpec with ErsTestHelper with GuiceOneApp
 
     "return false if the file has validation errors" in {
       when(mockDataGenerator.getErrors(any(), any(), any())(any(), any(), any())).thenReturn(sheetErrors)
-      when(mockErsUtil.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any(), any(), any()))
+      when(mockErsUtil.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any(), any()))
         .thenReturn(Future.successful(CacheMap("id", Map())))
 
-      await(buildProcessODSService(isValid = false).performODSUpload("testFileName", mockStaxProcessor)) shouldBe Success(false)
+      buildProcessODSService(isValid = false).performODSUpload("testFileName", mockStaxProcessor).futureValue shouldBe Success(false)
     }
 
     "return true if the file doesn't have any errors" in {
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
       when(mockDataGenerator.getErrors(any(), any(), any())(any(), any(), any())).thenReturn(emptyErrors)
-      when(mockErsUtil.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any(), any(), any()))
+      when(mockErsUtil.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any(), any()))
         .thenReturn(Future.successful(CacheMap("id", Map())))
 
-      await(buildProcessODSService().performODSUpload("testFileName", mockStaxProcessor)) shouldBe Success(true)
+      buildProcessODSService().performODSUpload("testFileName", mockStaxProcessor).futureValue shouldBe Success(true)
     }
 
     "return a failure if nothing was found in the cache" in {
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
       when(mockDataGenerator.getErrors(any(), any(), any())(any(), any(), any())).thenReturn(emptyErrors)
-      when(mockErsUtil.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any(), any(), any()))
+      when(mockErsUtil.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any(), any()))
         .thenReturn(Future.failed(new NoSuchElementException))
 
-      await(buildProcessODSService().performODSUpload("testFileName", mockStaxProcessor)).toString shouldBe Failure(new NoSuchElementException).toString
+      val result = buildProcessODSService().performODSUpload("testFileName", mockStaxProcessor).futureValue
+      assert(result.isFailure)
+      result.failed.get shouldBe a[NoSuchElementException]
     }
 
     "throw an ERSFileProcessingException if the file has an incorrect file type" in {
       val exception = ERSFileProcessingException("You chose to check an ODS file, but testFileName isn’t an ODS file.",
         "You chose to check an ODS file, but testFileName isn’t an ODS file.")
 
-      await(buildProcessODSService(false).performODSUpload("testFileName", mockStaxProcessor)) shouldBe Failure(exception)
+      buildProcessODSService(false).performODSUpload("testFileName", mockStaxProcessor).futureValue shouldBe Failure(exception)
     }
   }
 

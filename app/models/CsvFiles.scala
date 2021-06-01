@@ -21,5 +21,5 @@ import play.api.libs.json.{Json, OFormat}
 case class CsvFiles(fileId: String)
 
 object CsvFiles {
-	implicit val format: OFormat[CsvFiles] = Json.format[CsvFiles]
+  implicit val format: OFormat[CsvFiles] = Json.format[CsvFiles]
 }

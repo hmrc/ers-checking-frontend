@@ -24,12 +24,12 @@ import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRef}
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallbackList}
 import models.{ERSFileProcessingException, SheetErrors}
-import play.api.Logger
+import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
 import java.io.InputStream
@@ -46,22 +46,23 @@ class UploadController @Inject()(authAction: AuthAction,
                                  processCsvService: ProcessCsvService,
                                  mcc: MessagesControllerComponents,
                                  override val global_error: views.html.global_error
-                                )(implicit executionContext: ExecutionContext, actorSystem: ActorSystem, val ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with I18nSupport with BaseController {
+                                )(implicit executionContext: ExecutionContext,
+                                  actorSystem: ActorSystem, val ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
+  extends FrontendController(mcc) with I18nSupport with BaseController with Logging {
 
   def downloadAsInputStream(downloadUrl: String): InputStream = new URL(downloadUrl).openStream()
 
-  def clearErrorCache()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Boolean] = {
+  def clearErrorCache()(implicit hc: HeaderCarrier): Future[Boolean] = {
     //remove function doesn't work, the cache needs to be overwritten with 'blank' data
     (for {
       _ <- ersUtil.cache[Long](ersUtil.SCHEME_ERROR_COUNT_CACHE, 0L)
       _ <- ersUtil.cache[ListBuffer[SheetErrors]](ersUtil.ERROR_LIST_CACHE, new ListBuffer[SheetErrors]())
     } yield {
-      Logger.debug(s"[UploadController][clearCache] Successfully cleared cache")
+      logger.debug(s"[UploadController][clearCache] Successfully cleared cache")
       true
     }) recoverWith {
       case e: Exception =>
-        Logger.error(s"[UploadController][clearCache] Failed to clear cache of errors and error count", e)
+        logger.error(s"[UploadController][clearCache] Failed to clear cache of errors and error count", e)
         Future.successful(false)
     }
   }
@@ -157,13 +158,13 @@ class UploadController @Inject()(authAction: AuthAction,
           Redirect(routes.CheckingServiceController.formatErrorsPage())
         }
       case upstreamError: UpstreamErrorResponse =>
-        Logger.error(
+        logger.error(
           s"[UploadController][handleException] " +
             s"Encountered an upstream error response when processing a CSV file: " +
             s"status ${upstreamError.statusCode} with message ${upstreamError.getMessage()}")
         Future(getGlobalErrorPage)
       case notERSProcessingException =>
-        Logger.error(s"[UploadController][handleException] " +
+        logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${notERSProcessingException.getClass}. Redirecting to global error page.")
         Future(getGlobalErrorPage)
     }

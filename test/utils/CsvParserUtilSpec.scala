@@ -19,12 +19,12 @@ package utils
 import helpers.ErsTestHelper
 import models.SheetErrors
 import org.mockito.Mockito.when
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 
 import scala.collection.mutable.ListBuffer
 
-class CsvParserUtilSpec extends UnitSpec with ErsTestHelper {
+class CsvParserUtilSpec extends WordSpecLike with Matchers with OptionValues with ErsTestHelper {
   def parserUtil: CsvParserUtil = new CsvParserUtil(mockAppConfig)
 
   "formatDataToValidate" must {

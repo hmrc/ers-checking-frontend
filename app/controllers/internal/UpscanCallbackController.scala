@@ -18,26 +18,25 @@ package controllers.internal
 
 import javax.inject.{Inject, Singleton}
 import models.upscan._
-import play.api.Logger
+import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc._
 import services.SessionService
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.SessionId
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @Singleton
 class UpscanCallbackController @Inject()(sessionService: SessionService,
-                                         mcc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends FrontendController(mcc) {
+                                         mcc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends FrontendController(mcc) with Logging {
 
   def callbackCsv(uploadId: UploadId, sessionId: String): Action[JsValue] = Action.async(parse.json) {
     implicit request =>
       request.body.validate[UpscanCallback].fold (
         invalid = errors => {
-          Logger.error(s"[UpscanController][callbackCsv] Failed to validate UpscanCallback json with errors: $errors")
+          logger.error(s"[UpscanController][callbackCsv] Failed to validate UpscanCallback json with errors: $errors")
           Future.successful(BadRequest)
         },
         valid = callback => {
@@ -45,10 +44,10 @@ class UpscanCallbackController @Inject()(sessionService: SessionService,
             case callback: UpscanReadyCallback =>
               UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
             case UpscanFailedCallback(_, details) =>
-              Logger.warn(s"[UpscanController][callbackCsv] Upload id: ${uploadId.value} failed. Reason: ${details.failureReason}. Message: ${details.message}")
+              logger.warn(s"[UpscanController][callbackCsv] Upload id: ${uploadId.value} failed. Reason: ${details.failureReason}. Message: ${details.message}")
               Failed
           }
-          Logger.info(s"[UpscanController][callbackCsv] Updating CSV callback for upload id: ${uploadId.value} to ${uploadStatus.getClass.getSimpleName}")
+          logger.info(s"[UpscanController][callbackCsv] Updating CSV callback for upload id: ${uploadId.value} to ${uploadStatus.getClass.getSimpleName}")
 
           (for{
             upscanId   <- sessionService.ersUtil.fetch[UpscanIds](uploadId.value, sessionId)
@@ -57,7 +56,7 @@ class UpscanCallbackController @Inject()(sessionService: SessionService,
             Ok
           }) recover {
             case NonFatal(e) =>
-              Logger.error(s"[UpscanController][callbackCsv] Failed to update cache after Upscan callback for UploadID: ${uploadId.value}, " +
+              logger.error(s"[UpscanController][callbackCsv] Failed to update cache after Upscan callback for UploadID: ${uploadId.value}, " +
                 s"ScRef: $sessionId", e)
               InternalServerError("Exception occurred when attempting to store data")
           }
@@ -69,7 +68,7 @@ class UpscanCallbackController @Inject()(sessionService: SessionService,
     implicit val headerCarrier: HeaderCarrier = hc.copy(sessionId = Some(SessionId(sessionId)))
     request.body.validate[UpscanCallback].fold (
       invalid = errors => {
-        Logger.error(s"[UpscanController][callbackOds] Failed to validate UpscanCallback json with errors: $errors")
+        logger.error(s"[UpscanController][callbackOds] Failed to validate UpscanCallback json with errors: $errors")
         Future.successful(BadRequest)
       },
       valid = callback => {
@@ -77,14 +76,14 @@ class UpscanCallbackController @Inject()(sessionService: SessionService,
           case callback: UpscanReadyCallback =>
             UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
           case UpscanFailedCallback(_, details) =>
-            Logger.warn(s"[UpscanController][callbackOds] Callback for session id: $sessionId failed. " +
+            logger.warn(s"[UpscanController][callbackOds] Callback for session id: $sessionId failed. " +
               s"Reason: ${details.failureReason}. Message: ${details.message}")
             Failed
         }
-        Logger.info(s"[UpscanController][callbackOds] Updating callback for session: $sessionId to ${uploadStatus.getClass.getSimpleName}")
-        sessionService.updateCallbackRecord(uploadStatus)(request, headerCarrier,ec).map(_ => Ok) recover {
+        logger.info(s"[UpscanController][callbackOds] Updating callback for session: $sessionId to ${uploadStatus.getClass.getSimpleName}")
+        sessionService.updateCallbackRecord(uploadStatus)(headerCarrier, ec).map(_ => Ok) recover {
           case e: Throwable =>
-            Logger.error(s"[UpscanController][callbackOds] Failed to update callback record for session: $sessionId, " +
+            logger.error(s"[UpscanController][callbackOds] Failed to update callback record for session: $sessionId, " +
               s"timestamp: ${java.time.LocalTime.now()}.", e)
             InternalServerError("Exception occurred when attempting to update callback data")
         }

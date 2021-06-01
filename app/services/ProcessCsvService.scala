@@ -23,18 +23,16 @@ import akka.stream.alpakka.csv.scaladsl.CsvParsing
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.util.ByteString
 import config.ApplicationConfig
-import controllers.auth.RequestWithOptionalEmpRef
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import models.{ERSFileProcessingException, RowValidationResults, SheetErrors}
 import org.apache.commons.io.FilenameUtils
-import play.api.Logger
+import play.api.Logging
 import play.api.i18n.Messages
-import play.api.mvc.AnyContent
 import services.FlowOps.eitherFromFunction
-import services.validation.ErsValidator.getCells
-import uk.gov.hmrc.services.validation.models._
+import services.validation.ErsValidator
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.services.validation.DataValidator
+import uk.gov.hmrc.services.validation.models._
 import utils.{CsvParserUtil, ERSUtil}
 
 import javax.inject.{Inject, Singleton}
@@ -47,9 +45,10 @@ import scala.util.{Failure, Success, Try}
 class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
                                   dataGenerator: DataGenerator,
                                   appConfig: ApplicationConfig,
-                                  ersUtil: ERSUtil
+                                  ersUtil: ERSUtil,
+                                  ersValidator: ErsValidator
                                  )(implicit executionContext: ExecutionContext,
-                                   actorSystem: ActorSystem) {
+                                   actorSystem: ActorSystem) extends Logging {
 
   private val uploadCsvSizeLimit: Int = appConfig.uploadCsvSizeLimit
 
@@ -72,7 +71,7 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
       }
 
   def processFiles(callback: Option[UpscanCsvFilesCallbackList], scheme: String, source: String => Source[HttpResponse, _])(
-    implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier, messages: Messages
+    implicit hc: HeaderCarrier, messages: Messages
   ): List[Future[Either[Throwable, Boolean]]] =
     callback.get.files map { file =>
 
@@ -81,8 +80,8 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
       val validatorFuture: Future[Either[Throwable, DataValidator]] = Source(List(successUpload.name))
         .via(Flow.fromFunction(checkFileType(_)(messages)))
         .via(eitherFromFunction(dataGenerator.getSheetCsv(_, scheme)(messages)))
-        .via(eitherFromFunction(dataGenerator.identifyAndDefineSheetCsv(_)(hc, request, messages)))
-        .via(eitherFromFunction(dataGenerator.setValidatorCsv(_)(hc, request, messages)))
+        .via(eitherFromFunction(dataGenerator.identifyAndDefineSheetCsv(_)(hc, messages)))
+        .via(eitherFromFunction(dataGenerator.setValidatorCsv(_)(hc, messages)))
         .runWith(Sink.head)
 
       validatorFuture.flatMap {
@@ -110,10 +109,10 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
     val rowIsEmpty = parserUtil.rowIsEmpty(rowStrings)
 
     Try {
-      validator.validateRow(Row(0, getCells(parsedRow, 0)))
+      validator.validateRow(Row(0, ersValidator.getCells(parsedRow, 0)))
     } match {
       case Failure(e) =>
-        Logger.warn(e.toString)
+        logger.warn(e.toString)
         Left(e)
       case Success(list) => Right(RowValidationResults(list.getOrElse(List.empty), rowIsEmpty))
     }
@@ -128,10 +127,12 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
   }
 
 @tailrec
-private[services] final def processDisplayedErrors(errorsLeftToDisplay: Int, rowsWithIndex: Seq[(List[ValidationError], Int)]): Seq[(List[ValidationError], Int)] = {
+private[services] final def processDisplayedErrors(errorsLeftToDisplay: Int,
+                                                   rowsWithIndex: Seq[(List[ValidationError], Int)]): Seq[(List[ValidationError], Int)] = {
   if (errorsLeftToDisplay <= 0) rowsWithIndex
   else {
-    val indexOfFirstOccurrence: Int = rowsWithIndex.indexWhere(errorsWithIndex => errorsWithIndex._1.nonEmpty && errorsWithIndex._1.exists(validationError => validationError.cell.row == 0))
+    val indexOfFirstOccurrence: Int = rowsWithIndex.indexWhere(errorsWithIndex => errorsWithIndex._1.nonEmpty &&
+      errorsWithIndex._1.exists(validationError => validationError.cell.row == 0))
     if (indexOfFirstOccurrence != -1) {
       val listOriginalReference = rowsWithIndex(indexOfFirstOccurrence)._1
       val entryReplacement = (listOriginalReference.map(validationError => {
@@ -163,7 +164,7 @@ private[services] final def processDisplayedErrors(errorsLeftToDisplay: Int, row
   }
 
   def checkValidityOfRows(listOfErrors: Seq[List[ValidationError]], name: String, file: UpscanCsvFilesCallback)(
-    implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Either[Throwable, Boolean]] = {
+    implicit hc: HeaderCarrier): Future[Either[Throwable, Boolean]] = {
     listOfErrors.filter(rowErrors => rowErrors.nonEmpty) match {
       case allGood if allGood.isEmpty => Future.successful(Right(true))
       case errors =>

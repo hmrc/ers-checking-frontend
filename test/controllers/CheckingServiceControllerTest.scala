@@ -22,6 +22,8 @@ import models.upscan.{NotStarted, Reference, UploadId, UpscanCsvFilesList, Upsca
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
@@ -30,13 +32,13 @@ import play.api.mvc.{Call, DefaultMessagesControllerComponents, Result}
 import play.api.test.Helpers._
 import play.api.test.Injecting
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.test.UnitSpec
 import views.html.{check_csv_file, check_file, check_file_type, checking_success, format_errors, global_error, scheme_type, select_csv_file_types, start}
 
 import scala.concurrent.Future
 
 
-class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite with ErsTestHelper with Injecting {
+class CheckingServiceControllerTest extends WordSpecLike with Matchers with OptionValues
+  with GuiceOneAppPerSuite with ErsTestHelper with Injecting with ScalaFutures {
 
   val formatErrorsView: format_errors = inject[format_errors]
   val startView: start = inject[start]
@@ -91,7 +93,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val controllerUnderTest = buildFakeCheckingServiceController()
 
       val form = CSformMappings.schemeTypeForm.bind(Map("" -> ""))
-      val result = controllerUnderTest.showSchemeTypePage(form)(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val result = controllerUnderTest.showSchemeTypePage(form)(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
     }
 
@@ -102,7 +104,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
     def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, globalErrorView) {
-        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any()))
+        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any()))
           .thenReturn(if (schemeRes) Future.successful(null) else Future.failed(new Exception))
         mockAnyContentAction
       }
@@ -120,7 +122,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeTypeSelected(request)
       status(result) shouldBe Status.BAD_REQUEST
-      contentAsString(await(result)) shouldBe contentAsString(controllerUnderTest.showSchemeTypePage(form)(request, hc))
+      contentAsString(result) shouldBe contentAsString(controllerUnderTest.showSchemeTypePage(form)(request))
     }
 
     "if no form errors with scheme type and save success" in {
@@ -130,7 +132,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeTypeSelected(request)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.CheckingServiceController.checkFileTypePage().toString
+      result.futureValue.header.headers("Location") shouldBe routes.CheckingServiceController.checkFileTypePage().toString
     }
 
     "if no form errors with scheme type and save fails" in {
@@ -138,7 +140,8 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val schemeTypeData = Map("schemeType" -> "1")
       val form = CSformMappings.schemeTypeForm.bind(schemeTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      contentAsString(await(controllerUnderTest.showSchemeTypeSelected(request)))shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(request, testMessages))
+      contentAsString(controllerUnderTest.showSchemeTypeSelected(request)) shouldBe
+        contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request, testMessages)))
     }
   }
 
@@ -148,7 +151,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
     def buildFakeCheckingServiceController(fileTypeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, globalErrorView) {
-      when(mockErsUtil.fetch[String](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(),any(),any(),any()))
+      when(mockErsUtil.fetch[String](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(),any(),any()))
         .thenReturn(if (fileTypeRes) Future.successful("csv") else Future.failed(new NoSuchElementException))
 			mockAnyContentAction
     }
@@ -162,14 +165,14 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
     "give a status OK if fetch successful and shows check file type page" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
       val form = CSformMappings.checkFileTypeForm.bind(Map("" -> ""))
-      val result = controllerUnderTest.showCheckFileTypePage(form)(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val result = controllerUnderTest.showCheckFileTypePage(form)(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
     }
 
     "give a status OK if fetch fails then show check file type page with nothing selected" in {
       val controllerUnderTest = buildFakeCheckingServiceController(fileTypeRes = false)
       val form = CSformMappings.checkFileTypeForm.bind(Map("" -> ""))
-      val result = controllerUnderTest.showCheckFileTypePage(form)(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val result = controllerUnderTest.showCheckFileTypePage(form)(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=checkFileType-csv]").hasAttr("checked") shouldEqual false
@@ -184,7 +187,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
     def buildFakeCheckingServiceController(fileTypeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, globalErrorView) {
-      when(mockErsUtil.cache(refEq(mockErsUtil.FILE_TYPE_CACHE), anyString())(any(), any(), any(), any()))
+      when(mockErsUtil.cache(refEq(mockErsUtil.FILE_TYPE_CACHE), anyString())(any(), any(), any()))
         .thenReturn(if (fileTypeRes) Future.successful(null) else Future.failed(new Exception))
 			mockAnyContentAction
     }
@@ -202,7 +205,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showCheckFileTypeSelected(request)
       status(result) shouldBe Status.BAD_REQUEST
-      contentAsString(await(result)) shouldBe contentAsString(controllerUnderTest.showCheckFileTypePage(form)(request, hc))
+      contentAsString(result) shouldBe contentAsString(controllerUnderTest.showCheckFileTypePage(form)(request))
     }
 
     "if no form errors with file type = csv and save success" in {
@@ -212,7 +215,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showCheckFileTypeSelected(request)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.CheckCsvFilesController.selectCsvFilesPage().toString
+      result.futureValue.header.headers("Location") shouldBe routes.CheckCsvFilesController.selectCsvFilesPage().toString
     }
 
     "if no form errors with file type = ods and save success" in {
@@ -222,7 +225,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showCheckFileTypeSelected(request)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.CheckingServiceController.checkODSFilePage().toString
+      result.futureValue.header.headers("Location") shouldBe routes.CheckingServiceController.checkODSFilePage().toString
     }
 
     "if no form errors with scheme type and save fails" in {
@@ -230,7 +233,8 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val schemeTypeData = Map("checkFileType" -> "csv")
       val form = CSformMappings.schemeTypeForm.bind(schemeTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      contentAsString(await(controllerUnderTest.showCheckFileTypeSelected(request))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(request, testMessages))
+      contentAsString(controllerUnderTest.showCheckFileTypeSelected(request)) shouldBe
+        contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request, testMessages)))
     }
   }
 
@@ -240,13 +244,13 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
     def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, globalErrorView) {
-        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any()))
+        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any()))
           .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any(),any()))
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any()))
           .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
-        when(mockUpscanService.getUpscanFormData(any(), any(), any())(any(), any(), any()))
+        when(mockUpscanService.getUpscanFormData(any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(UpscanInitiateResponse(Reference("ref"), Call("GET", "/"), Map.empty)))
-        when(mockSessionService.createCallbackRecord(any(), any(), any()))
+        when(mockSessionService.createCallbackRecord(any(), any()))
           .thenReturn(Future.successful(CacheMap("", Map.empty)))
 
 			  mockAnyContentAction
@@ -268,7 +272,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
       val res: Future[Result] = controllerUnderTest.showCheckODSFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       res.map { result =>
-        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(request, testMessages))
+        result shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request, testMessages)))
       }    }
 
   }
@@ -279,13 +283,13 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
     def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, globalErrorView) {
-        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any()))
+        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any()))
           .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any(),any()))
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any()))
           .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
-        when(mockErsUtil.fetch[UpscanCsvFilesList](refEq(mockErsUtil.CSV_FILES_UPLOAD), any())(any(),any(),any(),any()))
+        when(mockErsUtil.fetch[UpscanCsvFilesList](refEq(mockErsUtil.CSV_FILES_UPLOAD), any())(any(),any(),any()))
           .thenReturn(if (schemeRes) Future.successful(UpscanCsvFilesList(Seq(UpscanIds(UploadId("id"), "fileId", NotStarted)))) else Future.failed(new Exception))
-        when(mockUpscanService.getUpscanFormData(any(), any(), any())(any(), any(), any()))
+        when(mockUpscanService.getUpscanFormData(any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(UpscanInitiateResponse(Reference("ref"), Call("GET", "/"), Map.empty)))
 			mockAnyContentAction
     }
@@ -307,7 +311,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val res: Future[Result] = controllerUnderTest.showCheckCSVFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       (Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       res.map{ result =>
-        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(request, testMessages))
+        result shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request, testMessages)))
       }}
 
   }
@@ -320,13 +324,13 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
 																					): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, globalErrorView) {
-        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any()))
+        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any()))
           .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
 
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any(),any()))
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any()))
         .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
 
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_ERROR_COUNT_CACHE))(any(),any(),any(),any()))
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_ERROR_COUNT_CACHE))(any(),any(),any()))
         .thenReturn(if (errorRes) Future.successful(errorCount) else Future.failed(new Exception))
 
 			mockAnyContentAction
@@ -340,7 +344,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
 
     "give a status OK and shows check success page" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.showCheckingSuccessPage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
+      val result = controllerUnderTest.showCheckingSuccessPage()(Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
       status(result) shouldBe Status.OK
     }
 
@@ -356,19 +360,19 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, globalErrorView) {
 
-        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any(), any()))
+        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any()))
           .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
         when(mockErsUtil.getSchemeName(any())).thenReturn(("a", "b"))
 
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(),any(),any(),any()))
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(),any(),any()))
           .thenReturn(if (schemeRes) Future.successful(fileTypeRes) else Future.failed(new Exception))
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any(),any()))
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any()))
           .thenReturn(if (schemeRes) Future.successful("csop") else Future.failed(new Exception))
-        when(mockErsUtil.fetch[Boolean](refEq(mockErsUtil.FORMAT_ERROR_EXTENDED_CACHE))(any(),any(),any(),any()))
+        when(mockErsUtil.fetch[Boolean](refEq(mockErsUtil.FORMAT_ERROR_EXTENDED_CACHE))(any(),any(),any()))
           .thenReturn(if (errorRes) Future.successful(false) else Future.failed(new Exception))
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.FORMAT_ERROR_CACHE))(any(),any(),any(),any()))
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.FORMAT_ERROR_CACHE))(any(),any(),any()))
           .thenReturn(if (errorRes) Future.successful(errorCount) else Future.failed(new Exception))
-        when(mockErsUtil.fetch[Seq[String]](refEq(mockErsUtil.FORMAT_ERROR_CACHE_PARAMS))(any(),any(),any(),any()))
+        when(mockErsUtil.fetch[Seq[String]](refEq(mockErsUtil.FORMAT_ERROR_CACHE_PARAMS))(any(),any(),any()))
           .thenReturn(if (errorRes) Future.successful(Seq(errorCount)) else Future.failed(new Exception))
 
 			mockAnyContentAction
@@ -390,7 +394,7 @@ class CheckingServiceControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
       val res: Future[Result] = controllerUnderTest.showFormatErrorsPage(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
       res.map { result =>
-        result shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(request, testMessages))
+        result shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request, testMessages)))
       }}
   }
 }
