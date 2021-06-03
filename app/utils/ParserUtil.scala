@@ -17,11 +17,11 @@
 package utils
 
 import config.ApplicationConfig
+
 import javax.inject.{Inject, Singleton}
 import models.SheetErrors
 import models.upscan.UpscanCsvFilesCallback
-import play.api.Logger
-import play.api.mvc.{AnyContent, Request}
+import play.api.Logging
 import services.ERSTemplatesInfo
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -32,12 +32,13 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class ParserUtil @Inject()(val ersUtil: ERSUtil,
                            appConfig: ApplicationConfig
-                          )(implicit ec: ExecutionContext) {
+                          )(implicit ec: ExecutionContext) extends Logging {
   val HUNDRED = 100
+
   def formatDataToValidate(rowData: Seq[String], sheetName: String): Seq[String] = {
     val sheetColSize = ERSTemplatesInfo.ersSheets(sheetName.replace(".csv", "")).headerRow.size
-    if(rowData.size < sheetColSize) {
-      Logger.debug(s"Difference between amount of columns ${rowData.size} and amount of headers $sheetColSize")
+    if (rowData.size < sheetColSize) {
+      logger.debug(s"Difference between amount of columns ${rowData.size} and amount of headers $sheetColSize")
       val additionalEmptyCells: Seq[String] = Seq.fill(sheetColSize - rowData.size)("")
       (rowData ++ additionalEmptyCells).take(sheetColSize)
     }
@@ -47,19 +48,19 @@ class ParserUtil @Inject()(val ersUtil: ERSUtil,
   }
 
   def isFileValid(errorList: ListBuffer[SheetErrors], file: Option[UpscanCsvFilesCallback] = None)
-								 (implicit request: Request[AnyContent], hc: HeaderCarrier): Future[Try[Boolean]] = {
+                 (implicit hc: HeaderCarrier): Future[Try[Boolean]] = {
     if (isValid(errorList)) {
       Future.successful(Success(true))
     }
     else {
-			val updatedErrorCount = getTotalErrorCount(errorList)
-			val updatedErrorList = getSheetErrors(errorList)
-			val id = if(file.isDefined) file.get.uploadId else ""
+      val updatedErrorCount = getTotalErrorCount(errorList)
+      val updatedErrorList = getSheetErrors(errorList)
+      val id = if (file.isDefined) file.get.uploadId else ""
 
       val result = for {
-				_ <- ersUtil.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}$id", updatedErrorCount )
-				_ <- ersUtil.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}$id", updatedErrorList)
-			} yield Success(false)
+        _ <- ersUtil.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}$id", updatedErrorCount)
+        _ <- ersUtil.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}$id", updatedErrorList)
+      } yield Success(false)
 
       result recover {
         case ex: Exception => Failure(ex)
@@ -67,9 +68,9 @@ class ParserUtil @Inject()(val ersUtil: ERSUtil,
     }
   }
 
-  def isValid(schemeErrors:ListBuffer[SheetErrors]):Boolean = {
-    for(sheet <- schemeErrors) {
-      for(_ <- sheet.errors){
+  def isValid(schemeErrors: ListBuffer[SheetErrors]): Boolean = {
+    for (sheet <- schemeErrors) {
+      for (_ <- sheet.errors) {
         return false
       }
     }
@@ -78,8 +79,8 @@ class ParserUtil @Inject()(val ersUtil: ERSUtil,
 
   def getTotalErrorCount(schemeErrors: ListBuffer[SheetErrors]): Long = {
     var totalErrors = 0
-    if(totalErrors != schemeErrors.size)
-      for(i <- schemeErrors.indices) totalErrors += schemeErrors(i).errors.length
+    if (totalErrors != schemeErrors.size)
+      for (i <- schemeErrors.indices) totalErrors += schemeErrors(i).errors.length
     totalErrors
   }
 

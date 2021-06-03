@@ -22,6 +22,7 @@ import models.CsvFiles
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesList, UpscanIds}
 import org.mockito.ArgumentMatchers.{any, refEq}
 import org.mockito.Mockito.when
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Play.materializer
 import play.api.data.Form
@@ -32,13 +33,15 @@ import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents, Request, R
 import play.api.test.{FakeRequest, Injecting}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
 import views.html.{check_csv_file, check_file, check_file_type, checking_success, format_errors, global_error, scheme_type, select_csv_file_types, start}
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
 
-class CheckCsvFilesControllerSpec extends UnitSpec with GuiceOneAppPerSuite with ErsTestHelper with Injecting {
+class CheckCsvFilesControllerSpec extends WordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite
+  with ErsTestHelper with Injecting with ScalaFutures {
 
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
@@ -66,9 +69,9 @@ class CheckCsvFilesControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
           implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Result] = Future.successful(Ok("Authenticated"))
         mockAnyContentAction
       }
-      val result = Await.result(controllerUnderTest.selectCsvFilesPage().apply(Fixtures.buildFakeRequestWithSessionId("GET")), Duration.Inf)
+      val result = controllerUnderTest.selectCsvFilesPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
-      bodyOf(result) shouldBe "Authenticated"
+      contentAsString(result) shouldBe "Authenticated"
     }
   }
 
@@ -82,10 +85,9 @@ class CheckCsvFilesControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
       when(mockErsUtil.remove(refEq(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())).thenReturn(Future.failed(new RuntimeException("this failed tbh")))
 
       val result = controllerUnderTest.showCheckCsvFilesPage()(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc)
-      val failure = Await.result(result, Duration.Inf)
 
-      failure.header.status shouldBe Status.INTERNAL_SERVER_ERROR
-      bodyOf(failure) shouldBe "this is very bad"
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      contentAsString(result) shouldBe "this is very bad"
     }
 
     "go to the select_csv_file_types page when successful" in {
@@ -95,16 +97,15 @@ class CheckCsvFilesControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
         mockAnyContentAction
       }
       when(mockErsUtil.remove(refEq(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())).thenReturn(Future.successful(HttpResponse(Status.OK, "we uploadin")))
-      when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any(), any(), any()))
+      when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any(), any()))
         .thenReturn(Future.successful("a string"))
       when(mockErsUtil.getCsvFilesList(any())).thenReturn(Seq(CsvFiles("a file")))
-      when(mockErsUtil.getPageElement(any(), any(), any())(any())).thenReturn("this is okay!")
+      when(mockErsUtil.getPageElement(any(), any(), any())).thenReturn("this is okay!")
 
       val result = controllerUnderTest.showCheckCsvFilesPage()(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc)
-      val success = Await.result(result, Duration.Inf)
 
-      success.header.status shouldBe Status.OK
-      assert(bodyOf(success).contains("this is okay!"))
+      status(result) shouldBe Status.OK
+      assert(contentAsString(result).contains("this is okay!"))
     }
 
   }
@@ -117,9 +118,9 @@ class CheckCsvFilesControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
           implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Result] = Future.successful(Ok("here we go!"))
         mockAnyContentAction
       }
-      val result = Await.result(controllerUnderTest.checkCsvFilesPageSelected().apply(Fixtures.buildFakeRequestWithSessionId("GET")), Duration.Inf)
+      val result = controllerUnderTest.checkCsvFilesPageSelected().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
-      bodyOf(result) shouldBe "here we go!"
+      contentAsString(result) shouldBe "here we go!"
     }
   }
 
@@ -134,9 +135,9 @@ class CheckCsvFilesControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
       }
       val request = FakeRequest("GET", "").withFormUrlEncodedBody(("files", "file"), ("fileId", "asdasd£$aaa"))
 
-      val result = Await.result(controllerUnderTest.validateCsvFilesPageSelected()(RequestWithOptionalEmpRef(request, None), hc), Duration.Inf)
+      val result = controllerUnderTest.validateCsvFilesPageSelected()(RequestWithOptionalEmpRef(request, None), hc)
       status(result) shouldBe Status.OK
-      bodyOf(result) shouldBe "this is a reload"
+      contentAsString(result) shouldBe "this is a reload"
     }
 
     "call reloadWithError if form does not have errors" in {
@@ -147,9 +148,9 @@ class CheckCsvFilesControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
       }
       val request = FakeRequest("GET", "").withFormUrlEncodedBody(("files", "file"), ("fileId", "1234"))
 
-      val result = Await.result(controllerUnderTest.validateCsvFilesPageSelected()(RequestWithOptionalEmpRef(request, None), hc), Duration.Inf)
+      val result = controllerUnderTest.validateCsvFilesPageSelected()(RequestWithOptionalEmpRef(request, None), hc)
       status(result) shouldBe Status.OK
-      bodyOf(result) shouldBe "form good"
+      contentAsString(result) shouldBe "form good"
     }
 
   }
@@ -164,9 +165,9 @@ class CheckCsvFilesControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
         mockAnyContentAction
       }
 
-      val result = Await.result(controllerUnderTest.performCsvFilesPageSelected(Seq.empty)(FakeRequest("GET", ""), hc), Duration.Inf)
+      val result = controllerUnderTest.performCsvFilesPageSelected(Seq.empty)(FakeRequest("GET", ""), hc)
       status(result) shouldBe Status.OK
-      bodyOf(result) shouldBe "this is a reload"
+      contentAsString(result) shouldBe "this is a reload"
 
     }
 
@@ -178,16 +179,16 @@ class CheckCsvFilesControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
         override def createCacheData(csvFilesList: Seq[CsvFiles]): UpscanCsvFilesList =
           UpscanCsvFilesList(Seq(UpscanIds(UploadId("value"), "field", UploadedSuccessfully("name", "download"))))
 
-        override def cacheUpscanIds(ids: Seq[UpscanIds])(implicit request: Request[AnyRef], hc: HeaderCarrier): Seq[Future[CacheMap]] =
+        override def cacheUpscanIds(ids: Seq[UpscanIds])(implicit hc: HeaderCarrier): Seq[Future[CacheMap]] =
           Seq.empty
         mockAnyContentAction
       }
-      when(mockErsUtil.cache(refEq(mockErsUtil.CSV_FILES_UPLOAD), any(), any())(any(), any(), any(), any()))
+      when(mockErsUtil.cache(refEq(mockErsUtil.CSV_FILES_UPLOAD), any(), any())(any(), any(), any()))
         .thenReturn(Future.successful(CacheMap("id", Map.empty)))
 
-      val result = Await.result(controllerUnderTest.performCsvFilesPageSelected(Seq.empty)(FakeRequest("GET", ""), hc), Duration.Inf)
+      val result = controllerUnderTest.performCsvFilesPageSelected(Seq.empty)(FakeRequest("GET", ""), hc)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe "/check-your-ers-files/choose-and-check-csv-files"
+      result.futureValue.header.headers("Location") shouldBe "/check-your-ers-files/choose-and-check-csv-files"
 
     }
   }
@@ -197,13 +198,11 @@ class CheckCsvFilesControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
       val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, selectFileTypeView, globalErrorView) {
         mockAnyContentAction
       }
-      when(mockErsUtil.cache[UpscanIds](any(), any())(any(), any(), any(), any()))
+      when(mockErsUtil.cache[UpscanIds](any(), any())(any(), any(), any()))
         .thenReturn(Future.successful(CacheMap("id", Map.empty)))
 
-      val result = Await.result(
-        controllerUnderTest
-          .cacheUpscanIds(Seq(UpscanIds(UploadId("value"), "field", UploadedSuccessfully("name", "download"))))(FakeRequest("GET", ""), hc),
-        Duration.Inf)
+      val result = controllerUnderTest
+        .cacheUpscanIds(Seq(UpscanIds(UploadId("value"), "field", UploadedSuccessfully("name", "download"))))(hc)
 
       assert(result.length == 1)
       Await.result(result.head, Duration.Inf) shouldBe CacheMap("id", Map.empty)

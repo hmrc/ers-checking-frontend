@@ -27,6 +27,7 @@ import models.ERSFileProcessingException
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import org.mockito.ArgumentMatchers.{any, anyString, refEq}
 import org.mockito.Mockito.when
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n.{Messages, MessagesImpl}
@@ -36,13 +37,15 @@ import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, i18n}
 import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
 import views.html.global_error
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) with UnitSpec with ErsTestHelper with GuiceOneAppPerSuite with Injecting {
+class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) with WordSpecLike with Matchers
+  with OptionValues with ErsTestHelper with GuiceOneAppPerSuite with Injecting with ScalaFutures {
 
   val config: Map[String, Any] = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
@@ -71,7 +74,7 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
                                   ): UploadController =
     new UploadController(mockAuthAction, mockProcessODSService, mockProcessCsvService, mcc, globalErrorView) {
 
-      override def clearErrorCache()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Boolean] =
+      override def clearErrorCache()(implicit hc: HeaderCarrier): Future[Boolean] =
         Future.successful(clearCacheResponse)
 
       override def getGlobalErrorPage(implicit request: Request[AnyRef], messages: Messages): Result = {
@@ -95,17 +98,18 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
         }
       }
 
-      when(mockProcessCsvService.processFiles(any(), any(), any())(any(),any(),any())).thenReturn(returnValue)
+      when(mockProcessCsvService.processFiles(any(), any(), any())(any(),any())).thenReturn(returnValue)
 
-      when(mockErsUtil.cache(refEq(ersUtil.FORMAT_ERROR_CACHE), anyString())(any(), any(), any(), any()))
+      when(mockErsUtil.cache(refEq(ersUtil.FORMAT_ERROR_CACHE), anyString())(any(), any(), any()))
         .thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))
-      when(mockErsUtil.cache(refEq(ersUtil.FORMAT_ERROR_CACHE_PARAMS), any[Seq[String]])(any(), any(), any(), any()))
+      when(mockErsUtil.cache(refEq(ersUtil.FORMAT_ERROR_CACHE_PARAMS), any[Seq[String]])(any(), any(), any()))
         .thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))
-      when(mockErsUtil.cache(refEq(ersUtil.FORMAT_ERROR_EXTENDED_CACHE), any[Boolean])(any(), any(), any(), any()))
+      when(mockErsUtil.cache(refEq(ersUtil.FORMAT_ERROR_EXTENDED_CACHE), any[Boolean])(any(), any(), any()))
         .thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))
 
       when(mockErsUtil.shortLivedCache).thenReturn(mockShortLivedCache)
-      when(mockShortLivedCache.fetchAndGetEntry[UpscanCsvFilesCallbackList](any(), any())(any(),any(), any())).thenReturn(callbackList)
+      when(mockShortLivedCache.fetchAndGetEntry[UpscanCsvFilesCallbackList](any(), any())(any(),any(), any()))
+        .thenReturn(Future.successful(callbackList))
 
       mockAnyContentAction
     }
@@ -114,7 +118,6 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
     implicit val fakeRequest: RequestWithOptionalEmpRef[AnyContent] = RequestWithOptionalEmpRef(Fixtures.buildFakeRequestWithSessionId("GET"), None)
 
     "give a redirect status and show checkingSuccessPage if authenticated and no validation errors" in {
-      UpscanCsvFilesCallbackList
       val controllerUnderTest = buildFakeUploadControllerCsv()
       val result = controllerUnderTest.uploadCSVFile(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
@@ -125,7 +128,7 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
       val result = controllerUnderTest
         .uploadCSVFile(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.CheckingServiceController.checkingSuccessPage().toString
+      result.futureValue.header.headers("Location") shouldBe routes.CheckingServiceController.checkingSuccessPage().toString
     }
 
     "give a redirect status to checkingSuccessPage if formatting errors" in {
@@ -133,7 +136,7 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
       val result = controllerUnderTest
         .uploadCSVFile(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.HtmlReportController.htmlErrorReportPage(true).toString
+      result.futureValue.header.headers("Location") shouldBe routes.HtmlReportController.htmlErrorReportPage(true).toString
     }
 
     "give a redirect status to globalErrorPage if clearErrorCache returns false" in {
@@ -141,7 +144,7 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
       val result = controllerUnderTest
         .uploadCSVFile(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-      result.body.consumeData.utf8String shouldBe "Test body"
+      contentAsString(result) shouldBe "Test body"
 
     }
   }
@@ -153,7 +156,7 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
         Future.successful(Left(ERSFileProcessingException("this is a problem", "help"))))
       )(RequestWithOptionalEmpRef(FakeRequest("GET", ""), None), hc)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.CheckingServiceController.formatErrorsPage().toString
+      result.futureValue.header.headers("Location") shouldBe routes.CheckingServiceController.formatErrorsPage().toString
     }
 
     "send user to GlobalErrorPage if unexpected exception is found" in {
@@ -163,7 +166,7 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
       )(RequestWithOptionalEmpRef(FakeRequest("GET", ""), None), hc)
 
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-      result.body.consumeData.utf8String shouldBe "Test body"
+      contentAsString(result) shouldBe "Test body"
     }
   }
 
@@ -184,27 +187,24 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
       val controllerUnderTest = buildFakeUploadControllerCsv()
       val result = controllerUnderTest.handleException(ERSFileProcessingException("a", "b"))(FakeRequest("", ""), hc)
 
-      val response = Await.result(result, Duration.Inf)
-      status(response) shouldBe Status.SEE_OTHER
-      response.header.headers("Location") shouldBe routes.CheckingServiceController.formatErrorsPage().toString
+      status(result) shouldBe Status.SEE_OTHER
+      result.futureValue.header.headers("Location") shouldBe routes.CheckingServiceController.formatErrorsPage().toString
     }
 
     "redirect to globalErrorPage if it's given an UpstreamErrorResponse" in {
       val controllerUnderTest = buildFakeUploadControllerCsv()
       val result = controllerUnderTest.handleException(UpstreamErrorResponse("a", Status.INTERNAL_SERVER_ERROR))(FakeRequest("", ""), hc)
 
-      val response = Await.result(result, Duration.Inf)
-      status(response) shouldBe Status.INTERNAL_SERVER_ERROR
-      result.body.consumeData.utf8String shouldBe "Test body"
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      contentAsString(result) shouldBe "Test body"
     }
 
     "redirect to globalErrorPage if it's given an unexpected exception" in {
       val controllerUnderTest = buildFakeUploadControllerCsv()
       val result = controllerUnderTest.handleException(new Exception("this is a big whoops"))(FakeRequest("", ""), hc)
 
-      val response = Await.result(result, Duration.Inf)
-      status(response) shouldBe Status.INTERNAL_SERVER_ERROR
-      result.body.consumeData.utf8String shouldBe "Test body"
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      contentAsString(result) shouldBe "Test body"
     }
   }
 

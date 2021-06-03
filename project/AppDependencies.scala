@@ -9,17 +9,12 @@ object AppDependencies {
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc" %% "bootstrap-play-26" % "2.3.0",
-    "uk.gov.hmrc" %% "govuk-template" % "5.66.0-play-26",
-    "uk.gov.hmrc" %% "play-ui" % "8.21.0-play-26",
-    "uk.gov.hmrc" %% "domain" % "5.11.0-play-26",
-    "uk.gov.hmrc" %% "play-partials" % "7.1.0-play-26",
-    "uk.gov.hmrc" %% "http-caching-client" % "9.2.0-play-26",
-    "uk.gov.hmrc" %% "play-language" % "4.7.0-play-26",
-    "uk.gov.hmrc" %% "auth-client" % "3.3.0-play-26",
+    "uk.gov.hmrc" %% "bootstrap-frontend-play-27" % "5.3.0",
+    "uk.gov.hmrc" %% "domain" % "5.11.0-play-27",
+    "uk.gov.hmrc" %% "http-caching-client" % "9.5.0-play-27",
     "uk.gov.hmrc" %% "tabular-data-validator" % "1.4.0",
-    "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.22",
-    "commons-io" % "commons-io" % "2.6",
+    "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.24",
+    "commons-io" % "commons-io" % "2.9.0",
     "com.lightbend.akka" %% "akka-stream-alpakka-csv" % "2.0.2",
     "com.typesafe.akka" %% "akka-stream" % akkaVersion,
     "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
@@ -28,17 +23,16 @@ object AppDependencies {
     compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
     "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full,
 
-    "uk.gov.hmrc" %% "play-frontend-hmrc" % "0.61.0-play-26"
+    "uk.gov.hmrc" %% "play-frontend-hmrc" % "0.68.0-play-27"
 
   )
 
   val test: Seq[ModuleID] = Seq(
-    "uk.gov.hmrc" %% "hmrctest" % "3.10.0-play-26",
     "org.scalatest" %% "scalatest" % "3.0.9",
-    "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3",
-    "org.mockito" % "mockito-core" % "3.4.6",
+    "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.3",
+    "org.mockito" % "mockito-core" % "3.10.0",
     "org.pegdown" % "pegdown" % "1.6.0",
-    "org.jsoup" % "jsoup" % "1.9.2",
+    "org.jsoup" % "jsoup" % "1.13.1",
     "com.github.tomakehurst" % "wiremock-standalone" % "2.27.2",
     "com.typesafe.play" %% "play-test" % PlayVersion.current,
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion

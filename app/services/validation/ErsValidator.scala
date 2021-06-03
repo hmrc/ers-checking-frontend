@@ -18,11 +18,10 @@ package services.validation
 
 import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models._
+import play.api.Logging
 
-import play.api.Logger
 
-
-object ErsValidator {
+class ErsValidator extends Logging {
   val colNames = List("A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
     "AA","AB","AC","AD","AE","AF","AG","AH","AI","AJ","AK","AL","AM","AN","AO","AP")
 
@@ -31,7 +30,7 @@ object ErsValidator {
       validator.validateRow(Row(rowNumber, getCells(rowData,rowNumber)))
     } catch {
       case e: Exception =>
-        Logger.warn(e.toString)
+        logger.warn(e.toString)
         throw e
     }
   }

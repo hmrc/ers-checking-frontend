@@ -16,20 +16,19 @@
 
 package services
 
-import controllers.Fixtures
 import helpers.ErsTestHelper
 import models.ERSFileProcessingException
 import org.mockito.ArgumentMatchers
+import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.i18n
+import play.api.{Logger, i18n}
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.mvc.DefaultMessagesControllerComponents
 import services.XMLTestData._
 import utils.{CsvParserUtil, ParserUtil}
-import org.mockito.Mockito._
 
 
 class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with ErsTestHelper with BeforeAndAfter {
@@ -40,8 +39,10 @@ class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures wit
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
 
-  object TestDataParser extends DataParser
-  object TestDataGenerator extends DataGenerator(mockAuditEvents, mockMetrics, mockParserUtil, realErsValidationConfigs, mockErsUtil)
+  object TestDataParser extends DataParser {
+    val logger: Logger = Logger(getClass)
+  }
+  object TestDataGenerator extends DataGenerator(mockAuditEvents, mockMetrics, mockParserUtil, realErsValidationConfigs, mockErsUtil, mockErsValidator)
 
   when(mockErsUtil.withArticle(ArgumentMatchers.any())).thenReturn("article")
 
@@ -63,7 +64,7 @@ class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures wit
     when(mockErsUtil.getSchemeName(ArgumentMatchers.any())).thenReturn(("ers_pdf_error_report.emi", "EMI"))
 
     val thrown = the[ERSFileProcessingException] thrownBy
-      TestDataGenerator.identifyAndDefineSheet("EMI40_Taxable","EMI")(hc,Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
+      TestDataGenerator.identifyAndDefineSheet("EMI40_Taxable","EMI")(hc, implicitly[Messages])
 
     thrown.getMessage mustBe "ers.exceptions.dataParser.incorrectSheetName"
     thrown.optionalParams mustBe Seq("EMI40_Taxable", "EMI")

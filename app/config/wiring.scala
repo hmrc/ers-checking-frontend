@@ -19,8 +19,8 @@ package config
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.crypto.{ApplicationCrypto, CryptoWithKeysFromConfig}
+import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.http.cache.client.{ShortLivedCache, ShortLivedHttpCaching}
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 @Singleton
 class ERSShortLivedHttpCache @Inject()(val http: HttpClient,

@@ -26,12 +26,14 @@ import scala.xml._
 
 trait DataParser {
 
+  val logger: Logger
+
   val repeatColumnsAttr = "table:number-columns-repeated"
   val repeatTableAttr = "table:number-rows-repeated"
 
   def validateSpecialCharacters(xmlRowData : String )(implicit messages: Messages): Unit ={
     if(xmlRowData.contains("&")){
-      Logger.debug("[DataParser][validateSpecialCharacters] Found invalid xml in Data Parser, throwing exception")
+      logger.debug("[DataParser][validateSpecialCharacters] Found invalid xml in Data Parser, throwing exception")
       throw ERSFileProcessingException(Messages("ers.exceptions.dataParser.ampersand"), Messages("ers.exceptions.dataParser.parsingOfFileData"))
     }
   }
@@ -49,12 +51,12 @@ trait DataParser {
 
     xmlRow match {
       case None =>
-        Logger.debug("[DataParser][parse] 3.1 Parse row left ")
+        logger.debug("[DataParser][parse] 3.1 Parse row left ")
         validateSpecialCharacters(row)
         Left(row)
-      case _:Option[Elem] => Logger.debug("[DataParser][parse] 3.2 Parse row right ")
+      case _:Option[Elem] => logger.debug("[DataParser][parse] 3.2 Parse row right ")
         val cols = Try( Right(xmlRow.get.child.flatMap(parseColumn))).getOrElse{
-          Logger.warn(Messages("ers.exceptions.dataParser.fileRetrievalFailed", fileName))
+          logger.warn(Messages("ers.exceptions.dataParser.fileRetrievalFailed", fileName))
           throw ERSFileProcessingException (
             Messages("ers.exceptions.dataParser.fileRetrievalFailed", fileName),
             Messages("ers.exceptions.dataParser.parserFailure", fileName)
@@ -66,7 +68,7 @@ trait DataParser {
           case Right(s: Seq[String]) => Right((s, 1))
         }
       case _  =>
-        Logger.warn(Messages("ers.exceptions.dataParser.fileParsingError", fileName))
+        logger.warn(Messages("ers.exceptions.dataParser.fileParsingError", fileName))
         throw ERSFileProcessingException(
           Messages("ers.exceptions.dataParser.fileParsingError", fileName),
           Messages("ers.exceptions.dataParser.parsingOfFileData")

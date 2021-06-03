@@ -17,9 +17,9 @@
 package utils
 
 import org.scalatestplus.mockito.MockitoSugar
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 
-class ContentUtilSpec extends UnitSpec with MockitoSugar {
+class ContentUtilSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar {
 
   class TestUtil extends ContentUtil
 

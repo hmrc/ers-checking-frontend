@@ -17,7 +17,6 @@
 package services
 
 import models.upscan.{NotStarted, UploadStatus, UpscanCsvFilesCallbackList}
-import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.ERSUtil
@@ -27,21 +26,21 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SessionService @Inject()(val ersUtil: ERSUtil) {
-	val CALLBACK_DATA_KEY = "callback_data_key"
-	val CALLBACK_DATA_KEY_CSV = "callback_data_key_csv"
+  val CALLBACK_DATA_KEY = "callback_data_key"
+  val CALLBACK_DATA_KEY_CSV = "callback_data_key_csv"
 
-	def createCallbackRecord(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[CacheMap] = {
-		ersUtil.cache[UploadStatus](CALLBACK_DATA_KEY, NotStarted)
-	}
+  def createCallbackRecord(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CacheMap] = {
+    ersUtil.cache[UploadStatus](CALLBACK_DATA_KEY, NotStarted)
+  }
 
-	def createCallbackRecordCSV(callbackList: UpscanCsvFilesCallbackList, sessionId: String)
-														 (implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[CacheMap] = {
-		ersUtil.cache(CALLBACK_DATA_KEY_CSV, callbackList, sessionId)
-	}
+  def createCallbackRecordCSV(callbackList: UpscanCsvFilesCallbackList, sessionId: String)
+                             (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CacheMap] = {
+    ersUtil.cache(CALLBACK_DATA_KEY_CSV, callbackList, sessionId)
+  }
 
-	def updateCallbackRecord(uploadStatus: UploadStatus)(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[CacheMap] =
-		ersUtil.cache(CALLBACK_DATA_KEY, uploadStatus)
+  def updateCallbackRecord(uploadStatus: UploadStatus)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[CacheMap] =
+    ersUtil.cache(CALLBACK_DATA_KEY, uploadStatus)
 
-	def getCallbackRecord(implicit request: Request[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UploadStatus]] =
-		ersUtil.shortLivedCache.fetchAndGetEntry[UploadStatus](ersUtil.getCacheId, CALLBACK_DATA_KEY)
+  def getCallbackRecord(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UploadStatus]] =
+    ersUtil.shortLivedCache.fetchAndGetEntry[UploadStatus](ersUtil.getCacheId, CALLBACK_DATA_KEY)
 }

@@ -25,10 +25,12 @@ import org.mockito.Mockito._
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.UnitSpec
-import scala.concurrent.Future
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 
-class UpscanServiceSpec extends UnitSpec with ErsTestHelper {
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
+
+class UpscanServiceSpec extends WordSpecLike with Matchers with OptionValues with ErsTestHelper {
 
 	override implicit val request = FakeRequest("GET", "http://localhost:9290/")
 	val mockUpscanConnector: UpscanConnector = mock[UpscanConnector]
@@ -56,7 +58,7 @@ class UpscanServiceSpec extends UnitSpec with ErsTestHelper {
       when(mockUpscanConnector.getUpscanFormData(initiateRequestCaptor.capture())(any[HeaderCarrier]))
         .thenReturn(Future.successful(upscanInitiateResponse))
 
-      await(getUpscanFormData(isCSV = false, "csop"))
+      Await.ready(getUpscanFormData(isCSV = false, "csop"), Duration.Inf)
       initiateRequestCaptor.getValue shouldBe expectedInitiateRequest
     }
   }
@@ -75,7 +77,7 @@ class UpscanServiceSpec extends UnitSpec with ErsTestHelper {
       when(mockUpscanConnector.getUpscanFormData(initiateRequestCaptor.capture())(any[HeaderCarrier]))
         .thenReturn(Future.successful(upscanInitiateResponse))
 
-      await(getUpscanFormData(isCSV = true, scheme = "csop", Some(upscanIds)))
+      Await.ready(getUpscanFormData(isCSV = true, scheme = "csop", Some(upscanIds)), Duration.Inf)
       initiateRequestCaptor.getValue shouldBe expectedInitiateRequest
     }
   }

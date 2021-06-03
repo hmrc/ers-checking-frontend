@@ -18,7 +18,6 @@ package services.audit
 
 import controllers.auth.RequestWithOptionalEmpRef
 import javax.inject.{Inject, Singleton}
-import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 
@@ -28,7 +27,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class AuditEvents @Inject()(val auditConnector: AuditConnector) extends AuditService {
 
   def auditRunTimeError(exception : Throwable, contextInfo : String, sheetName : String)
-                       (implicit hc: HeaderCarrier, request: Request[_], ec: ExecutionContext): Future[AuditResult] = {
+                       (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AuditResult] = {
     sendEvent("CheckingServiceRunTimeError", Map(
       "ErrorMessage" -> exception.getMessage,
       "Context" -> contextInfo,
@@ -38,7 +37,7 @@ class AuditEvents @Inject()(val auditConnector: AuditConnector) extends AuditSer
   }
 
   def fileProcessingErrorAudit(schemeType : String, sheetName : String, errorMsg:String)
-                              (implicit hc: HeaderCarrier, request: Request[_], ec: ExecutionContext): Future[AuditResult] = {
+                              (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AuditResult] = {
     sendEvent("CheckingServiceFileProcessingError", Map(
       "schemeType" -> schemeType,
       "sheetName" -> sheetName,

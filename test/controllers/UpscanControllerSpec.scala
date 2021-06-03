@@ -16,24 +16,28 @@
 
 package controllers
 
+import akka.actor.ActorSystem
 import helpers.ErsTestHelper
 import models.upscan._
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.http.Status
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{DefaultMessagesControllerComponents, Request, Result}
+import play.api.mvc.{DefaultMessagesControllerComponents, Result}
 import play.api.test.Injecting
 import services.{ProcessCsvService, ProcessODSService}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import views.html.global_error
 
 import scala.concurrent.Future
 
-class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppPerSuite with Injecting {
+class UpscanControllerSpec extends WordSpecLike with Matchers with OptionValues
+  with ErsTestHelper with GuiceOneAppPerSuite with Injecting with ScalaFutures {
 
   val config: Map[String, Any] = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
@@ -42,6 +46,7 @@ class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
     "metrics.enabled" -> false)
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
+  implicit val as: ActorSystem = app.actorSystem
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(app)
   val mockProcessODSService: ProcessODSService = mock[ProcessODSService]
   val mockProcessCsvService: ProcessCsvService = mock[ProcessCsvService]
@@ -54,7 +59,7 @@ class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
   def upscanController(csvList: UpscanCsvFilesCallbackList = upscanCsvFilesListCallbackList): UpscanController =
     new UpscanController(mockAuthAction, mockSessionService, mcc, globalErrorView) {
     override def fetchCsvCallbackList(list: UpscanCsvFilesList, sessionId: String)
-                                     (implicit hc: HeaderCarrier, request: Request[_]): Future[Seq[UpscanCsvFilesCallback]] = {
+                                     (implicit hc: HeaderCarrier): Future[Seq[UpscanCsvFilesCallback]] = {
       Future.successful(csvList.files)
     }
     mockAnyContentAction
@@ -77,12 +82,12 @@ class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
       val upscanCsvFilesCallback= UpscanCsvFilesCallback(uploadId: UploadId, successfully)
       val upscanCsvFilesListCallbackList = UpscanCsvFilesCallbackList(files = List(upscanCsvFilesCallback))
 
-      when(mockErsUtil.fetch[UpscanCsvFilesList](any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(singleCsvFile))
-      when(mockErsUtil.cache(any(), any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(null))
+      when(mockErsUtil.fetch[UpscanCsvFilesList](any(), any())(any(), any(), any())).thenReturn(Future.successful(singleCsvFile))
+      when(mockErsUtil.cache(any(), any(), any())(any(), any(), any())).thenReturn(Future.successful(null))
 
       val result = upscanController(upscanCsvFilesListCallbackList).successCSV(uploadId, Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.UploadController.uploadCSVFile(Fixtures.getMockSchemeTypeString).toString
+      result.futureValue.header.headers("Location") shouldBe routes.UploadController.uploadCSVFile(Fixtures.getMockSchemeTypeString).toString
     }
 
     "send a user to the global error page when a file is still in progress" in {
@@ -91,8 +96,8 @@ class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
       val singleCsvFile: UpscanCsvFilesList = UpscanCsvFilesList(ids = Seq(upscanId))
 
       when(mockSessionService.ersUtil).thenReturn(mockErsUtil)
-      when(mockErsUtil.fetch[UpscanCsvFilesList](any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(singleCsvFile))
-      when(mockErsUtil.cache(any(), any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(null))
+      when(mockErsUtil.fetch[UpscanCsvFilesList](any(), any())(any(), any(), any())).thenReturn(Future.successful(singleCsvFile))
+      when(mockErsUtil.cache(any(), any(), any())(any(), any(), any())).thenReturn(Future.successful(null))
 
       val result = upscanController(upscanCsvFilesListCallbackList).successCSV(uploadId, Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
@@ -104,13 +109,13 @@ class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
       val singleCsvFile: UpscanCsvFilesList = UpscanCsvFilesList(ids = Seq(upscanId))
 
       when(mockSessionService.ersUtil).thenReturn(mockErsUtil)
-      when(mockErsUtil.fetch[UpscanCsvFilesList](any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(singleCsvFile))
-      when(mockErsUtil.cache(any(), any(), any())(any(), any(), any(), any())).thenReturn(Future.successful(null))
+      when(mockErsUtil.fetch[UpscanCsvFilesList](any(), any())(any(), any(), any())).thenReturn(Future.successful(singleCsvFile))
+      when(mockErsUtil.cache(any(), any(), any())(any(), any(), any())).thenReturn(Future.successful(null))
 
       def upscanControllerError(): UpscanController =
         new UpscanController(mockAuthAction, mockSessionService, mcc, globalErrorView) {
           override def fetchCsvCallbackList(list: UpscanCsvFilesList, sessionId: String)
-                                           (implicit hc: HeaderCarrier, request: Request[_]): Future[Seq[UpscanCsvFilesCallback]] = {
+                                           (implicit hc: HeaderCarrier): Future[Seq[UpscanCsvFilesCallback]] = {
             Future.failed(new Exception("error"))
           }
           mockAnyContentAction
@@ -126,17 +131,17 @@ class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
       val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET")
       val successfully: UploadedSuccessfully = UploadedSuccessfully("thefilename", "downloadUrl", Some(1000))
 
-      when(mockSessionService.getCallbackRecord(any(), any(), any())).thenReturn(Future.successful(Some(successfully)))
+      when(mockSessionService.getCallbackRecord(any(), any())).thenReturn(Future.successful(Some(successfully)))
 
       val result = upscanController().successODS(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.UploadController.uploadODSFile(Fixtures.getMockSchemeTypeString).toString
+      result.futureValue.header.headers("Location") shouldBe routes.UploadController.uploadODSFile(Fixtures.getMockSchemeTypeString).toString
 
     }
 
     "return a 500 (getGlobalErrorPage) when getCallbackRecord returns a None" in {
       val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET")
-      when(mockSessionService.getCallbackRecord(any(), any(), any())).thenReturn(Future.successful(None))
+      when(mockSessionService.getCallbackRecord(any(), any())).thenReturn(Future.successful(None))
 
       val result = upscanController().successODS(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
@@ -144,7 +149,7 @@ class UpscanControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppP
 
     "return a 500 (getGlobalErrorPage) when an exception occurs" in {
       val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET")
-      when(mockSessionService.getCallbackRecord(any(), any(), any())).thenReturn(Future.failed(new Exception("an error occured")))
+      when(mockSessionService.getCallbackRecord(any(), any())).thenReturn(Future.failed(new Exception("an error occured")))
 
       val result = upscanController().successODS(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR

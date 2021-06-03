@@ -16,7 +16,7 @@
 
 package services.audit
 
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
 
@@ -41,7 +41,9 @@ trait AuditService {
 
 
   private[audit] def generateTags(hc: HeaderCarrier): Map[String, String] =
-    hc.headers.toMap ++ Map("dateTime" ->  getDateTime.toString)
+
+
+    hc.headers(HeaderNames.explicitlyIncludedHeaders).toMap ++ hc.extraHeaders.toMap ++ hc.otherHeaders.toMap ++ Map("dateTime" ->  getDateTime.toString)
 
     private def getDateTime = java.time.LocalTime.now()
 

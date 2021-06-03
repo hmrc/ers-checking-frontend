@@ -18,13 +18,18 @@ package utils
 
 import helpers.ErsTestHelper
 import models.SheetErrors
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import uk.gov.hmrc.play.test.UnitSpec
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 
 import scala.collection.mutable.ListBuffer
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
-class ParserUtilSpec extends UnitSpec with ErsTestHelper {
+class ParserUtilSpec extends WordSpecLike with Matchers with OptionValues with ErsTestHelper with ScalaFutures {
   def parserUtil: ParserUtil = new ParserUtil(mockErsUtil, mockAppConfig)
 
   "getDataToValidate" must {
@@ -52,12 +57,12 @@ class ParserUtilSpec extends UnitSpec with ErsTestHelper {
     sheetErrors3 += list1
     sheetErrors3 += list2
     sheetErrors3 += list3
-    schemeErrors += SheetErrors("sheet_tab_1",sheetErrors3)
-    schemeErrors += SheetErrors("sheet_tab_2",sheetErrors3)
+    schemeErrors += SheetErrors("sheet_tab_1", sheetErrors3)
+    schemeErrors += SheetErrors("sheet_tab_2", sheetErrors3)
 
     val sheetErrors1 = new ListBuffer[ValidationError]()
     sheetErrors1 += list1
-    schemeErrors += SheetErrors("sheet_tab_3",sheetErrors1)
+    schemeErrors += SheetErrors("sheet_tab_3", sheetErrors1)
 
     "return up to the first 100 errors of each sheet" in {
 
@@ -74,8 +79,8 @@ class ParserUtilSpec extends UnitSpec with ErsTestHelper {
     val errors = new ListBuffer[ValidationError]
     errors ++= List(error)
 
-    val invalidSheet = SheetErrors ("", errors)
-    val validSheet = SheetErrors ("", new ListBuffer())
+    val invalidSheet = SheetErrors("", errors)
+    val validSheet = SheetErrors("", new ListBuffer())
 
     "return true if no errors are found" in {
       val schemeErrors = new ListBuffer[SheetErrors]()
@@ -122,18 +127,42 @@ class ParserUtilSpec extends UnitSpec with ErsTestHelper {
     "return the total errors found over all sheets" in {
       val schemeErrors = new ListBuffer[SheetErrors]()
 
-      val error = ValidationError(Cell("A",1,"abc"),"001", "error.1", "This entry must be 'yes' or 'no'.")
+      val error = ValidationError(Cell("A", 1, "abc"), "001", "error.1", "This entry must be 'yes' or 'no'.")
       val errors = new ListBuffer[ValidationError]
       errors ++= List(error)
 
-      val invalidSheet = SheetErrors ("", errors)
-      val validSheet = SheetErrors ("", new ListBuffer())
+      val invalidSheet = SheetErrors("", errors)
+      val validSheet = SheetErrors("", new ListBuffer())
 
       schemeErrors += invalidSheet
       schemeErrors += validSheet
       schemeErrors += invalidSheet
 
       parserUtil.getTotalErrorCount(schemeErrors) shouldBe 2
+    }
+  }
+
+  "isFileValid" should {
+    "return a Success(true) if no errors are present" in {
+      parserUtil.isFileValid(ListBuffer.empty).futureValue shouldBe Success(true)
+    }
+
+    "return a Success(false) if errors are present but no exceptions" in {
+      when(mockErsUtil.cache[Long](any(), any())(any(), any(), any())).thenReturn(Future.successful(CacheMap("id", Map.empty)))
+      when(mockErsUtil.cache[ListBuffer[SheetErrors]](any(), any())(any(), any(), any())).thenReturn(Future.successful(CacheMap("id", Map.empty)))
+
+      parserUtil.isFileValid(
+        ListBuffer(SheetErrors("sheet", ListBuffer(ValidationError(Cell("A", 1, "cell"), "ruleId", "errorId", "errorMsg"))))
+      ).futureValue shouldBe Success(false)
+    }
+
+    "return Failure if exception was thrown" in {
+      val exception = new RuntimeException("this  is a runtime exception")
+      when(mockErsUtil.cache[Long](any(), any())(any(), any(), any())).thenReturn(Future.failed(exception))
+
+      parserUtil.isFileValid(
+        ListBuffer(SheetErrors("sheet", ListBuffer(ValidationError(Cell("A", 1, "cell"), "ruleId", "errorId", "errorMsg"))))
+      ).futureValue shouldBe Failure(exception)
     }
   }
 }

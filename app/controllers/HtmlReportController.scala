@@ -22,12 +22,12 @@ import controllers.auth.AuthAction
 import javax.inject.{Inject, Singleton}
 import models.SheetErrors
 import models.upscan.{UploadId, UpscanCsvFilesCallbackList}
-import play.Logger
+import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{ERSUtil, JsonParser}
 import uk.gov.hmrc.services.validation.models.ValidationError
 
@@ -40,7 +40,7 @@ class HtmlReportController @Inject()(authAction: AuthAction,
                                      html_error_report: views.html.html_error_report,
                                      override val global_error: views.html.global_error
                                     )(implicit executionContext: ExecutionContext, ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with JsonParser with I18nSupport with BaseController {
+  extends FrontendController(mcc) with JsonParser with I18nSupport with BaseController with Logging {
 
   def htmlErrorReportPage(isCsv: Boolean): Action[AnyContent] = authAction.async {
       implicit request =>
@@ -76,7 +76,7 @@ class HtmlReportController @Inject()(authAction: AuthAction,
         case _ => ("", "")
       }
 
-      lazy val (errorsList, errorCountLong, totalErrorsCount) =	if(isCsv) {
+      lazy val (errorsList, errorCountLong, totalErrorsCount) = if(isCsv) {
         val uploadIds: Seq[UploadId] = all.getEntry[UpscanCsvFilesCallbackList]("callback_data_key_csv").get.files.map(_.uploadId)
         csvExtractErrors(uploadIds, all)
       } else {
@@ -91,7 +91,7 @@ class HtmlReportController @Inject()(authAction: AuthAction,
       Ok(html_error_report(schemeName, schemeNameShort, totalErrorsCount, errorCountLong, errorsList)(request, messages, appConfig, ersUtil))
     } recover {
       case e: NoSuchElementException =>
-        Logger.error("Unable to display error report in HtmlReportController.showHtmlErrorReportPage. Error: " + e.getMessage, e)
+        logger.error("Unable to display error report in HtmlReportController.showHtmlErrorReportPage. Error: " + e.getMessage, e)
         getGlobalErrorPage(request, messages)
     }
   }

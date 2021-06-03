@@ -21,13 +21,13 @@ import controllers.auth.{AuthAction, RequestWithOptionalEmpRef}
 import javax.inject.{Inject, Singleton}
 import models._
 import models.upscan.{NotStarted, UploadId, UpscanCsvFilesList, UpscanIds}
-import play.api.Logger
+import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,7 +38,7 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
                                         select_csv_file_types: views.html.select_csv_file_types,
                                         override val global_error: views.html.global_error)
                                        (implicit ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with I18nSupport with BaseController {
+  extends FrontendController(mcc) with I18nSupport with BaseController with Logging {
 
   def selectCsvFilesPage(): Action[AnyContent] = authAction.async {
     implicit request =>
@@ -83,13 +83,13 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
         Redirect(routes.CheckingServiceController.checkCSVFilePage())
       }).recover {
         case e: Throwable =>
-          Logger.error(s"[CheckCsvFilesController][performCsvFilesPageSelected]: Save data to cache failed with exception ${e.getMessage}.", e)
+          logger.error(s"[CheckCsvFilesController][performCsvFilesPageSelected]: Save data to cache failed with exception ${e.getMessage}.", e)
           getGlobalErrorPage
       }
     }
   }
 
-  def cacheUpscanIds(ids: Seq[UpscanIds])(implicit request: Request[AnyRef], hc: HeaderCarrier): Seq[Future[CacheMap]] = {
+  def cacheUpscanIds(ids: Seq[UpscanIds])(implicit hc: HeaderCarrier): Seq[Future[CacheMap]] = {
     ids map { id =>
       ersUtil.cache[UpscanIds](id.uploadId.value, id)
     }

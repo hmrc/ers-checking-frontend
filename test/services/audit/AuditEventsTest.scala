@@ -25,9 +25,9 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.bootstrap.audit.DefaultAuditConnector
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 
-class AuditEventsTest extends UnitSpec with ErsTestHelper {
+class AuditEventsTest extends WordSpecLike with Matchers with OptionValues with ErsTestHelper {
 
   val dataEvent: DataEvent = DataEvent(
     auditSource = "ers-checking-frontend",

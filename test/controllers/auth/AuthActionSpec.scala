@@ -21,24 +21,29 @@ import controllers.routes
 import helpers.ErsTestHelper
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Assertion, BeforeAndAfterEach}
 import play.api.Play
 import play.api.http.Status
 import play.api.mvc.{BodyParsers, Result, Results}
 import play.api.test.FakeRequest
+import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.allEnrolments
 import uk.gov.hmrc.domain.EmpRef
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatestplus.play.guice.GuiceOneServerPerTest
 
 import scala.concurrent.Future
 
-class AuthActionSpec extends UnitSpec with ErsTestHelper with BeforeAndAfterEach with WithFakeApplication {
+class AuthActionSpec extends WordSpecLike with Matchers with OptionValues
+  with ErsTestHelper with BeforeAndAfterEach with GuiceOneServerPerTest with ScalaFutures {
 
   override val mockAuthConnector: AuthConnector = mock[AuthConnector]
   override val testBodyParser: BodyParsers.Default = fakeApplication.injector.instanceOf[BodyParsers.Default]
+
   implicit def materializer: Materializer = Play.materializer(fakeApplication)
 
   override protected def beforeEach(): Unit = {
@@ -59,15 +64,15 @@ class AuthActionSpec extends UnitSpec with ErsTestHelper with BeforeAndAfterEach
   val ersEnrolments: Enrolments =
     Enrolments(Set(
       Enrolment("IR-PAYE",
-        Seq(EnrolmentIdentifier("TaxOfficeNumber","1234"), EnrolmentIdentifier("TaxOfficeReference","1234")),
+        Seq(EnrolmentIdentifier("TaxOfficeNumber", "1234"), EnrolmentIdentifier("TaxOfficeReference", "1234")),
         "Activated",
         None))
     )
 
   val nonePayeEnrolments: Enrolments =
     Enrolments(Set(
-      Enrolment("test1", Seq(EnrolmentIdentifier("Dummy","1234")), "Activated", None),
-      Enrolment("IR-PAYE", Seq(EnrolmentIdentifier("TaxOfficeNumber","1234")), "Activated", None))
+      Enrolment("test1", Seq(EnrolmentIdentifier("Dummy", "1234")), "Activated", None),
+      Enrolment("IR-PAYE", Seq(EnrolmentIdentifier("TaxOfficeNumber", "1234")), "Activated", None))
     )
 
   "AuthAction" should {
@@ -86,11 +91,7 @@ class AuthActionSpec extends UnitSpec with ErsTestHelper with BeforeAndAfterEach
         defaultAsyncBody(_.optionalEmpRef shouldBe Some(EmpRef("1234", "1234")))
       )(FakeRequest())
       status(result) shouldBe Status.OK
-      await(
-        bodyOf(result).map(
-          _ shouldBe "Successful"
-        )
-      )
+      contentAsString(result) shouldBe "Successful"
     }
 
 
@@ -109,11 +110,7 @@ class AuthActionSpec extends UnitSpec with ErsTestHelper with BeforeAndAfterEach
         defaultAsyncBody(_.optionalEmpRef shouldBe None)
       )(FakeRequest())
       status(result) shouldBe Status.OK
-      await(
-        bodyOf(result).map(
-          _ shouldBe "Successful"
-        )
-      )
+        contentAsString(result) shouldBe "Successful"
     }
 
     "return a perform the action if the user is authorised without and empref when user has no enrolments" in {
@@ -131,11 +128,7 @@ class AuthActionSpec extends UnitSpec with ErsTestHelper with BeforeAndAfterEach
         defaultAsyncBody(_.optionalEmpRef shouldBe None)
       )(FakeRequest())
       status(result) shouldBe Status.OK
-      await(
-        bodyOf(result).map(
-          _ shouldBe "Successful"
-        )
-      )
+      contentAsString(result) shouldBe "Successful"
     }
 
     "return a 401 if an SessionRecordNotFound Exception (NoActiveSession) is experienced" in {
@@ -151,7 +144,7 @@ class AuthActionSpec extends UnitSpec with ErsTestHelper with BeforeAndAfterEach
 
       val result: Future[Result] = authAction(defaultAsyncBody(_.optionalEmpRef shouldBe None))(FakeRequest())
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe "http://localhost:9553/bas-gateway/sign-in?" +
+      result.futureValue.header.headers("Location") shouldBe "http://localhost:9553/bas-gateway/sign-in?" +
         "continue_url=http%3A%2F%2Flocalhost%3A9225%2Fcheck-your-ers-files&origin=ers-checking-frontend"
     }
 
@@ -168,7 +161,7 @@ class AuthActionSpec extends UnitSpec with ErsTestHelper with BeforeAndAfterEach
 
       val result: Future[Result] = authAction(defaultAsyncBody(_.optionalEmpRef shouldBe None))(FakeRequest())
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.AuthorisationController.notAuthorised().url
+      result.futureValue.header.headers("Location") shouldBe routes.AuthorisationController.notAuthorised().url
     }
 
     "return a 401 if an InsufficientConfidenceLevel Exception is experienced" in {
@@ -184,7 +177,7 @@ class AuthActionSpec extends UnitSpec with ErsTestHelper with BeforeAndAfterEach
 
       val result: Future[Result] = authAction(defaultAsyncBody(_.optionalEmpRef shouldBe None))(FakeRequest())
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.AuthorisationController.notAuthorised().url
+      result.futureValue.header.headers("Location") shouldBe routes.AuthorisationController.notAuthorised().url
     }
   }
 
