@@ -23,7 +23,7 @@ object AppDependencies {
     compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
     "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full,
 
-    "uk.gov.hmrc" %% "play-frontend-hmrc" % "0.68.0-play-27"
+    "uk.gov.hmrc" %% "play-frontend-hmrc" % "0.71.0-play-27"
 
   )
 
