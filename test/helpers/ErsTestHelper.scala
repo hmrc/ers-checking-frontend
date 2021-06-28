@@ -93,6 +93,7 @@ trait ErsTestHelper extends MockitoSugar {
 	val mockUpscanService: UpscanService = mock[UpscanService]
 
 	when(mockAppConfig.signIn).thenReturn("http://localhost:9553/bas-gateway/sign-in")
+	when(mockAppConfig.signOut).thenReturn("http://localhost:9553/bas-gateway/sign-out-without-state")
 	when(mockAppConfig.appName).thenReturn("ers-checking-frontend")
 	when(mockAppConfig.loginCallback).thenReturn("http://localhost:9225/check-your-ers-files")
 	when(mockAppConfig.odsSuccessRetryAmount).thenReturn(5)

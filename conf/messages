@@ -20,7 +20,7 @@ ers.start.page_title = Check your ERS files – Employment Related Securities �
 ers.scheme_types.page_title = Choose scheme or arrangement type – Employment Related Securities – GOV.UK
 ers.file_type.page_title = Choose file type – Employment Related Securities – GOV.UK
 ers.choose_csv_files.title = Choose the .csv files – Employment Related Securities – GOV.UK
-ers.upload_csv.page_title = Choose and check the .csv files – Employment Related Securities – GOV.UK
+ers.upload_csv.page_title = Upload your ‘{0}’ file – Employment Related Securities – GOV.UK
 ers.upload_ods.page_title = Choose and check the .ods file – Employment Related Securities – GOV.UK
 ers.error_report.page_title = Error report – Employment Related Securities – GOV.UK
 ers.confirmation.page_title = Confirmation – Employment Related Securities – GOV.UK
@@ -98,7 +98,7 @@ ers_check_csv_file.other.OTHER_ENCHANCEMENT = Artificial enhancement of market v
 ers_check_csv_file.other.OTHER_SOLD = Securities sold for more than market value post acquisition
 
 ers_check_file.title = Choose the .ods file that you want to check for errors
-ers_check_file.file_upload_label = Select the file to upload.
+ers_check_file.file_upload_label = Upload a file
 ers_check_file.check_file_button = Check for errors
 ers_check_file.file_type_error = You chose to check an ODS file, but {0} isn’t an ODS file.
 ers_check_file.no_file_error = No file selected. Please choose your file.

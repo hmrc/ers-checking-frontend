@@ -4,8 +4,6 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
 val appName = "ers-checking-frontend"
 
-lazy val plugins: Seq[Plugins] = Seq(play.sbt.PlayScala, SbtDistributablesPlugin)
-
 lazy val scoverageSettings: Seq[Def.Setting[_]] =
   Seq(
     ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;models/.data/..*;prod.*;app.*;.*BuildInfo.*;view.*;.*Connector.*;.*Metrics;.*config;.*Global;.*Routes;.*RoutesPrefix;.*Configuration;config.AuditFilter;config.LoggingFilter;.*config.WSHttp;models.*;controllers.ERSCheckingBaseController;services.AllWSHttp;",
@@ -15,7 +13,7 @@ lazy val scoverageSettings: Seq[Def.Setting[_]] =
   )
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(plugins: _*)
+  .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .settings(publishingSettings: _*)
   .settings(scoverageSettings: _*)
   .settings(PlayKeys.playDefaultPort := 9225)
@@ -25,18 +23,11 @@ lazy val microservice = Project(appName, file("."))
     targetJvm := "jvm-1.8",
     scalaVersion := "2.12.12",
     libraryDependencies ++= AppDependencies.all,
-    parallelExecution in Test := false,
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
     routesImport += "models.upscan.UploadId"
   )
-  .settings(
-    sources in doc in Compile := List(),
-    sources in doc in Test := List()
-  )
-  .settings(resolvers ++= Seq(Resolver.jcenterRepo))
-  .settings(evictionWarningOptions in update := EvictionWarningOptions.default.withWarnTransitiveEvictions(false).withWarnDirectEvictions(false).withWarnScalaVersionEviction(false))
-  .settings(majorVersion :=4)
+  .settings(majorVersion := 4)
 
 scalacOptions ++= Seq(
   "-P:silencer:pathFilters=views;routes"

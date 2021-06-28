@@ -16,25 +16,23 @@
 
 package controllers
 
-import config.ApplicationConfig
+import helpers.ErsTestHelper
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Play.materializer
-import play.api.mvc.MessagesControllerComponents
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout}
 import play.api.test.{FakeRequest, Injecting}
 import play.mvc.Http.Status
 import views.html.not_authorised
 
 class AuthorisationControllerSpec extends WordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite
-  with MockitoSugar with Injecting with ScalaFutures {
-  val controllerComponents: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
-  val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
-  val view: not_authorised = inject[not_authorised]
+  with MockitoSugar with Injecting with ScalaFutures with ErsTestHelper {
 
-  val authController: AuthorisationController = new AuthorisationController(controllerComponents, mockAppConfig, view)
+  private val mcc = testMCC(app)
+  val view: not_authorised = inject[not_authorised]
+  val authController: AuthorisationController = new AuthorisationController(mcc, mockAppConfig, view)
 
   "AuthorisationController" should {
     "call notAuthorised" in {
