@@ -14,16 +14,18 @@
  * limitations under the License.
  *@
 
+@import includes.fileProcessingAlert
+
 @this(
         govukFileUpload: GovukFileUpload,
-        govukButton: GovukButton
+        govukButton: GovukButton,
+        fileProcessingAlert: fileProcessingAlert
 )
 
 @(fileType: String, formFields: Map[String, String], postTarget: Call, messageKey: String)(implicit messages: Messages)
 
 <div id="uploadForm" class="govuk-form-group">
     <form action=@postTarget method="post" enctype="multipart/form-data" id="upload-file-form">
-
         @for(field <- formFields) {
             <input type="hidden" name="@field._1" value="@field._2"/>
         }
@@ -33,16 +35,18 @@
             id = "input-file-name",
             attributes = Map("accept" -> fileType),
             label = Label(
-                content = Text(messages(messageKey))
+                content = Text(messages(messageKey)),
+                forAttr = Some("input-file-name")
             )
-
         ))
 
         @govukButton(Button(
             content = Text(messages("ers_check_file.check_file_button")),
             attributes = Map("id" -> "check-file-button")
         ))
-        <div class="govuk-!-display-none" id="progress-spinner"><img id="progress-spinner-img" src="@routes.Assets.versioned("images/spinner.gif")" alt="Loading ..."/></div>
+
+        @fileProcessingAlert()
+
     </form>
 </div>
 

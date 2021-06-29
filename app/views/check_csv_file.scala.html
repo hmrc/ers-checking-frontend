@@ -52,6 +52,6 @@
 
     @hmrcPageHeading(PageHeading(text = messages("csv_file_upload.upload_your_file_header", messages(s"${ersUtil.PAGE_CHECK_CSV_FILE}.$scheme.$fileId"))))
 
-    @upscan_file_upload_form(".csv", upscanResponse.formFields, upscanResponse.postTarget, s"${ersUtil.PAGE_CHECK_CSV_FILE}.$scheme.$fileId")
+    @upscan_file_upload_form(".csv", upscanResponse.formFields, upscanResponse.postTarget, messages(s"${ersUtil.PAGE_CHECK_CSV_FILE}.file_upload_label"))
 
 }

@@ -1,0 +1,16 @@
+
+@this(
+        govukWarningText: GovukWarningText
+)
+
+@()(implicit messages: Messages)
+
+<div class="govuk-!-display-none" id="file-processing-alert">
+    <div class="govuk-!-margin-bottom-2" style="display: flex; justify-content: center; align-items: center">
+        <img id="file-processing-alert-img" src="@routes.Assets.versioned("images/spinner.gif")" alt="Loading symbol"/>
+    </div>
+    @govukWarningText(WarningText(
+        iconFallbackText = "Warning",
+        content = Text(messages("ers_upload_form.processing_alert"))
+    ))
+</div>
