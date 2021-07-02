@@ -33,9 +33,9 @@
             id = "input-file-name",
             attributes = Map("accept" -> fileType),
             label = Label(
+                forAttr = Some("input-file-name"),
                 content = Text(messages(messageKey))
             )
-
         ))
 
         @govukButton(Button(

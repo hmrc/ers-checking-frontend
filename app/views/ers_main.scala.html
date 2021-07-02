@@ -25,6 +25,7 @@
         hmrcStandardFooter: HmrcStandardFooter,
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
         hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
+        hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
         assetsConfig: AssetsConfig
 )
 
@@ -34,6 +35,7 @@
     <meta name="format-detection" content="telephone=no"/>
     <meta http-equiv='Pragma' content='no-cache'/>
     <meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate, private'/>
+    @hmrcTimeoutDialogHelper(signOutUrl = applicationConfig.signOut)
 }
 
 @scripts = {
@@ -58,7 +60,7 @@
     headBlock = Some(hmrcHead(Some(head))),
     headerBlock = Some(hmrcStandardHeader(
         serviceName = Some(messages("service.name")),
-        signOutUrl = None,
+        signOutUrl = Some(applicationConfig.signOut),
         serviceUrl = Some(controllers.routes.CheckingServiceController.startPage.url)
     )),
     beforeContentBlock = Some(hmrcLanguageSelectHelper()),

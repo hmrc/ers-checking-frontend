@@ -20,7 +20,7 @@ ers.start.page_title = Gwirio’ch ffeiliau ERS – Gwarantau ar Sail Cyflogaeth
 ers.scheme_types.page_title = Dewis math o gynllun neu drefniant – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.file_type.page_title = Dewis math o ffeil – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.choose_csv_files.title = Dewis a gwirio’r ffeiliau .csv – Gwarantau ar Sail Cyflogaeth – GOV.UK
-ers.upload_csv.page_title = Dewis a gwirio’r ffeiliau .csv – Gwarantau ar Sail Cyflogaeth – GOV.UK
+ers.upload_csv.page_title = Uwchlwytho’ch ffeil ‘{0}’ – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.upload_ods.page_title = Dewis a gwirio’r ffeiliau .ods – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.error_report.page_title = Adroddiad o wallau – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.confirmation.page_title = Cadarnhad – Gwarantau ar Sail Cyflogaeth – GOV.UK
@@ -98,7 +98,7 @@ ers_check_csv_file.other.OTHER_ENCHANCEMENT =Gwelliant artiffisial y gwerth marc
 ers_check_csv_file.other.OTHER_SOLD =Gwarantau sydd wedi’u gwerthu am fwy na’r gwerth marchnadol ar ôl caffael
 
 ers_check_file.title =Dewiswch y ffeil .ods rydych am ei gwirio am wallau
-ers_check_file.file_upload_label =Dewis y ffeil i’w huwchlwytho.
+ers_check_file.file_upload_label = Uwchlwytho ffeil
 ers_check_file.check_file_button =Gwirio am wallau
 ers_check_file.file_type_error =Gwnaethoch ddewis gwirio ffeil ODS, ond nid yw {0} yn ffeil ODS.
 ers_check_file.no_file_error =Dim ffeil wedi’i dewis. Dewiswch eich ffeil.
