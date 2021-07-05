@@ -14,6 +14,7 @@ ers.finish = Finished
 ers.signout = Sign out
 ers.continue = Continue
 ers.back = Back
+ers.warning = Warning
 
 
 ers.start.page_title = Check your Employment Related Securities (ERS) files – Employment Related Securities – GOV.UK
@@ -35,21 +36,21 @@ ers_start.sub_title = Before you start
 ers_start.intro_para_3 = You’ll need to know which type of ERS scheme or arrangement the file is for.
 ers_start.intro_para_4 = If you’re checking a spreadsheet it needs to be an OpenDocument Spreadsheet (.ods) file. You can also check comma separated values (.csv) files.
 ers_start.intro_para_5 = The time it takes to check a file depends on the speed of your internet connection and the size of your spreadsheet or .csv file.
-ers_start.ers_help = <a href="https://www.gov.uk/government/collections/employment-related-securities" id="ers-help-link">Use the ERS guidance documents</a> to help you create error-free files.
+ers_start.ers_help = <a href="https://www.gov.uk/government/collections/employment-related-securities" id="ers-help-link">Use the Employment Related Securities (ERS) guidance documents</a> to help you create error-free files.
 ers_start.start_now_button = Start now
 
 #********************************************************************
 # Scheme type messages
 #********************************************************************
 
-ers_scheme_type.page_title = Which type of ERS scheme or arrangement is this file for?
+ers_scheme_type.page_title = Which type of Employment Related Securities (ERS) scheme or arrangement is this file for?
 ers_scheme_type.csop = Company Share Option Plan (CSOP - Form 35)
 ers_scheme_type.emi = Enterprise Management Incentives (EMI - Form EMI40)
 ers_scheme_type.saye = Save As You Earn (SAYE - Form 34)
 ers_scheme_type.sip = Share Incentive Plan (SIP - Form 39)
 ers_scheme_type.other = Other (Form 42)
 ers_scheme_type.continue = Continue
-ers_scheme_type.select_scheme_type = Select the type of ERS scheme or arrangement
+ers_scheme_type.select_scheme_type = Select the type of Employment Related Securities (ERS) scheme or arrangement
 
 #********************************************************************
 # File type messages
@@ -104,7 +105,7 @@ ers_check_file.check_file_button = Check for errors
 ers_check_file.file_type_error = You chose to check an ODS file, but {0} isn’t an ODS file.
 ers_check_file.no_file_error = No file selected. Please choose your file.
 
-ers_upload_form.processing_alert = We're checking your file for errors. Do not refresh the page.
+ers_upload_form.processing_alert = We’re checking your file for errors. Do not refresh the page.
 
 #********************************************************************
 # Error messages
@@ -134,7 +135,6 @@ ers_service_unavailable.para1 = The Checking Service is currently unavailable, p
 
 ers_not_authorised.page_title = Check your Employment Related Securities (ERS) files
 ers_not_authorised.para1 = You aren’t authorised to access ERS checking service
-ers_not_authorised.warning = Warning
 
 ers_html_error_report.report_title = {0} ({1}) error report
 ers_html_error_report.number_of_errors_sing = Showing {0} of {1} error found.
@@ -156,15 +156,15 @@ ers.exceptions.dataParser.fileRetrievalFailed = The file that you chose seems to
 ers.exceptions.dataParser.parserFailure = The file that you chose seems to be damaged.<br/><br/>You won’t be able to upload {0} as part of your annual return.
 ers.exceptions.dataParser.fileParsingError = The file that you chose to check seems to be damaged. You won’t be able to upload {0} as part of your annual return.
 ers.exceptions.dataParser.parsingOfFileData = Parsing of File Data
-ers.exceptions.dataParser.incorrectSheetName = {0} isn’t a sheet name (title) that can be used in {1} files.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the ERS guidance documents</a> to help you create error-free files.
+ers.exceptions.dataParser.incorrectSheetName = {0} isn’t a sheet name (title) that can be used in {1} files.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the Employment Related Securities (ERS) guidance documents</a> to help you create error-free files.
 ers.exceptions.dataParser.incorrectSchemeType = You chose to check {1} file, but {2} is {0} file.
 ers.exceptions.dataParser.unidentifiableSheetName = Couldn’t identify SheetName
-ers.exceptions.dataParser.incorrectHeader = The headers on {0} in {1} aren’t right.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the ERS guidance documents</a> to make sure they’re as required.
+ers.exceptions.dataParser.incorrectHeader = The headers on {0} in {1} aren’t right.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the Employment Related Securities (ERS) guidance documents</a> to make sure they’re as required.
 ers.exceptions.dataParser.headersDontMatch = Header doesn’t match
 ers.exceptions.dataParser.configFailure = It hasn’t been possible to check this file.
 ers.exceptions.dataParser.validatorError = Could not set the validator
 ers.exceptions.dataParser.ampersand = Must not contain ampersands.
-ers.exceptions.dataParser.noData = The file that you chose doesn’t have any data after row 9. The reportable events data must start in cell A10.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the ERS guidance documents</a> to help you create error-free files.
+ers.exceptions.dataParser.noData = The file that you chose doesn’t have any data after row 9. The reportable events data must start in cell A10.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the Employment Related Securities (ERS) guidance documents</a> to help you create error-free files.
 
 ers.global_errors.message = Sorry, there is a problem with the service
 ers.global_errors.heading = Check your Employment Related Securities (ERS) files – Employment Related Securities
