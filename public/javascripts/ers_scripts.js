@@ -102,13 +102,13 @@ function showErrorMsg(msg) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    const spinnerDiv = document.getElementById("progress-spinner")
+    const fileProcessingAlertDiv = document.getElementById("file-processing-alert")
 
     /* Spinner */
     if (checkFileButton) {
             checkFileButton.addEventListener('click', function () {
-                spinnerDiv.style.display = ''
-                spinnerDiv.classList.remove("govuk-!-display-none")
+                fileProcessingAlertDiv.style.display = ''
+                fileProcessingAlertDiv.classList.remove("govuk-!-display-none")
             })
     }
 

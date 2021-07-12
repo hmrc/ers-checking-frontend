@@ -2,21 +2,22 @@
 # General messages
 #********************************************************************
 
-service.name = Gwirio’ch ffeiliau ERS
+service.name = Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS)
 
 ers.csop = Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni
 ers.emi = Cymhellion Rheoli Mentrau
 ers.saye = Cynilo Wrth Ennill
 ers.sip = Cynllun Cymell Cyfranddaliadau
 ers.other = Arall
-ers.header = Gwirio’ch ffeiliau ERS
+ers.header = Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS)
 ers.finish = Wedi gorffen
 ers.signout =  Allgofnodi
 ers.continue = Yn eich blaen
 ers.back = Yn ôl
+ers.warning = Rhybudd
 
 
-ers.start.page_title = Gwirio’ch ffeiliau ERS – Gwarantau ar Sail Cyflogaeth – GOV.UK
+ers.start.page_title = Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS) – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.scheme_types.page_title = Dewis math o gynllun neu drefniant – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.file_type.page_title = Dewis math o ffeil – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.choose_csv_files.title = Dewis a gwirio’r ffeiliau .csv – Gwarantau ar Sail Cyflogaeth – GOV.UK
@@ -29,27 +30,27 @@ ers.confirmation.page_title = Cadarnhad – Gwarantau ar Sail Cyflogaeth – GOV
 # Start page messages
 #********************************************************************
 
-ers_start.page_title = Gwirio’ch ffeiliau ERS
+ers_start.page_title = Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS)
 ers_start.intro_para_1 = Defnyddiwch y gwasanaeth hwn i wirio am wallau yn y ffeiliau y mae angen i chi eu huwchlwytho fel rhan o’ch Datganiad Blynyddol ar gyfer Gwarantau ar Sail Cyflogaeth (ERS)
 ers_start.sub_title = Cyn i chi ddechrau
 ers_start.intro_para_3 = Bydd angen i chi wybod ar gyfer pa fath o gynllun neu drefniant ERS y mae’r ffeil.
 ers_start.intro_para_4 = Os ydych yn gwirio taenlen, mae’n rhaid iddi fod yn ffeil Taenlen OpenDocument (.ods). Gallwch hefyd wirio ffeiliau gwerthoedd wedi’u gwahanu gan goma (.csv).
 ers_start.intro_para_5 = Mae’r amser y mae’n cymryd i wirio ffeil yn dibynnu ar gyflymder eich cysylltiad i’r rhyngrwyd a maint eich taenlen neu’ch ffeil .csv.
-ers_start.ers_help = <a href="https://www.gov.uk/government/collections/employment-related-securities" id="ers-help-link">Defnyddio dogfennau arweiniad ERS</a> i’ch helpu i greu ffeiliau heb wallau.
+ers_start.ers_help = <a href="https://www.gov.uk/government/collections/employment-related-securities" id="ers-help-link">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i’ch helpu i greu ffeiliau heb wallau.
 ers_start.start_now_button = Dechrau nawr
 
 #********************************************************************
 # Scheme type messages
 #********************************************************************
 
-ers_scheme_type.page_title = Ar gyfer pa fath o gynllun neu drefniant ERS y mae’r ffeil hon?
+ers_scheme_type.page_title = Pa fath o gynllun neu drefniant Gwarantau Ar Sail Cyflogaeth (ERS) y mae’r ffeil hon ar ei gyfer?
 ers_scheme_type.csop = Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni (CSOP - Ffurflen 35)
 ers_scheme_type.emi = Cymhellion Rheoli Mentrau (EMI - Ffurflen EMI40)
 ers_scheme_type.saye = Cynilo Wrth Ennill (SAYE - Ffurflen 34)
 ers_scheme_type.sip = Cynllun Cymell Cyfranddaliadau (SIP - Ffurflen 39)
 ers_scheme_type.other = Arall (Ffurflen 42)
 ers_scheme_type.continue = Yn eich blaen
-ers_scheme_type.select_scheme_type = Dewiswch y math o gynllun neu drefniant ERS
+ers_scheme_type.select_scheme_type = Dewiswch y math o gynllun neu drefniant Gwarantau Ar Sail Cyflogaeth (ERS)
 
 #********************************************************************
 # File type messages
@@ -67,6 +68,7 @@ ers_check_csv_file.file_type_error =Gwnaethoch ddewis gwirio ffeil CSV, ond nid 
 ers_check_csv_file.noData =Nid yw’r ffeil a ddewisoch yn cynnwys unrhyw ddata.<br/><br/>Ni fyddwch yn gallu uwchlwytho {0} fel rhan o’ch Datganiad Blynyddol.
 ers_check_csv_file.no_file_error =Dim ffeil wedi’i dewis. Dewiswch eich ffeiliau.
 ers_check_csv_file.invalidCharacters = Dileu cymeriadau annilys
+ers_check_csv_file.file_upload_label = Uwchlwytho ffeil
 
 ers_check_csv_file.clear_all_link =Clirio pob un
 
@@ -103,6 +105,8 @@ ers_check_file.check_file_button =Gwirio am wallau
 ers_check_file.file_type_error =Gwnaethoch ddewis gwirio ffeil ODS, ond nid yw {0} yn ffeil ODS.
 ers_check_file.no_file_error =Dim ffeil wedi’i dewis. Dewiswch eich ffeil.
 
+ers_upload_form.processing_alert = Rydym yn gwirio eich ffeil am wallau. Peidiwch ag adnewyddu’r dudalen.
+
 #********************************************************************
 # Error messages
 #********************************************************************
@@ -126,12 +130,11 @@ ers_file_format_successful.banner =Ni ddarganfuwyd unrhyw wallau.
 ers_file_format_successful.feedback =Beth oedd eich barn ar y gwasanaeth hwn?
 ers_file_format_successful.feedback_time =(mae’n cymryd 30 eiliad)
 
-ers_service_unavailable.page_title =Gwirio’ch ffeiliau ERS
+ers_service_unavailable.page_title =Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS)
 ers_service_unavailable.para1 =Nid yw’r Gwasanaeth Gwirio ar gael ar hyn o bryd, rhowch gynnig arall arni’n nes ymlaen.
 
-ers_not_authorised.page_title = Gwirio’ch ffeiliau ERS
+ers_not_authorised.page_title = Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS)
 ers_not_authorised.para1 = Nid ydych wedi’ch awdurdodi i gyrchu’r gwasanaeth gwirio ERS
-ers_not_authorised.warning = Rhybudd
 
 ers_html_error_report.report_title =Adroddiad o wallau {0} ({1})
 ers_html_error_report.number_of_errors_sing =Dangos {0} o’r {1} gwall a ddarganfuwyd.
@@ -153,18 +156,18 @@ ers.exceptions.dataParser.fileRetrievalFailed =Ymddengys fod y ffeil a ddewisoch
 ers.exceptions.dataParser.parserFailure =Ymddengys fod y ffeil a ddewisoch i’w gwirio wedi torri.<br/><br/>Ni fyddwch yn gallu uwchlwytho {0} fel rhan o’ch Datganiad Blynyddol.
 ers.exceptions.dataParser.fileParsingError =Ymddengys fod y ffeil a ddewisoch i’w gwirio wedi torri. Ni fyddwch yn gallu uwchlwytho {0} fel rhan o’ch Datganiad Blynyddol.
 ers.exceptions.dataParser.parsingOfFileData =Dosrannu Data Ffeil
-ers.exceptions.dataParser.incorrectSheetName =Nid yw {0} yn (deitl) enw dalen all gael ei ddefnyddio yn ffeiliau {1}.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Defnyddiwch y dogfennau arweiniad ERS</a> i’ch helpu i greu ffeiliau heb wallau.
+ers.exceptions.dataParser.incorrectSheetName =Nid yw {0} yn (deitl) enw dalen all gael ei ddefnyddio yn ffeiliau {1}.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i’ch helpu i greu ffeiliau heb wallau.
 ers.exceptions.dataParser.incorrectSchemeType =Gwnaethoch ddewis gwirio ffeil {1}, ond ffeil {0} yw {2}.
 ers.exceptions.dataParser.unidentifiableSheetName =Nid oedd modd adnabod EnwDalen
-ers.exceptions.dataParser.incorrectHeader =Nid yw’r penynnau ar {0} yn {1} yn gywir.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Defnyddiwch y dogfennau arweiniad ERS</a> i sicrhau eu bod yn bodloni gofynion.
+ers.exceptions.dataParser.incorrectHeader =Nid yw’r penynnau ar {0} yn {1} yn gywir.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i sicrhau eu bod yn bodloni gofynion.
 ers.exceptions.dataParser.headersDontMatch =Nid yw’r pennyn yn cyd-fynd
 ers.exceptions.dataParser.configFailure =Ni fu’n bosibl gwirio’r ffeil hon.
 ers.exceptions.dataParser.ampersand =Rhaid peidio â chynnwys ampersandau.
-ers.exceptions.dataParser.noData =Nid oes unrhyw ddata ar ôl rhes 9 yn y ffeil a ddewisoch. Mae’n rhaid i ddata’r digwyddiadau hysbysadwy ddechrau yng nghell A10.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Defnyddiwch y dogfennau arweiniad ERS</a> i’ch helpu i greu ffeiliau heb wallau.
+ers.exceptions.dataParser.noData =Nid oes unrhyw ddata ar ôl rhes 9 yn y ffeil a ddewisoch. Mae’n rhaid i ddata’r digwyddiadau hysbysadwy ddechrau yng nghell A10.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i’ch helpu i greu ffeiliau heb wallau.
 
 ers.global_errors.message = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth
-ers.global_errors.heading = Gwirio’ch ffeiliau ERS
-ers.global_errors.title = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth -  Gwirio’ch ffeiliau ERS – Gwarantau ar Sail Cyflogaeth – GOV.UK
+ers.global_errors.heading = Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS)
+ers.global_errors.title = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth -  Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS) – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.global.errors.try.later = Rhowch gynnig arall arni yn nes ymlaen.
 
 validation.summary.heading =Mae problem wedi codi
