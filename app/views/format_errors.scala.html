@@ -20,7 +20,10 @@
 @this(ers_main: views.html.ers_main,
         govukBackLink: GovukBackLink,
         hmrcPageHeading: HmrcPageHeading,
-        govukInsetText: GovukInsetText)
+        govukInsetText: GovukInsetText,
+        h1: components.h1,
+        p: components.p,
+        link: components.link)
 
 @(fileType: String,
         schemeName: String,
@@ -29,22 +32,24 @@
         errorMsgParams: Seq[String],
         showExtendedInstructions: Boolean)(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig, ersUtil: ERSUtil)
 
-@ers_main(title = messages("ers.error_report.page_title")) {
+@ers_main(title = messages("ers.format_errors.page_title")) {
 
     @govukBackLink(BackLink(
         href = ersUtil.getPageBackLink(messages(fileType)),
         content = Text(messages("ers.back"))
     ))
-    <div class="govuk-form-group">
-        @hmrcPageHeading(PageHeading(text = messages("ers_format_errors.page_title", schemeName, schemeNameShort)))
-        @govukInsetText(InsetText(content = HtmlContent(messages(errorMsg, errorMsgParams: _*))))
-        <h2 class="govuk-heading-m">@Html(messages("ers_format_errors.sub_heading"))</h2>
-        <p class="govuk-body">
-        @if(showExtendedInstructions) {
-            @Html(messages("ers_error_report.instructions1"))&nbsp<a href="@routes.CheckingServiceController.schemeTypePage()" class="govuk-link govuk-!-display-inline-block" id="check-another-return-file-link">@Html(messages("ers_error_report.instructions2"))</a>.
-        } else {
-            <a href="@routes.CheckingServiceController.schemeTypePage()" class="govuk-link" id="check-another-return-file-link">@Html(messages("ers_format_errors.instructions"))</a>
-        }
-        </p>
-    </div>
+<div class="govuk-body">
+    @h1(messages("ers_format_errors.page_title_new"))
+    @p(Html(messages("ers_format_errors.p")))
+
+    <ul class="govuk-list govuk-list--bullet">
+       <li>@messages("ers_format_errors.ul.l1")</li>
+       <li>@messages("ers_format_errors.ul.l2")</li>
+       <li>@messages("ers_format_errors.ul.l3")</li>
+       <li>@messages("ers_format_errors.ul.l4")</li>
+       <li>@messages("ers_format_errors.ul.l5")</li>
+    </ul>
+
+    @link(routes.CheckingServiceController.checkFileTypePage().url,"ers_format_errors.try_again")
+ </div>
 }

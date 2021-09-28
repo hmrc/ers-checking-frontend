@@ -25,6 +25,7 @@ ers.upload_csv.page_title = Uwchlwytho’ch ffeil ‘{0}’ – Gwarantau ar Sai
 ers.upload_ods.page_title = Dewis a gwirio’r ffeiliau .ods – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.error_report.page_title = Adroddiad o wallau – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.confirmation.page_title = Cadarnhad – Gwarantau ar Sail Cyflogaeth – GOV.UK
+ers.format_errors.page_title = Rhowch gynnig arall arni – Gwarantau ar Sail Cyflogaeth – GOV.UK
 
 #********************************************************************
 # Start page messages
@@ -173,6 +174,19 @@ ers.global.errors.try.later = Rhowch gynnig arall arni yn nes ymlaen.
 validation.summary.heading =Mae problem wedi codi
 csv_file_upload.summary_error =Dewiswch ffeil wahanol - rhaid iddi fod yn ffeil CSV
 ods_file_upload.summary_error =Dewiswch ffeil wahanol - rhaid iddi fod yn ffeil ODS
+
+#********************************************************************
+# File problem messages
+#********************************************************************
+
+ers_format_errors.page_title_new = Bu problem wrth uwchlwytho’r ffeil
+ers_format_errors.p = Gall hyn fod oherwydd y canlynol:
+ers_format_errors.ul.l1 = mae gan y ffeil yr enw anghywir neu mae’r enw yn fwy na 240 o gymeriadau
+ers_format_errors.ul.l2 = mae’r ffeil yn rhy fawr – mae terfyn o 100MB ar gyfer ffeiliau CSV a therfyn o 10MB ar gyfer ffeiliau ODS
+ers_format_errors.ul.l3 = yn wag
+ers_format_errors.ul.l4 = mae’r ffeil wedi’i chadw ar ffurf anghywir – dylai fod ar ffurf CSV neu ODS yn dibynnu ar yr hyn rydych eisoes wedi’i ddewis
+ers_format_errors.ul.l5 = mae’r ffeil yn cynnwys cymeriadau annilys
+ers_format_errors.try_again = Rhowch gynnig arall arni
 
 #********************************************************************
 # Upload Error Messages
