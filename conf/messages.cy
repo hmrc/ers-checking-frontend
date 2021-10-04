@@ -208,3 +208,16 @@ ers.upload.error.address-postcode=Mae’n rhaid i hwn fod rhwng 6 ac 8 cymeriad 
 ers.upload.error.address-postcode-mand=Nodwch y cod post (mae’n rhaid i hwn fod rhwng 6 ac 8 cymeriad a gall gynnwys dim ond priflythrennau)
 ers.upload.error.crn=Mae’n rhaid i Gyfeirnod y Cwmni fod yn llai nag 11 o gymeriadau (rhifau a llythrennau)
 ers.upload.error.ctr=Mae’n rhaid i’r cyfeirnod Treth Corfforaeth fod yn rhif 10 digid
+
+#********************************************************************
+# File problem messages
+#********************************************************************
+ers.file_problem.title = Bu problem wrth uwchlwytho’r ffeil - Gwarantau ar Sail Cyflogaeth – GOV.UK
+ers.file_problem.heading = Bu problem wrth uwchlwytho’r ffeil
+ers.file_problem.paragraph = Gall hyn fod oherwydd y canlynol:
+ers.file_problem.invalidFileName = mae gan y ffeil yr enw anghywir neu mae’r enw yn fwy na 240 o gymeriadau
+ers.file_problem.fileTooLarge = mae’r ffeil yn rhy fawr – mae terfyn o 100MB ar gyfer ffeiliau CSV a therfyn o 10MB ar gyfer ffeiliau ODS
+ers.file_problem.fileTooSmall = yn wag
+ers.file_problem.invalidFileType = mae’r ffeil wedi’i chadw ar ffurf anghywir – dylai fod ar ffurf CSV neu ODS yn dibynnu ar yr hyn rydych eisoes wedi’i ddewis
+ers.file_problem.invalidFileNameCharacters = mae’r ffeil yn cynnwys cymeriadau annilys
+ers.file_problem.tryAgain = Rhowch gynnig arall arni

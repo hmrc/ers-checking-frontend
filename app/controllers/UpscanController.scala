@@ -23,7 +23,7 @@ import controllers.auth.AuthAction
 import javax.inject.Inject
 import models.upscan._
 import play.api.Logger
-import play.api.i18n.I18nSupport
+import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -36,15 +36,32 @@ import scala.concurrent.{ExecutionContext, Future}
 class UpscanController @Inject()(authAction: AuthAction,
                                  sessionService: SessionService,
                                  mcc: MessagesControllerComponents,
-                                 override val global_error: views.html.global_error
+                                 override val global_error: views.html.global_error,
+                                 fileUploadProblemView: views.html.file_upload_problem
                                 )(implicit executionContext: ExecutionContext, ersUtil: ERSUtil,
                                   actorSystem: ActorSystem, override val appConfig: ApplicationConfig)
   extends FrontendController(mcc) with Retryable with I18nSupport with BaseController {
 
   val logger: Logger = Logger(getClass)
+
+
   def failure(): Action[AnyContent] = authAction.async { implicit request =>
+    val errorCode = request.getQueryString("errorCode").getOrElse("No errorCode returned")
+    val errorMessage = request.getQueryString("errorMessage").getOrElse("No errorMessage returned")
+    val errorRequestId = request.getQueryString("errorRequestId").getOrElse("No errorRequestId returned")
     logger.error("[UpscanController][failure] Failed to upload file to Upscan")
-    Future.successful(getGlobalErrorPage)
+    logger.error(s"Upscan Failure. errorCode: $errorCode, errorMessage: $errorMessage, errorRequestId: $errorRequestId")
+    errorCode match {
+      case "InvalidArgument" | "EntityTooLarge" | "EntityTooSmall" =>
+        Future.successful(getFileUploadProblemPage)
+      case _ => Future.successful(getGlobalErrorPage)
+    }
+  }
+
+  def getFileUploadProblemPage()(implicit request: Request[AnyRef], messages: Messages): Result = {
+    BadRequest(fileUploadProblemView(
+      "ers.file_problem.title"
+    )(request, messages, appConfig))
   }
 
 
