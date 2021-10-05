@@ -27,8 +27,8 @@ import scala.collection.mutable.ListBuffer
 
 object Fixtures {
 
-  def buildFakeRequestWithSessionId(method: String): FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest(method, "").withSession("sessionId" -> "FAKE_SESSION_ID")
+  def buildFakeRequestWithSessionId(method: String, url: String = ""): FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest(method, url).withSession("sessionId" -> "FAKE_SESSION_ID")
 
   def buildEmpRefRequestWithSessionId(method: String): RequestWithOptionalEmpRef[AnyContent] =
     RequestWithOptionalEmpRef(FakeRequest(method, "").withSession("sessionId" -> "FAKE_SESSION_ID"), None)

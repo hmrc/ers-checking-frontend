@@ -209,3 +209,17 @@ ers.upload.error.address-postcode=Must be 6 to 8 characters and only have capita
 ers.upload.error.address-postcode-mand=Enter the postcode (must be 6 to 8 characters and only have capital letters)
 ers.upload.error.crn=Company Reference Number must be less than 11 characters (numbers and letters)
 ers.upload.error.ctr=Corporation Tax reference must be a 10 digit number
+
+#********************************************************************
+# File problem messages
+#********************************************************************
+ers.file_problem.page_title = There is a problem with the file upload - Submit your ERS annual return – GOV.UK
+ers.file_problem.title = There is a problem with the file upload - Submit your ERS annual return – GOV.UK
+ers.file_problem.heading = There is a problem with the file upload
+ers.file_problem.paragraph = This may be because the file:
+ers.file_problem.invalidFileName = has the wrong name or the name is more than 240 characters
+ers.file_problem.fileTooLarge = is too large - there is a 100MB limit for CSV files and a 10MB limit for ODS files
+ers.file_problem.fileTooSmall = is empty
+ers.file_problem.invalidFileType = is the wrong type - it should be a CSV or an ODS depending on what you have already selected
+ers.file_problem.invalidFileNameCharacters = contains invalid characters
+ers.file_problem.tryAgain = Try again

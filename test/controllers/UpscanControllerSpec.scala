@@ -33,6 +33,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import views.html.global_error
+import views.html.file_upload_problem
 
 import scala.concurrent.Future
 
@@ -51,13 +52,14 @@ class UpscanControllerSpec extends WordSpecLike with Matchers with OptionValues
   val mockProcessODSService: ProcessODSService = mock[ProcessODSService]
   val mockProcessCsvService: ProcessCsvService = mock[ProcessCsvService]
   val globalErrorView: global_error = inject[global_error]
+  val fileUploadProblemView: file_upload_problem = inject[file_upload_problem]
 
   val uploadId: UploadId = UploadId("uploadId")
   val upscanCsvFilesCallback: UpscanCsvFilesCallback = UpscanCsvFilesCallback(uploadId: UploadId, InProgress)
   val upscanCsvFilesListCallbackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(files = List(upscanCsvFilesCallback))
 
   def upscanController(csvList: UpscanCsvFilesCallbackList = upscanCsvFilesListCallbackList): UpscanController =
-    new UpscanController(mockAuthAction, mockSessionService, mcc, globalErrorView) {
+    new UpscanController(mockAuthAction, mockSessionService, mcc, globalErrorView, fileUploadProblemView) {
     override def fetchCsvCallbackList(list: UpscanCsvFilesList, sessionId: String)
                                      (implicit hc: HeaderCarrier): Future[Seq[UpscanCsvFilesCallback]] = {
       Future.successful(csvList.files)
@@ -70,6 +72,15 @@ class UpscanControllerSpec extends WordSpecLike with Matchers with OptionValues
       val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET")
       val result: Future[Result] = upscanController().failure().apply(fakeRequest)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+    }
+
+    "return a 400 when one of the valid errorCodes is returned" in {
+      List("InvalidArgument", "EntityTooLarge", "EntityTooSmall").foreach {
+        errorCode =>
+          val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET", s"/failure?errorCode=$errorCode")
+          val result: Future[Result] = upscanController().failure().apply(fakeRequest)
+          status(result) shouldBe Status.BAD_REQUEST
+      }
     }
   }
 
@@ -113,7 +124,7 @@ class UpscanControllerSpec extends WordSpecLike with Matchers with OptionValues
       when(mockErsUtil.cache(any(), any(), any())(any(), any(), any())).thenReturn(Future.successful(null))
 
       def upscanControllerError(): UpscanController =
-        new UpscanController(mockAuthAction, mockSessionService, mcc, globalErrorView) {
+        new UpscanController(mockAuthAction, mockSessionService, mcc, globalErrorView,fileUploadProblemView) {
           override def fetchCsvCallbackList(list: UpscanCsvFilesList, sessionId: String)
                                            (implicit hc: HeaderCarrier): Future[Seq[UpscanCsvFilesCallback]] = {
             Future.failed(new Exception("error"))
