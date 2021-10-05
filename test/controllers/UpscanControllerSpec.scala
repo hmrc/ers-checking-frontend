@@ -74,7 +74,7 @@ class UpscanControllerSpec extends WordSpecLike with Matchers with OptionValues
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
 
-    "return a 4xx when one of the valid errorCodes is returned" in {
+    "return a 400 when one of the valid errorCodes is returned" in {
       List("InvalidArgument", "EntityTooLarge", "EntityTooSmall").foreach {
         errorCode =>
           val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET", s"/failure?errorCode=$errorCode")
