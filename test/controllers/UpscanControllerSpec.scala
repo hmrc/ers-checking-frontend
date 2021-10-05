@@ -73,6 +73,15 @@ class UpscanControllerSpec extends WordSpecLike with Matchers with OptionValues
       val result: Future[Result] = upscanController().failure().apply(fakeRequest)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
+
+    "return a 4xx when one of the valid errorCodes is returned" in {
+      List("InvalidArgument", "EntityTooLarge", "EntityTooSmall").foreach {
+        errorCode =>
+          val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET", s"/failure?errorCode=$errorCode")
+          val result: Future[Result] = upscanController().failure().apply(fakeRequest)
+          status(result) shouldBe Status.BAD_REQUEST
+      }
+    }
   }
 
   "successCsv" should {
