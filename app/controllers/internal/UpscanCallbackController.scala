@@ -59,6 +59,7 @@ class UpscanCallbackController @Inject()(sessionService: SessionService,
             Ok
           }) recover {
             case NonFatal(e) =>
+              logger.error(s"Exception Thrown: ${e.getMessage()}")
               logger.error(s"[UpscanController][callbackCsv] Failed to update cache after Upscan callback for UploadID: ${uploadId.value}, " +
                 s"ScRef: $sessionId", e)
               InternalServerError("Exception occurred when attempting to store data")
