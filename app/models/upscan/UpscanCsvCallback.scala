@@ -21,7 +21,7 @@ import play.api.libs.json.{Format, Json}
 case class UpscanCsvFilesCallback(uploadId: UploadId, uploadStatus: UploadStatus = NotStarted) {
   def isStarted: Boolean = uploadStatus != NotStarted
   def isComplete: Boolean = uploadStatus match {
-    case _: UploadedSuccessfully | Failed => true
+    case _: UploadedSuccessfully | Failed | FailedMimeType => true
     case _ => false
   }
 }
