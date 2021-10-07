@@ -22,6 +22,7 @@ sealed trait UploadStatus
 case object NotStarted extends UploadStatus
 case object InProgress extends UploadStatus
 case object Failed extends UploadStatus
+case object FailedMimeType extends UploadStatus
 
 case class UploadedSuccessfully(name: String, downloadUrl: String, noOfRows: Option[Int] = None) extends UploadStatus
 
@@ -37,6 +38,7 @@ object UploadStatus {
       case Some(JsString("NotStarted")) => JsSuccess(NotStarted)
       case Some(JsString("InProgress")) => JsSuccess(InProgress)
       case Some(JsString("Failed")) => JsSuccess(Failed)
+      case Some(JsString("FailedMimeType")) => JsSuccess(FailedMimeType)
       case Some(JsString("UploadedSuccessfully")) => Json.fromJson[UploadedSuccessfully](jsObject)(uploadedSuccessfullyFormat)
       case Some(value) => JsError(s"Unexpected value of _type: $value")
       case None => JsError("Missing _type field")
@@ -47,6 +49,7 @@ object UploadStatus {
     case NotStarted => JsObject(Map("_type" -> JsString("NotStarted")))
     case InProgress => JsObject(Map("_type" -> JsString("InProgress")))
     case Failed => JsObject(Map("_type" -> JsString("Failed")))
+    case FailedMimeType => JsObject(Map("_type" -> JsString("FailedMimeType")))
     case s: UploadedSuccessfully => Json.toJson(s)(uploadedSuccessfullyFormat).as[JsObject] + ("_type" -> JsString("UploadedSuccessfully"))
   }
 }

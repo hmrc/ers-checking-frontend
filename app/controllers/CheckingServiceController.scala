@@ -44,6 +44,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
                                           check_csv_file: views.html.check_csv_file,
                                           check_file: views.html.check_file,
                                           checking_success: views.html.checking_success,
+                                          invalid_file: views.html.file_upload_problem,
                                           override val global_error: views.html.global_error
                                          )(implicit ec: ExecutionContext, ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
   extends FrontendController(mcc) with I18nSupport with BaseController with Logging {
@@ -173,6 +174,15 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
 
   def showCheckingSuccessPage()(implicit request: Request[AnyRef], messages: Messages): Future[Result] = {
     Future.successful(Ok(checking_success(request, messages, appConfig)))
+  }
+
+  def checkingInvalidFilePage(): Action[AnyContent] = authAction.async {
+    implicit request =>
+      showInvalidFilePage()
+  }
+
+  def showInvalidFilePage()(implicit request: Request[AnyRef], messages: Messages): Future[Result] = {
+      Future.successful(BadRequest(invalid_file("ers.file_problem.title")(request, messages, appConfig)))
   }
 
   def formatErrorsPage(): Action[AnyContent] = authAction.async {

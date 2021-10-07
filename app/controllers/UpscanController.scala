@@ -52,18 +52,11 @@ class UpscanController @Inject()(authAction: AuthAction,
     logger.error("[UpscanController][failure] Failed to upload file to Upscan")
     logger.error(s"Upscan Failure. errorCode: $errorCode, errorMessage: $errorMessage, errorRequestId: $errorRequestId")
     errorCode match {
-      case "InvalidArgument" | "EntityTooLarge" | "EntityTooSmall" =>
-        Future.successful(getFileUploadProblemPage)
+      case "EntityTooLarge" | "EntityTooSmall" =>
+        Future.successful(Redirect(routes.CheckingServiceController.checkingInvalidFilePage()))
       case _ => Future.successful(getGlobalErrorPage)
     }
   }
-
-  def getFileUploadProblemPage()(implicit request: Request[AnyRef], messages: Messages): Result = {
-    BadRequest(fileUploadProblemView(
-      "ers.file_problem.title"
-    )(request, messages, appConfig))
-  }
-
 
   def fetchCsvCallbackList(list: UpscanCsvFilesList, sessionId: String)
                           (implicit hc: HeaderCarrier): Future[Seq[UpscanCsvFilesCallback]] = {
@@ -103,6 +96,8 @@ class UpscanController @Inject()(authAction: AuthAction,
           sessionService.createCallbackRecordCSV(callbackData, sessionId)
           if(callbackData.areAllFilesSuccessful()) {
             Redirect(routes.UploadController.uploadCSVFile(scheme))
+          } else if (callbackData.areAnyFilesWrongMimeType()) {
+            Redirect(routes.CheckingServiceController.checkingInvalidFilePage())
           } else {
             logger.error(s"[UpscanController][successCSV] Not all files are completed uploading - (${callbackData.areAllFilesComplete()}) " +
               s"or  had a successful response - (${callbackData.areAllFilesSuccessful()})")
