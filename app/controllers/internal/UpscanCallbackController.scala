@@ -56,7 +56,6 @@ class UpscanCallbackController @Inject()(sessionService: SessionService,
             Ok
           }) recover {
             case NonFatal(e) =>
-              logger.error(s"Exception Thrown: ${e.getMessage()}")
               logger.error(s"[UpscanController][callbackCsv] Failed to update cache after Upscan callback for UploadID: ${uploadId.value}, " +
                 s"ScRef: $sessionId", e)
               InternalServerError("Exception occurred when attempting to store data")
@@ -79,7 +78,7 @@ class UpscanCallbackController @Inject()(sessionService: SessionService,
           case UpscanFailedCallback(_, details) =>
             logger.warn(s"[UpscanController][callbackOds] Callback for session id: $sessionId failed. " +
               s"Reason: ${details.failureReason}. Message: ${details.message}")
-            Failed
+            if (details.message.contains("MIME type")) FailedMimeType else Failed
         }
         logger.info(s"[UpscanController][callbackOds] Updating callback for session: $sessionId to ${uploadStatus.getClass.getSimpleName}")
         sessionService.updateCallbackRecord(uploadStatus)(headerCarrier, ec).map(_ => Ok) recover {

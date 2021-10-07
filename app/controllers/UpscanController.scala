@@ -120,7 +120,7 @@ class UpscanController @Inject()(authAction: AuthAction,
   def successODS(scheme: String): Action[AnyContent] = authAction.async { implicit request =>
     val futureCallbackData: Future[Option[UploadStatus]] = sessionService.getCallbackRecord.withRetry(appConfig.odsSuccessRetryAmount) {
       _.fold(true) {
-          case _: UploadedSuccessfully | Failed => true
+          case _: UploadedSuccessfully | Failed | FailedMimeType => true
           case _ => false
         }
     }
@@ -131,6 +131,9 @@ class UpscanController @Inject()(authAction: AuthAction,
       case Some(Failed) =>
         logger.warn("[UpscanController][successODS] Upload status is failed")
         Future.successful(getGlobalErrorPage)
+      case Some(FailedMimeType) =>
+        logger.warn("[UpscanController][successODS] Upload status is rejected")
+        Future.successful(Redirect(routes.CheckingServiceController.checkingInvalidFilePage()))
       case None =>
         logger.error(s"[UpscanController][successODS] Failed to verify upload. No data found in cache")
         Future.successful(getGlobalErrorPage)

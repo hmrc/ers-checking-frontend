@@ -75,11 +75,12 @@ class UpscanControllerSpec extends WordSpecLike with Matchers with OptionValues
     }
 
     "return a 400 when one of the valid errorCodes is returned" in {
-      List("InvalidArgument", "EntityTooLarge", "EntityTooSmall").foreach {
+      List("EntityTooLarge", "EntityTooSmall").foreach {
         errorCode =>
           val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET", s"/failure?errorCode=$errorCode")
           val result: Future[Result] = upscanController().failure().apply(fakeRequest)
-          status(result) shouldBe Status.BAD_REQUEST
+          status(result) shouldBe Status.SEE_OTHER
+          result.futureValue.header.headers("Location") shouldBe routes.CheckingServiceController.checkingInvalidFilePage().toString
       }
     }
   }

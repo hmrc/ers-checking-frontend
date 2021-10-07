@@ -32,7 +32,7 @@ import play.api.mvc.{Call, DefaultMessagesControllerComponents, Result}
 import play.api.test.Helpers._
 import play.api.test.Injecting
 import uk.gov.hmrc.http.cache.client.CacheMap
-import views.html.{check_csv_file, check_file, check_file_type, checking_success, format_errors, global_error, scheme_type, select_csv_file_types, start}
+import views.html.{check_csv_file, check_file, check_file_type, checking_success, file_upload_problem, format_errors, global_error, scheme_type, select_csv_file_types, start}
 
 import scala.concurrent.Future
 
@@ -49,6 +49,7 @@ class CheckingServiceControllerTest extends WordSpecLike with Matchers with Opti
   val checkingSuccessView: checking_success = inject[checking_success]
   val selectFileTypeView: select_csv_file_types = inject[select_csv_file_types]
   val globalErrorView: global_error = inject[global_error]
+  val invalidErrorView: file_upload_problem = inject[file_upload_problem]
 
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
@@ -57,7 +58,7 @@ class CheckingServiceControllerTest extends WordSpecLike with Matchers with Opti
 
     def buildFakeCheckingServiceController(): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
-        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, globalErrorView) {
+        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, globalErrorView) {
         mockAnyContentAction
       }
 
@@ -79,7 +80,7 @@ class CheckingServiceControllerTest extends WordSpecLike with Matchers with Opti
 
     def buildFakeCheckingServiceController(): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
-        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, globalErrorView) {
+        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, globalErrorView) {
         mockAnyContentAction
       }
 
@@ -103,7 +104,7 @@ class CheckingServiceControllerTest extends WordSpecLike with Matchers with Opti
 
     def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
-        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, globalErrorView) {
+        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, globalErrorView) {
         when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any()))
           .thenReturn(if (schemeRes) Future.successful(null) else Future.failed(new Exception))
         mockAnyContentAction
@@ -150,7 +151,7 @@ class CheckingServiceControllerTest extends WordSpecLike with Matchers with Opti
 
     def buildFakeCheckingServiceController(fileTypeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
-        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, globalErrorView) {
+        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, globalErrorView) {
       when(mockErsUtil.fetch[String](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(),any(),any()))
         .thenReturn(if (fileTypeRes) Future.successful("csv") else Future.failed(new NoSuchElementException))
 			mockAnyContentAction
@@ -186,7 +187,7 @@ class CheckingServiceControllerTest extends WordSpecLike with Matchers with Opti
 
     def buildFakeCheckingServiceController(fileTypeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
-        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, globalErrorView) {
+        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, globalErrorView) {
       when(mockErsUtil.cache(refEq(mockErsUtil.FILE_TYPE_CACHE), anyString())(any(), any(), any()))
         .thenReturn(if (fileTypeRes) Future.successful(null) else Future.failed(new Exception))
 			mockAnyContentAction
@@ -243,7 +244,7 @@ class CheckingServiceControllerTest extends WordSpecLike with Matchers with Opti
 
     def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
-        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, globalErrorView) {
+        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, globalErrorView) {
         when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any()))
           .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
         when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any()))
@@ -282,7 +283,7 @@ class CheckingServiceControllerTest extends WordSpecLike with Matchers with Opti
 
     def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
-        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, globalErrorView) {
+        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, globalErrorView) {
         when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any()))
           .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
         when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any()))
@@ -323,7 +324,7 @@ class CheckingServiceControllerTest extends WordSpecLike with Matchers with Opti
 																					 errorCount: String = "0"
 																					): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
-        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, globalErrorView) {
+        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, globalErrorView) {
         when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any()))
           .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
 
@@ -358,7 +359,7 @@ class CheckingServiceControllerTest extends WordSpecLike with Matchers with Opti
 																					 errorCount: String = "0"
 																					): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
-        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, globalErrorView) {
+        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, globalErrorView) {
 
         when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any()))
           .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
