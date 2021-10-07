@@ -17,7 +17,6 @@
 package models.upscan
 
 import play.api.libs.json.{Format, Json}
-import play.api.http.FileMimeTypes
 
 case class UpscanCsvFilesCallback(uploadId: UploadId, uploadStatus: UploadStatus = NotStarted) {
   def isStarted: Boolean = uploadStatus != NotStarted
@@ -38,8 +37,7 @@ case class UpscanCsvFilesCallbackList(files: List[UpscanCsvFilesCallback]){
     _.uploadStatus.isInstanceOf[UploadedSuccessfully]
   }
 
-  def areAnyFilesWrongMimeType(): Boolean = files.contains(UpscanCsvFilesCallback(_, FailedMimeType))
-
+  def areAnyFilesWrongMimeType(): Boolean = files.filter(x => x.uploadStatus == FailedMimeType).nonEmpty
 }
 
 object UpscanCsvFilesCallbackList {
