@@ -103,6 +103,8 @@ class UpscanController @Inject()(authAction: AuthAction,
           sessionService.createCallbackRecordCSV(callbackData, sessionId)
           if(callbackData.areAllFilesSuccessful()) {
             Redirect(routes.UploadController.uploadCSVFile(scheme))
+          } else if (callbackData.areAnyFilesWrongMimeType()) {
+            getFileUploadProblemPage
           } else {
             logger.error(s"[UpscanController][successCSV] Not all files are completed uploading - (${callbackData.areAllFilesComplete()}) " +
               s"or  had a successful response - (${callbackData.areAllFilesSuccessful()})")

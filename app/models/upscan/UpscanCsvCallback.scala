@@ -36,6 +36,9 @@ case class UpscanCsvFilesCallbackList(files: List[UpscanCsvFilesCallback]){
   def areAllFilesSuccessful(): Boolean = files.forall {
     _.uploadStatus.isInstanceOf[UploadedSuccessfully]
   }
+
+  def areAnyFilesWrongMimeType(): Boolean = files.contains((_: UploadId, FailedMimeType))
+
 }
 
 object UpscanCsvFilesCallbackList {

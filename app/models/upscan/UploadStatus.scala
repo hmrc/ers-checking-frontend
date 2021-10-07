@@ -22,6 +22,9 @@ sealed trait UploadStatus
 case object NotStarted extends UploadStatus
 case object InProgress extends UploadStatus
 case object Failed extends UploadStatus
+case object FailedMimeType extends UploadStatus
+case object FailedFileTooLarge extends UploadStatus
+case object FailedFileTooSmall extends UploadStatus
 
 case class UploadedSuccessfully(name: String, downloadUrl: String, noOfRows: Option[Int] = None) extends UploadStatus
 
