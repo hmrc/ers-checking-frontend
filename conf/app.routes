@@ -28,6 +28,7 @@ POST  		/choose-scheme-or-arrangement-type			controllers.CheckingServiceControll
 
 GET			/confirmation			                    controllers.CheckingServiceController.checkingSuccessPage()
 GET			/format-errors				                controllers.CheckingServiceController.formatErrorsPage()
+GET         /invalid-file                               controllers.CheckingServiceController.checkingInvalidFilePage()
 
 GET			/error-report			    	            controllers.HtmlReportController.htmlErrorReportPage(isCsv: Boolean)
 

@@ -45,7 +45,7 @@ class UpscanCallbackController @Inject()(sessionService: SessionService,
               UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
             case UpscanFailedCallback(_, details) =>
               logger.warn(s"[UpscanController][callbackCsv] Upload id: ${uploadId.value} failed. Reason: ${details.failureReason}. Message: ${details.message}")
-              Failed
+              if (details.message.contains("MIME type")) FailedMimeType else Failed
           }
           logger.info(s"[UpscanController][callbackCsv] Updating CSV callback for upload id: ${uploadId.value} to ${uploadStatus.getClass.getSimpleName}")
 
@@ -78,7 +78,7 @@ class UpscanCallbackController @Inject()(sessionService: SessionService,
           case UpscanFailedCallback(_, details) =>
             logger.warn(s"[UpscanController][callbackOds] Callback for session id: $sessionId failed. " +
               s"Reason: ${details.failureReason}. Message: ${details.message}")
-            Failed
+            if (details.message.contains("MIME type")) FailedMimeType else Failed
         }
         logger.info(s"[UpscanController][callbackOds] Updating callback for session: $sessionId to ${uploadStatus.getClass.getSimpleName}")
         sessionService.updateCallbackRecord(uploadStatus)(headerCarrier, ec).map(_ => Ok) recover {

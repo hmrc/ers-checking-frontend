@@ -52,18 +52,11 @@ class UpscanController @Inject()(authAction: AuthAction,
     logger.error("[UpscanController][failure] Failed to upload file to Upscan")
     logger.error(s"Upscan Failure. errorCode: $errorCode, errorMessage: $errorMessage, errorRequestId: $errorRequestId")
     errorCode match {
-      case "InvalidArgument" | "EntityTooLarge" | "EntityTooSmall" =>
-        Future.successful(getFileUploadProblemPage)
+      case "EntityTooLarge" | "EntityTooSmall" =>
+        Future.successful(Redirect(routes.CheckingServiceController.checkingInvalidFilePage()))
       case _ => Future.successful(getGlobalErrorPage)
     }
   }
-
-  def getFileUploadProblemPage()(implicit request: Request[AnyRef], messages: Messages): Result = {
-    BadRequest(fileUploadProblemView(
-      "ers.file_problem.title"
-    )(request, messages, appConfig))
-  }
-
 
   def fetchCsvCallbackList(list: UpscanCsvFilesList, sessionId: String)
                           (implicit hc: HeaderCarrier): Future[Seq[UpscanCsvFilesCallback]] = {
@@ -103,6 +96,8 @@ class UpscanController @Inject()(authAction: AuthAction,
           sessionService.createCallbackRecordCSV(callbackData, sessionId)
           if(callbackData.areAllFilesSuccessful()) {
             Redirect(routes.UploadController.uploadCSVFile(scheme))
+          } else if (callbackData.areAnyFilesWrongMimeType()) {
+            Redirect(routes.CheckingServiceController.checkingInvalidFilePage())
           } else {
             logger.error(s"[UpscanController][successCSV] Not all files are completed uploading - (${callbackData.areAllFilesComplete()}) " +
               s"or  had a successful response - (${callbackData.areAllFilesSuccessful()})")
@@ -125,7 +120,7 @@ class UpscanController @Inject()(authAction: AuthAction,
   def successODS(scheme: String): Action[AnyContent] = authAction.async { implicit request =>
     val futureCallbackData: Future[Option[UploadStatus]] = sessionService.getCallbackRecord.withRetry(appConfig.odsSuccessRetryAmount) {
       _.fold(true) {
-          case _: UploadedSuccessfully | Failed => true
+          case _: UploadedSuccessfully | Failed | FailedMimeType => true
           case _ => false
         }
     }
@@ -136,6 +131,9 @@ class UpscanController @Inject()(authAction: AuthAction,
       case Some(Failed) =>
         logger.warn("[UpscanController][successODS] Upload status is failed")
         Future.successful(getGlobalErrorPage)
+      case Some(FailedMimeType) =>
+        logger.warn("[UpscanController][successODS] Upload status is rejected")
+        Future.successful(Redirect(routes.CheckingServiceController.checkingInvalidFilePage()))
       case None =>
         logger.error(s"[UpscanController][successODS] Failed to verify upload. No data found in cache")
         Future.successful(getGlobalErrorPage)

@@ -35,7 +35,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
-import views.html.{check_csv_file, check_file, check_file_type, checking_success, format_errors, global_error, scheme_type, select_csv_file_types, start}
+import views.html.{check_csv_file, check_file, check_file_type, checking_success, file_upload_problem, format_errors, global_error, scheme_type, select_csv_file_types, start}
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
@@ -54,10 +54,11 @@ class CheckCsvFilesControllerSpec extends WordSpecLike with Matchers with Option
   val checkingSuccessView: checking_success = inject[checking_success]
   val selectFileTypeView: select_csv_file_types = inject[select_csv_file_types]
   val globalErrorView: global_error = inject[global_error]
+  val invalidErrorView: file_upload_problem = inject[file_upload_problem]
 
   def buildFakeCheckingServiceController(): CheckingServiceController =
     new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
-      formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, globalErrorView) {
+      formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, globalErrorView) {
       mockAnyContentAction
     }
 
