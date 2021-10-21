@@ -33,14 +33,16 @@ import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents, Request, R
 import play.api.test.{FakeRequest, Injecting}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
 import views.html.{check_csv_file, check_file, check_file_type, checking_success, file_upload_problem, format_errors, global_error, scheme_type, select_csv_file_types, start}
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class CheckCsvFilesControllerSpec extends WordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite
+class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite
   with ErsTestHelper with Injecting with ScalaFutures {
 
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())

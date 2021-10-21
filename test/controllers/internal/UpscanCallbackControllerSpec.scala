@@ -29,11 +29,13 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.SessionService
 import uk.gov.hmrc.http.cache.client.CacheMap
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.Future
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class UpscanCallbackControllerSpec extends WordSpecLike with Matchers with OptionValues with ErsTestHelper
+class UpscanCallbackControllerSpec extends AnyWordSpecLike with Matchers with OptionValues with ErsTestHelper
                                                     with GuiceOneAppPerSuite
                                                     with BeforeAndAfterEach {
 

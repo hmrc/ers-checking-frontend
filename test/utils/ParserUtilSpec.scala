@@ -21,15 +21,17 @@ import models.SheetErrors
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class ParserUtilSpec extends WordSpecLike with Matchers with OptionValues with ErsTestHelper with ScalaFutures {
+class ParserUtilSpec extends AnyWordSpecLike with Matchers with OptionValues with ErsTestHelper with ScalaFutures {
   def parserUtil: ParserUtil = new ParserUtil(mockErsUtil, mockAppConfig)
 
   "getDataToValidate" must {

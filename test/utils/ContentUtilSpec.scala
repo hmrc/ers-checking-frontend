@@ -17,9 +17,11 @@
 package utils
 
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class ContentUtilSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar {
+class ContentUtilSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar {
 
   class TestUtil extends ContentUtil
 

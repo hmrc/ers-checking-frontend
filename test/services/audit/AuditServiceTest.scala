@@ -18,7 +18,7 @@ package services.audit
 
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -28,8 +28,9 @@ import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.bootstrap.audit.DefaultAuditConnector
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class AuditServiceTest extends WordSpec with Matchers with MockitoSugar {
+class AuditServiceTest extends AnyWordSpecLike with Matchers with MockitoSugar {
   val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
   implicit val hc: HeaderCarrier = HeaderCarrier()
 

@@ -33,12 +33,14 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.allEnrolments
 import uk.gov.hmrc.domain.EmpRef
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.play.guice.GuiceOneServerPerTest
 
 import scala.concurrent.Future
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class AuthActionSpec extends WordSpecLike with Matchers with OptionValues
+class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
   with ErsTestHelper with BeforeAndAfterEach with GuiceOneServerPerTest with ScalaFutures {
 
   override val mockAuthConnector: AuthConnector = mock[AuthConnector]

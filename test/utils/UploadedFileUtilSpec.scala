@@ -17,9 +17,11 @@
 package utils
 
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class UploadedFileUtilSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar {
+class UploadedFileUtilSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar {
 
   class TestUtil extends UploadedFileUtil
   val uploadedFileUtil = new TestUtil

@@ -31,7 +31,8 @@ import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.{Application, i18n}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.services.validation.models.ValidationError
 import utils.{ParserUtil, UploadedFileUtil}
 
@@ -39,8 +40,9 @@ import java.util.NoSuchElementException
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class ProcessODSServiceSpec extends WordSpecLike with Matchers with OptionValues with ErsTestHelper with GuiceOneAppPerSuite with ScalaFutures {
+class ProcessODSServiceSpec extends AnyWordSpecLike with Matchers with OptionValues with ErsTestHelper with GuiceOneAppPerSuite with ScalaFutures {
 
   val mockUploadedFileUtil: UploadedFileUtil = mock[UploadedFileUtil]
   val mockDataGenerator: DataGenerator = mock[DataGenerator]
