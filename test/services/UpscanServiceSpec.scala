@@ -25,12 +25,14 @@ import org.mockito.Mockito._
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class UpscanServiceSpec extends WordSpecLike with Matchers with OptionValues with ErsTestHelper {
+class UpscanServiceSpec extends AnyWordSpecLike with Matchers with OptionValues with ErsTestHelper {
 
 	override implicit val request = FakeRequest("GET", "http://localhost:9290/")
 	val mockUpscanConnector: UpscanConnector = mock[UpscanConnector]

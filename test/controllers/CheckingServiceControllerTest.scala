@@ -23,7 +23,8 @@ import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
@@ -35,9 +36,10 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.{check_csv_file, check_file, check_file_type, checking_success, file_upload_problem, format_errors, global_error, scheme_type, select_csv_file_types, start}
 
 import scala.concurrent.Future
+import org.scalatest.wordspec.AnyWordSpecLike
 
 
-class CheckingServiceControllerTest extends WordSpecLike with Matchers with OptionValues
+class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with OptionValues
   with GuiceOneAppPerSuite with ErsTestHelper with Injecting with ScalaFutures {
 
   val formatErrorsView: format_errors = inject[format_errors]

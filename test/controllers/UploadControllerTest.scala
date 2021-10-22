@@ -33,14 +33,16 @@ import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, i18n}
 import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
 import uk.gov.hmrc.http.HeaderCarrier
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import views.html.global_error
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) with WordSpecLike with Matchers
+class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) with AnyWordSpecLike with Matchers
 	with OptionValues with ErsTestHelper with GuiceOneAppPerSuite with Injecting with ScalaFutures {
 
 	val config: Map[String, Any] = Map("application.secret" -> "test",

@@ -30,14 +30,16 @@ import play.api.mvc.{DefaultMessagesControllerComponents, Result}
 import play.api.test.Injecting
 import services.{ProcessCsvService, ProcessODSService}
 import uk.gov.hmrc.http.HeaderCarrier
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import views.html.global_error
 import views.html.file_upload_problem
 
 import scala.concurrent.Future
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class UpscanControllerSpec extends WordSpecLike with Matchers with OptionValues
+class UpscanControllerSpec extends AnyWordSpecLike with Matchers with OptionValues
   with ErsTestHelper with GuiceOneAppPerSuite with Injecting with ScalaFutures {
 
   val config: Map[String, Any] = Map("application.secret" -> "test",

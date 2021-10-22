@@ -34,15 +34,17 @@ import play.api.test.Injecting
 import play.api.{Application, i18n}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 import utils.ERSUtil
 import views.html.{global_error, html_error_report}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class HtmlReportControllerTest extends WordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite with ErsTestHelper with Injecting {
+class HtmlReportControllerTest extends AnyWordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite with ErsTestHelper with Injecting {
 
   val config: Map[String, Any] = Map("application.secret" -> "test",
     "login-callback.url" -> "test",
