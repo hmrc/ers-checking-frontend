@@ -16,6 +16,7 @@
 
 @import models.upscan.UpscanInitiateResponse
 @import config.ApplicationConfig
+@import views.html.helper.CSPNonce
 
 @this(ers_main: views.html.ers_main,
 		upscan_file_upload_form: views.html.includes.upscan_file_upload_form,
@@ -24,14 +25,13 @@
 		hmrcPageHeading: HmrcPageHeading,
 )
 
-@(param: String, invalidChars: String)(implicit request: Request[AnyRef], messages: Messages, upscanResponse: UpscanInitiateResponse, appConfig: ApplicationConfig)
+@(param: String)(implicit request: Request[AnyRef], messages: Messages, upscanResponse: UpscanInitiateResponse, appConfig: ApplicationConfig)
 @* check return file Template *@
 
 
 
 @scripts = {
-	<script>var INVALID_CHARACTERS=/@Html(invalidChars)/</script>
-	<script src='@routes.Assets.versioned("javascripts/ers_ods_scripts.js")'> </script>
+	<script src='@routes.Assets.versioned("javascripts/ers_ods_scripts.js")' @{CSPNonce.attr}> </script>
 }
 
 @ers_main(title = messages("ers.upload_ods.page_title"), scripts) {

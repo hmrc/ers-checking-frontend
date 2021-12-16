@@ -42,6 +42,7 @@ var ie = (function () {
 
 /* Sanitise Filename */
 function validFileName(fileName) {
+    const INVALID_CHARACTERS = "[/^~\"|#?,\\\\£$&:@*+%{}<>\\[\\]]"
     return fileName.match(INVALID_CHARACTERS) == null;
 }
 

@@ -17,6 +17,7 @@
 @import models.upscan.UpscanInitiateResponse
 @import config.ApplicationConfig
 @import _root_.utils.ERSUtil
+@import views.html.helper.CSPNonce
 
 @this(ers_main: views.html.ers_main,
         upscan_file_upload_form: views.html.includes.upscan_file_upload_form,
@@ -25,11 +26,10 @@
         hmrcPageHeading: HmrcPageHeading
 )
 
-@(scheme: String, invalidChars: String, fileId: String)(implicit request: Request[AnyRef], messages: Messages, upscanResponse: UpscanInitiateResponse, appConfig: ApplicationConfig, ersUtil: ERSUtil)
+@(scheme: String, fileId: String)(implicit request: Request[AnyRef], messages: Messages, upscanResponse: UpscanInitiateResponse, appConfig: ApplicationConfig, ersUtil: ERSUtil)
 
 @scripts = {
-    <script>var INVALID_CHARACTERS =/@Html(invalidChars)/</script>
-    <script src='@routes.Assets.versioned("javascripts/ers_csv_scripts.js")'> </script>
+    <script src='@routes.Assets.versioned("javascripts/ers_csv_scripts.js")' @{CSPNonce.attr}> </script>
 }
 
 @ers_main(title = messages("ers.upload_csv.page_title", messages(s"ers_check_csv_file.$scheme.$fileId")), scripts) {
