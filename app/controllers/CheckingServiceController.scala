@@ -137,8 +137,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
       if currentCsvFile.isDefined
       upscanResponse <- upscanService.getUpscanFormData(isCSV = true, scheme, currentCsvFile)
     } yield {
-      val invalidChars: String = "[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]"
-      Ok(check_csv_file(scheme, invalidChars, currentCsvFile.get.fileId)(request, messages, upscanResponse, appConfig, ersUtil))
+      Ok(check_csv_file(scheme, currentCsvFile.get.fileId)(request, messages, upscanResponse, appConfig, ersUtil))
     }) recover {
       case e: Exception =>
         logger.error("[CheckingServiceController][showCheckCSVFilePage]: Unable to fetch scheme. Error: " + e.getMessage)
@@ -158,8 +157,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
       upscanResponse <- upscanService.getUpscanFormData(isCSV = false, scheme)
       _ <- sessionService.createCallbackRecord
     } yield {
-      val invalidChars: String = "[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]"
-      Ok(check_file(scheme, invalidChars)(request, messages, upscanResponse, appConfig))
+      Ok(check_file(scheme)(request, messages, upscanResponse, appConfig))
     }) recover {
       case e: Exception =>
         logger.error("[CheckingServiceController][showCheckODSFilePage] Unable to fetch scheme. Error: " + e.getMessage)
