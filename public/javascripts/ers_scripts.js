@@ -46,15 +46,6 @@ function validFileName(fileName) {
     return fileName.match(INVALID_CHARACTERS) == null;
 }
 
-function getFileNameExtension(fileName, shouldEqual) {
-    if (typeof fileName != "undefined") {
-        const extension = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length).toLowerCase()
-        return extension === shouldEqual
-    } else {
-        return false
-    }
-}
-
 function fileSizeOK() {
     if (ie < 10) {
         return true
