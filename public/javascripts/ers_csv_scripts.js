@@ -18,18 +18,11 @@ function validateFile(fileName, fileSize, e) {
     if (validFileName(fileName)) {
         // check file name length
         if (fileName.length <= MAX_FILENAME_LENGTH) {
-            // Check file extn
-            if (getFileNameExtension(fileName, "csv")) {
-                if (csvFileSizeOK(fileSize)) {
-                    // file ok
-                    return true;
-                } else {
-                    showErrorMsg(getLocalisedContent("csv.file.too.large", [MAX_CSV_FILESIZE / 1000000]));
-                    errors++;
-                    return false;
-                }
+            if (csvFileSizeOK(fileSize)) {
+                // file ok
+                return true;
             } else {
-                showErrorMsg(getLocalisedContent("csv.file.wrong.type"));
+                showErrorMsg(getLocalisedContent("csv.file.too.large", [MAX_CSV_FILESIZE / 1000000]));
                 errors++;
                 return false;
             }

@@ -19,16 +19,11 @@ document.getElementById("input-file-name").onchange = function (e) {
         if (validFileName(fileName)) {
             // check file name length
             if (fileName.length <= MAX_FILENAME_LENGTH) {
-                // Check file extn
-                if (getFileNameExtension(fileName, "ods")) {
-                    if (fileSizeOK()) {
-                        // file ok
-                        removeErrorMsg();
-                    } else {
-                        showErrorMsg(getLocalisedContent("ods.file.too.large", [MAX_ODS_FILESIZE / 1000000]));
-                    }
+                if (fileSizeOK()) {
+                    // file ok
+                    removeErrorMsg();
                 } else {
-                    showErrorMsg(getLocalisedContent("ods.file.wrong.type"));
+                    showErrorMsg(getLocalisedContent("ods.file.too.large", [MAX_ODS_FILESIZE / 1000000]));
                 }
             } else {
                 showErrorMsg(getLocalisedContent("ods.file.name.too.long", [MAX_FILENAME_LENGTH]));
