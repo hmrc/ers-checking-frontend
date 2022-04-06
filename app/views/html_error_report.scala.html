@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.{HmrcPageHeading, PageHeading}
 @import config.ApplicationConfig
 @import _root_.utils.ERSUtil
 
@@ -84,8 +85,15 @@
 
 
     <h2 class="govuk-heading-m">@Html(messages("ers_error_report.sub_heading"))</h2>
-    <p class="govuk-body">@Html(messages("ers_error_report.instructions1"))&nbsp<a href="@routes.CheckingServiceController.schemeTypePage()" class="govuk-link" id="check-another-return-file-link">@Html(messages("ers_error_report.instructions2"))</a>.</p>
+        <p class="govuk-body">@messages("ers_error_report.view_as_html2")</p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li>@messages("ers_error_report.instructions1") <a href="@routes.CheckingServiceController.schemeTypePage()" class="govuk-link" id="check-another-return-file-link-1">@messages("ers_error_report.instructions1.hyperlink")</a></li>
+        <li>@messages("ers_error_report.instructions2") <a href="@routes.CheckingServiceController.schemeTypePage()" class="govuk-link" id="check-another-return-file-link-2">@messages("ers_error_report.instructions2.hyperlink")</a></li>
+    </ul>
+
     <p class="govuk-body">
         <a class="govuk-link" href="https://www.gov.uk/done/employment-related-securities-files" id="finished">@Html(messages("ers_file_format_successful.feedback"))</a>&nbsp@Html(messages("ers_file_format_successful.feedback_time"))
     </p>
+
+<div class="govuk-!-padding-bottom-5"></div>
 }

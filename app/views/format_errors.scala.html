@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.{HmrcPageHeading, PageHeading}
 @import _root_.utils.ERSUtil
 @import config.ApplicationConfig
 
@@ -39,12 +40,21 @@
         @hmrcPageHeading(PageHeading(text = messages("ers_format_errors.page_title", schemeName, schemeNameShort)))
         @govukInsetText(InsetText(content = HtmlContent(messages(errorMsg, errorMsgParams: _*))))
         <h2 class="govuk-heading-m">@Html(messages("ers_format_errors.sub_heading"))</h2>
-        <p class="govuk-body">
-        @if(showExtendedInstructions) {
-            @Html(messages("ers_error_report.instructions1"))&nbsp<a href="@routes.CheckingServiceController.schemeTypePage()" class="govuk-link govuk-!-display-inline-block" id="check-another-return-file-link">@Html(messages("ers_error_report.instructions2"))</a>.
-        } else {
-            <a href="@routes.CheckingServiceController.schemeTypePage()" class="govuk-link" id="check-another-return-file-link">@Html(messages("ers_format_errors.instructions"))</a>
-        }
+        <p class="govuk-body" id="you-can">
+            @Html(messages("ers_error_report.view_as_html2"))
         </p>
+        <ul class="govuk-list govuk-list--bullet">
+
+            <li>
+                @Html(messages("ers.file_upload_error.instructions1"))
+                <a href="@routes.CheckingServiceController.schemeTypePage()" class="govuk-link" id="fix-the-errors">
+                    @Html(messages("ers.file_upload_error.instructions1.hyperlink"))</a>
+            </li>
+            <li>
+                @Html(messages("ers.file_upload_error.instructions2"))
+                <a href="@routes.CheckingServiceController.schemeTypePage()" class="govuk-link" id="check-another-return-file-link">
+                    @Html(messages("ers.file_upload_error.instructions2.hyperlink"))</a>
+            </li>
+        </ul>
     </div>
 }

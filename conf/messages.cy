@@ -36,7 +36,7 @@ ers_start.sub_title = Cyn i chi ddechrau
 ers_start.intro_para_3 = Bydd angen i chi wybod ar gyfer pa fath o gynllun neu drefniant ERS y mae’r ffeil.
 ers_start.intro_para_4 = Os ydych yn gwirio taenlen, mae’n rhaid iddi fod yn ffeil Taenlen OpenDocument (.ods). Gallwch hefyd wirio ffeiliau gwerthoedd wedi’u gwahanu gan goma (.csv).
 ers_start.intro_para_5 = Mae’r amser y mae’n cymryd i wirio ffeil yn dibynnu ar gyflymder eich cysylltiad i’r rhyngrwyd a maint eich taenlen neu’ch ffeil .csv.
-ers_start.ers_help = <a href="https://www.gov.uk/government/collections/employment-related-securities" id="ers-help-link">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i’ch helpu i greu ffeiliau heb wallau.
+ers_start.ers_help = <a href="https://www.gov.uk/government/collections/employment-related-securities" id="ers-help-link" class="govuk-link">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i’ch helpu i greu ffeiliau heb wallau.
 ers_start.start_now_button = Dechrau nawr
 
 #********************************************************************
@@ -115,9 +115,11 @@ ers_error_report.page_title =Adroddiad o wallau {0} ({1})
 ers_error_report.alert =Ymddengys fod y ffeil a ddewisoch i’w gwirio wedi torri.
 ers_error_report.alert_2 =Ni fyddwch yn gallu uwchlwytho {0} fel rhan o’ch Datganiad Blynyddol.
 ers_error_report.sub_heading =Yr hyn sy’n digwydd nesaf
-ers_error_report.view_as_html2 =Tarwch olwg ar yr adroddiad o wallau fel tudalen we
-ers_error_report.instructions1 =Cywirwch y gwallau cyn i chi ddefnyddio’r gwasanaeth hwn eto neu
-ers_error_report.instructions2 =dewiswch ffeil wahanol i’w gwirio
+ers_error_report.view_as_html2 =Gallwch wneud y canlynol:
+ers_error_report.instructions1 =cywiro’r gwallau ac
+ers_error_report.instructions1.hyperlink =uwchlwytho’r ffeil eto
+ers_error_report.instructions2 =dewis
+ers_error_report.instructions2.hyperlink =gwirio ffeil wahanol
 
 ers_format_errors.page_title =Adroddiad o wallau
 ers_format_errors.sub_heading =Yr hyn sy’n digwydd nesaf
@@ -156,19 +158,23 @@ ers.exceptions.dataParser.fileRetrievalFailed =Ymddengys fod y ffeil a ddewisoch
 ers.exceptions.dataParser.parserFailure =Ymddengys fod y ffeil a ddewisoch i’w gwirio wedi torri.<br/><br/>Ni fyddwch yn gallu uwchlwytho {0} fel rhan o’ch Datganiad Blynyddol.
 ers.exceptions.dataParser.fileParsingError =Ymddengys fod y ffeil a ddewisoch i’w gwirio wedi torri. Ni fyddwch yn gallu uwchlwytho {0} fel rhan o’ch Datganiad Blynyddol.
 ers.exceptions.dataParser.parsingOfFileData =Dosrannu Data Ffeil
-ers.exceptions.dataParser.incorrectSheetName =Nid yw {0} yn (deitl) enw dalen all gael ei ddefnyddio yn ffeiliau {1}.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i’ch helpu i greu ffeiliau heb wallau.
+ers.exceptions.dataParser.incorrectSheetName =Nid yw {0} yn (deitl) enw dalen all gael ei ddefnyddio yn ffeiliau {1}.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i’ch helpu i greu ffeiliau heb wallau.
 ers.exceptions.dataParser.incorrectSchemeType =Gwnaethoch ddewis gwirio ffeil {1}, ond ffeil {0} yw {2}.
 ers.exceptions.dataParser.unidentifiableSheetName =Nid oedd modd adnabod EnwDalen
-ers.exceptions.dataParser.incorrectHeader =Nid yw’r penynnau ar {0} yn {1} yn gywir.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i sicrhau eu bod yn bodloni gofynion.
+ers.exceptions.dataParser.incorrectHeader =Nid yw’r penynnau ar {0} yn {1} yn gywir.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i sicrhau eu bod yn bodloni gofynion.
 ers.exceptions.dataParser.headersDontMatch =Nid yw’r pennyn yn cyd-fynd
 ers.exceptions.dataParser.configFailure =Ni fu’n bosibl gwirio’r ffeil hon.
 ers.exceptions.dataParser.ampersand =Rhaid peidio â chynnwys ampersandau.
-ers.exceptions.dataParser.noData =Nid oes unrhyw ddata ar ôl rhes 9 yn y ffeil a ddewisoch. Mae’n rhaid i ddata’r digwyddiadau hysbysadwy ddechrau yng nghell A10.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i’ch helpu i greu ffeiliau heb wallau.
+ers.exceptions.dataParser.noData =Nid oes unrhyw ddata ar ôl rhes 9 yn y ffeil a ddewisoch. Mae’n rhaid i ddata’r digwyddiadau hysbysadwy ddechrau yng nghell A10.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link>Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i’ch helpu i greu ffeiliau heb wallau.
 
 ers.global_errors.message = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth
 ers.global_errors.heading = Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS)
 ers.global_errors.title = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth -  Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS) – Gwarantau ar Sail Cyflogaeth – GOV.UK
-ers.global.errors.try.later = Rhowch gynnig arall arni yn nes ymlaen.
+ers.global.errors.you.can.either= Gallwch wneud un o’r canlynol:
+ers.global.error.list.first = ewch
+ers.global.error.list.first.hyperlink = yn ôl i’r dechrau
+ers.global.error.list.second = dewiswch
+ers.global.error.list.second.hyperlink = gyflwyno cais am help
 
 validation.summary.heading =Mae problem wedi codi
 csv_file_upload.summary_error =Dewiswch ffeil wahanol - rhaid iddi fod yn ffeil CSV
@@ -208,6 +214,19 @@ ers.upload.error.address-postcode=Mae’n rhaid i hwn fod rhwng 6 ac 8 cymeriad 
 ers.upload.error.address-postcode-mand=Nodwch y cod post (mae’n rhaid i hwn fod rhwng 6 ac 8 cymeriad a gall gynnwys dim ond priflythrennau)
 ers.upload.error.crn=Mae’n rhaid i Gyfeirnod y Cwmni fod yn llai nag 11 o gymeriadau (rhifau a llythrennau)
 ers.upload.error.ctr=Mae’n rhaid i’r cyfeirnod Treth Corfforaeth fod yn rhif 10 digid
+
+#********************************************************************
+# Service File Upload Error Messages
+#********************************************************************
+
+ers.file_upload_error.heading = Mae’n ddrwg gennym, mae’n rhaid i chi uwchlwytho ffeil arall
+ers.file_upload_error.instructions1 = cywiro’r gwallau ac
+ers.file_upload_error.instructions1.hyperlink = uwchlwytho’r ffeil eto
+ers.file_upload_error.instructions2 = dewis
+ers.file_upload_error.instructions2.hyperlink = gwirio ffeil wahanol
+ers.file_upload_error.instructions3 = Os byddwch yn parhau i gael trafferthion gyda’r gwasanaeth
+ers.file_upload_error.instructions3.hyperlink = rhowch wybod i ni am y trafferthion rydych chi’n eu cael
+ers.file_upload_error.instructions3.fullstop = .
 
 #********************************************************************
 # File problem messages
