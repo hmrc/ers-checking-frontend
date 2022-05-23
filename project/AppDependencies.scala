@@ -1,12 +1,11 @@
-import play.core.PlayVersion
 import play.sbt.PlayImport.ws
 import sbt._
 
 object AppDependencies {
 
   val silencerVersion = "1.7.7"
-  val akkaVersion = "2.6.17"
-  val bootstrapVersion = "5.18.0"
+  val akkaVersion = "2.6.19"
+  val bootstrapVersion = "5.24.0"
 
   val compile: Seq[ModuleID] = Seq(
     ws,
@@ -22,10 +21,10 @@ object AppDependencies {
     "com.typesafe.akka"           %% "akka-http-spray-json"       % "10.2.7",
     "net.sourceforge.htmlcleaner" % "htmlcleaner"                 % "2.25",
     "uk.gov.hmrc"                 %% "bootstrap-frontend-play-28" % bootstrapVersion,
-    "uk.gov.hmrc"                 %% "domain"                     % "6.2.0-play-28",
-    "uk.gov.hmrc"                 %% "http-caching-client"        % "9.5.0-play-28",
+    "uk.gov.hmrc"                 %% "domain"                     % "8.1.0-play-28",
+    "uk.gov.hmrc"                 %% "http-caching-client"        % "9.6.0-play-28",
     "uk.gov.hmrc"                 %% "tabular-data-validator"     % "1.4.0",
-    "uk.gov.hmrc"                 %% "play-frontend-hmrc"         % "1.31.0-play-28"
+    "uk.gov.hmrc"                 %% "play-frontend-hmrc"         % "3.19.0-play-28"
   )
 
   val test: Seq[ModuleID] = Seq(
