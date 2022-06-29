@@ -18,19 +18,20 @@ package controllers
 
 import config.ApplicationConfig
 import controllers.auth.AuthAction
+
 import javax.inject.{Inject, Singleton}
-import models.upscan.{NotStarted, UpscanCsvFilesList}
+import models.upscan.{InProgress, NotStarted, UploadId, UploadStatus, UpscanCsvFilesList, UpscanIds}
 import models.{CS_checkFileType, CS_schemeType, CSformMappings}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.{SessionService, UpscanService}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future, future}
 
 @Singleton
 class CheckingServiceController @Inject()(authAction: AuthAction,
@@ -45,6 +46,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
                                           check_file: views.html.check_file,
                                           checking_success: views.html.checking_success,
                                           invalid_file: views.html.file_upload_problem,
+                                          file_upload_error: views.html.file_upload_error,
                                           override val global_error: views.html.global_error
                                          )(implicit ec: ExecutionContext, ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
   extends FrontendController(mcc) with I18nSupport with BaseController with Logging {
@@ -139,6 +141,9 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
     } yield {
       Ok(check_csv_file(scheme, currentCsvFile.get.fileId)(request, messages, upscanResponse, appConfig, ersUtil))
     }) recover {
+      case e: NoSuchElementException =>
+        logger.warn((("[CheckingServiceController][showCheckCSVFilePage]: No files match status NotStarted")))
+        Redirect(routes.CheckingServiceController.fileUploadError())
       case e: Exception =>
         logger.error("[CheckingServiceController][showCheckCSVFilePage]: Unable to fetch scheme. Error: " + e.getMessage)
         getGlobalErrorPage(request, messages)
@@ -210,5 +215,14 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
         logger.error("[CheckingServiceController][showFormatErrorsPage] Unable to fetch file type. Error: " + e.getMessage)
         getGlobalErrorPage
     }
+  }
+
+  def fileUploadError(): Action[AnyContent] = authAction {
+    implicit request =>
+      showFileUploadErrorPage()
+  }
+
+  def showFileUploadErrorPage()(implicit request: Request[AnyRef], messages: Messages): Result = {
+    (BadRequest(file_upload_error()(request, messages ,appConfig)))
   }
 }

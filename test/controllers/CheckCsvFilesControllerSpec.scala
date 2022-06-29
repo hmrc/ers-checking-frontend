@@ -36,7 +36,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
-import views.html.{check_csv_file, check_file, check_file_type, checking_success, file_upload_problem, format_errors, global_error, scheme_type, select_csv_file_types, start}
+import views.html.{check_csv_file, check_file, check_file_type, checking_success, file_upload_error, file_upload_problem, format_errors, global_error, scheme_type, select_csv_file_types, start}
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
@@ -57,10 +57,12 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
   val selectFileTypeView: select_csv_file_types = inject[select_csv_file_types]
   val globalErrorView: global_error = inject[global_error]
   val invalidErrorView: file_upload_problem = inject[file_upload_problem]
+  val fileUploadErrorView: file_upload_error = inject[file_upload_error]
 
   def buildFakeCheckingServiceController(): CheckingServiceController =
     new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
-      formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, globalErrorView) {
+      formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView,
+      invalidErrorView, fileUploadErrorView, globalErrorView) {
       mockAnyContentAction
     }
 
@@ -143,6 +145,16 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
       contentAsString(result) shouldBe "this is a reload"
     }
 
+    "call reloadWithError if no file selected" in {
+      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, selectFileTypeView, globalErrorView) {
+        mockAnyContentAction
+      }
+      val request = FakeRequest("GET", "")
+
+      val result = controllerUnderTest.validateCsvFilesPageSelected()(RequestWithOptionalEmpRef(request, None), hc)
+      status(result) shouldBe Status.SEE_OTHER
+    }
+
     "call reloadWithError if form does not have errors" in {
       val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, selectFileTypeView, globalErrorView) {
         override def performCsvFilesPageSelected(formData: Seq[CsvFiles])(
@@ -211,5 +223,4 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
       Await.result(result.head, Duration.Inf) shouldBe CacheMap("id", Map.empty)
     }
   }
-
 }

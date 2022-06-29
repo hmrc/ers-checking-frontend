@@ -30,6 +30,7 @@ GET			/format-errors				                controllers.CheckingServiceController.fo
 GET         /invalid-file                               controllers.CheckingServiceController.checkingInvalidFilePage()
 
 GET			/error-report			    	            controllers.HtmlReportController.htmlErrorReportPage(isCsv: Boolean)
+GET         /file-upload-error-page                     controllers.CheckingServiceController.fileUploadError()
 
 GET			/not-authorised                             controllers.AuthorisationController.notAuthorised()
 

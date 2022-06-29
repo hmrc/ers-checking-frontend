@@ -36,7 +36,7 @@ ers_start.sub_title = Before you start
 ers_start.intro_para_3 = You’ll need to know which type of ERS scheme or arrangement the file is for.
 ers_start.intro_para_4 = If you’re checking a spreadsheet it needs to be an OpenDocument Spreadsheet (.ods) file. You can also check comma separated values (.csv) files.
 ers_start.intro_para_5 = The time it takes to check a file depends on the speed of your internet connection and the size of your spreadsheet or .csv file.
-ers_start.ers_help = <a href="https://www.gov.uk/government/collections/employment-related-securities" id="ers-help-link">Use the Employment Related Securities (ERS) guidance documents</a> to help you create error-free files.
+ers_start.ers_help = <a href="https://www.gov.uk/government/collections/employment-related-securities" id="ers-help-link" class="govuk-link">Use the Employment Related Securities (ERS) guidance documents</a> to help you create error-free files.
 ers_start.start_now_button = Start now
 
 #********************************************************************
@@ -114,16 +114,18 @@ ers_upload_form.processing_alert = We’re checking your file for errors. Do not
 ers_error_report.page_title = {0} ({1}) error report
 ers_error_report.alert = The file that you chose to check seems to be damaged.
 ers_error_report.alert_2 = You won’t be able to upload {0} as part of your annual return.
-ers_error_report.sub_heading = What happens next
-ers_error_report.view_as_html2 = View this error report as a web page
-ers_error_report.instructions1 = Fix the errors before you use this service again or
-ers_error_report.instructions2 = choose a different file to check
+ers_error_report.sub_heading = What to do next
+ers_error_report.view_as_html2 = You can:
+ers_error_report.instructions1 = fix the errors and
+ers_error_report.instructions1.hyperlink = upload the file again
+ers_error_report.instructions2 = choose to
+ers_error_report.instructions2.hyperlink = check a different file
 
 ers_format_errors.page_title = Error report
-ers_format_errors.sub_heading = What happens next
+ers_format_errors.sub_heading = What to do next
 
 ers_file_format_successful.page_title = Check complete
-ers_file_format_successful.sub_heading = What happens next
+ers_file_format_successful.sub_heading = What to do next
 ers_file_format_successful.instructions = Check your files whenever you update them (regular checks help you to find and fix errors earlier).
 ers_file_format_successful.return_to_start_page_link = Check a different file
 ers_file_format_successful.banner = No errors were found.
@@ -156,20 +158,24 @@ ers.exceptions.dataParser.fileRetrievalFailed = The file that you chose seems to
 ers.exceptions.dataParser.parserFailure = The file that you chose seems to be damaged.<br/><br/>You won’t be able to upload {0} as part of your annual return.
 ers.exceptions.dataParser.fileParsingError = The file that you chose to check seems to be damaged. You won’t be able to upload {0} as part of your annual return.
 ers.exceptions.dataParser.parsingOfFileData = Parsing of File Data
-ers.exceptions.dataParser.incorrectSheetName = {0} isn’t a sheet name (title) that can be used in {1} files.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the Employment Related Securities (ERS) guidance documents</a> to help you create error-free files.
+ers.exceptions.dataParser.incorrectSheetName = {0} isn’t a sheet name (title) that can be used in {1} files.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Use the Employment Related Securities (ERS) guidance documents</a> to help you create error-free files.
 ers.exceptions.dataParser.incorrectSchemeType = You chose to check {1} file, but {2} is {0} file.
 ers.exceptions.dataParser.unidentifiableSheetName = Couldn’t identify SheetName
-ers.exceptions.dataParser.incorrectHeader = The headers on {0} in {1} aren’t right.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the Employment Related Securities (ERS) guidance documents</a> to make sure they’re as required.
+ers.exceptions.dataParser.incorrectHeader = The headers on {0} in {1} aren’t right.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Use the Employment Related Securities (ERS) guidance documents</a> to make sure they’re as required.
 ers.exceptions.dataParser.headersDontMatch = Header doesn’t match
 ers.exceptions.dataParser.configFailure = It hasn’t been possible to check this file.
 ers.exceptions.dataParser.validatorError = Could not set the validator
 ers.exceptions.dataParser.ampersand = Must not contain ampersands.
-ers.exceptions.dataParser.noData = The file that you chose doesn’t have any data after row 9. The reportable events data must start in cell A10.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities">Use the Employment Related Securities (ERS) guidance documents</a> to help you create error-free files.
+ers.exceptions.dataParser.noData = The file that you chose doesn’t have any data after row 9. The reportable events data must start in cell A10.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Use the Employment Related Securities (ERS) guidance documents</a> to help you create error-free files.
 
 ers.global_errors.message = Sorry, there is a problem with the service
 ers.global_errors.heading = Check your Employment Related Securities (ERS) files – Employment Related Securities
 ers.global_errors.title = Sorry, there is a problem with the service - Check your Employment Related Securities (ERS) files – GOV.UK
-ers.global.errors.try.later=Try again later.
+ers.global.errors.you.can.either= You can either:
+ers.global.error.list.first = go
+ers.global.error.list.first.hyperlink = back to the start
+ers.global.error.list.second = choose to
+ers.global.error.list.second.hyperlink = submit a request for help
 
 validation.summary.heading = There is a problem
 csv_file_upload.summary_error = Choose a different file - it must be a CSV file
@@ -209,6 +215,19 @@ ers.upload.error.address-postcode=Must be 6 to 8 characters and only have capita
 ers.upload.error.address-postcode-mand=Enter the postcode (must be 6 to 8 characters and only have capital letters)
 ers.upload.error.crn=Company Reference Number must be less than 11 characters (numbers and letters)
 ers.upload.error.ctr=Corporation Tax reference must be a 10 digit number
+
+#********************************************************************
+# Service File Upload Error Messages
+#********************************************************************
+
+ers.file_upload_error.heading = Sorry, you have to upload another file
+ers.file_upload_error.instructions1 = fix the errors and
+ers.file_upload_error.instructions1.hyperlink = upload the file again
+ers.file_upload_error.instructions2 = choose to
+ers.file_upload_error.instructions2.hyperlink = check a different file
+ers.file_upload_error.instructions3 = If you continue to have problems with the service then
+ers.file_upload_error.instructions3.hyperlink = please tell us about the issue you are experiencing
+ers.file_upload_error.instructions3.fullstop = .
 
 #********************************************************************
 # File problem messages
