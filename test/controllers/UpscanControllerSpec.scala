@@ -34,7 +34,6 @@ import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import views.html.global_error
-import views.html.file_upload_problem
 
 import scala.concurrent.Future
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -54,14 +53,13 @@ class UpscanControllerSpec extends AnyWordSpecLike with Matchers with OptionValu
   val mockProcessODSService: ProcessODSService = mock[ProcessODSService]
   val mockProcessCsvService: ProcessCsvService = mock[ProcessCsvService]
   val globalErrorView: global_error = inject[global_error]
-  val fileUploadProblemView: file_upload_problem = inject[file_upload_problem]
 
   val uploadId: UploadId = UploadId("uploadId")
   val upscanCsvFilesCallback: UpscanCsvFilesCallback = UpscanCsvFilesCallback(uploadId: UploadId, InProgress)
   val upscanCsvFilesListCallbackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(files = List(upscanCsvFilesCallback))
 
   def upscanController(csvList: UpscanCsvFilesCallbackList = upscanCsvFilesListCallbackList): UpscanController =
-    new UpscanController(mockAuthAction, mockSessionService, mcc, globalErrorView, fileUploadProblemView) {
+    new UpscanController(mockAuthAction, mockSessionService, mcc, globalErrorView) {
     override def fetchCsvCallbackList(list: UpscanCsvFilesList, sessionId: String)
                                      (implicit hc: HeaderCarrier): Future[Seq[UpscanCsvFilesCallback]] = {
       Future.successful(csvList.files)
@@ -127,7 +125,7 @@ class UpscanControllerSpec extends AnyWordSpecLike with Matchers with OptionValu
       when(mockErsUtil.cache(any(), any(), any())(any(), any(), any())).thenReturn(Future.successful(null))
 
       def upscanControllerError(): UpscanController =
-        new UpscanController(mockAuthAction, mockSessionService, mcc, globalErrorView,fileUploadProblemView) {
+        new UpscanController(mockAuthAction, mockSessionService, mcc, globalErrorView) {
           override def fetchCsvCallbackList(list: UpscanCsvFilesList, sessionId: String)
                                            (implicit hc: HeaderCarrier): Future[Seq[UpscanCsvFilesCallback]] = {
             Future.failed(new Exception("error"))

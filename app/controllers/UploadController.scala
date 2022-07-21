@@ -132,8 +132,11 @@ class UploadController @Inject()(authAction: AuthAction,
 
   def showuploadODSFile(scheme: String)
                        (implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
-    clearErrorCache() map {
-      case false => getGlobalErrorPage(request, messages)
+
+    for (
+      clearedSuccessfully <- clearErrorCache()
+    ) yield {
+      if (!clearedSuccessfully) getGlobalErrorPage(request, messages)
     }
 
     //These .get's are safe because the UploadedSuccessfully model is already validated as existing in the UpscanController

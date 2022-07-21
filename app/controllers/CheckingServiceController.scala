@@ -18,20 +18,19 @@ package controllers
 
 import config.ApplicationConfig
 import controllers.auth.AuthAction
-
 import javax.inject.{Inject, Singleton}
-import models.upscan.{InProgress, NotStarted, UploadId, UploadStatus, UpscanCsvFilesList, UpscanIds}
+import models.upscan.{NotStarted, UpscanCsvFilesList}
 import models.{CS_checkFileType, CS_schemeType, CSformMappings}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.{SessionService, UpscanService}
-import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
 
-import scala.concurrent.{ExecutionContext, Future, future}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class CheckingServiceController @Inject()(authAction: AuthAction,
