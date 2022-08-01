@@ -35,7 +35,7 @@ import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
 import uk.gov.hmrc.http.HeaderCarrier
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
-import play.api.test.Helpers.{defaultAwaitTimeout, status}
+import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
 import views.html.global_error
 
 import scala.concurrent.Future
@@ -111,6 +111,14 @@ class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) 
 			val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
 			status(result) shouldBe Status.SEE_OTHER
 			result.futureValue.header.headers("Location") shouldBe routes.HtmlReportController.htmlErrorReportPage(false).toString
+		}
+
+		"send the user to the global error page if the error cache fails to clear" in {
+			val controllerUnderTest = buildFakeUploadControllerOds(clearCacheResponse = false)
+			val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
+
+			//contentAsString(result) shouldBe "Blah"
+			status(result) shouldBe Status.INTERNAL_SERVER_ERROR
 		}
 
 	}
