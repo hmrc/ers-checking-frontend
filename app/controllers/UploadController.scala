@@ -132,17 +132,20 @@ class UploadController @Inject()(authAction: AuthAction,
 
   def showuploadODSFile(scheme: String)
                        (implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
-    clearErrorCache() map {
-      case false => getGlobalErrorPage(request, messages)
-    }
 
-    //These .get's are safe because the UploadedSuccessfully model is already validated as existing in the UpscanController
-    ersUtil.shortLivedCache.fetchAndGetEntry[UploadedSuccessfully](ersUtil.getCacheId, "callback_data_key") flatMap { file =>
-      val result = processODSService.performODSUpload(file.get.name, readFileOds(file.get.downloadUrl))(request, scheme, hc, messages)
-      result.flatMap[Result] {
-        case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
-        case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(false)))
-        case Failure(t) => handleException(t)
+    clearErrorCache().flatMap { clearedSuccessfully =>
+      if (clearedSuccessfully) {
+        //These .get's are safe because the UploadedSuccessfully model is already validated as existing in the UpscanController
+        ersUtil.shortLivedCache.fetchAndGetEntry[UploadedSuccessfully](ersUtil.getCacheId, "callback_data_key").flatMap { file =>
+          val result = processODSService.performODSUpload(file.get.name, readFileOds(file.get.downloadUrl))(request, scheme, hc, messages)
+          result.flatMap[Result] {
+            case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
+            case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(false)))
+            case Failure(t) => handleException(t)
+          }
+        }
+      } else {
+        Future.successful(getGlobalErrorPage(request, messages))
       }
     }
   }

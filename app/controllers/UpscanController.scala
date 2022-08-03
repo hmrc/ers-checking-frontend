@@ -19,11 +19,10 @@ package controllers
 import akka.actor.ActorSystem
 import config.ApplicationConfig
 import controllers.auth.AuthAction
-
 import javax.inject.Inject
 import models.upscan._
 import play.api.Logger
-import play.api.i18n.{I18nSupport, Messages}
+import play.api.i18n.I18nSupport
 import play.api.mvc._
 import services.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -36,14 +35,12 @@ import scala.concurrent.{ExecutionContext, Future}
 class UpscanController @Inject()(authAction: AuthAction,
                                  sessionService: SessionService,
                                  mcc: MessagesControllerComponents,
-                                 override val global_error: views.html.global_error,
-                                 fileUploadProblemView: views.html.file_upload_problem
+                                 override val global_error: views.html.global_error
                                 )(implicit executionContext: ExecutionContext, ersUtil: ERSUtil,
                                   actorSystem: ActorSystem, override val appConfig: ApplicationConfig)
   extends FrontendController(mcc) with Retryable with I18nSupport with BaseController {
 
   val logger: Logger = Logger(getClass)
-
 
   def failure(): Action[AnyContent] = authAction.async { implicit request =>
     val errorCode = request.getQueryString("errorCode").getOrElse("No errorCode returned")
@@ -67,7 +64,7 @@ class UpscanController @Inject()(authAction: AuthAction,
         }
       }
     }
-}
+  }
 
   def successCSV(uploadId: UploadId, scheme: String): Action[AnyContent] = authAction.async { implicit request =>
     logger.info(s"[UpscanController][successCSV] Upload form submitted for ID: $uploadId")
@@ -88,7 +85,6 @@ class UpscanController @Inject()(authAction: AuthAction,
           logger.debug(s"[UpscanController][successCSV] Fetched Callback list - $list")
           logger.info(s"[UpscanController][successCSV] Comparing cached files [${list.size}] to numberOfFileToUpload[${fileList.noOfFilesToUpload}]")
           logger.info(s"[UpscanController][successCSV] Checking if all files have completed upload - [${list.forall(_.isComplete)}]")
-
 
           (list.size == fileList.noOfFilesToUpload) && list.forall(_.isComplete)
         } map { files =>
@@ -115,7 +111,6 @@ class UpscanController @Inject()(authAction: AuthAction,
     }
 
   }
-
 
   def successODS(scheme: String): Action[AnyContent] = authAction.async { implicit request =>
     val futureCallbackData: Future[Option[UploadStatus]] = sessionService.getCallbackRecord.withRetry(appConfig.odsSuccessRetryAmount) {

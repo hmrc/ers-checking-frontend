@@ -24,7 +24,7 @@ import org.mockito.Mockito._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.play.bootstrap.audit.DefaultAuditConnector
+import uk.gov.hmrc.play.audit.DefaultAuditConnector
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike

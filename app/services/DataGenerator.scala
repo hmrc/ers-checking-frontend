@@ -126,13 +126,15 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
     }
   }
 
-  def setValidator(sheetName:String)(implicit hc : HeaderCarrier, messages: Messages): DataValidator = {
+  def setValidator(sheetName: String)(implicit hc: HeaderCarrier, messages: Messages): DataValidator = {
     try {
       ersValidationConfigs.getValidator(ersSheets(sheetName).configFileName)
-    }catch{
+    } catch {
       case e: Exception =>
         auditEvents.auditRunTimeError(e,"Could not set the validator", sheetName)
-        logger.error("[DataGenerator][setValidator] setValidator has thrown an exception, SheetName: " + sheetName + " Exception message: " + e.getMessage)
+        // Adjusting this log until this investigation is complete https://jira.tools.tax.service.gov.uk/browse/DDCE-3208
+        // logger.error("[DataGenerator][setValidator] setValidator has thrown an exception, SheetName: " + sheetName + " Exception message: " + e.getMessage)
+        logger.error("[DataGenerator][setValidator] setValidator has thrown an exception. Exception message: " + e.getMessage)
         throw ERSFileProcessingException(
           "ers.exceptions.dataParser.configFailure",
           Messages("ers.exceptions.dataParser.validatorError"),
@@ -141,7 +143,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
     }
   }
 
-  def setValidatorCsv(sheetName:String)(implicit hc : HeaderCarrier, messages: Messages): Either[Throwable, DataValidator] = {
+  def setValidatorCsv(sheetName: String)(implicit hc : HeaderCarrier, messages: Messages): Either[Throwable, DataValidator] = {
     Try {
       ersValidationConfigs.getValidator(ersSheets(sheetName).configFileName)
     } match {

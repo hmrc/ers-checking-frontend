@@ -23,24 +23,24 @@ import models.ERSFileProcessingException
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents}
+import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, i18n}
 import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
 import uk.gov.hmrc.http.HeaderCarrier
-import org.scalatest.OptionValues
-import org.scalatest.matchers.should.Matchers
-import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import views.html.global_error
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import org.scalatest.wordspec.AnyWordSpecLike
 
 class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) with AnyWordSpecLike with Matchers
 	with OptionValues with ErsTestHelper with GuiceOneAppPerSuite with Injecting with ScalaFutures {
@@ -111,6 +111,13 @@ class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) 
 			val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
 			status(result) shouldBe Status.SEE_OTHER
 			result.futureValue.header.headers("Location") shouldBe routes.HtmlReportController.htmlErrorReportPage(false).toString
+		}
+
+		"send the user to the global error page if the error cache fails to clear" in {
+			val controllerUnderTest = buildFakeUploadControllerOds(clearCacheResponse = false)
+			val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
+
+			status(result) shouldBe Status.INTERNAL_SERVER_ERROR
 		}
 
 	}
