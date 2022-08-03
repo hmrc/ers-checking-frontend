@@ -136,7 +136,7 @@ class UploadController @Inject()(authAction: AuthAction,
     clearErrorCache().flatMap { clearedSuccessfully =>
       if (clearedSuccessfully) {
         //These .get's are safe because the UploadedSuccessfully model is already validated as existing in the UpscanController
-        ersUtil.shortLivedCache.fetchAndGetEntry[UploadedSuccessfully](ersUtil.getCacheId, "callback_data_key") flatMap { file =>
+        ersUtil.shortLivedCache.fetchAndGetEntry[UploadedSuccessfully](ersUtil.getCacheId, "callback_data_key").flatMap { file =>
           val result = processODSService.performODSUpload(file.get.name, readFileOds(file.get.downloadUrl))(request, scheme, hc, messages)
           result.flatMap[Result] {
             case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
