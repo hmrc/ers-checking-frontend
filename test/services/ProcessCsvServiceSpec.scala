@@ -16,6 +16,8 @@
 
 package services
 
+import java.io.File
+
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
@@ -30,9 +32,10 @@ import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, Up
 import models.{ERSFileProcessingException, RowValidationResults, SheetErrors}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.concurrent.{ScalaFutures, TimeLimits}
 import org.scalatest.OptionValues
+import org.scalatest.concurrent.{ScalaFutures, TimeLimits}
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesImpl}
@@ -44,11 +47,9 @@ import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 import utils.CsvParserUtil
 
-import java.io.File
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
-import org.scalatest.wordspec.AnyWordSpecLike
 
 class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with AnyWordSpecLike with Matchers
   with OptionValues with ErsTestHelper with GuiceOneAppPerSuite with TimeLimits with ScalaFutures {

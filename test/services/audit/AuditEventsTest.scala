@@ -21,13 +21,13 @@ import helpers.ErsTestHelper
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import play.api.test.FakeRequest
-import uk.gov.hmrc.domain.EmpRef
-import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.play.audit.DefaultAuditConnector
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
+import play.api.test.FakeRequest
+import uk.gov.hmrc.domain.EmpRef
+import uk.gov.hmrc.play.audit.DefaultAuditConnector
+import uk.gov.hmrc.play.audit.model.DataEvent
 
 class AuditEventsTest extends AnyWordSpecLike with Matchers with OptionValues with ErsTestHelper {
 

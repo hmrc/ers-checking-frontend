@@ -24,9 +24,9 @@ import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Logger, i18n}
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.mvc.DefaultMessagesControllerComponents
+import play.api.{Logger, i18n}
 import services.XMLTestData._
 import utils.{CsvParserUtil, ParserUtil}
 

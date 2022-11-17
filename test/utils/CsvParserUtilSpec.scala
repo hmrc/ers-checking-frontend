@@ -21,10 +21,10 @@ import models.SheetErrors
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 
 import scala.collection.mutable.ListBuffer
-import org.scalatest.wordspec.AnyWordSpecLike
 
 class CsvParserUtilSpec extends AnyWordSpecLike with Matchers with OptionValues with ErsTestHelper {
   def parserUtil: CsvParserUtil = new CsvParserUtil(mockAppConfig)

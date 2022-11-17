@@ -16,8 +16,8 @@
 
 package services.validation.SAYETestData
 
-import uk.gov.hmrc.services.validation.models.Cell
 import models.ValidationErrorData
+import uk.gov.hmrc.services.validation.models.Cell
 
 trait ERSValidationSAYERCLTestData {
   val rowNumber:Int = 1

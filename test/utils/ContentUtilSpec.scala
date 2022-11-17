@@ -16,10 +16,10 @@
 
 package utils
 
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatestplus.mockito.MockitoSugar
 
 class ContentUtilSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar {
 

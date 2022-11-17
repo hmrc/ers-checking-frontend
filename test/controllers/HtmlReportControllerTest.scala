@@ -22,6 +22,9 @@ import models.SheetErrors
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n.MessagesImpl
@@ -34,15 +37,12 @@ import play.api.test.Injecting
 import play.api.{Application, i18n}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
-import org.scalatest.OptionValues
-import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 import utils.ERSUtil
 import views.html.{global_error, html_error_report}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
-import org.scalatest.wordspec.AnyWordSpecLike
 
 class HtmlReportControllerTest extends AnyWordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite with ErsTestHelper with Injecting {
 

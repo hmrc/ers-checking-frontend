@@ -18,7 +18,7 @@ package controllers
 
 import helpers.ErsTestHelper
 import models.CSformMappings
-import models.upscan.{NotStarted, Reference, UploadId, UpscanCsvFilesList, UpscanIds, UpscanInitiateResponse}
+import models.upscan._
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -34,7 +34,7 @@ import play.api.mvc.{Call, DefaultMessagesControllerComponents, Result}
 import play.api.test.Helpers._
 import play.api.test.Injecting
 import uk.gov.hmrc.http.cache.client.CacheMap
-import views.html.{check_csv_file, check_file, check_file_type, checking_success, file_upload_error, file_upload_problem, format_errors, global_error, scheme_type, select_csv_file_types, start}
+import views.html._
 
 import scala.concurrent.Future
 

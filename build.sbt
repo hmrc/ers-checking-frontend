@@ -37,3 +37,5 @@ TwirlKeys.templateImports ++= Seq(
   "uk.gov.hmrc.govukfrontend.views.html.components._",
   "uk.gov.hmrc.hmrcfrontend.views.html.helpers._"
 )
+
+addCommandAlias("scalastyleAll", "all scalastyle test:scalastyle")

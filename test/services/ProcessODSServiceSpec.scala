@@ -16,6 +16,8 @@
 
 package services
 
+import java.util.NoSuchElementException
+
 import controllers.Fixtures
 import controllers.auth.RequestWithOptionalEmpRef
 import helpers.ErsTestHelper
@@ -23,7 +25,10 @@ import models.{ERSFileProcessingException, SheetErrors}
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.MessagesImpl
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -31,16 +36,12 @@ import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.{Application, i18n}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import org.scalatest.OptionValues
-import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.services.validation.models.ValidationError
 import utils.{ParserUtil, UploadedFileUtil}
 
-import java.util.NoSuchElementException
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import org.scalatest.wordspec.AnyWordSpecLike
 
 class ProcessODSServiceSpec extends AnyWordSpecLike with Matchers with OptionValues with ErsTestHelper with GuiceOneAppPerSuite with ScalaFutures {
 

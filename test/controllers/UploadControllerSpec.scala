@@ -27,24 +27,24 @@ import models.ERSFileProcessingException
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import org.mockito.ArgumentMatchers.{any, anyString, refEq}
 import org.mockito.Mockito.when
+import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents, Request, Result}
+import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, i18n}
 import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import org.scalatest.OptionValues
-import org.scalatest.matchers.should.Matchers
-import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
 import views.html.global_error
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
-import org.scalatest.wordspec.AnyWordSpecLike
 
 class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) with AnyWordSpecLike with Matchers
   with OptionValues with ErsTestHelper with GuiceOneAppPerSuite with Injecting with ScalaFutures {
