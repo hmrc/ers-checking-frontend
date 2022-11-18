@@ -22,15 +22,15 @@ import models.upscan._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
-import org.scalatest.OptionValues
-import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
-import org.scalatest.wordspec.AnyWordSpecLike
 
 class UpscanServiceSpec extends AnyWordSpecLike with Matchers with OptionValues with ErsTestHelper {
 

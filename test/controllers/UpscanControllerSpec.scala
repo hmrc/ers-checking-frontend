@@ -21,22 +21,22 @@ import helpers.ErsTestHelper
 import models.upscan._
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
+import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.http.Status
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{DefaultMessagesControllerComponents, Result}
+import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.Injecting
 import services.{ProcessCsvService, ProcessODSService}
 import uk.gov.hmrc.http.HeaderCarrier
-import org.scalatest.OptionValues
-import org.scalatest.matchers.should.Matchers
-import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import views.html.global_error
 
 import scala.concurrent.Future
-import org.scalatest.wordspec.AnyWordSpecLike
 
 class UpscanControllerSpec extends AnyWordSpecLike with Matchers with OptionValues
   with ErsTestHelper with GuiceOneAppPerSuite with Injecting with ScalaFutures {

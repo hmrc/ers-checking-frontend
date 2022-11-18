@@ -16,9 +16,9 @@
 
 package services.validation.OTHERTestData
 
-import uk.gov.hmrc.services.validation.models.Cell
 import models.ValidationErrorData
 import org.apache.commons.lang3.StringUtils
+import uk.gov.hmrc.services.validation.models.Cell
 
 trait ERSValidationOTHEROtherBenefitsTestData {
 
@@ -163,7 +163,7 @@ trait ERSValidationOTHEROtherBenefitsTestData {
       //M|
       None,
       Some(List(ValidationErrorData("error.13","013","Enter ‘yes’ or ‘no’"))),
-      Some(List(ValidationErrorData("error.13","013","Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("error.13","013","Enter ‘yes’ or ‘no’")))
     )
     expectedResults
   }

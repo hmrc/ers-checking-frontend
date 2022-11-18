@@ -22,7 +22,10 @@ import helpers.ErsTestHelper
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{Assertion, BeforeAndAfterEach}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.{Assertion, BeforeAndAfterEach, OptionValues}
+import org.scalatestplus.play.guice.GuiceOneServerPerTest
 import play.api.Play
 import play.api.http.Status
 import play.api.mvc.{BodyParsers, Result, Results}
@@ -33,12 +36,8 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.allEnrolments
 import uk.gov.hmrc.domain.EmpRef
-import org.scalatest.OptionValues
-import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.play.guice.GuiceOneServerPerTest
 
 import scala.concurrent.Future
-import org.scalatest.wordspec.AnyWordSpecLike
 
 class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
   with ErsTestHelper with BeforeAndAfterEach with GuiceOneServerPerTest with ScalaFutures {

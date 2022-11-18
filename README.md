@@ -15,6 +15,8 @@ This service utilises [Upscan](https://github.com/hmrc/upscan-initiate)
 
 Service Manager: sm --start ERS_CHECKING_ALL
 
+You can use the `./run_all_tests` script to quickly run the unit tests, along with scalastyle and a dependency check,  for this repo
+
 |Repositories|Link|
 |------------|----|
 |Acceptance tests|https://github.com/hmrc/ers-checking-acceptance-tests|

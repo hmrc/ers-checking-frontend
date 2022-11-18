@@ -16,9 +16,9 @@
 
 package services.validation.OTHERTestData
 
-import uk.gov.hmrc.services.validation.models.Cell
 import models.ValidationErrorData
 import org.apache.commons.lang3.StringUtils
+import uk.gov.hmrc.services.validation.models.Cell
 
 trait ERSValidationOTHERAcquisitionTestData {
 

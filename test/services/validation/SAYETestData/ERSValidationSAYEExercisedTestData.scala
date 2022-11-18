@@ -16,9 +16,9 @@
 
 package services.validation.SAYETestData
 
-import uk.gov.hmrc.services.validation.models.Cell
 import models.ValidationErrorData
 import org.apache.commons.lang3.StringUtils
+import uk.gov.hmrc.services.validation.models.Cell
 
 trait ERSValidationSAYEExercisedTestData {
   val rowNumber : Int = 1
@@ -217,6 +217,6 @@ trait ERSValidationSAYEExercisedTestData {
     //P
     None,
     Some(List(ValidationErrorData("error.16", "016", "Enter ‘yes’ or ‘no’"))),
-    Some(List(ValidationErrorData("error.16", "016", "Enter ‘yes’ or ‘no’"))),
+    Some(List(ValidationErrorData("error.16", "016", "Enter ‘yes’ or ‘no’")))
   )
 }

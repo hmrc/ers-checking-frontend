@@ -19,9 +19,9 @@ package services.validation
 import com.typesafe.config.ConfigFactory
 import org.scalatestplus.play.PlaySpec
 import services.validation.SIPTestData.{ERSValidationSIPAwardsTestData, ERSValidationSIPOutTestData}
+import services.validation.ValidationErrorHelper.ErrorFromMessagesOps
 import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models.{Cell, Row, ValidationError}
-import services.validation.ValidationErrorHelper.ErrorFromMessagesOps
 
 class SIPAwardsV3ValidationTest extends PlaySpec with ERSValidationSIPAwardsTestData with ValidationTestRunner {
 

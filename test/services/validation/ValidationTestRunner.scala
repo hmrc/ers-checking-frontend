@@ -20,10 +20,10 @@ import helpers.ErsTestHelper
 import models.ValidationErrorData
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, i18n}
 import play.api.i18n.MessagesImpl
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.DefaultMessagesControllerComponents
+import play.api.{Application, i18n}
 import services.validation.ValidationErrorHelper._
 import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}

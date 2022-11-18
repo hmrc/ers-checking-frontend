@@ -22,7 +22,10 @@ import models.CsvFiles
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesList, UpscanIds}
 import org.mockito.ArgumentMatchers.{any, refEq}
 import org.mockito.Mockito.when
+import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Play.materializer
 import play.api.data.Form
@@ -30,17 +33,14 @@ import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents, Request, Result}
+import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Injecting}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import org.scalatest.OptionValues
-import org.scalatest.matchers.should.Matchers
-import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
-import views.html.{check_csv_file, check_file, check_file_type, checking_success, file_upload_error, file_upload_problem, format_errors, global_error, scheme_type, select_csv_file_types, start}
+import views.html._
 
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
-import org.scalatest.wordspec.AnyWordSpecLike
+import scala.concurrent.{Await, Future}
 
 class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite
   with ErsTestHelper with Injecting with ScalaFutures {

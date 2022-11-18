@@ -16,9 +16,9 @@
 
 package services.validation.OTHERTestData
 
-import uk.gov.hmrc.services.validation.models.Cell
 import models.ValidationErrorData
 import org.apache.commons.lang3.StringUtils
+import uk.gov.hmrc.services.validation.models.Cell
 
 trait ERSValidationOTHERNotionalTestData {
 
@@ -120,9 +120,6 @@ trait ERSValidationOTHERNotionalTestData {
       Cell("M",rowNumber,"Yes"),
       Cell("M",rowNumber,"Yess"),
       Cell("M",rowNumber,"")
-
-
-
     )
     testData
   }
@@ -178,7 +175,7 @@ trait ERSValidationOTHERNotionalTestData {
       //column M
       None,
       Some(List(ValidationErrorData("error.13","013","Enter ‘yes’ or ‘no’"))),
-      Some(List(ValidationErrorData("error.13","013","Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("error.13","013","Enter ‘yes’ or ‘no’")))
     )
     expectedResults
   }

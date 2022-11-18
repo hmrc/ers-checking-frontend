@@ -20,8 +20,8 @@ import com.typesafe.config.ConfigFactory
 import org.scalatestplus.play.PlaySpec
 import services.validation.EMITestData._
 import services.validation.ValidationErrorHelper._
-import uk.gov.hmrc.services.validation.models.{Cell, Row, ValidationError}
 import uk.gov.hmrc.services.validation.DataValidator
+import uk.gov.hmrc.services.validation.models.{Cell, Row, ValidationError}
 
 class EMIAdjustmentsV3ValidationTest extends PlaySpec with ERSValidationEMIAdjustmentsTestData with ValidationTestRunner {
 
