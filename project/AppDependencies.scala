@@ -4,7 +4,7 @@ import sbt._
 object AppDependencies {
 
   val silencerVersion = "1.7.12"
-  val akkaVersion = "2.7.0"
+  val akkaVersion = "2.6.20"
   val bootstrapVersion = "7.11.0"
 
   val compile: Seq[ModuleID] = Seq(
@@ -18,7 +18,7 @@ object AppDependencies {
     "com.typesafe.akka"           %% "akka-protobuf"              % akkaVersion,
     "com.typesafe.akka"           %% "akka-actor-typed"           % akkaVersion,
     "com.typesafe.akka"           %% "akka-serialization-jackson" % akkaVersion,
-    "com.typesafe.akka"           %% "akka-http-spray-json"       % "10.4.0",
+    "com.typesafe.akka"           %% "akka-http-spray-json"       % "10.2.10",
     "net.sourceforge.htmlcleaner" %  "htmlcleaner"                % "2.26",
     "uk.gov.hmrc"                 %% "bootstrap-frontend-play-28" % bootstrapVersion,
     "uk.gov.hmrc"                 %% "domain"                     % "8.1.0-play-28",
