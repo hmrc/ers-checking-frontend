@@ -43,7 +43,8 @@ trait ERSValidationCSOPExercisedTestData {
         "Return The National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter. For individualNino when an incorrect Nino is provided.",
         //F
         "When individualPayeReference is correctly formatted, no validation error should be raised.",
-        "Return The PAYE reference must be less than 15 characters. For individualPayeReference",
+        "Return Enter an employer PAYE reference. For example ‘123/AB456’. For individualPayeReference given invalid data",
+        "Return Enter an employer PAYE reference. For example ‘123/AB456’. For individualPayeReference given no data",
         //G
         "When dateOfGrant is in the correct data format, no validation error should be raised",
         "Return The date must match the yyyy-mm-dd pattern. For dateOfGrant given an incorrect date.",
@@ -75,7 +76,7 @@ trait ERSValidationCSOPExercisedTestData {
         "Return ValidationErrors when umvPerShareAtExerciseDate contains other than 4 decimal places",
         "Return ValidationErrors when umvPerShareAtExerciseDate contains non-numeric characters",
         "Return ValidationErrors when umvPerShareAtExerciseDate contains a number too large",
-        // N
+        //N
         "Validate valid mvAgreedHMRC data",
         "Return ValidationErrors when mvAgreedHMRC data in not valid",
         //O
@@ -94,11 +95,11 @@ trait ERSValidationCSOPExercisedTestData {
         "Return ValidationErrors when deductibleAmount contains other than 4 decimal places",
         "Return ValidationErrors when deductibleAmount contains non-numeric characters",
         "Return ValidationErrors when deductibleAmount contains a number too large",
-        // S
+        //S
         "Validate valid nicsElectionAgreementEnteredInto data",
         "Return ValidationErrors when nicsElectionAgreementEnteredInto is not valid",
         "Return ValidationErrors when nicsElectionAgreementEnteredInto is empty",
-        // T
+        //T
         "Validate valid sharesDisposedOnSameDay data",
         "Return ValidationErrors when sharedDisposedOnSameDay is not valid",
         "Return ValidationErrors when sharedDisposedOnSameDay is empty"
@@ -119,6 +120,7 @@ trait ERSValidationCSOPExercisedTestData {
       Cell("E", rowNumber, "AA123456A"),
       Cell("E", rowNumber, "AAAA12341.135a"),
       Cell("F", rowNumber, "123/XZ55555555"),
+      Cell("F", rowNumber, ""),
       Cell("F", rowNumber, "1234/12345/12341234"),
       Cell("G", rowNumber, "2014-12-10"),
       Cell("G", rowNumber, "12-2014-10"),
@@ -188,7 +190,8 @@ trait ERSValidationCSOPExercisedTestData {
       Some(List(ValidationErrorData("error.5", "005", "National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter"))),
       //F
       None,
-      Some(List(ValidationErrorData("error.6", "006", "PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters"))),
+      Some(List(ValidationErrorData("error.6", "006", "Enter an employer PAYE reference. For example ‘123/AB456’"))),
+      Some(List(ValidationErrorData("error.6", "006", "Enter an employer PAYE reference. For example ‘123/AB456’"))),
       //G
       None,
       Some(List(ValidationErrorData("error.7", "007", "Enter a date that matches the yyyy-mm-dd pattern"))),

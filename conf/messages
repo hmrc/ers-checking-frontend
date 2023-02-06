@@ -191,6 +191,7 @@ ers.upload.error.second-name=Must be less than 36 characters and can only have l
 ers.upload.error.last-name=Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)
 ers.upload.error.nino=National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter
 ers.upload.error.paye=PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters
+ers.upload.error.paye-emp=Enter an employer PAYE reference. For example ‘123/AB456’
 ers.upload.error.hmrcRef=Enter the HMRC reference (must be less than 11 characters)
 ers.upload.error.srn=Enter the scheme reference number (it should be an 8 digit number)
 ers.upload.error.digitsUpTo2=It should be a whole number that has no more than 11 digits
