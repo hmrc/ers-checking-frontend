@@ -155,7 +155,15 @@ trait ERSValidationOTHERAcquisitionTestData {
         "validate sharesIssuedUnderAnEmployeeShareholderArrangement with ValidationErrors for invalid data",
         //AL
         "validate totalMarketValueOfShares2000OrMore without ValidationErrors for valid data",
-        "validate totalMarketValueOfShares2000OrMore with ValidationErrors for invalid data"
+        "validate totalMarketValueOfShares2000OrMore with ValidationErrors for invalid data",
+        //AM
+        "validate payeOperated without ValidationErrors for valid data",
+        "validate payeOperated with ValidationErrors for invalid data",
+        "validate payeOperated with ValidationErrors for no data",
+        //AN
+        "validate adjustmentMadeForAmountsSubject without ValidationErrors for valid data",
+        "validate adjustmentMadeForAmountsSubject with ValidationErrors for invalid data",
+        "validate adjustmentMadeForAmountsSubject with ValidationErrors for no data"
       )
     descriptions
   }
@@ -396,8 +404,8 @@ trait ERSValidationOTHERAcquisitionTestData {
       Some(List(ValidationErrorData("error.38","038","Enter ‘yes’ or ‘no’"))),
       //AM
       None,
-      Some(List(ValidationErrorData("error.39","039","Enter ‘yes’ or ‘no’"))),
-      Some(List(ValidationErrorData("error.39","039","Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("error.39","039","Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated"))),
+      Some(List(ValidationErrorData("error.39","039","Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated"))),
       //AN
       None,
       Some(List(ValidationErrorData("error.40","040","Enter ‘yes’ or ‘no’"))),

@@ -90,7 +90,7 @@ class EMIRLCV3ValidationTest extends PlaySpec with ERSValidationEMIRLCTestData w
     val validator = new DataValidator(ConfigFactory.load.getConfig("ers-emi-rlc-validation-config"))
     runValidationTests(validator, getDescriptions, getTestData, getExpectedResults)
 
-    "when Column K is answered yes, column L is a mandatory field" in {
+    "when Column B is answered yes, column C is a mandatory field" in {
       val cellC = Cell("C", rowNumber, "")
       val cellB = Cell("B", rowNumber, "yes")
       val row = Row(1, Seq(cellC, cellB))
@@ -106,15 +106,6 @@ class EMIRLCV3ValidationTest extends PlaySpec with ERSValidationEMIRLCTestData w
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
       resOpt.withErrorsFromMessages.get must contain(
         ValidationError(cellK, "mandatoryK", "K01", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)")
-      )
-    }
-    "when Column K is answered, column L is a mandatory field" in {
-      val cellL = Cell("L", rowNumber, "")
-      val cellK = Cell("K", rowNumber, "10.1234")
-      val row = Row(1, Seq(cellL, cellK))
-      val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
-      resOpt.withErrorsFromMessages.get must contain(
-        ValidationError(cellL, "mandatoryL", "L01", "Enter ‘yes’ or ‘no’")
       )
     }
   }

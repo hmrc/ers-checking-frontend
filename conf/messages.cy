@@ -198,6 +198,7 @@ ers.upload.error.digitsUpTo4=Mae’n rhaid i hyn fod yn rhif (ni all rhifau cyfa
 ers.upload.error.digits4=Mae’n rhaid i hyn fod yn rhif gyda 4 digid ar ôl y pwynt degol (a dim mwy nag 13 digid o’i flaen)
 ers.upload.error.int6=Mae’n rhaid i hyn fod yn rhif cyfan ac yn llai na 1,000,000
 ers.upload.error.yes-no=Nodwch ‘yes’ neu ‘no’
+ers.upload.error.paye-yes-no=Nodwch ‘Iawn’ neu ‘Na’ i roi gwybod i CThEF a oedd TWE yn cael ei weithredu
 ers.upload.error.enum1-3=Nodwch ‘1’, ‘2’ neu ‘3’
 ers.upload.error.enum1-4=Nodwch ‘1’, ‘2’, ‘3’ neu ‘4’
 ers.upload.error.enum1-8=Nodwch ‘1’, ‘2’, ‘3’, ‘4’, ‘5’, ‘6’, ‘7’ neu ‘8’

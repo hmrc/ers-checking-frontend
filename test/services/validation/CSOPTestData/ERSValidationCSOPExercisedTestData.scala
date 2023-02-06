@@ -87,8 +87,8 @@ trait ERSValidationCSOPExercisedTestData {
         "Return ValidationErrors when qualifyForTaxRelief is given no data",
         //Q
         "Validate payeOperatedApplied without ValidationErrors for valid data",
-        "Return ValidationErrors when payeOperatedApplied is given invalid data",
-        "Return ValidationErrors when payeOperatedApplied is given no data",
+        "Return Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated. when payeOperatedApplied is given invalid data",
+        "Return Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated. when payeOperatedApplied is given no data",
         //R
         "Validate valid deductibleAmount data",
         "Return ValidationErrors when deductibleAmount contains other than 4 decimal places",
@@ -232,8 +232,8 @@ trait ERSValidationCSOPExercisedTestData {
       Some(List(ValidationErrorData("error.16", "016", "Enter ‘yes’ or ‘no’"))),
       //Q
       None,
-      Some(List(ValidationErrorData("error.17", "017", "Enter ‘yes’ or ‘no’"))),
-      Some(List(ValidationErrorData("error.17", "017", "Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("error.17", "017", "Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated"))),
+      Some(List(ValidationErrorData("error.17", "017", "Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated"))),
       //R
       None,
       Some(List(ValidationErrorData("error.18", "018","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),

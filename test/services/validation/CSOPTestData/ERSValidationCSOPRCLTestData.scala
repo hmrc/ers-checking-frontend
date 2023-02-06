@@ -58,8 +58,8 @@ trait ERSValidationCSOPRCLTestData {
         "Return The PAYE reference must be less than 15 characters. When the submitted text does not match the PAYE format.",
         //Column I
         "When payeOperatedApplied is Yes or No, no validation error should be raised",
-        "Return This entry must be ‘yes’ or ‘no’. When an empty string is given for payeOperatedApplied.",
-        "Return This entry must be ‘yes’ or ‘no’. When the characters entered do not match yes or no for payeOperatedApplied."
+        "Return Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated. When an empty string is given for payeOperatedApplied.",
+        "Return Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated. When the characters entered do not match yes or no for payeOperatedApplied."
       )
     descriptions
   }
@@ -120,8 +120,8 @@ trait ERSValidationCSOPRCLTestData {
       None,
       Some(List(ValidationErrorData("error.8", "008", "PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters"))),
       None,
-      Some(List(ValidationErrorData("error.9", "009", "Enter ‘yes’ or ‘no’"))),
-      Some(List(ValidationErrorData("error.9", "009", "Enter ‘yes’ or ‘no’")))
+      Some(List(ValidationErrorData("error.9", "009", "Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated"))),
+      Some(List(ValidationErrorData("error.9", "009", "Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated")))
     )
 
     expectedResults

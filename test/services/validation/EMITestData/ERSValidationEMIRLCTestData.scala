@@ -73,8 +73,8 @@ trait ERSValidationEMIRLCTestData {
         "Return an error message when receivedAmount is too large",
         //column L
         "When payeOperatedApplied is Yes or No, no validation error should be raised",
-        "Return an error message when payeOperatedApplied is not yes or no"
-
+        "Return Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated. When an empty string is given for payeOperatedApplied.",
+        "Return Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated. When the characters entered do not match yes or no for payeOperatedApplied."
       )
     descriptions
   }
@@ -117,6 +117,7 @@ trait ERSValidationEMIRLCTestData {
       Cell("K", rowNumber, "abc"),
       Cell("K", rowNumber, "1234567890123456.1234"),
       Cell("L", rowNumber, "Yes"),
+      Cell("L", rowNumber, " "),
       Cell("L", rowNumber, "Noooo")
 
     )
@@ -161,7 +162,8 @@ trait ERSValidationEMIRLCTestData {
       Some(List(ValidationErrorData("error.11", "011", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       Some(List(ValidationErrorData("error.11", "011", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),
       None,
-      Some(List(ValidationErrorData("error.12", "012", "Enter ‘yes’ or ‘no’")))
+      Some(List(ValidationErrorData("error.12", "012", "Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated"))),
+      Some(List(ValidationErrorData("error.12", "012", "Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated")))
     )
 
     expectedResults

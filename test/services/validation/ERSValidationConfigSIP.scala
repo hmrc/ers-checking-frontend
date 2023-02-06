@@ -101,7 +101,7 @@ class SIPOutV3ValidationTest extends PlaySpec with ERSValidationSIPOutTestData w
     val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
     assert(resOpt.isDefined)
     resOpt.withErrorsFromMessages.get must contain
-      ValidationError(cellP, "mandatoryP", "P01", "Enter ‘yes’ or ‘no’")
+      ValidationError(cellP, "mandatoryP", "P01", "Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated")
   }
 
   "when awards Column P is answered NO, column Q is a mandatory field" in {
