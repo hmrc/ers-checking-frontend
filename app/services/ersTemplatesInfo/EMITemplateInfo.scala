@@ -103,7 +103,7 @@ trait EMITemplateInfo {
     "10.AMV of a share at date of exercise£e.g. 10.1234",
     "11.Are the shares subject to the option exercised listed on a recognised stock exchange?(yes/no)If yes go to question 14If no go to next question 12",
     "12.If no, was the market value agreed with HMRC?(yes/no)",
-    "13.If yes, enter the HMRC reference given",
+    "13.If yes, enter the HMRC valuation reference given",
     "14.Total amount paid for shares£e.g. 10.1234",
     "15.Were all shares resulting from the exercise sold? (yes/no). Answer yes if they were either sold on the same day " +
       "as the exercise in connection with the exercise or sale instructions were given for all shares to be sold on exercise"
@@ -126,7 +126,7 @@ trait EMITemplateInfo {
     "14.Total amount paid for the shares£e.g. 10.1234",
     "15.Is the company listed on a recognised stock exchange? (yes/no)If no go to question 16If yes go to question 18",
     "16.Has the market value been agreed with HMRC?(yes/no)",
-    "17.If yes, enter the HMRC reference given",
+    "17.If yes, enter the HMRC valuation reference given",
     "18.Has an election under Section 431(1) been made to disregard restrictions?(yes/ no)",
     "19.Has a National Insurance Contribution election or agreement been operated (yes/no)",
     "20.Amount subjected to PAYE£e.g. 10.1234"

@@ -155,7 +155,15 @@ trait ERSValidationOTHERAcquisitionTestData {
         "validate sharesIssuedUnderAnEmployeeShareholderArrangement with ValidationErrors for invalid data",
         //AL
         "validate totalMarketValueOfShares2000OrMore without ValidationErrors for valid data",
-        "validate totalMarketValueOfShares2000OrMore with ValidationErrors for invalid data"
+        "validate totalMarketValueOfShares2000OrMore with ValidationErrors for invalid data",
+        //AM
+        "validate payeOperated without ValidationErrors for valid data",
+        "validate payeOperated with ValidationErrors for invalid data",
+        "validate payeOperated with ValidationErrors for no data",
+        //AN
+        "validate adjustmentMadeForAmountsSubject without ValidationErrors for valid data",
+        "validate adjustmentMadeForAmountsSubject with ValidationErrors for invalid data",
+        "validate adjustmentMadeForAmountsSubject with ValidationErrors for no data"
       )
     descriptions
   }
