@@ -162,7 +162,7 @@ class HtmlReportControllerTest extends AnyWordSpecLike with Matchers with Option
 
     "return the errors and count when the sheet has errors" in {
       val errorList = ListBuffer(
-        SheetErrors("CSOP_OptionsExercised_V3",
+        SheetErrors("CSOP_OptionsExercised_V4",
           ListBuffer(
             ValidationError(Cell("A",1,"23-07-2015"),"error.1","001","ers.upload.error.date")
           )
