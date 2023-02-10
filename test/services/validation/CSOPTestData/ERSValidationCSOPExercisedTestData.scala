@@ -40,10 +40,13 @@ trait ERSValidationCSOPExercisedTestData {
         "Return This entry must contain 35 characters or less. When the data is larger than 35 characters for individualLastName.",
         //E
         "When individualNino contains a correctly formatted Nino, no validation error should be raised.",
-        "Return The National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter. For individualNino when an incorrect Nino is provided.",
+        "Return The Enter a National Insurance number (for example QQ123456C) or an ERS reference (for example TN010181Y). For individualNino when an incorrect Nino is provided.",
+        "Return The Enter a National Insurance number (for example QQ123456C) or an ERS reference (for example TN010181Y). For individualNino when a letter is missing.",
+        "Return The Enter a National Insurance number (for example QQ123456C) or an ERS reference (for example TN010181Y). For individualNino when no Nino is provided.",
         //F
         "When individualPayeReference is correctly formatted, no validation error should be raised.",
-        "Return The PAYE reference must be less than 15 characters. For individualPayeReference",
+        "Return Enter an employer PAYE reference. For example ‘123/AB456’. For individualPayeReference given invalid data",
+        "Return Enter an employer PAYE reference. For example ‘123/AB456’. For individualPayeReference given no data",
         //G
         "When dateOfGrant is in the correct data format, no validation error should be raised",
         "Return The date must match the yyyy-mm-dd pattern. For dateOfGrant given an incorrect date.",
@@ -75,7 +78,7 @@ trait ERSValidationCSOPExercisedTestData {
         "Return ValidationErrors when umvPerShareAtExerciseDate contains other than 4 decimal places",
         "Return ValidationErrors when umvPerShareAtExerciseDate contains non-numeric characters",
         "Return ValidationErrors when umvPerShareAtExerciseDate contains a number too large",
-        // N
+        //N
         "Validate valid mvAgreedHMRC data",
         "Return ValidationErrors when mvAgreedHMRC data in not valid",
         //O
@@ -87,18 +90,18 @@ trait ERSValidationCSOPExercisedTestData {
         "Return ValidationErrors when qualifyForTaxRelief is given no data",
         //Q
         "Validate payeOperatedApplied without ValidationErrors for valid data",
-        "Return ValidationErrors when payeOperatedApplied is given invalid data",
-        "Return ValidationErrors when payeOperatedApplied is given no data",
+        "Return Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated. when payeOperatedApplied is given invalid data",
+        "Return Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated. when payeOperatedApplied is given no data",
         //R
         "Validate valid deductibleAmount data",
         "Return ValidationErrors when deductibleAmount contains other than 4 decimal places",
         "Return ValidationErrors when deductibleAmount contains non-numeric characters",
         "Return ValidationErrors when deductibleAmount contains a number too large",
-        // S
+        //S
         "Validate valid nicsElectionAgreementEnteredInto data",
         "Return ValidationErrors when nicsElectionAgreementEnteredInto is not valid",
         "Return ValidationErrors when nicsElectionAgreementEnteredInto is empty",
-        // T
+        //T
         "Validate valid sharesDisposedOnSameDay data",
         "Return ValidationErrors when sharedDisposedOnSameDay is not valid",
         "Return ValidationErrors when sharedDisposedOnSameDay is empty"
@@ -118,7 +121,10 @@ trait ERSValidationCSOPExercisedTestData {
       Cell("D", rowNumber, "AbcdefghijklmnopqrstuvwxyzAbcdefghijklmnopqrstuvwxyz"),
       Cell("E", rowNumber, "AA123456A"),
       Cell("E", rowNumber, "AAAA12341.135a"),
+      Cell("E", rowNumber, "AA123456"),
+      Cell("E", rowNumber, ""),
       Cell("F", rowNumber, "123/XZ55555555"),
+      Cell("F", rowNumber, ""),
       Cell("F", rowNumber, "1234/12345/12341234"),
       Cell("G", rowNumber, "2014-12-10"),
       Cell("G", rowNumber, "12-2014-10"),
@@ -185,10 +191,13 @@ trait ERSValidationCSOPExercisedTestData {
       Some(List(ValidationErrorData("error.4", "004", "Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)"))),
       //E
       None,
-      Some(List(ValidationErrorData("error.5", "005", "National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter"))),
+      Some(List(ValidationErrorData("error.5", "005", "Enter a National Insurance number (for example QQ123456C) or an ERS reference (for example TN010181Y)"))),
+      Some(List(ValidationErrorData("error.5", "005", "Enter a National Insurance number (for example QQ123456C) or an ERS reference (for example TN010181Y)"))),
+      Some(List(ValidationErrorData("error.5", "005", "Enter a National Insurance number (for example QQ123456C) or an ERS reference (for example TN010181Y)"))),
       //F
       None,
-      Some(List(ValidationErrorData("error.6", "006", "PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters"))),
+      Some(List(ValidationErrorData("error.6", "006", "Enter an employer PAYE reference. For example ‘123/AB456’"))),
+      Some(List(ValidationErrorData("error.6", "006", "Enter an employer PAYE reference. For example ‘123/AB456’"))),
       //G
       None,
       Some(List(ValidationErrorData("error.7", "007", "Enter a date that matches the yyyy-mm-dd pattern"))),
@@ -232,8 +241,8 @@ trait ERSValidationCSOPExercisedTestData {
       Some(List(ValidationErrorData("error.16", "016", "Enter ‘yes’ or ‘no’"))),
       //Q
       None,
-      Some(List(ValidationErrorData("error.17", "017", "Enter ‘yes’ or ‘no’"))),
-      Some(List(ValidationErrorData("error.17", "017", "Enter ‘yes’ or ‘no’"))),
+      Some(List(ValidationErrorData("error.17", "017", "Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated"))),
+      Some(List(ValidationErrorData("error.17", "017", "Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated"))),
       //R
       None,
       Some(List(ValidationErrorData("error.18", "018","Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"))),

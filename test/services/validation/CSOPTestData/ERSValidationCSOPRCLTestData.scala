@@ -52,14 +52,17 @@ trait ERSValidationCSOPRCLTestData {
         "Return This entry must contain 35 characters or less. For releasedindividualLastName when the user inputs too many characters",
         //Column G
         "When releasedindividualNino matches the expected Nino format, no validation error should be raised",
-        "Return The National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter. When the submitted text does not match a valid Nino ",
+        "Return The Enter a National Insurance number (for example QQ123456C) or an ERS reference (for example TN010181Y). When the submitted text does not match a valid Nino ",
+        "Return The Enter a National Insurance number (for example QQ123456C) or an ERS reference (for example TN010181Y). When the submitted Nino is missing a letter ",
+        "Return The Enter a National Insurance number (for example QQ123456C) or an ERS reference (for example TN010181Y). When no text submitted",
         //Column H
         "When releasedindividualPayeReference matches the expected PAYE reference format, no validation error should be raised",
-        "Return The PAYE reference must be less than 15 characters. When the submitted text does not match the PAYE format.",
+        "Return Enter an employer PAYE reference. For example ‘123/AB456’. When the submitted text does not match the PAYE format.",
+        "Return Enter an employer PAYE reference. For example ‘123/AB456’. When the submitted text is empty.",
         //Column I
         "When payeOperatedApplied is Yes or No, no validation error should be raised",
-        "Return This entry must be ‘yes’ or ‘no’. When an empty string is given for payeOperatedApplied.",
-        "Return This entry must be ‘yes’ or ‘no’. When the characters entered do not match yes or no for payeOperatedApplied."
+        "Return Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated. When an empty string is given for payeOperatedApplied.",
+        "Return Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated. When the characters entered do not match yes or no for payeOperatedApplied."
       )
     descriptions
   }
@@ -86,8 +89,11 @@ trait ERSValidationCSOPRCLTestData {
       Cell("F", rowNumber, "AbcdefghijklmnopqrstuvwxyzAbcdefghijklmnopqrstuvwxyz"),
       Cell("G", rowNumber, "AB123456A"),
       Cell("G", rowNumber, "ABB25345BA1"),
+      Cell("G", rowNumber, "AB123456"),
+      Cell("G", rowNumber, ""),
       Cell("H", rowNumber, "123/XZ55555555"),
       Cell("H", rowNumber, "1234/12345/67890abcd"),
+      Cell("H", rowNumber, ""),
       Cell("I", rowNumber, "Yes"),
       Cell("I", rowNumber, " "),
       Cell("I", rowNumber, "YyEeSs")
@@ -116,12 +122,15 @@ trait ERSValidationCSOPRCLTestData {
       Some(List(ValidationErrorData("error.6", "006", "Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)"))),
       Some(List(ValidationErrorData("error.6", "006", "Enter a last name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)"))),
       None,
-      Some(List(ValidationErrorData("error.7", "007", "National Insurance number must be 2 letters followed by 6 number digits, with an optional final letter"))),
+      Some(List(ValidationErrorData("error.7", "007", "Enter a National Insurance number (for example QQ123456C) or an ERS reference (for example TN010181Y)"))),
+      Some(List(ValidationErrorData("error.7", "007", "Enter a National Insurance number (for example QQ123456C) or an ERS reference (for example TN010181Y)"))),
+      Some(List(ValidationErrorData("error.7", "007", "Enter a National Insurance number (for example QQ123456C) or an ERS reference (for example TN010181Y)"))),
       None,
-      Some(List(ValidationErrorData("error.8", "008", "PAYE reference must be a 3 digit number followed by a forward slash and up to 10 more characters"))),
+      Some(List(ValidationErrorData("error.8", "008", "Enter an employer PAYE reference. For example ‘123/AB456’"))),
+      Some(List(ValidationErrorData("error.8", "008", "Enter an employer PAYE reference. For example ‘123/AB456’"))),
       None,
-      Some(List(ValidationErrorData("error.9", "009", "Enter ‘yes’ or ‘no’"))),
-      Some(List(ValidationErrorData("error.9", "009", "Enter ‘yes’ or ‘no’")))
+      Some(List(ValidationErrorData("error.9", "009", "Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated"))),
+      Some(List(ValidationErrorData("error.9", "009", "Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated")))
     )
 
     expectedResults
