@@ -61,75 +61,75 @@ class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ErsTes
      }
 
     "validateHeaderRow " in new DataGeneratorObj("OTHER") {
-      validateHeaderRow(XMLTestData.otherHeaderSheet1Data, "Other_Grants_V3", "OTHER", "Other_Grants_V3.csv") must be (4)
-      val result: Try[Int] = Try(validateHeaderRow(XMLTestData.otherHeaderSheet1Data, "csopHeaderSheet1Data", "CSOP", "CSOP_OptionsGranted_V3.csv"))
+      validateHeaderRow(XMLTestData.otherHeaderSheet1Data, "Other_Grants_V4", "OTHER", "Other_Grants_V4.csv") must be (4)
+      val result: Try[Int] = Try(validateHeaderRow(XMLTestData.otherHeaderSheet1Data, "csopHeaderSheet1Data", "CSOP", "CSOP_OptionsGranted_V4.csv"))
       result.isFailure must be (true)
     }
 
-    "validate CSOP_OptionsGranted_V3 headerRow as valid" in new DataGeneratorObj("CSOP") {
-      validateHeaderRow(csopHeaderSheet1Data, "CSOP_OptionsGranted_V3", "CSOP", "CSOP_OptionsGranted_V3.csv") must be (9)
+    "validate CSOP_OptionsGranted_V4 headerRow as valid" in new DataGeneratorObj("CSOP") {
+      validateHeaderRow(csopHeaderSheet1Data, "CSOP_OptionsGranted_V4", "CSOP", "CSOP_OptionsGranted_V4.csv") must be (9)
     }
-    "validate CSOP_OptionsRCL_V3 headerRow as valid" in new DataGeneratorObj("CSOP") {
-      validateHeaderRow(csopHeaderSheet2Data, "CSOP_OptionsRCL_V3", "CSOP", "CSOP_OptionsRCL_V3.csv") must be (9)
+    "validate CSOP_OptionsRCL_V4 headerRow as valid" in new DataGeneratorObj("CSOP") {
+      validateHeaderRow(csopHeaderSheet2Data, "CSOP_OptionsRCL_V4", "CSOP", "CSOP_OptionsRCL_V4.csv") must be (9)
     }
-    "validate CSOP_OptionsExercised_V3 headerRow as valid" in new DataGeneratorObj("CSOP") {
-      validateHeaderRow(csopHeaderSheet3Data, "CSOP_OptionsExercised_V3", "CSOP", "CSOP_OptionsExercised_V3.csv") must be (20)
-    }
-
-    "validate SIP_Awards_V3 headerRow as valid" in new DataGeneratorObj("SIP") {
-      validateHeaderRow(sipHeaderSheet1Data, "SIP_Awards_V3", "SIP", "SIP_Awards_V3.csv") must be (17)
-    }
-    "validate SIP_Out_V3 headerRow as valid" in new DataGeneratorObj("SIP") {
-      validateHeaderRow(sipHeaderSheet2Data, "SIP_Out_V3", "SIP", "SIP_Out_V3.csv") must be (17)
+    "validate CSOP_OptionsExercised_V4 headerRow as valid" in new DataGeneratorObj("CSOP") {
+      validateHeaderRow(csopHeaderSheet3Data, "CSOP_OptionsExercised_V4", "CSOP", "CSOP_OptionsExercised_V4.csv") must be (20)
     }
 
-    "validate EMI40_Adjustments_V3 headerRow as valid" in new DataGeneratorObj("EMI") {
-      validateHeaderRow(emiHeaderSheet1Data, "EMI40_Adjustments_V3", "EMI", "EMI40_Adjustments_V3.csv") must be (14)
+    "validate SIP_Awards_V4 headerRow as valid" in new DataGeneratorObj("SIP") {
+      validateHeaderRow(sipHeaderSheet1Data, "SIP_Awards_V4", "SIP", "SIP_Awards_V4.csv") must be (17)
     }
-    "validate EMI40_Replaced_V3 headerRow as valid" in new DataGeneratorObj("EMI") {
-      validateHeaderRow(emiHeaderSheet2Data, "EMI40_Replaced_V3", "EMI", "EMI40_Replaced_V3.csv") must be (17)
-    }
-    "validate EMI40_RLC_V3 headerRow as valid" in new DataGeneratorObj("EMI") {
-      validateHeaderRow(emiHeaderSheet3Data, "EMI40_RLC_V3", "EMI", "EMI40_RLC_V3.csv") must be (12)
-    }
-    "validate EMI40_NonTaxable_V3 headerRow as valid" in new DataGeneratorObj("EMI") {
-      validateHeaderRow(emiHeaderSheet4Data, "EMI40_NonTaxable_V3", "EMI", "EMI40_NonTaxable_V3.csv") must be (15)
-    }
-    "validate EMI40_Taxable_V3 headerRow as valid" in new DataGeneratorObj("EMI") {
-      validateHeaderRow(emiHeaderSheet5Data, "EMI40_Taxable_V3", "EMI", "EMI40_Taxable_V3.csv") must be (20)
+    "validate SIP_Out_V4 headerRow as valid" in new DataGeneratorObj("SIP") {
+      validateHeaderRow(sipHeaderSheet2Data, "SIP_Out_V4", "SIP", "SIP_Out_V4.csv") must be (17)
     }
 
-    "validate Other_Grants_V3 headerRow as valid" in new DataGeneratorObj("OTHER") {
-      validateHeaderRow(otherHeaderSheet1Data, "Other_Grants_V3", "OTHER", "Other_Grants_V3.csv") must be (4)
+    "validate EMI40_Adjustments_V4 headerRow as valid" in new DataGeneratorObj("EMI") {
+      validateHeaderRow(emiHeaderSheet1Data, "EMI40_Adjustments_V4", "EMI", "EMI40_Adjustments_V4.csv") must be (14)
     }
-    "validate Other_Options_V3 headerRow as valid" in new DataGeneratorObj("OTHER") {
-      validateHeaderRow(otherHeaderSheet2Data, "Other_Options_V3", "OTHER", "Other_Options_V3.csv") must be (42)
+    "validate EMI40_Replaced_V4 headerRow as valid" in new DataGeneratorObj("EMI") {
+      validateHeaderRow(emiHeaderSheet2Data, "EMI40_Replaced_V4", "EMI", "EMI40_Replaced_V4.csv") must be (17)
     }
-    "validate Other_Acquisition_V3 headerRow as valid" in new DataGeneratorObj("OTHER") {
-      validateHeaderRow(otherHeaderSheet3Data, "Other_Acquisition_V3", "OTHER", "Other_Acquisition_V3.csv") must be (40)
+    "validate EMI40_RLC_V4 headerRow as valid" in new DataGeneratorObj("EMI") {
+      validateHeaderRow(emiHeaderSheet3Data, "EMI40_RLC_V4", "EMI", "EMI40_RLC_V4.csv") must be (12)
     }
-    "validate Other_RestrictedSecurities_V3 headerRow as valid" in new DataGeneratorObj("OTHER") {
-      validateHeaderRow(otherHeaderSheet4Data, "Other_RestrictedSecurities_V3", "OTHER", "Other_RestrictedSecurities_V3.csv") must be (20)
+    "validate EMI40_NonTaxable_V4 headerRow as valid" in new DataGeneratorObj("EMI") {
+      validateHeaderRow(emiHeaderSheet4Data, "EMI40_NonTaxable_V4", "EMI", "EMI40_NonTaxable_V4.csv") must be (15)
     }
-    "validate Other_OtherBenefits_V3 headerRow as valid" in new DataGeneratorObj("OTHER") {
-      validateHeaderRow(otherHeaderSheet5Data, "Other_OtherBenefits_V3", "OTHER", "Other_OtherBenefits_V3.csv") must be (13)
+    "validate EMI40_Taxable_V4 headerRow as valid" in new DataGeneratorObj("EMI") {
+      validateHeaderRow(emiHeaderSheet5Data, "EMI40_Taxable_V4", "EMI", "EMI40_Taxable_V4.csv") must be (20)
     }
-    "validate Other_Convertible_V3 headerRow as valid" in new DataGeneratorObj("OTHER") {
-      validateHeaderRow(otherHeaderSheet6Data, "Other_Convertible_V3", "OTHER", "Other_Convertible_V3.csv") must be (15)
+
+    "validate Other_Grants_V4 headerRow as valid" in new DataGeneratorObj("OTHER") {
+      validateHeaderRow(otherHeaderSheet1Data, "Other_Grants_V4", "OTHER", "Other_Grants_V4.csv") must be (4)
     }
-    "validate Other_Notional_V3 headerRow as valid" in new DataGeneratorObj("OTHER") {
-      validateHeaderRow(otherHeaderSheet7Data, "Other_Notional_V3", "OTHER", "Other_Notional_V3.csv") must be (13)
+    "validate Other_Options_V4 headerRow as valid" in new DataGeneratorObj("OTHER") {
+      validateHeaderRow(otherHeaderSheet2Data, "Other_Options_V4", "OTHER", "Other_Options_V4.csv") must be (42)
     }
-    "validate Other_Enhancement_V3 headerRow as valid" in new DataGeneratorObj("OTHER") {
-      validateHeaderRow(otherHeaderSheet8Data, "Other_Enhancement_V3", "OTHER", "Other_Enhancement_V3.csv") must be (14)
+    "validate Other_Acquisition_V4 headerRow as valid" in new DataGeneratorObj("OTHER") {
+      validateHeaderRow(otherHeaderSheet3Data, "Other_Acquisition_V4", "OTHER", "Other_Acquisition_V4.csv") must be (40)
     }
-    "validate Other_Sold_V3 headerRow as valid" in new DataGeneratorObj("OTHER") {
-      validateHeaderRow(otherHeaderSheet9Data, "Other_Sold_V3", "OTHER", "Other_Sold_V3.csv") must be (14)
+    "validate Other_RestrictedSecurities_V4 headerRow as valid" in new DataGeneratorObj("OTHER") {
+      validateHeaderRow(otherHeaderSheet4Data, "Other_RestrictedSecurities_V4", "OTHER", "Other_RestrictedSecurities_V4.csv") must be (20)
+    }
+    "validate Other_OtherBenefits_V4 headerRow as valid" in new DataGeneratorObj("OTHER") {
+      validateHeaderRow(otherHeaderSheet5Data, "Other_OtherBenefits_V4", "OTHER", "Other_OtherBenefits_V4.csv") must be (13)
+    }
+    "validate Other_Convertible_V4 headerRow as valid" in new DataGeneratorObj("OTHER") {
+      validateHeaderRow(otherHeaderSheet6Data, "Other_Convertible_V4", "OTHER", "Other_Convertible_V4.csv") must be (15)
+    }
+    "validate Other_Notional_V4 headerRow as valid" in new DataGeneratorObj("OTHER") {
+      validateHeaderRow(otherHeaderSheet7Data, "Other_Notional_V4", "OTHER", "Other_Notional_V4.csv") must be (13)
+    }
+    "validate Other_Enhancement_V4 headerRow as valid" in new DataGeneratorObj("OTHER") {
+      validateHeaderRow(otherHeaderSheet8Data, "Other_Enhancement_V4", "OTHER", "Other_Enhancement_V4.csv") must be (14)
+    }
+    "validate Other_Sold_V4 headerRow as valid" in new DataGeneratorObj("OTHER") {
+      validateHeaderRow(otherHeaderSheet9Data, "Other_Sold_V4", "OTHER", "Other_Sold_V4.csv") must be (14)
     }
 
     "identifyAndDefineSheet with correct scheme type" in new DataGeneratorObj("EMI") {
       val hc: HeaderCarrier = HeaderCarrier()
-      identifyAndDefineSheet("EMI40_Adjustments_V3","emi")(hc, implicitly[Messages]) must be ("EMI40_Adjustments_V3")
+      identifyAndDefineSheet("EMI40_Adjustments_V4","emi")(hc, implicitly[Messages]) must be ("EMI40_Adjustments_V4")
       val result: Try[String] = Try(identifyAndDefineSheet("EMI40_Adjustments","emi")(hc, implicitly[Messages]))
       result.isFailure must be (true)
     }
@@ -140,10 +140,10 @@ class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ErsTes
 
       val hc: HeaderCarrier = HeaderCarrier()
       val invalidSheet: ERSFileProcessingException = intercept[ERSFileProcessingException]{
-        identifyAndDefineSheet("CSOP_OptionsExercised_V3","emi")(hc, implicitly[Messages])
+        identifyAndDefineSheet("CSOP_OptionsExercised_V4","emi")(hc, implicitly[Messages])
       }
       invalidSheet.message mustBe "ers.exceptions.dataParser.incorrectSchemeType"
-      invalidSheet.optionalParams mustBe Seq("a CSOP", "an EMI", "CSOP_OptionsExercised_V3")
+      invalidSheet.optionalParams mustBe Seq("a CSOP", "an EMI", "CSOP_OptionsExercised_V4")
     }
 
     "isBlankRow" in new DataGeneratorObj("CSOP") {
@@ -158,7 +158,7 @@ class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ErsTes
         getErrors(XMLTestData.getInvalidCSOPWithoutHeaders,"csop","CSOP.ods")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
       }
       result.message mustBe "ers.exceptions.dataParser.incorrectHeader"
-      result.optionalParams mustBe Seq("CSOP_OptionsGranted_V3", "CSOP.ods")
+      result.optionalParams mustBe Seq("CSOP_OptionsGranted_V4", "CSOP.ods")
     }
 
     "get an exception if ods file has more than 1 sheet but 1 of the sheets has less than 9 rows and doesn't have header data" in new DataGeneratorObj("CSOP") {
@@ -166,7 +166,7 @@ class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ErsTes
         getErrors(XMLTestData.getInvalidCSOPWith2Sheets1WithoutHeaders,"csop","CSOP.ods")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
       }
       result.message mustBe "ers.exceptions.dataParser.incorrectHeader"
-      result.optionalParams mustBe Seq("CSOP_OptionsGranted_V3", "CSOP.ods")
+      result.optionalParams mustBe Seq("CSOP_OptionsGranted_V4", "CSOP.ods")
     }
 
     "get an exception if ods file doesn't contain any data" in new DataGeneratorObj("CSOP") {
@@ -221,19 +221,19 @@ class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ErsTes
       val returnValidator: DataValidator = mock[DataValidator]
       when(mockErsValidationConfigs.getValidator(any())).thenReturn(returnValidator)
 
-      setValidatorCsv("CSOP_OptionsGranted_V3") mustBe Right(returnValidator)
+      setValidatorCsv("CSOP_OptionsGranted_V4") mustBe Right(returnValidator)
     }
 
     "return a Failure with the exception when receiving an exception" in {
       val thrownException = new RuntimeException("this is bad")
       val testDataGen = new DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, mockErsValidationConfigs, mockErsUtil, mockErsValidator)
       when(mockErsValidationConfigs.getValidator(any())).thenThrow(thrownException)
-      val failedValue: Either[Throwable, DataValidator] = testDataGen.setValidatorCsv("CSOP_OptionsGranted_V3")
+      val failedValue: Either[Throwable, DataValidator] = testDataGen.setValidatorCsv("CSOP_OptionsGranted_V4")
 
       val returnedExceptionExample: ERSFileProcessingException = ERSFileProcessingException(
         "ers.exceptions.dataParser.configFailure",
         Messages("ers.exceptions.dataParser.validatorError"),
-        optionalParams = Seq("CSOP_OptionsGranted_V3")
+        optionalParams = Seq("CSOP_OptionsGranted_V4")
       )
 
       assert(failedValue.isLeft)
@@ -246,7 +246,7 @@ class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ErsTes
         .auditRunTimeError(
           ArgumentMatchers.eq(thrownException),
           ArgumentMatchers.eq("Could not set the validator"),
-          ArgumentMatchers.eq("CSOP_OptionsGranted_V3"))(any(), any())
+          ArgumentMatchers.eq("CSOP_OptionsGranted_V4"))(any(), any())
     }
   }
 
@@ -282,7 +282,7 @@ class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ErsTes
   "getSheetCsv" must {
 
     "return Right with a tuple of sheetInfo on uploadedfile and the selected scheme name when they match" in new DataGeneratorObj("CSOP") {
-      getSheetCsv("CSOP_OptionsGranted_V3", "CSOP") mustBe Right((
+      getSheetCsv("CSOP_OptionsGranted_V4", "CSOP") mustBe Right((
         SheetInfo(csop,  1, csopSheet1Name , csopSheet1title, csopSheet1ValConfig,  csopOptionsGrantedHeaderRow),
         "CSOP"
         )

@@ -61,7 +61,7 @@ trait ERSValidationEMIReplacedTestData {
         //I
         "When snopCompany\\companyName is a correctly formatted company name, no validation errors should be returned",
         "Return an error message when snopCompany\\companyName exceeds the maximum amount of characters allowed",
-        "Reurn an error message when snopCompany\\companyName is left empty",
+        "Return an error message when snopCompany\\companyName is left empty",
         //J
         "When snopCompany\\companyAddress\\addressLine1 is a correctly formatted address, no validation error should be raised",
         "Return an error message when snopCompany\\companyAddress\\addressLine1 exceeds the maximum character limit",
