@@ -50,7 +50,7 @@ class UpscanService @Inject()(upscanConnector: UpscanConnector, appConfig: Appli
     val upscanInitiateRequest: UpscanInitiateRequest =
       if (isCsvAndUploadId)
         UpscanInitiateRequest(callback.absoluteURL(isSecure), success, failure, Some(1))
-      else 
+      else
         UpscanInitiateRequest(callback.absoluteURL(isSecure), success, failure, Some(1), Some(10000000))
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }
