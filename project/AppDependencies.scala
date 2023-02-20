@@ -24,14 +24,14 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "domain"                     % "8.1.0-play-28",
     "uk.gov.hmrc"                 %% "http-caching-client"        % "10.0.0-play-28",
     "uk.gov.hmrc"                 %% "tabular-data-validator"     % "1.5.0",
-    "uk.gov.hmrc"                 %% "play-frontend-hmrc"         % "6.4.0-play-28"
+    "uk.gov.hmrc"                 %% "play-frontend-hmrc"         % "6.6.0-play-28"
   )
 
   val test: Seq[ModuleID] = Seq(
     "com.github.tomakehurst" %  "wiremock-standalone"    % "2.27.2",
     "com.typesafe.akka"      %% "akka-testkit"           % akkaVersion,
     "com.vladsch.flexmark"   %  "flexmark-all"           % "0.62.2",
-    "org.jsoup"              %  "jsoup"                  % "1.15.3",
+    "org.jsoup"              %  "jsoup"                  % "1.15.4",
     "org.scalatestplus"      %% "mockito-3-4"            % "3.2.10.0",
     "uk.gov.hmrc"            %% "bootstrap-test-play-28" % bootstrapVersion
   ).map(_ % Test)
