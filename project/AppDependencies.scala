@@ -16,7 +16,7 @@ object AppDependencies {
     "com.typesafe.akka"           %% "akka-stream"                % akkaVersion,
     "com.typesafe.akka"           %% "akka-slf4j"                 % akkaVersion,
     "com.typesafe.akka"           %% "akka-protobuf"              % akkaVersion,
-    "com.typesafe.akka"           %% "akka-actor-typed"           % akkaVersion,
+    "com.typesafe.akka"           %% "akka-actor-typed"           % "2.7.0",
     "com.typesafe.akka"           %% "akka-serialization-jackson" % "2.7.0",
     "com.typesafe.akka"           %% "akka-http-spray-json"       % "10.2.10",
     "net.sourceforge.htmlcleaner" %  "htmlcleaner"                % "2.26",
