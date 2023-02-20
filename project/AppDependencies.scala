@@ -5,7 +5,7 @@ object AppDependencies {
 
   val silencerVersion = "1.7.12"
   val akkaVersion = "2.6.20"
-  val bootstrapVersion = "7.11.0"
+  val bootstrapVersion = "7.13.0"
 
   val compile: Seq[ModuleID] = Seq(
     ws,
@@ -24,7 +24,7 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "domain"                     % "8.1.0-play-28",
     "uk.gov.hmrc"                 %% "http-caching-client"        % "10.0.0-play-28",
     "uk.gov.hmrc"                 %% "tabular-data-validator"     % "1.5.0",
-    "uk.gov.hmrc"                 %% "play-frontend-hmrc"         % "3.33.0-play-28"
+    "uk.gov.hmrc"                 %% "play-frontend-hmrc"         % "6.6.0-play-28"
   )
 
   val test: Seq[ModuleID] = Seq(
