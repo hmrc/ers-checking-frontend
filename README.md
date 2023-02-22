@@ -13,7 +13,7 @@ This service utilises [Upscan](https://github.com/hmrc/upscan-initiate)
 
 ### Running the service
 
-Service Manager: sm --start ERS_CHECKING_ALL
+Service Manager: sm2 --start ERS_CHECKING_ALL
 
 You can use the `./run_all_tests` script to quickly run the unit tests, along with scalastyle and a dependency check,  for this repo
 
