@@ -23,7 +23,7 @@ import services.validation.ValidationErrorHelper._
 import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models.{Cell, Row, ValidationError}
 
-class EMIAdjustmentsV3ValidationTest extends PlaySpec with ERSValidationEMIAdjustmentsTestData with ValidationTestRunner {
+class EMIAdjustmentsV4ValidationTest extends PlaySpec with ERSValidationEMIAdjustmentsTestData with ValidationTestRunner {
 
   "ERS Validation tests for EMI Adjustments" should {
     val validator = new DataValidator(ConfigFactory.load.getConfig("ers-emi-adjustments-validation-config"))
@@ -75,7 +75,7 @@ class EMIAdjustmentsV3ValidationTest extends PlaySpec with ERSValidationEMIAdjus
 
 }
 
-class EMIReplacedV3ValidationTest extends PlaySpec with ERSValidationEMIReplacedTestData with ValidationTestRunner {
+class EMIReplacedV4ValidationTest extends PlaySpec with ERSValidationEMIReplacedTestData with ValidationTestRunner {
 
   "ERS EMI Replaced Validation Test" should {
     val validator = new DataValidator(ConfigFactory.load.getConfig("ers-emi-replaced-validation-config"))
@@ -83,14 +83,14 @@ class EMIReplacedV3ValidationTest extends PlaySpec with ERSValidationEMIReplaced
   }
 
 }
-class EMIRLCV3ValidationTest extends PlaySpec with ERSValidationEMIRLCTestData with ValidationTestRunner{
+class EMIRLCV4ValidationTest extends PlaySpec with ERSValidationEMIRLCTestData with ValidationTestRunner{
 
 
   "ERS EMI RLC Validation Test" should {
     val validator = new DataValidator(ConfigFactory.load.getConfig("ers-emi-rlc-validation-config"))
     runValidationTests(validator, getDescriptions, getTestData, getExpectedResults)
 
-    "when Column K is answered yes, column L is a mandatory field" in {
+    "when Column B is answered yes, column C is a mandatory field" in {
       val cellC = Cell("C", rowNumber, "")
       val cellB = Cell("B", rowNumber, "yes")
       val row = Row(1, Seq(cellC, cellB))
@@ -108,19 +108,10 @@ class EMIRLCV3ValidationTest extends PlaySpec with ERSValidationEMIRLCTestData w
         ValidationError(cellK, "mandatoryK", "K01", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)")
       )
     }
-    "when Column K is answered, column L is a mandatory field" in {
-      val cellL = Cell("L", rowNumber, "")
-      val cellK = Cell("K", rowNumber, "10.1234")
-      val row = Row(1, Seq(cellL, cellK))
-      val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
-      resOpt.withErrorsFromMessages.get must contain(
-        ValidationError(cellL, "mandatoryL", "L01", "Enter ‘yes’ or ‘no’")
-      )
-    }
   }
 }
 
-class EMINonTaxableV3ValidationTest extends PlaySpec with ERSValidationEMINonTaxableTestData with ValidationTestRunner {
+class EMINonTaxableV4ValidationTest extends PlaySpec with ERSValidationEMINonTaxableTestData with ValidationTestRunner {
 
   "ERS EMI Replaced Exercised Validation Test" should {
 
@@ -164,7 +155,7 @@ class EMINonTaxableV3ValidationTest extends PlaySpec with ERSValidationEMINonTax
 }
 
 
-class EMITaxableV3ValidationTest extends PlaySpec with ERSValidationEMITaxableTestData with ValidationTestRunner {
+class EMITaxableV4ValidationTest extends PlaySpec with ERSValidationEMITaxableTestData with ValidationTestRunner {
 
   "ERS Validation tests for EMI Taxable" should {
 

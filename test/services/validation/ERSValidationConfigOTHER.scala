@@ -23,7 +23,7 @@ import services.validation.ValidationErrorHelper._
 import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models._
 
-class OTHERGrantsV3ValidationTest extends PlaySpec with ERSValidationOTHERGrantsTestData with ValidationTestRunner {
+class OTHERGrantsV4ValidationTest extends PlaySpec with ERSValidationOTHERGrantsTestData with ValidationTestRunner {
 
   val validator: DataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-other-grants-validation-config"))
 
@@ -45,7 +45,7 @@ class OTHERGrantsV3ValidationTest extends PlaySpec with ERSValidationOTHERGrants
 
 }
 
-class OTHEROptionsV3ValidationTest extends PlaySpec with ERSValidationOTHEROptionsTestData with ValidationTestRunner {
+class OTHEROptionsV4ValidationTest extends PlaySpec with ERSValidationOTHEROptionsTestData with ValidationTestRunner {
 
   val validator: DataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-other-options-validation-config"))
 
@@ -89,7 +89,7 @@ class OTHEROptionsV3ValidationTest extends PlaySpec with ERSValidationOTHEROptio
 
 }
 
-class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERAcquisitionTestData with ValidationTestRunner {
+class OTHERAcquisitionV4ValidationTest extends PlaySpec with ERSValidationOTHERAcquisitionTestData with ValidationTestRunner {
 
   val validator: DataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-other-acquisition-validation-config"))
 
@@ -189,7 +189,7 @@ class OTHERAcquisitionV3ValidationTest extends PlaySpec with ERSValidationOTHERA
   }
 }
 
-class OTHERRestrictedSecuritiesV3_ValidationTest extends PlaySpec with ERSValidationOTHERRestrictedSecuritiesTestData with ValidationTestRunner {
+class OTHERRestrictedSecuritiesV4_ValidationTest extends PlaySpec with ERSValidationOTHERRestrictedSecuritiesTestData with ValidationTestRunner {
 
   val validator: DataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-other-restrictedsecurities-validation-config"))
 
@@ -241,7 +241,7 @@ class OTHERRestrictedSecuritiesV3_ValidationTest extends PlaySpec with ERSValida
 
 }
 
-class OTHEROtherBenefitsV3ValidationTest extends PlaySpec with ERSValidationOTHEROtherBenefitsTestData with ValidationTestRunner {
+class OTHEROtherBenefitsV4ValidationTest extends PlaySpec with ERSValidationOTHEROtherBenefitsTestData with ValidationTestRunner {
 
   val validator: DataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-other-other-benefits-validation-config"))
 
@@ -260,7 +260,7 @@ class OTHEROtherBenefitsV3ValidationTest extends PlaySpec with ERSValidationOTHE
   }
 }
 
-class OTHERConvertibleV3ValidationTest extends PlaySpec with ERSValidationOTHERConvertibleTestData with ValidationTestRunner {
+class OTHERConvertibleV4ValidationTest extends PlaySpec with ERSValidationOTHERConvertibleTestData with ValidationTestRunner {
 
   val validator: DataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-other-convertible-validation-config"))
 
@@ -292,7 +292,7 @@ class OTHERConvertibleV3ValidationTest extends PlaySpec with ERSValidationOTHERC
 
 }
 
-class OTHERNotionalV3ValidationTest extends PlaySpec with ERSValidationOTHERNotionalTestData with ValidationTestRunner {
+class OTHERNotionalV4ValidationTest extends PlaySpec with ERSValidationOTHERNotionalTestData with ValidationTestRunner {
 
   val validator: DataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-other-notional-validation-config"))
 
@@ -323,7 +323,7 @@ class OTHERNotionalV3ValidationTest extends PlaySpec with ERSValidationOTHERNoti
 
 }
 
-class OTHEREnhancementV3ValidationTest extends PlaySpec with ERSValidationOTHEREnhancementTestData with ValidationTestRunner {
+class OTHEREnhancementV4ValidationTest extends PlaySpec with ERSValidationOTHEREnhancementTestData with ValidationTestRunner {
 
   val validator: DataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-other-enhancement-validation-config"))
 
@@ -355,7 +355,7 @@ class OTHEREnhancementV3ValidationTest extends PlaySpec with ERSValidationOTHERE
 
 }
 
-class OTHERSoldV3ValidationTest extends PlaySpec with ERSValidationOTHERSoldTestData with ValidationTestRunner {
+class OTHERSoldV4ValidationTest extends PlaySpec with ERSValidationOTHERSoldTestData with ValidationTestRunner {
 
   val validator: DataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-other-sold-validation-config"))
 
