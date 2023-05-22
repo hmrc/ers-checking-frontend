@@ -55,7 +55,7 @@ class StaxProcessorTests extends PlaySpec with CSOPStaxIntegrationTestData {
       val processor = new StaxProcessor(constructXmlDocument(simpleXml, simpleXml2))
 
       processor.hasNext
-      processor.next
+      processor.next()
 
       processor.hasNext
       processor.next() must equal("table2")

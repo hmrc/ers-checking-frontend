@@ -16,7 +16,6 @@
 
 @import uk.gov.hmrc.hmrcfrontend.views.html.components.{HmrcPageHeading, PageHeading}
 @import config.ApplicationConfig
-@import _root_.utils.ERSUtil
 
 @this(ers_main: views.html.ers_main,
         govukBackLink: GovukBackLink,
@@ -29,7 +28,7 @@
         schemeNameShort: String,
         errorListCount: Long,
         schemeErrorCount: Long,
-        schemeErrors: Seq[SheetErrors] = Seq.empty)(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig, ersUtil: ERSUtil)
+        schemeErrors: Seq[SheetErrors] = Seq.empty)(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
 @* HTML Error Report Template *@
 @ers_main(title = messages("ers.error_report.page_title")) {
 
@@ -47,7 +46,7 @@
 
     @schemeErrors.filter(_.errors.nonEmpty).map { sheetErrors =>
         @govukTable(Table(
-            rows = sheetErrors.errors.map { error =>
+            rows = sheetErrors.errors.toSeq.map { error =>
                 Seq(
                     TableRow(
                         content = Text(error.cell.column)

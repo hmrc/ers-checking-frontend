@@ -35,7 +35,7 @@
 
 @ers_main(title = messages("ers.upload_csv.page_title", messages(s"ers_check_csv_file.$scheme.$fileId")), scripts) {
     @govukBackLink(BackLink(
-        href = routes.CheckCsvFilesController.selectCsvFilesPage.url,
+        href = routes.CheckCsvFilesController.selectCsvFilesPage().url,
         content = Text(messages("ers.back"))
     ))
 

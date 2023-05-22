@@ -21,6 +21,7 @@ import models._
 import play.api.Logger
 import play.api.i18n.Messages
 
+import scala.collection.mutable.ListBuffer
 import scala.util.Try
 import scala.xml._
 
@@ -89,12 +90,14 @@ trait DataParser {
     val colsRepeated =  col.attributes.asAttrMap.get(repeatColumnsAttr)
 
     if(colsRepeated.nonEmpty && colsRepeated.get.toInt < 50) {
-      val cols:scala.collection.mutable.MutableList[String]= scala.collection.mutable.MutableList()
+      val cols: ListBuffer[String] = ListBuffer()
       for( _ <- 1 to colsRepeated.get.toInt)  cols += col.text
       cols.toSeq
     }
-    else Seq(col.text)
+    else {
+      Seq(col.text)
+    }
   }
 
-  def isBlankRow(data :Seq[String]): Boolean = data.mkString("").trim.length == 0
+  def isBlankRow(data :Seq[String]): Boolean = data.mkString("").trim.isEmpty
 }

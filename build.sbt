@@ -1,9 +1,9 @@
 import scoverage.ScoverageKeys
-import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings, targetJvm}
+import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings}
 
 val appName = "ers-checking-frontend"
 
-lazy val scoverageSettings: Seq[Def.Setting[_]] =
+lazy val scoverageSettings: Seq[Def.Setting[?]] =
   Seq(
     ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;models/.data/..*;prod.*;app.*;.*BuildInfo.*;view.*;.*Connector.*;.*Metrics;.*config;.*Global;.*Routes;.*RoutesPrefix;.*Configuration;config.AuditFilter;config.LoggingFilter;.*config.WSHttp;models.*;controllers.ERSCheckingBaseController;services.AllWSHttp;",
     ScoverageKeys.coverageMinimumStmtTotal := 83,
@@ -13,14 +13,14 @@ lazy val scoverageSettings: Seq[Def.Setting[_]] =
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
-  .settings(scoverageSettings: _*)
+  .settings(scoverageSettings *)
   .settings(PlayKeys.playDefaultPort := 9225)
-  .settings(scalaSettings: _*)
-  .settings(defaultSettings(): _*)
+  .settings(scalaSettings *)
+  .settings(defaultSettings() *)
   .settings(
-    targetJvm := "jvm-1.8",
-    scalaVersion := "2.12.16",
+    scalaVersion := "2.13.10",
     libraryDependencies ++= AppDependencies.all,
+    libraryDependencySchemes ++= Seq("org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always),
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
     routesImport += "models.upscan.UploadId"
@@ -28,7 +28,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(majorVersion := 4)
 
 scalacOptions ++= Seq(
-  "-P:silencer:pathFilters=views;routes"
+  "-Wconf:src=routes/.*:s", "-Wconf:cat=unused-imports&src=html/.*:s"
 )
 
 TwirlKeys.templateImports ++= Seq(

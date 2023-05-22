@@ -63,7 +63,7 @@ trait PageBuilder {
   val SIP_CSV_FILES: Int = 2
   val OTHER_CSV_FILES: Int = 9
 
-  val CSVFilesList = Map(
+  val CSVFilesList: Map[String, List[CsvFiles]] = Map(
     (
       SCHEME_EMI, List(
       CsvFiles("EMI_ADJUSTMENTS"),
@@ -120,9 +120,10 @@ trait PageBuilder {
 
 
   def getPageBackLink(fileType: String): String = {
-    fileType match {
-      case OPTION_ODS => routes.CheckingServiceController.checkODSFilePage().toString
-      case OPTION_CSV => routes.CheckingServiceController.checkCSVFilePage().toString
+    if (fileType == OPTION_ODS) {
+      routes.CheckingServiceController.checkODSFilePage().toString
+    } else {
+      routes.CheckingServiceController.checkCSVFilePage().toString
     }
   }
 }

@@ -38,7 +38,7 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
                                         select_csv_file_types: views.html.select_csv_file_types,
                                         override val global_error: views.html.global_error)
                                        (implicit ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with I18nSupport with BaseController with Logging {
+  extends FrontendController(mcc) with I18nSupport with ErsBaseController with Logging {
 
   def selectCsvFilesPage(): Action[AnyContent] = authAction.async {
     implicit request =>
@@ -63,7 +63,7 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
   }
 
   def validateCsvFilesPageSelected()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    CSformMappings.csvFileCheckForm().bindFromRequest.fold(
+    CSformMappings.csvFileCheckForm().bindFromRequest().fold(
       formWithError =>
         reloadWithError(Some(formWithError)),
       formData =>

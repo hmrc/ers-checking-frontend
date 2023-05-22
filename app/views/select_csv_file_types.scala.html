@@ -29,7 +29,7 @@
 
 @ers_main(title = messages("ers.choose_csv_files.title")) {
     @govukBackLink(BackLink(
-        href = routes.CheckingServiceController.checkFileTypePage.url,
+        href = routes.CheckingServiceController.checkFileTypePage().url,
         content = Text(messages("ers.back"))
     ))
 

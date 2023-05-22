@@ -43,9 +43,9 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
   with ErsTestHelper with BeforeAndAfterEach with GuiceOneServerPerTest with ScalaFutures {
 
   override val mockAuthConnector: AuthConnector = mock[AuthConnector]
-  override val testBodyParser: BodyParsers.Default = fakeApplication.injector.instanceOf[BodyParsers.Default]
+  override val testBodyParser: BodyParsers.Default = fakeApplication().injector.instanceOf[BodyParsers.Default]
 
-  implicit def materializer: Materializer = Play.materializer(fakeApplication)
+  implicit def materializer: Materializer = Play.materializer(fakeApplication())
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
@@ -94,7 +94,6 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
       status(result) shouldBe Status.OK
       contentAsString(result) shouldBe "Successful"
     }
-
 
     "return a perform the action if the user is authorised without and empref when user has multiple enrolments" in {
       when(
@@ -181,5 +180,4 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
       result.futureValue.header.headers("Location") shouldBe routes.AuthorisationController.notAuthorised().url
     }
   }
-
 }

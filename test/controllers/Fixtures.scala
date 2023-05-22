@@ -53,14 +53,14 @@ object Fixtures {
 
   def getMockErrorList: JsValue = {
     val schemeErrors = buildSheetErrors
-    val jsonValue: JsValue = Json.toJson(schemeErrors);
-    jsonValue;
+    val jsonValue: JsValue = Json.toJson(schemeErrors)
+    jsonValue
   }
 
   def getMockSummaryErrors: JsValue = {
-    val errorList: String = "\"{\\\"b\\\":[{\\\"c\\\":\\\"11\\\", \\\"d\\\":\\\"1\\\"}]}\"";
-    val jsonValue: JsValue = Json.parse(errorList);
-    jsonValue;
+    val errorList: String = "\"{\\\"b\\\":[{\\\"c\\\":\\\"11\\\", \\\"d\\\":\\\"1\\\"}]}\""
+    val jsonValue: JsValue = Json.parse(errorList)
+    jsonValue
   }
 
   def getMockSchemeTypeString: String = "1"

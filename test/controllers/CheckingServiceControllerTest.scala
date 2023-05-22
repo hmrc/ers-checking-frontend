@@ -38,10 +38,9 @@ import views.html._
 
 import scala.concurrent.Future
 
-
 class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with OptionValues
   with GuiceOneAppPerSuite with ErsTestHelper with Injecting with ScalaFutures {
-
+  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
   val formatErrorsView: format_errors = inject[format_errors]
   val startView: start = inject[start]
   val schemeTypeView: scheme_type = inject[scheme_type]
@@ -53,8 +52,6 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
   val globalErrorView: global_error = inject[global_error]
   val invalidErrorView: file_upload_problem = inject[file_upload_problem]
   val fileUploadErrorView: file_upload_error = inject[file_upload_error]
-
-  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
 
   "start Page GET" should {
@@ -156,10 +153,10 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
     def buildFakeCheckingServiceController(fileTypeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, fileUploadErrorView, globalErrorView) {
-      when(mockErsUtil.fetch[String](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(),any(),any()))
-        .thenReturn(if (fileTypeRes) Future.successful("csv") else Future.failed(new NoSuchElementException))
-			mockAnyContentAction
-    }
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(), any(), any()))
+          .thenReturn(if (fileTypeRes) Future.successful("csv") else Future.failed(new NoSuchElementException))
+        mockAnyContentAction
+      }
 
     "gives a call to showCheckFileTypePage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
@@ -192,10 +189,10 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
     def buildFakeCheckingServiceController(fileTypeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, fileUploadErrorView, globalErrorView) {
-      when(mockErsUtil.cache(refEq(mockErsUtil.FILE_TYPE_CACHE), anyString())(any(), any(), any()))
-        .thenReturn(if (fileTypeRes) Future.successful(null) else Future.failed(new Exception))
-			mockAnyContentAction
-    }
+        when(mockErsUtil.cache(refEq(mockErsUtil.FILE_TYPE_CACHE), anyString())(any(), any(), any()))
+          .thenReturn(if (fileTypeRes) Future.successful(null) else Future.failed(new Exception))
+        mockAnyContentAction
+      }
 
     "gives a call to showCheckFileTypeSelected if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
@@ -252,15 +249,15 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
         invalidErrorView, fileUploadErrorView, globalErrorView) {
         when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any()))
           .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any()))
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any(), any()))
           .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
         when(mockUpscanService.getUpscanFormData(any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(UpscanInitiateResponse(Reference("ref"), Call("GET", "/"), Map.empty)))
         when(mockSessionService.createCallbackRecord(any(), any()))
           .thenReturn(Future.successful(CacheMap("", Map.empty)))
 
-			  mockAnyContentAction
-    }
+        mockAnyContentAction
+      }
 
     "give a call to showCheckFilePage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
@@ -279,7 +276,8 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
       val res: Future[Result] = controllerUnderTest.showCheckODSFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       res.map { result =>
         result shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request, testMessages)))
-      }    }
+      }
+    }
 
   }
 
@@ -292,14 +290,14 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
         invalidErrorView, fileUploadErrorView, globalErrorView) {
         when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any()))
           .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any()))
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any(), any()))
           .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
-        when(mockErsUtil.fetch[UpscanCsvFilesList](refEq(mockErsUtil.CSV_FILES_UPLOAD), any())(any(),any(),any()))
+        when(mockErsUtil.fetch[UpscanCsvFilesList](refEq(mockErsUtil.CSV_FILES_UPLOAD), any())(any(), any(), any()))
           .thenReturn(if (schemeRes) Future.successful(UpscanCsvFilesList(Seq(UpscanIds(UploadId("id"), "fileId", NotStarted)))) else Future.failed(new Exception))
         when(mockUpscanService.getUpscanFormData(any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(UpscanInitiateResponse(Reference("ref"), Call("GET", "/"), Map.empty)))
-			mockAnyContentAction
-    }
+        mockAnyContentAction
+      }
 
     "give a call to showCheckCSVFilePage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
@@ -317,32 +315,33 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
       val res: Future[Result] = controllerUnderTest.showCheckCSVFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       (Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
-      res.map{ result =>
+      res.map { result =>
         result shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request, testMessages)))
-      }}
+      }
+    }
 
   }
 
   "Checking success page GET" should {
 
     def buildFakeCheckingServiceController(schemeRes: Boolean = true,
-																					 errorRes: Boolean = true,
-																					 errorCount: String = "0"
-																					): CheckingServiceController =
+                                           errorRes: Boolean = true,
+                                           errorCount: String = "0"
+                                          ): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView,
         invalidErrorView, fileUploadErrorView, globalErrorView) {
         when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any()))
           .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
 
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(),any(),any()))
-        .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any(), any()))
+          .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
 
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_ERROR_COUNT_CACHE))(any(),any(),any()))
-        .thenReturn(if (errorRes) Future.successful(errorCount) else Future.failed(new Exception))
+        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_ERROR_COUNT_CACHE))(any(), any(), any()))
+          .thenReturn(if (errorRes) Future.successful(errorCount) else Future.failed(new Exception))
 
-			mockAnyContentAction
-    }
+        mockAnyContentAction
+      }
 
     "give a call to showCheckingSuccessPage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()

@@ -129,7 +129,9 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
 @tailrec
 private[services] final def processDisplayedErrors(errorsLeftToDisplay: Int,
                                                    rowsWithIndex: Seq[(List[ValidationError], Int)]): Seq[(List[ValidationError], Int)] = {
-  if (errorsLeftToDisplay <= 0) rowsWithIndex
+  if (errorsLeftToDisplay <= 0) {
+    rowsWithIndex
+  }
   else {
     val indexOfFirstOccurrence: Int = rowsWithIndex.indexWhere(errorsWithIndex => errorsWithIndex._1.nonEmpty &&
       errorsWithIndex._1.exists(validationError => validationError.cell.row == 0))
@@ -140,7 +142,9 @@ private[services] final def processDisplayedErrors(errorsLeftToDisplay: Int,
         validationError.copy(cell = cellReplaced)
       }), indexOfFirstOccurrence)
       processDisplayedErrors(errorsLeftToDisplay - entryReplacement._1.length, rowsWithIndex.updated(indexOfFirstOccurrence, entryReplacement))
-    } else rowsWithIndex
+    } else {
+      rowsWithIndex
+    }
   }
 }
 
@@ -151,7 +155,7 @@ private[services] final def processDisplayedErrors(errorsLeftToDisplay: Int,
 
   def getRowsWithNumbers(listOfErrors: Seq[Either[Throwable, RowValidationResults]], name: String)(
     implicit messages: Messages): Either[Throwable, Seq[List[ValidationError]]] = listOfErrors match {
-    case allEmpty if allEmpty.isEmpty || allEmpty.filter(_.isRight).forall(_.right.get.rowWasEmpty) =>
+    case allEmpty if allEmpty.isEmpty || allEmpty.filter(_.isRight).forall(_.map(_.rowWasEmpty).forall(identity)) =>
       Left(ERSFileProcessingException(
         messages("ers_check_csv_file.noData", name),
         messages("ers_check_csv_file.noData"),
@@ -159,7 +163,9 @@ private[services] final def processDisplayedErrors(errorsLeftToDisplay: Int,
     case nonEmpty =>
       nonEmpty.find(_.isLeft) match {
       case Some(Left(issues)) => Left(issues)
-      case _ => Right(giveRowNumbers(nonEmpty.map(_.right.get.validationErrors)))
+      case _ =>
+        val maybeErrors = nonEmpty.map(_.getOrElse(RowValidationResults(List())).validationErrors)
+        Right(giveRowNumbers(maybeErrors))
     }
   }
 
@@ -168,7 +174,7 @@ private[services] final def processDisplayedErrors(errorsLeftToDisplay: Int,
     listOfErrors.filter(rowErrors => rowErrors.nonEmpty) match {
       case allGood if allGood.isEmpty => Future.successful(Right(true))
       case errors =>
-        val errorsToCache = ListBuffer(parserUtil.getSheetErrors(SheetErrors(FilenameUtils.removeExtension(name), errors.flatten.to[ListBuffer])))
+        val errorsToCache = ListBuffer(parserUtil.getSheetErrors(SheetErrors(FilenameUtils.removeExtension(name), errors.flatten.to(ListBuffer))))
         for {
           _ <- ersUtil.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${file.uploadId.value}", errors.flatten.length)
           _ <- ersUtil.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${file.uploadId.value}",
@@ -177,7 +183,6 @@ private[services] final def processDisplayedErrors(errorsLeftToDisplay: Int,
     }
   }
 }
-
 
 object FlowOps {
 

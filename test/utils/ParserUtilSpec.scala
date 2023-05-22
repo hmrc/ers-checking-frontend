@@ -36,13 +36,13 @@ class ParserUtilSpec extends AnyWordSpecLike with Matchers with OptionValues wit
 
   "getDataToValidate" must {
     "truncate array depending on number of columns in given sheet" in {
-      val rowData: Array[String] = Array.fill(50)("")
+      val rowData: Seq[String] = Seq.fill(50)("")
       val result = parserUtil.formatDataToValidate(rowData, "Other_Grants_V4")
       result.length shouldBe 4
     }
 
     "add empty strings to match number of columns in given sheet" in {
-      val rowData: Array[String] = Array("")
+      val rowData: Seq[String] = Seq("")
       val result = parserUtil.formatDataToValidate(rowData, "Other_Grants_V4")
       result.length shouldBe 4
     }

@@ -21,7 +21,7 @@ import play.api.i18n.Messages
 import play.api.mvc.{Request, Result}
 import play.api.mvc.Results.InternalServerError
 
-trait BaseController {
+trait ErsBaseController {
 
   implicit val appConfig: ApplicationConfig
   val global_error: views.html.global_error
