@@ -16,8 +16,6 @@
 
 package services
 
-import java.io.File
-
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
@@ -32,10 +30,10 @@ import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, Up
 import models.{ERSFileProcessingException, RowValidationResults, SheetErrors}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.OptionValues
 import org.scalatest.concurrent.{ScalaFutures, TimeLimits}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.{EitherValues, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesImpl}
@@ -47,19 +45,20 @@ import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 import utils.CsvParserUtil
 
+import java.io.File
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with AnyWordSpecLike with Matchers
-  with OptionValues with ErsTestHelper with GuiceOneAppPerSuite with TimeLimits with ScalaFutures {
+  with OptionValues with EitherValues with ErsTestHelper with GuiceOneAppPerSuite with TimeLimits with ScalaFutures {
 
   def convertToAkkaSource(file: File): Source[List[ByteString], Future[IOResult]] = {
     FileIO.fromPath(file.toPath)
       .via(CsvParsing.lineScanner())
   }
 
-  lazy val testParserUtil: CsvParserUtil = fakeApplication.injector.instanceOf[CsvParserUtil]
+  lazy val testParserUtil: CsvParserUtil = fakeApplication().injector.instanceOf[CsvParserUtil]
   val mockDataGenerator: DataGenerator = mock[DataGenerator]
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
@@ -83,11 +82,10 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with AnyWordSpe
 
       val result = Await.result(resultFuture, Duration.Inf)
       assert(result.isRight)
-      val validationErrorList = result.right.get
-      validationErrorList.validationErrors.head.cell shouldBe Cell("A", 0, "25  2015")
-      validationErrorList.validationErrors.head.errorId shouldBe "001"
-      validationErrorList.validationErrors.head.errorMsg shouldBe "ers.upload.error.date"
-      validationErrorList.validationErrors.head.ruleId shouldBe "error.1"
+      result.value.validationErrors.head.cell shouldBe Cell("A", 0, "25  2015")
+      result.value.validationErrors.head.errorId shouldBe "001"
+      result.value.validationErrors.head.errorMsg shouldBe "ers.upload.error.date"
+      result.value.validationErrors.head.ruleId shouldBe "error.1"
     }
 
     "process a row and return an empty list if there are no errors" in {
@@ -109,7 +107,7 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with AnyWordSpe
 
       val result = Await.result(resultFuture, Duration.Inf)
       assert(result.isRight)
-      result.right.get.validationErrors.isEmpty shouldBe true
+      result.value.validationErrors.isEmpty shouldBe true
       }
   }
 
@@ -163,7 +161,7 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with AnyWordSpe
 
       val result = resultFuture.map(_.futureValue)
       assert(result.forall(_.isLeft))
-      result.head.left.get
+      result.head.left.value
         .getMessage shouldBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload CSOP_OptionsGranted_V4.csv as part of your annual return."
     }
 
@@ -180,7 +178,7 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with AnyWordSpe
 
       val result = resultFuture.map(_.futureValue)
       assert(result.forall(_.isLeft))
-      result.head.left.get
+      result.head.left.value
         .getMessage shouldBe "ers.exceptions.dataParser.configFailure"
     }
 
@@ -214,8 +212,8 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with AnyWordSpe
       val result = Await.result(resultFuture, Duration.Inf)
 
       assert(result.forall(_.isRight))
-      result.head.right.get shouldBe List(ByteString("0"), ByteString(" 1"), ByteString(" 2"), ByteString(" 3"))
-      result(1).right.get shouldBe List(ByteString("4"), ByteString(" 5"))
+      result.head.value shouldBe List(ByteString("0"), ByteString(" 1"), ByteString(" 2"), ByteString(" 3"))
+      result(1).value shouldBe List(ByteString("4"), ByteString(" 5"))
     }
 
     "return a left containing a throwable when an error occurs" in {
@@ -225,7 +223,7 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with AnyWordSpe
       val resultFuture = testProcessCsvService.extractBodyOfRequest(source).runWith(Sink.seq)
       val result = Await.result(resultFuture, Duration.Inf)
       result.head.isLeft shouldBe true
-      val exception = result.head.left.get
+      val exception = result.head.left.value
       assert(exception.isInstanceOf[UpstreamErrorResponse])
       assert(exception.asInstanceOf[UpstreamErrorResponse].getMessage().contains("Illegal response from Upscan"))
     }
@@ -235,13 +233,13 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with AnyWordSpe
     "check the file is a csv and remove the extension" in {
       val result = testProcessCsvService.checkFileType("test.csv")
       result.isRight shouldBe true
-      result.right.get shouldBe "test"
+      result.value shouldBe "test"
     }
 
     "if the file is not a csv throw an ERSFileProcessingException" in {
       val result = testProcessCsvService.checkFileType("test.ods")
       result.isLeft shouldBe true
-      result.left.get.getMessage shouldBe "You chose to check a CSV file, but test.ods isn’t a CSV file."
+      result.left.value.getMessage shouldBe "You chose to check a CSV file, but test.ods isn’t a CSV file."
     }
   }
 
@@ -378,7 +376,7 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with AnyWordSpe
       val result = testProcessCsvService.getRowsWithNumbers(errors, "test.csv")
 
       result.isLeft shouldBe true
-      result.left.get
+      result.left.value
         .getMessage shouldBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload test.csv as part of your annual return."
     }
 
@@ -391,7 +389,7 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with AnyWordSpe
       val result = testProcessCsvService.getRowsWithNumbers(errors, "test.csv")
 
       result.isLeft shouldBe true
-      result.left.get.getMessage shouldBe "test error"
+      result.left.value.getMessage shouldBe "test error"
     }
   }
 
@@ -406,7 +404,7 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with AnyWordSpe
       val result = Await.result(resultFuture, Duration.Inf)
 
       result.isRight shouldBe true
-      result.right.get shouldBe true
+      result.value shouldBe true
     }
 
     "return false and cache errors if there are validation errors in any row" in {
@@ -425,7 +423,7 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with AnyWordSpe
       val result = Await.result(resultFuture, Duration.Inf)
 
       result.isRight shouldBe true
-      result.right.get shouldBe false
+      result.value shouldBe false
     }
   }
 }

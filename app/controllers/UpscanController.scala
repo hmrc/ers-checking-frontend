@@ -38,7 +38,7 @@ class UpscanController @Inject()(authAction: AuthAction,
                                  override val global_error: views.html.global_error
                                 )(implicit executionContext: ExecutionContext, ersUtil: ERSUtil,
                                   actorSystem: ActorSystem, override val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with Retryable with I18nSupport with BaseController {
+  extends FrontendController(mcc) with Retryable with I18nSupport with ErsBaseController {
 
   val logger: Logger = Logger(getClass)
 
@@ -129,11 +129,14 @@ class UpscanController @Inject()(authAction: AuthAction,
       case Some(FailedMimeType) =>
         logger.warn("[UpscanController][successODS] Upload status is rejected")
         Future.successful(Redirect(routes.CheckingServiceController.checkingInvalidFilePage()))
+      case Some(status) =>
+        logger.warn(s"[UpscanController][successODS] Invalid upload status: $status")
+        Future.successful(getGlobalErrorPage)
       case None =>
         logger.error(s"[UpscanController][successODS] Failed to verify upload. No data found in cache")
         Future.successful(getGlobalErrorPage)
     } recover {
-      case e: LoopException[Option[UploadStatus]] =>
+      case e: LoopException[Option[UploadStatus] @unchecked] =>
         logger.error(s"[UpscanController][successODS] Failed to verify upload. Upload status: ${e.finalFutureData.flatten}", e)
         getGlobalErrorPage
       case e: Exception =>

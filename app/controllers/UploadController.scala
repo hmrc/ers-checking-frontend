@@ -48,7 +48,7 @@ class UploadController @Inject()(authAction: AuthAction,
                                  override val global_error: views.html.global_error
                                 )(implicit executionContext: ExecutionContext,
                                   actorSystem: ActorSystem, val ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with I18nSupport with BaseController with Logging {
+  extends FrontendController(mcc) with I18nSupport with ErsBaseController with Logging {
 
   def downloadAsInputStream(downloadUrl: String): InputStream = new URL(downloadUrl).openStream()
 

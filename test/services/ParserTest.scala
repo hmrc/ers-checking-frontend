@@ -20,7 +20,7 @@ import helpers.ErsTestHelper
 import models.ERSFileProcessingException
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatest.BeforeAndAfter
+import org.scalatest.{BeforeAndAfter, EitherValues}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -31,7 +31,7 @@ import services.XMLTestData._
 import utils.{CsvParserUtil, ParserUtil}
 
 
-class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with ErsTestHelper with BeforeAndAfter {
+class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with ErsTestHelper with BeforeAndAfter with EitherValues {
 
   val mockParserUtil: ParserUtil = mock[ParserUtil]
   val mockCsvParserUtil: CsvParserUtil = mock[CsvParserUtil]
@@ -48,13 +48,13 @@ class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures wit
 
   "parse row with duplicate column data 1" in {
     val result = TestDataParser.parse(emiAdjustmentsXMLRow1.toString,"")
-    result.right.get._1.size must equal(17)
+    result.value._1.size must equal(17)
   }
 
   besParserTests.foreach( rec => {
     rec._1 in {
       val result = TestDataParser.parse(rec._2.toString,"")
-      result.right.get._1.toList.take(rec._3.size) must be (rec._3)
+      result.value._1.toList.take(rec._3.size) must be (rec._3)
     }
   })
 

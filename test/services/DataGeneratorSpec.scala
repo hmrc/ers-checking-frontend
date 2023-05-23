@@ -18,10 +18,11 @@ package services
 
 import controllers.Fixtures
 import helpers.ErsTestHelper
-import models.ERSFileProcessingException
+import models.{ERSFileProcessingException, SheetErrors}
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.EitherValues
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.i18n
@@ -34,15 +35,16 @@ import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 import utils.ParserUtil
 
+import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
-class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ErsTestHelper with HeaderData {
+class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ErsTestHelper with HeaderData with EitherValues {
 
   lazy val mockParserUtil: ParserUtil = mock[ParserUtil]
-  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication)
+  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
-  lazy val testParserUtil: ParserUtil = fakeApplication.injector.instanceOf[ParserUtil]
-  lazy val testErsValidationConfigs: ERSValidationConfigs = fakeApplication.injector.instanceOf[ERSValidationConfigs]
+  lazy val testParserUtil: ParserUtil = fakeApplication().injector.instanceOf[ParserUtil]
+  lazy val testErsValidationConfigs: ERSValidationConfigs = fakeApplication().injector.instanceOf[ERSValidationConfigs]
 
   class DataGeneratorObj(scheme: String) extends DataGenerator(mockAuditEvents, mockMetrics,
     testParserUtil, testErsValidationConfigs, mockErsUtil, mockErsValidator){
@@ -147,9 +149,9 @@ class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ErsTes
     }
 
     "isBlankRow" in new DataGeneratorObj("CSOP") {
-      val testAct = List("","","","")
+      val testAct: List[String] = List("","","","")
       isBlankRow(testAct) must be (true)
-      val testAct1 = List("dfgdg","","","")
+      val testAct1: List[String] = List("dfgdg","","","")
       isBlankRow(testAct1) must be (false)
     }
 
@@ -178,7 +180,7 @@ class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ErsTes
     }
 
     "get no errors for EMI" in new DataGeneratorObj("EMI") {
-      val result = getErrors(XMLTestData.getEMIAdjustmentsTemplate,"emi","")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
+      val result: ListBuffer[SheetErrors] = getErrors(XMLTestData.getEMIAdjustmentsTemplate,"emi","")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
       result.foreach(_.errors.size mustBe 0)
     }
 
@@ -186,7 +188,7 @@ class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ErsTes
       when(mockErsValidator.validateRow(any())(any(), any()))
         .thenReturn(Some(List(ValidationError(Cell("A", 1, "badValue"), "rule", "error", "errorMessage"))))
         .thenReturn(None)
-      val result = getErrors(XMLTestData.getInvalidEMIAdjustmentsTemplate,"emi","")(
+      val result: ListBuffer[SheetErrors] = getErrors(XMLTestData.getInvalidEMIAdjustmentsTemplate,"emi","")(
         hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
       result.head.errors.size mustBe 1
     }
@@ -198,7 +200,7 @@ class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ErsTes
             ValidationError(Cell("A", 1, "badValue"), "rule", "error", "errorMessage")
           )))
         .thenReturn(None)
-      val result = getErrors(XMLTestData.getEMIAdjustmentsTemplate ++ XMLTestData.getInvalidEMIReplacedTemplate,"emi","")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
+      val result: ListBuffer[SheetErrors] = getErrors(XMLTestData.getEMIAdjustmentsTemplate ++ XMLTestData.getInvalidEMIReplacedTemplate,"emi","")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
       result(1).errors.size mustBe 1
     }
 
@@ -206,7 +208,7 @@ class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ErsTes
       when(mockErsValidator.validateRow(any())(any(), any()))
         .thenReturn(Some(List(ValidationError(Cell("A", 13, "badValue"), "rule", "error", "errorMessage"))))
         .thenReturn(None)
-      val result = getErrors(XMLTestData.getInvalidEMIWithRepeats,"emi","")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
+      val result: ListBuffer[SheetErrors] = getErrors(XMLTestData.getInvalidEMIWithRepeats,"emi","")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
       result.head.errors.size mustBe 1
       result.head.errors.head.cell.row mustBe 13
     }
@@ -237,10 +239,10 @@ class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ErsTes
       )
 
       assert(failedValue.isLeft)
-      assert(failedValue.left.get.isInstanceOf[ERSFileProcessingException])
-      failedValue.left.get.asInstanceOf[ERSFileProcessingException].context mustEqual returnedExceptionExample.context
-      failedValue.left.get.asInstanceOf[ERSFileProcessingException].message mustEqual returnedExceptionExample.message
-      failedValue.left.get.asInstanceOf[ERSFileProcessingException].optionalParams mustEqual returnedExceptionExample.optionalParams
+      assert(failedValue.left.value.isInstanceOf[ERSFileProcessingException])
+      failedValue.left.value.asInstanceOf[ERSFileProcessingException].context mustEqual returnedExceptionExample.context
+      failedValue.left.value.asInstanceOf[ERSFileProcessingException].message mustEqual returnedExceptionExample.message
+      failedValue.left.value.asInstanceOf[ERSFileProcessingException].optionalParams mustEqual returnedExceptionExample.optionalParams
 
       verify(mockAuditEvents, times(1))
         .auditRunTimeError(
@@ -268,10 +270,10 @@ class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ErsTes
       )
 
       assert(failedValue.isLeft)
-      assert(failedValue.left.get.isInstanceOf[ERSFileProcessingException])
-      failedValue.left.get.asInstanceOf[ERSFileProcessingException].context mustEqual returnedExceptionExample.context
-      failedValue.left.get.asInstanceOf[ERSFileProcessingException].message mustEqual returnedExceptionExample.message
-      failedValue.left.get.asInstanceOf[ERSFileProcessingException].optionalParams mustEqual returnedExceptionExample.optionalParams
+      assert(failedValue.left.value.isInstanceOf[ERSFileProcessingException])
+      failedValue.left.value.asInstanceOf[ERSFileProcessingException].context mustEqual returnedExceptionExample.context
+      failedValue.left.value.asInstanceOf[ERSFileProcessingException].message mustEqual returnedExceptionExample.message
+      failedValue.left.value.asInstanceOf[ERSFileProcessingException].optionalParams mustEqual returnedExceptionExample.optionalParams
 
       verify(mockAuditEvents, times(1)).fileProcessingErrorAudit("differentInput", "aSheetName", "differentinput is not equal to someinput")
 

@@ -47,7 +47,9 @@ trait Retryable {
                 after(delay, scheduler)(loop(count + 1, Some(data)))
               }
           }
-        } else throw LoopException(count, previous)
+        } else {
+          throw LoopException(count, previous)
+        }
       }
       loop()
     }

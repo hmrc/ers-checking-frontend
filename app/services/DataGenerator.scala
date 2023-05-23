@@ -47,57 +47,59 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
   // scalastyle:off magic.number
 
   def getErrors(iterator: Iterator[String], scheme: String, fileName: String)
-               (implicit hc: HeaderCarrier, request: RequestWithOptionalEmpRef[_], messages: Messages): ListBuffer[SheetErrors] =
-  {
+               (implicit hc: HeaderCarrier, request: RequestWithOptionalEmpRef[_], messages: Messages): ListBuffer[SheetErrors] = {
+
     var rowNum = 0
-    implicit var sheetName :String = ""
+    implicit var sheetName: String = ""
     var sheetColSize = 0
     val schemeErrors: ListBuffer[SheetErrors] = ListBuffer()
     var validator: DataValidator = ersValidationConfigs.defValidator
 
     def incRowNum(): Unit = rowNum =  rowNum + 1
-    var rowCount : Int = 0
-    var rowsWithData : Int = 0
+    var rowCount: Int = 0
+    var rowsWithData: Int = 0
     val startTime = System.currentTimeMillis()
 
-    while(iterator.hasNext){
+    while(iterator.hasNext) {
       val row = iterator.next()
       val rowData = parse(row, fileName)
       logger.debug("[DataGenerator][getErrors] parsed data ---> " + rowData + " -- cursor --> " + rowNum)
       if (rowData.isLeft) {
         checkForMissingHeaders(rowNum, sheetName, fileName)
-        logger.debug("[DataGenerator][getErrors] data from the left --->" + rowData.left.get)
-        sheetName = identifyAndDefineSheet(rowData.left.get, scheme)
+        logger.debug("[DataGenerator][getErrors] data from the left --->" + rowData.swap.getOrElse(""))
+        sheetName = identifyAndDefineSheet(rowData.swap.getOrElse(""), scheme)
         logger.debug("[DataGenerator][getErrors] Sheetname = " + sheetName + "******")
         schemeErrors += SheetErrors(sheetName, ListBuffer())
         logger.debug("[DataGenerator][getErrors] SchemeData = " + schemeErrors.size + "******")
         rowNum = 1
         validator = setValidator(sheetName)
       } else {
-        (1 to rowData.right.get._2).foreach { _ =>
-          rowNum match {
-            case count if count < 9 =>
-              logger.debug("[DataGenerator][getErrors] GetData: incRowNum if count < 9: " + count + " RowNum: " + rowNum)
-              incRowNum()
-            case 9 =>
-              logger.debug("[DataGenerator][getErrors] GetData: incRowNum if  9: " + rowNum + "sheetColSize: " + sheetColSize)
-              logger.debug("[DataGenerator][getErrors] sheetName--->" + sheetName)
-              sheetColSize = validateHeaderRow(rowData.right.get._1, sheetName, scheme, fileName)
-              incRowNum()
-            case _ =>
-              val foundData = rowData.right.get._1
-              rowCount = foundData.size
-              val data = parserUtil.formatDataToValidate(foundData, sheetName)
-              if (!isBlankRow(data)) {
-                rowsWithData += 1
-                ersValidator.validateRow(validator)(data, rowNum) match {
-                  case Some(errors) if errors.nonEmpty =>
-                    logger.debug("[DataGenerator][getErrors] Error while Validating File + Formatting errors present " + errors.toString)
-                    schemeErrors.last.errors ++= errors
-                  case _ => schemeErrors.last.errors
+        rowData.map { rd =>
+          (1 to rd._2).foreach { _ =>
+            rowNum match {
+              case count if count < 9 =>
+                logger.debug("[DataGenerator][getErrors] GetData: incRowNum if count < 9: " + count + " RowNum: " + rowNum)
+                incRowNum()
+              case 9 =>
+                logger.debug("[DataGenerator][getErrors] GetData: incRowNum if  9: " + rowNum + "sheetColSize: " + sheetColSize)
+                logger.debug("[DataGenerator][getErrors] sheetName--->" + sheetName)
+                sheetColSize = validateHeaderRow(rd._1, sheetName, scheme, fileName)
+                incRowNum()
+              case _ =>
+                val foundData = rd._1
+                rowCount = foundData.size
+                val data = parserUtil.formatDataToValidate(foundData, sheetName)
+                if (!isBlankRow(data)) {
+                  rowsWithData += 1
+                  ersValidator.validateRow(validator)(data, rowNum) match {
+                    case Some(errors) if errors.nonEmpty =>
+                      logger.debug("[DataGenerator][getErrors] Error while Validating File + Formatting errors present " + errors.toString)
+                      schemeErrors.last.errors ++= errors
+                    case _ => schemeErrors.last.errors
+                  }
                 }
-              }
-              incRowNum()
+                incRowNum()
+            }
           }
         }
       }

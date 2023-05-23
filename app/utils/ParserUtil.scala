@@ -69,19 +69,11 @@ class ParserUtil @Inject()(val ersUtil: ERSUtil,
   }
 
   def isValid(schemeErrors: ListBuffer[SheetErrors]): Boolean = {
-    for (sheet <- schemeErrors) {
-      for (_ <- sheet.errors) {
-        return false
-      }
-    }
-    true
+    schemeErrors.map(_.errors.isEmpty).forall(identity)
   }
 
   def getTotalErrorCount(schemeErrors: ListBuffer[SheetErrors]): Long = {
-    var totalErrors = 0
-    if (totalErrors != schemeErrors.size)
-      for (i <- schemeErrors.indices) totalErrors += schemeErrors(i).errors.length
-    totalErrors
+    schemeErrors.map(_.errors.length).sum
   }
 
   def getSheetErrors(schemeErrors: ListBuffer[SheetErrors]): ListBuffer[SheetErrors] = {

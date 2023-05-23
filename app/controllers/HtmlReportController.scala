@@ -40,7 +40,7 @@ class HtmlReportController @Inject()(authAction: AuthAction,
                                      html_error_report: views.html.html_error_report,
                                      override val global_error: views.html.global_error
                                     )(implicit executionContext: ExecutionContext, ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with JsonParser with I18nSupport with BaseController with Logging {
+  extends FrontendController(mcc) with JsonParser with I18nSupport with ErsBaseController with Logging {
 
   def htmlErrorReportPage(isCsv: Boolean): Action[AnyContent] = authAction.async {
       implicit request =>
@@ -88,7 +88,7 @@ class HtmlReportController @Inject()(authAction: AuthAction,
 
       val (schemeName, schemeNameShort) = scheme
 
-      Ok(html_error_report(schemeName, schemeNameShort, totalErrorsCount, errorCountLong, errorsList)(request, messages, appConfig, ersUtil))
+      Ok(html_error_report(schemeName, schemeNameShort, totalErrorsCount, errorCountLong, errorsList.toSeq)(request, messages, appConfig))
     } recover {
       case e: NoSuchElementException =>
         logger.error("Unable to display error report in HtmlReportController.showHtmlErrorReportPage. Error: " + e.getMessage, e)

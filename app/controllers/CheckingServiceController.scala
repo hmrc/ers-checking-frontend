@@ -48,7 +48,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
                                           file_upload_error: views.html.file_upload_error,
                                           override val global_error: views.html.global_error
                                          )(implicit ec: ExecutionContext, ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with I18nSupport with BaseController with Logging {
+  extends FrontendController(mcc) with I18nSupport with ErsBaseController with Logging {
 
   def startPage(): Action[AnyContent] = authAction.async { implicit request =>
     showStartPage()
@@ -73,7 +73,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
   }
 
   def showSchemeTypeSelected(implicit request: Request[AnyContent]): Future[Result] = {
-    CSformMappings.schemeTypeForm.bindFromRequest.fold(
+    CSformMappings.schemeTypeForm.bindFromRequest().fold(
       formWithErrors => {
         Future.successful(BadRequest(scheme_type(formWithErrors)))
       },
@@ -105,7 +105,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
   }
 
   def showCheckFileTypeSelected(implicit request: Request[AnyContent]): Future[Result] = {
-    CSformMappings.checkFileTypeForm.bindFromRequest.fold(
+    CSformMappings.checkFileTypeForm.bindFromRequest().fold(
       formWithErrors => {
         Future.successful(BadRequest(check_file_type(formWithErrors)))
       },
@@ -141,7 +141,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
       Ok(check_csv_file(scheme, currentCsvFile.get.fileId)(request, messages, upscanResponse, appConfig, ersUtil))
     }) recover {
       case e: NoSuchElementException =>
-        logger.warn((("[CheckingServiceController][showCheckCSVFilePage]: No files match status NotStarted")))
+        logger.warn("[CheckingServiceController][showCheckCSVFilePage]: No files match status NotStarted")
         Redirect(routes.CheckingServiceController.fileUploadError())
       case e: Exception =>
         logger.error("[CheckingServiceController][showCheckCSVFilePage]: Unable to fetch scheme. Error: " + e.getMessage)
@@ -222,6 +222,6 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
   }
 
   def showFileUploadErrorPage()(implicit request: Request[AnyRef], messages: Messages): Result = {
-    (BadRequest(file_upload_error()(request, messages ,appConfig)))
+    BadRequest(file_upload_error()(request, messages ,appConfig))
   }
 }

@@ -49,14 +49,14 @@ class ProcessODSServiceSpec extends AnyWordSpecLike with Matchers with OptionVal
   val mockDataGenerator: DataGenerator = mock[DataGenerator]
   val mockStaxProcessor: StaxProcessor = mock[StaxProcessor]
 
-  val config = Map(
+  val config: Map[String, String] = Map(
     "microservice.services.cachable.short-lived-cache-frontend.host" -> "test",
     "cachable.short-lived-cache-frontend.port" -> "test",
     "short-lived-cache-frontend.domain" -> "test"
   )
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
-  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication)
+  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
   lazy val mockParserUtil: ParserUtil = mock[ParserUtil]
   lazy val testParserUtil: ParserUtil = app.injector.instanceOf[ParserUtil]
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
@@ -107,7 +107,7 @@ class ProcessODSServiceSpec extends AnyWordSpecLike with Matchers with OptionVal
       val exception = ERSFileProcessingException("You chose to check an ODS file, but testFileName isn’t an ODS file.",
         "You chose to check an ODS file, but testFileName isn’t an ODS file.")
 
-      buildProcessODSService(false).performODSUpload("testFileName", mockStaxProcessor).futureValue shouldBe Failure(exception)
+      buildProcessODSService(checkODSFileTypeResult = false).performODSUpload("testFileName", mockStaxProcessor).futureValue shouldBe Failure(exception)
     }
   }
 

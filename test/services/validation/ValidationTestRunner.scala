@@ -29,14 +29,25 @@ import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 
 trait ValidationTestRunner extends PlaySpec with GuiceOneAppPerSuite with ErsTestHelper {
-
-  def fakeApp(): Application = new GuiceApplicationBuilder().configure(Map("play.i18n.langs"->List("en", "cy"),"metrics.enabled"-> "false")).build()
-
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApp())
+
+  def fakeApp(): Application = new GuiceApplicationBuilder().configure(Map("play.i18n.langs" -> List("en", "cy"), "metrics.enabled" -> "false")).build()
+
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
 
-  def populateValidationError(expRes: ValidationErrorData)(implicit cell: Cell): ValidationError = {
-    ValidationError(cell, expRes.id, expRes.errorId, expRes.errorMsg)
+  def runValidationTests(validator: DataValidator,
+                         descriptions: List[String],
+                         testDatas: List[Cell],
+                         expectedResults: List[Option[List[ValidationErrorData]]]): Unit = {
+    for (x <- descriptions.indices) {
+      descriptions(x) in {
+        val validatedCell = validator.validateCell(testDatas(x)) match {
+          case Some(x) => Some(List(x))
+          case None => Option.empty[List[ValidationError]]
+        }
+        validatedCell.withErrorsFromMessages mustBe resultBuilder(testDatas(x), expectedResults(x))
+      }
+    }
   }
 
   def resultBuilder(cellData: Cell, expectedResultsMaybe: Option[List[ValidationErrorData]]): Option[List[ValidationError]] = {
@@ -44,18 +55,12 @@ trait ValidationTestRunner extends PlaySpec with GuiceOneAppPerSuite with ErsTes
       implicit val cell: Cell = cellData
       val validationErrors = expectedResultsMaybe.get.map(errorData => populateValidationError(errorData))
       Some(validationErrors)
-    } else None
+    } else {
+      None
+    }
   }
 
-  def runValidationTests(validator:DataValidator, descriptions: List[String], testDatas:List[Cell], expectedResults:List[Option[List[ValidationErrorData]]]): Unit = {
-      for (x <- 0 until descriptions.length) {
-        descriptions(x) in {
-          val validatedCell = validator.validateCell(testDatas(x)) match {
-            case Some(x) => Some(List(x))
-            case None => Option.empty[List[ValidationError]]
-          }
-          validatedCell.withErrorsFromMessages mustBe resultBuilder(testDatas(x), expectedResults(x))
-        }
-      }
+  def populateValidationError(expRes: ValidationErrorData)(implicit cell: Cell): ValidationError = {
+    ValidationError(cell, expRes.id, expRes.errorId, expRes.errorMsg)
   }
 }

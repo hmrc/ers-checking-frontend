@@ -37,10 +37,11 @@ class StaxProcessor(inputStream: InputStream) extends Iterator[String] {
       val xmlevent = eventReader.peek()
       if (xmlevent.isStartElement) {
         val name = xmlevent.asStartElement().getName.getLocalPart
-        if (name == "table:table" || name == "table:table-row")
+        if (name == "table:table" || name == "table:table-row") {
           return true
-        else
+        } else {
           eventReader.nextEvent()
+        }
       } else {
           eventReader.nextEvent()
       }
@@ -54,10 +55,11 @@ class StaxProcessor(inputStream: InputStream) extends Iterator[String] {
       if(nextValue.asStartElement().getName.getLocalPart == "table:table-row") {
         val a = getStringToEndElement("table:table-row")
         val b = nextValue.toString
-        return (b + a)
+        return b + a
       }
-      else
+      else {
         return getName(nextValue.toString)
+      }
 
     "--NOT-FOUND--"
   }
@@ -72,10 +74,11 @@ class StaxProcessor(inputStream: InputStream) extends Iterator[String] {
     val buffer: StringBuilder = new StringBuilder
 
     def foundElement(event: XMLEvent, elementName: String): Boolean = {
-      if(event.isEndElement)
+      if(event.isEndElement) {
         event.asEndElement().getName.getLocalPart == elementName
-      else
+      } else {
         false
+      }
     }
 
     while(eventReader.hasNext)
