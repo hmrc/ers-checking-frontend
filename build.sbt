@@ -13,6 +13,7 @@ lazy val scoverageSettings: Seq[Def.Setting[?]] =
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
+  .disablePlugins(JUnitXmlReportPlugin)
   .settings(scoverageSettings *)
   .settings(PlayKeys.playDefaultPort := 9225)
   .settings(scalaSettings *)
