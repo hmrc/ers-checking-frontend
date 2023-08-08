@@ -25,7 +25,7 @@
         <img id="file-processing-alert-img" src="@routes.Assets.versioned("images/spinner.gif")"/>
     </div>
     @govukWarningText(WarningText(
-        iconFallbackText = messages("ers.warning"),
+        iconFallbackText = Some(messages("ers.warning")),
         content = Text(messages("ers_upload_form.processing_alert")),
         attributes = Map("role" -> "alert")
     ))
