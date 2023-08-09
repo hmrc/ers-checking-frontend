@@ -4,7 +4,7 @@ import sbt.*
 object AppDependencies {
 
   val silencerVersion = "1.7.12"
-  val akkaVersion = "2.7.0"
+  val akkaVersion = "2.6.21"
   val bootstrapVersion = "7.21.0"
 
   val compile: Seq[ModuleID] = Seq(
