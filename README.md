@@ -13,23 +13,23 @@ This service utilises [Upscan](https://github.com/hmrc/upscan-initiate)
 
 ### Running the service
 
-Service Manager: sm2 --start ERS_CHECKING_ALL
+Service Manager: `sm2 --start ERS_CHECKING_ALL`
 
 You can use the `./run_all_tests` script to quickly run the unit tests, along with scalastyle and a dependency check,  for this repo
 
-|Repositories|Link|
-|------------|----|
-|Acceptance tests|https://github.com/hmrc/ers-checking-acceptance-tests|
-|Performance tests|https://github.com/hmrc/ers-checking-perf-tests|
+| Repositories      | Link                                                  |
+|-------------------|-------------------------------------------------------|
+| Acceptance tests  | https://github.com/hmrc/ers-checking-acceptance-tests |
+| Performance tests | https://github.com/hmrc/ers-checking-perf-tests       |
 
 ### Useful Links
 
-|Context|Link|
-|------------|----|
-|Local|http://localhost:9225/check-your-ers-files|
-|QA|https://www.qa.tax.service.gov.uk/check-your-ers-files|
-|Staging|https://www.staging.tax.service.gov.uk/check-your-ers-files|
-|Test files to upload|https://github.com/hmrc/ers-checking-acceptance-tests/tree/master/resources|
+| Context              | Link                                                                        |
+|----------------------|-----------------------------------------------------------------------------|
+| Local                | http://localhost:9225/check-your-ers-files                                  |
+| QA                   | https://www.qa.tax.service.gov.uk/check-your-ers-files                      |
+| Staging              | https://www.staging.tax.service.gov.uk/check-your-ers-files                 |
+| Test files to upload | https://github.com/hmrc/ers-checking-acceptance-tests/tree/master/resources |
 
 ### License
 

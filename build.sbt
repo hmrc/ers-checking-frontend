@@ -19,8 +19,8 @@ lazy val microservice = Project(appName, file("."))
   .settings(scalaSettings *)
   .settings(defaultSettings() *)
   .settings(
-    scalaVersion := "2.13.10",
-    libraryDependencies ++= AppDependencies.all,
+    scalaVersion := "2.13.11",
+    libraryDependencies ++= AppDependencies(),
     libraryDependencySchemes ++= Seq("org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always),
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
@@ -37,4 +37,4 @@ TwirlKeys.templateImports ++= Seq(
   "uk.gov.hmrc.hmrcfrontend.views.html.helpers._"
 )
 
-addCommandAlias("scalastyleAll", "all scalastyle test:scalastyle")
+addCommandAlias("scalastyleAll", "all scalastyle Test/scalastyle")
