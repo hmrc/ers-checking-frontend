@@ -37,7 +37,7 @@ trait Retryable {
       val delay: FiniteDuration = appConfig.retryDelay
       val scheduler: Scheduler = actorSystem.getScheduler
       def loop(count: Int = 0, previous: Option[A] = None): Future[A] = {
-        logger.info(s"[Retryable][withRetry][loop] Retrying call x$count with predicate - $f")
+        logger.info(s"[Retryable][withRetry][loop] Retrying call x$count with predicate - Future completed: ${f.isCompleted}")
         if(count < maxTimes){
           f.flatMap {
             data =>
