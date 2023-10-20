@@ -18,15 +18,17 @@ package controllers
 
 import config.ApplicationConfig
 import controllers.auth.AuthAction
+
 import javax.inject.{Inject, Singleton}
-import models.upscan.{NotStarted, UpscanCsvFilesList}
+import models.upscan.{NotStarted, UploadStatus, UpscanCsvFilesList}
 import models.{CS_checkFileType, CS_schemeType, CSformMappings}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import services.{SessionService, UpscanService}
+import services.{SessionCacheService, UpscanService}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
 
@@ -35,7 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class CheckingServiceController @Inject()(authAction: AuthAction,
                                           upscanService: UpscanService,
-                                          sessionService: SessionService,
+                                          sessionCacheService: SessionCacheService,
                                           mcc: MessagesControllerComponents,
                                           format_errors: views.html.format_errors,
                                           start: views.html.start,
@@ -69,16 +71,17 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
 
   def schemeTypeSelected(): Action[AnyContent] = authAction.async {
     implicit request =>
-      showSchemeTypeSelected(request)
+      showSchemeTypeSelected(request, hc)
   }
 
-  def showSchemeTypeSelected(implicit request: Request[AnyContent]): Future[Result] = {
+  def showSchemeTypeSelected(implicit request: Request[AnyContent], hc: HeaderCarrier): Future[Result] = {
     CSformMappings.schemeTypeForm.bindFromRequest().fold(
       formWithErrors => {
         Future.successful(BadRequest(scheme_type(formWithErrors)))
       },
       formData => {
-        ersUtil.cache[String](ersUtil.SCHEME_CACHE, formData.getSchemeType).map { _ =>
+        val sessionId = hc.sessionId.get.value
+        sessionCacheService.cache[String](ersUtil.SCHEME_CACHE, formData.getSchemeType, sessionId).map { _ =>
           Redirect(routes.CheckingServiceController.checkFileTypePage())
         }.recover {
           case e: Exception =>
@@ -110,7 +113,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
         Future.successful(BadRequest(check_file_type(formWithErrors)))
       },
       formData => {
-        ersUtil.cache[String](ersUtil.FILE_TYPE_CACHE, formData.getFileType).map { _ =>
+        sessionCacheService.cache[String](ersUtil.FILE_TYPE_CACHE, formData.getFileType).map { _ =>
           if (formData.getFileType == ersUtil.OPTION_ODS) {
             Redirect(routes.CheckingServiceController.checkODSFilePage())
           } else {
@@ -132,15 +135,15 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
 
   def showCheckCSVFilePage()(implicit request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
     (for {
-      scheme <- ersUtil.fetch[String](ersUtil.SCHEME_CACHE)
-      csvFilesList <- ersUtil.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD, hc.sessionId.get.value)
+      scheme <- sessionCacheService.fetchAndGetEntry[String](ersUtil.SCHEME_CACHE)
+      csvFilesList <- sessionCacheService.fetchAndGetEntry[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
       currentCsvFile = csvFilesList.ids.find(ids => ids.uploadStatus == NotStarted)
       if currentCsvFile.isDefined
       upscanResponse <- upscanService.getUpscanFormData(isCSV = true, scheme, currentCsvFile)
     } yield {
       Ok(check_csv_file(scheme, currentCsvFile.get.fileId)(request, messages, upscanResponse, appConfig, ersUtil))
     }) recover {
-      case e: NoSuchElementException =>
+      case _: NoSuchElementException =>
         logger.warn("[CheckingServiceController][showCheckCSVFilePage]: No files match status NotStarted")
         Redirect(routes.CheckingServiceController.fileUploadError())
       case e: Exception =>
@@ -157,9 +160,9 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
 
   def showCheckODSFilePage()(implicit request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
     (for {
-      scheme <- ersUtil.fetch[String](ersUtil.SCHEME_CACHE)
+      scheme <- sessionCacheService.fetchAndGetEntry[String](ersUtil.SCHEME_CACHE)
       upscanResponse <- upscanService.getUpscanFormData(isCSV = false, scheme)
-      _ <- sessionService.createCallbackRecord
+      _ <- createCallbackRecord(hc.sessionId.get.value)
     } yield {
       Ok(check_file(scheme)(request, messages, upscanResponse, appConfig))
     }) recover {
@@ -167,6 +170,10 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
         logger.error("[CheckingServiceController][showCheckODSFilePage] Unable to fetch scheme. Error: " + e.getMessage)
         getGlobalErrorPage(request, messages)
     }
+  }
+
+  private def createCallbackRecord(sessionId: String): Future[CacheItem] = {
+    sessionCacheService.cache[UploadStatus](ersUtil.CALLBACK_DATA_KEY, NotStarted, sessionId)
   }
 
   def checkingSuccessPage(): Action[AnyContent] = authAction.async {
@@ -194,11 +201,11 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
 
   def showFormatErrorsPage(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
     val future = for {
-      fileType <- ersUtil.fetch[String](ersUtil.FILE_TYPE_CACHE)
-      schemeName <- ersUtil.fetch[String](ersUtil.SCHEME_CACHE)
-      extendedInstructions <- ersUtil.fetch[Boolean](ersUtil.FORMAT_ERROR_EXTENDED_CACHE)
-      errorMsg <- ersUtil.fetch[String](ersUtil.FORMAT_ERROR_CACHE)
-      errorParams <- ersUtil.fetch[Seq[String]](ersUtil.FORMAT_ERROR_CACHE_PARAMS)
+      fileType <- sessionCacheService.fetchAndGetEntry[String](ersUtil.FILE_TYPE_CACHE)
+      schemeName <- sessionCacheService.fetchAndGetEntry[String](ersUtil.SCHEME_CACHE)
+      extendedInstructions <- sessionCacheService.fetchAndGetEntry[Boolean](ersUtil.FORMAT_ERROR_EXTENDED_CACHE)
+      errorMsg <- sessionCacheService.fetchAndGetEntry[String](ersUtil.FORMAT_ERROR_CACHE)
+      errorParams <- sessionCacheService.fetchAndGetEntry[Seq[String]](ersUtil.FORMAT_ERROR_CACHE_PARAMS)
     } yield {
       Ok(format_errors(
         fileType,

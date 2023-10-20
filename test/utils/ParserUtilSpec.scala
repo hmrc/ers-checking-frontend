@@ -24,7 +24,6 @@ import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 
 import scala.collection.mutable.ListBuffer
@@ -32,7 +31,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 class ParserUtilSpec extends AnyWordSpecLike with Matchers with OptionValues with ErsTestHelper with ScalaFutures {
-  def parserUtil: ParserUtil = new ParserUtil(mockErsUtil, mockAppConfig)
+  def parserUtil: ParserUtil = new ParserUtil(mockErsUtil, mockAppConfig, mockSessionCacheService)
 
   "getDataToValidate" must {
     "truncate array depending on number of columns in given sheet" in {
@@ -150,8 +149,8 @@ class ParserUtilSpec extends AnyWordSpecLike with Matchers with OptionValues wit
     }
 
     "return a Success(false) if errors are present but no exceptions" in {
-      when(mockErsUtil.cache[Long](any(), any())(any(), any(), any())).thenReturn(Future.successful(CacheMap("id", Map.empty)))
-      when(mockErsUtil.cache[ListBuffer[SheetErrors]](any(), any())(any(), any(), any())).thenReturn(Future.successful(CacheMap("id", Map.empty)))
+      when(mockSessionCacheService.cache[Long](any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
+      when(mockSessionCacheService.cache[ListBuffer[SheetErrors]](any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
 
       parserUtil.isFileValid(
         ListBuffer(SheetErrors("sheet", ListBuffer(ValidationError(Cell("A", 1, "cell"), "ruleId", "errorId", "errorMsg"))))
@@ -160,7 +159,7 @@ class ParserUtilSpec extends AnyWordSpecLike with Matchers with OptionValues wit
 
     "return Failure if exception was thrown" in {
       val exception = new RuntimeException("this  is a runtime exception")
-      when(mockErsUtil.cache[Long](any(), any())(any(), any(), any())).thenReturn(Future.failed(exception))
+      when(mockSessionCacheService.cache[Long](any(), any())(any(), any())).thenReturn(Future.failed(exception))
 
       parserUtil.isFileValid(
         ListBuffer(SheetErrors("sheet", ListBuffer(ValidationError(Cell("A", 1, "cell"), "ruleId", "errorId", "errorMsg"))))

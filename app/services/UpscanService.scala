@@ -51,7 +51,8 @@ class UpscanService @Inject()(upscanConnector: UpscanConnector, appConfig: Appli
       if (isCsvAndUploadId) {
         UpscanInitiateRequest(callback.absoluteURL(isSecure), success, failure, Some(1))
       } else {
-        UpscanInitiateRequest(callback.absoluteURL(isSecure), success, failure, Some(1), Some(10000000))
+        val maximumFileSize = 10000000
+        UpscanInitiateRequest(callback.absoluteURL(isSecure), success, failure, Some(1), Some(maximumFileSize))
       }
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }

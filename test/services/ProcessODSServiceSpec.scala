@@ -17,7 +17,6 @@
 package services
 
 import java.util.NoSuchElementException
-
 import controllers.Fixtures
 import controllers.auth.RequestWithOptionalEmpRef
 import helpers.ErsTestHelper
@@ -35,7 +34,6 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.{Application, i18n}
-import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.services.validation.models.ValidationError
 import utils.{ParserUtil, UploadedFileUtil}
 
@@ -67,7 +65,7 @@ class ProcessODSServiceSpec extends AnyWordSpecLike with Matchers with OptionVal
 
     def buildProcessODSService(checkODSFileTypeResult: Boolean = true, isValid: Boolean = true): ProcessODSService = {
       lazy val result = if(isValid) Future.successful(Success(true)) else Future.successful(Success(false))
-      new ProcessODSService(mockUploadedFileUtil, mockParserUtil, mockDataGenerator, mockErsUtil){
+      new ProcessODSService(mockUploadedFileUtil, mockParserUtil, mockDataGenerator, mockSessionCacheService, mockErsUtil){
         when(mockParserUtil.isFileValid(any(), any())(any())).thenReturn(result)
         when(mockUploadedFileUtil.checkODSFileType(anyString())).thenReturn(checkODSFileTypeResult)
       }
@@ -77,8 +75,8 @@ class ProcessODSServiceSpec extends AnyWordSpecLike with Matchers with OptionVal
 
     "return false if the file has validation errors" in {
       when(mockDataGenerator.getErrors(any(), any(), any())(any(), any(), any())).thenReturn(sheetErrors)
-      when(mockErsUtil.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any(), any()))
-        .thenReturn(Future.successful(CacheMap("id", Map())))
+      when(mockSessionCacheService.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any()))
+        .thenReturn(Future.successful(("", "")))
 
       buildProcessODSService(isValid = false).performODSUpload("testFileName", mockStaxProcessor).futureValue shouldBe Success(false)
     }
@@ -86,8 +84,8 @@ class ProcessODSServiceSpec extends AnyWordSpecLike with Matchers with OptionVal
     "return true if the file doesn't have any errors" in {
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
       when(mockDataGenerator.getErrors(any(), any(), any())(any(), any(), any())).thenReturn(emptyErrors)
-      when(mockErsUtil.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any(), any()))
-        .thenReturn(Future.successful(CacheMap("id", Map())))
+      when(mockSessionCacheService.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any()))
+        .thenReturn(Future.successful(("", "")))
 
       buildProcessODSService().performODSUpload("testFileName", mockStaxProcessor).futureValue shouldBe Success(true)
     }
@@ -95,7 +93,7 @@ class ProcessODSServiceSpec extends AnyWordSpecLike with Matchers with OptionVal
     "return a failure if nothing was found in the cache" in {
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
       when(mockDataGenerator.getErrors(any(), any(), any())(any(), any(), any())).thenReturn(emptyErrors)
-      when(mockErsUtil.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any(), any()))
+      when(mockSessionCacheService.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any()))
         .thenReturn(Future.failed(new NoSuchElementException))
 
       val result = buildProcessODSService().performODSUpload("testFileName", mockStaxProcessor).futureValue
@@ -114,7 +112,7 @@ class ProcessODSServiceSpec extends AnyWordSpecLike with Matchers with OptionVal
   "calling checkFileType" should {
 
     def buildProcessODSService(checkODSFileTypeResult: Boolean = true): ProcessODSService =
-      new ProcessODSService(mockUploadedFileUtil, testParserUtil, mockDataGenerator, mockErsUtil){
+      new ProcessODSService(mockUploadedFileUtil, testParserUtil, mockDataGenerator, mockSessionCacheService, mockErsUtil){
       when(mockUploadedFileUtil.checkODSFileType(anyString())).thenReturn(checkODSFileTypeResult)
     }
 

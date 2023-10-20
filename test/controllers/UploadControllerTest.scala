@@ -31,12 +31,11 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents}
+import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents, Request}
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, i18n}
 import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
-import uk.gov.hmrc.http.HeaderCarrier
 import views.html.global_error
 
 import scala.concurrent.Future
@@ -51,7 +50,8 @@ class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) 
     "login-callback.url" -> "test",
     "contact-frontend.host" -> "localhost",
     "contact-frontend.port" -> "9250",
-    "metrics.enabled" -> false)
+    "metrics.enabled" -> false,
+    "mongodb.timeToLiveInSeconds" -> 3600)
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
   val mockProcessODSService: ProcessODSService = mock[ProcessODSService]
   val mockProcessCsvService: ProcessCsvService = mock[ProcessCsvService]
@@ -67,9 +67,9 @@ class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) 
                                    formatRes: Boolean = true,
                                    clearCacheResponse: Boolean = true
                                   ): UploadController =
-    new UploadController(mockAuthAction, mockProcessODSService, mockProcessCsvService, mcc, globalErrorView) {
+    new UploadController(mockAuthAction, mockProcessODSService, mockProcessCsvService, mockSessionCacheService, mcc, globalErrorView) {
 
-      override def clearErrorCache()(implicit hc: HeaderCarrier): Future[Boolean] =
+      override def clearErrorCache()(implicit request: Request[_]): Future[Boolean] =
         Future.successful(clearCacheResponse)
 
       override private[controllers] def readFileOds(downloadUrl: String): StaxProcessor = mockStaxProcessor
@@ -77,11 +77,10 @@ class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) 
       when(mockProcessODSService.performODSUpload(any(), any())(any(), any(), any(), any()))
         .thenReturn(if (processFile) Future.successful(Success(uploadRes)) else Future.successful(Failure(ERSFileProcessingException("", ""))))
 
-      when(mockErsUtil.cache(refEq(mockErsUtil.FORMAT_ERROR_CACHE), anyString())(any(), any(), any()))
+      when(mockSessionCacheService.cache(refEq(mockErsUtil.FORMAT_ERROR_CACHE), anyString())(any(), any()))
         .thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))
 
-      when(mockErsUtil.shortLivedCache).thenReturn(mockShortLivedCache)
-      when(mockShortLivedCache.fetchAndGetEntry[UploadedSuccessfully](any(), any())(any(), any(), any()))
+      when(mockSessionCacheService.fetch[UploadedSuccessfully](any())(any(), any()))
         .thenReturn(Future.successful(uploadedSuccessfully))
 
       mockAnyContentAction

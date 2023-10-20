@@ -19,21 +19,22 @@ package controllers
 import akka.actor.ActorSystem
 import config.ApplicationConfig
 import controllers.auth.AuthAction
-import javax.inject.Inject
 import models.upscan._
 import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc._
-import services.SessionService
+import services.SessionCacheService
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{ERSUtil, Retryable}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 @Inject
 class UpscanController @Inject()(authAction: AuthAction,
-                                 sessionService: SessionService,
+                                 sessionCacheService: SessionCacheService,
                                  mcc: MessagesControllerComponents,
                                  override val global_error: views.html.global_error
                                 )(implicit executionContext: ExecutionContext, ersUtil: ERSUtil,
@@ -56,10 +57,10 @@ class UpscanController @Inject()(authAction: AuthAction,
   }
 
   def fetchCsvCallbackList(list: UpscanCsvFilesList, sessionId: String)
-                          (implicit hc: HeaderCarrier): Future[Seq[UpscanCsvFilesCallback]] = {
+                          (implicit request: Request[_], hc: HeaderCarrier): Future[Seq[UpscanCsvFilesCallback]] = {
     Future.sequence {
       list.ids map { head =>
-        ersUtil.fetch[UpscanIds](head.uploadId.value, sessionId) map { upscanId =>
+        sessionCacheService.fetchAndGetEntry[UpscanIds](head.uploadId.value) map { upscanId =>
           UpscanCsvFilesCallback(upscanId.uploadId, upscanId.uploadStatus)
         }
       }
@@ -71,12 +72,12 @@ class UpscanController @Inject()(authAction: AuthAction,
     val sessionId = hc.sessionId.get.value
 
     val upscanCsvFilesList = for {
-      csvFileList   <- ersUtil.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD, sessionId)
+      csvFileList   <- sessionCacheService.fetchAndGetEntry[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
       updatedCacheFileList = {
         logger.info(s"[UpscanController][successCSV] Updating uploadId: ${uploadId.value} to InProgress")
         csvFileList.updateToInProgress(uploadId)
       }
-      _ <- ersUtil.cache(ersUtil.CSV_FILES_UPLOAD, updatedCacheFileList, sessionId)
+      _ <- sessionCacheService.cache(ersUtil.CSV_FILES_UPLOAD, updatedCacheFileList, sessionId)
     } yield updatedCacheFileList
 
     upscanCsvFilesList flatMap { fileList =>
@@ -89,7 +90,7 @@ class UpscanController @Inject()(authAction: AuthAction,
           (list.size == fileList.noOfFilesToUpload) && list.forall(_.isComplete)
         } map { files =>
           val callbackData = UpscanCsvFilesCallbackList(files.toList.reverse)
-          sessionService.createCallbackRecordCSV(callbackData, sessionId)
+          createCallbackRecordCSV(callbackData, sessionId)
           if(callbackData.areAllFilesSuccessful()) {
             Redirect(routes.UploadController.uploadCSVFile(scheme))
           } else if (callbackData.areAnyFilesWrongMimeType()) {
@@ -112,8 +113,14 @@ class UpscanController @Inject()(authAction: AuthAction,
 
   }
 
+  private def createCallbackRecordCSV(callbackList: UpscanCsvFilesCallbackList, sessionId: String): Future[CacheItem] = {
+    sessionCacheService.cache[UpscanCsvFilesCallbackList](ersUtil.CALLBACK_DATA_KEY_CSV, callbackList, sessionId)
+  }
+
   def successODS(scheme: String): Action[AnyContent] = authAction.async { implicit request =>
-    val futureCallbackData: Future[Option[UploadStatus]] = sessionService.getCallbackRecord.withRetry(appConfig.odsSuccessRetryAmount) {
+    val sessionId = hc.sessionId.get.value
+    val futureCallbackData: Future[Option[UploadStatus]] = sessionCacheService.fetchKeyFromSession[UploadStatus](sessionId,
+      ersUtil.CALLBACK_DATA_KEY).withRetry(appConfig.odsSuccessRetryAmount) {
       _.fold(true) {
           case _: UploadedSuccessfully | Failed | FailedMimeType => true
           case _ => false

@@ -38,8 +38,7 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
   lazy val allCsvFilesCacheRetryAmount: Int = config.getInt("retry.csv-success-cache.all-files-complete.amount")
   lazy val retryDelay: FiniteDuration = FiniteDuration(config.getString("retry.delay").toInt, "ms")
 
-  lazy val shortLivedCacheBaseUri: String = config.baseUrl("cachable.short-lived-cache")
-  lazy val shortLivedCacheDomain: String = config.getString("microservice.services.cachable.short-lived-cache.domain")
+  lazy val mongoTTLInSeconds: Int = config.getInt("mongodb.timeToLiveInSeconds")
 
   lazy val languageTranslationEnabled: Boolean = config.getConfBool("features.welsh-translation", defBool = true)
   def languageMap: Map[String, Lang] = Map("english" -> Lang("en"), "cymraeg" -> Lang("cy"))

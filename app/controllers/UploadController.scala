@@ -27,7 +27,7 @@ import models.{ERSFileProcessingException, SheetErrors}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
+import services.{ProcessCsvService, ProcessODSService, SessionCacheService, StaxProcessor}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
@@ -44,6 +44,7 @@ import scala.util.{Failure, Success}
 class UploadController @Inject()(authAction: AuthAction,
                                  processODSService: ProcessODSService,
                                  processCsvService: ProcessCsvService,
+                                 sessionCacheService: SessionCacheService,
                                  mcc: MessagesControllerComponents,
                                  override val global_error: views.html.global_error
                                 )(implicit executionContext: ExecutionContext,
@@ -52,11 +53,11 @@ class UploadController @Inject()(authAction: AuthAction,
 
   def downloadAsInputStream(downloadUrl: String): InputStream = new URL(downloadUrl).openStream()
 
-  def clearErrorCache()(implicit hc: HeaderCarrier): Future[Boolean] = {
+  def clearErrorCache()(implicit request: Request[_]): Future[Boolean] = {
     //remove function doesn't work, the cache needs to be overwritten with 'blank' data
     (for {
-      _ <- ersUtil.cache[Long](ersUtil.SCHEME_ERROR_COUNT_CACHE, 0L)
-      _ <- ersUtil.cache[ListBuffer[SheetErrors]](ersUtil.ERROR_LIST_CACHE, new ListBuffer[SheetErrors]())
+      _ <- sessionCacheService.cache[Long](ersUtil.SCHEME_ERROR_COUNT_CACHE, 0L)
+      _ <- sessionCacheService.cache[ListBuffer[SheetErrors]](ersUtil.ERROR_LIST_CACHE, new ListBuffer[SheetErrors]())
     } yield {
       logger.debug(s"[UploadController][clearCache] Successfully cleared cache")
       true
@@ -104,7 +105,7 @@ class UploadController @Inject()(authAction: AuthAction,
       clearErrorCache() flatMap {
         case false => Future(getGlobalErrorPage)
         case _ =>
-          ersUtil.shortLivedCache.fetchAndGetEntry[UpscanCsvFilesCallbackList](ersUtil.getCacheId, "callback_data_key_csv") flatMap { callback =>
+          sessionCacheService.fetch[UpscanCsvFilesCallbackList](ersUtil.CALLBACK_DATA_KEY_CSV) flatMap { callback =>
             val validationResults = processCsvService.processFiles(callback, scheme, readFileCsv)
             finaliseRequestAndRedirect(validationResults)
           }
@@ -112,7 +113,7 @@ class UploadController @Inject()(authAction: AuthAction,
   }
 
   def finaliseRequestAndRedirect(validationResults: List[Future[Either[Throwable, Boolean]]])(
-    implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Result] =
+    implicit request: RequestWithOptionalEmpRef[AnyContent]): Future[Result] =
     Future.sequence(validationResults).flatMap {
       case noFailures if noFailures.forall(_.contains(true)) =>
         Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
@@ -136,7 +137,7 @@ class UploadController @Inject()(authAction: AuthAction,
     clearErrorCache().flatMap { clearedSuccessfully =>
       if (clearedSuccessfully) {
         //These .get's are safe because the UploadedSuccessfully model is already validated as existing in the UpscanController
-        ersUtil.shortLivedCache.fetchAndGetEntry[UploadedSuccessfully](ersUtil.getCacheId, "callback_data_key").flatMap { file =>
+        sessionCacheService.fetch[UploadedSuccessfully](ersUtil.CALLBACK_DATA_KEY).flatMap { file =>
           val result = processODSService.performODSUpload(file.get.name, readFileOds(file.get.downloadUrl))(request, scheme, hc, messages)
           result.flatMap[Result] {
             case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
@@ -150,13 +151,13 @@ class UploadController @Inject()(authAction: AuthAction,
     }
   }
 
-  def handleException(t: Throwable)(implicit request: Request[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def handleException(t: Throwable)(implicit request: Request[AnyContent]): Future[Result] = {
     t match {
       case e: ERSFileProcessingException =>
         for {
-          _ <- ersUtil.cache[String](ersUtil.FORMAT_ERROR_CACHE, e.message)
-          _ <- ersUtil.cache[Seq[String]](ersUtil.FORMAT_ERROR_CACHE_PARAMS, e.optionalParams)
-          _ <- ersUtil.cache[Boolean](ersUtil.FORMAT_ERROR_EXTENDED_CACHE, e.needsExtendedInstructions)
+          _ <- sessionCacheService.cache[String](ersUtil.FORMAT_ERROR_CACHE, e.message)
+          _ <- sessionCacheService.cache[Seq[String]](ersUtil.FORMAT_ERROR_CACHE_PARAMS, e.optionalParams)
+          _ <- sessionCacheService.cache[Boolean](ersUtil.FORMAT_ERROR_EXTENDED_CACHE, e.needsExtendedInstructions)
         } yield {
           Redirect(routes.CheckingServiceController.formatErrorsPage())
         }

@@ -16,15 +16,11 @@
 
 package utils
 
-import config.ERSShortLivedCache
 import play.api.Logger
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class ERSUtil @Inject()(val shortLivedCache: ERSShortLivedCache)
-  extends CacheUtil
-    with PageBuilder
-    with ContentUtil {
+class ERSUtil @Inject()() extends CacheUtil with PageBuilder with ContentUtil {
   val logger: Logger = Logger(getClass)
 }

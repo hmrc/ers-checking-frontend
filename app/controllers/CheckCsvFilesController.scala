@@ -18,6 +18,7 @@ package controllers
 
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRef}
+
 import javax.inject.{Inject, Singleton}
 import models._
 import models.upscan.{NotStarted, UploadId, UpscanCsvFilesList, UpscanIds}
@@ -26,7 +27,8 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
+import services.SessionCacheService
+import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
@@ -35,6 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class CheckCsvFilesController @Inject()(authAction: AuthAction,
                                         mcc: MessagesControllerComponents,
+                                        sessionCacheService: SessionCacheService,
                                         select_csv_file_types: views.html.select_csv_file_types,
                                         override val global_error: views.html.global_error)
                                        (implicit ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
@@ -47,8 +50,8 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
 
   def showCheckCsvFilesPage()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Result] = {
     (for {
-      _           <- ersUtil.remove(ersUtil.CSV_FILES_UPLOAD)
-      scheme      <- ersUtil.fetch[String](ersUtil.SCHEME_CACHE)
+      _           <- sessionCacheService.removeByKey(ersUtil.CSV_FILES_UPLOAD)
+      scheme      <- sessionCacheService.fetchAndGetEntry[String](ersUtil.SCHEME_CACHE)
     } yield {
       val csvFilesList: Seq[CsvFiles] = ersUtil.getCsvFilesList(scheme)
       Ok(select_csv_file_types(scheme, csvFilesList))
@@ -78,7 +81,7 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
     } else {
       (for{
         _   <- Future.sequence(cacheUpscanIds(csvFilesCallbackList.ids))
-        _   <- ersUtil.cache(ersUtil.CSV_FILES_UPLOAD, csvFilesCallbackList, hc.sessionId.get.value)
+        _   <- sessionCacheService.cache(ersUtil.CSV_FILES_UPLOAD, csvFilesCallbackList, hc.sessionId.get.value)
       } yield {
         Redirect(routes.CheckingServiceController.checkCSVFilePage())
       }).recover {
@@ -89,9 +92,10 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
     }
   }
 
-  def cacheUpscanIds(ids: Seq[UpscanIds])(implicit hc: HeaderCarrier): Seq[Future[CacheMap]] = {
+  def cacheUpscanIds(ids: Seq[UpscanIds])(implicit hc: HeaderCarrier): Seq[Future[CacheItem]] = {
+    val sessionId = hc.sessionId.get.value
     ids map { id =>
-      ersUtil.cache[UpscanIds](id.uploadId.value, id)
+      sessionCacheService.cache[UpscanIds](id.uploadId.value, id, sessionId)
     }
   }
 
