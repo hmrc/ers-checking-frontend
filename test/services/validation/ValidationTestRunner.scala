@@ -25,13 +25,35 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.DefaultMessagesControllerComponents
 import play.api.{Application, i18n}
 import services.validation.ValidationErrorHelper._
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.test.MongoSupport
 import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
+import play.api.inject.{Injector, bind}
+import repository.ErsCheckingFrontendSessionCacheRepository
 
-trait ValidationTestRunner extends PlaySpec with GuiceOneAppPerSuite with ErsTestHelper {
-  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApp())
+trait ValidationTestRunner
+  extends PlaySpec
+    with GuiceOneAppPerSuite
+    with ErsTestHelper
+    with MongoSupport {
 
-  def fakeApp(): Application = new GuiceApplicationBuilder().configure(Map("play.i18n.langs" -> List("en", "cy"), "metrics.enabled" -> "false")).build()
+  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication)
+
+  override lazy val fakeApplication: Application = new GuiceApplicationBuilder()
+    .configure(
+      Map(
+        "play.i18n.langs" -> List("en", "cy"),
+        "metrics.enabled" -> "false"
+      )
+    )
+    .overrides(
+      bind(classOf[MongoComponent]).toInstance(mongoComponent)
+    ).build()
+
+  val injector: Injector = fakeApplication.injector
+  implicit val ersCheckingFrontendSessionCacheRepository: ErsCheckingFrontendSessionCacheRepository = mock[ErsCheckingFrontendSessionCacheRepository]
+
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
 

@@ -18,6 +18,7 @@ package controllers
 
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRef}
+
 import javax.inject.{Inject, Singleton}
 import models._
 import models.upscan.{NotStarted, UploadId, UpscanCsvFilesList, UpscanIds}
@@ -25,8 +26,7 @@ import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
+import repository.ErsCheckingFrontendSessionCacheRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
@@ -35,6 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class CheckCsvFilesController @Inject()(authAction: AuthAction,
                                         mcc: MessagesControllerComponents,
+                                        sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
                                         select_csv_file_types: views.html.select_csv_file_types,
                                         override val global_error: views.html.global_error)
                                        (implicit ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
@@ -42,13 +43,13 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
 
   def selectCsvFilesPage(): Action[AnyContent] = authAction.async {
     implicit request =>
-        showCheckCsvFilesPage()(request, hc)
+        showCheckCsvFilesPage()
   }
 
-  def showCheckCsvFilesPage()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def showCheckCsvFilesPage()(implicit request: RequestWithOptionalEmpRef[AnyContent]): Future[Result] = {
     (for {
-      _           <- ersUtil.remove(ersUtil.CSV_FILES_UPLOAD)
-      scheme      <- ersUtil.fetch[String](ersUtil.SCHEME_CACHE)
+      _           <- sessionCacheService.delete(ersUtil.CSV_FILES_UPLOAD)
+      scheme      <- sessionCacheService.fetchAndGetEntry[String](ersUtil.SCHEME_CACHE)
     } yield {
       val csvFilesList: Seq[CsvFiles] = ersUtil.getCsvFilesList(scheme)
       Ok(select_csv_file_types(scheme, csvFilesList))
@@ -62,7 +63,7 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
         validateCsvFilesPageSelected()
   }
 
-  def validateCsvFilesPageSelected()(implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def validateCsvFilesPageSelected()(implicit request: RequestWithOptionalEmpRef[AnyContent]): Future[Result] = {
     CSformMappings.csvFileCheckForm().bindFromRequest().fold(
       formWithError =>
         reloadWithError(Some(formWithError)),
@@ -71,14 +72,14 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
     )
   }
 
-  def performCsvFilesPageSelected(formData: Seq[CsvFiles])(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def performCsvFilesPageSelected(formData: Seq[CsvFiles])(implicit request: Request[AnyRef]): Future[Result] = {
     val csvFilesCallbackList: UpscanCsvFilesList = createCacheData(formData)
     if(csvFilesCallbackList.ids.isEmpty) {
       reloadWithError()
     } else {
       (for{
         _   <- Future.sequence(cacheUpscanIds(csvFilesCallbackList.ids))
-        _   <- ersUtil.cache(ersUtil.CSV_FILES_UPLOAD, csvFilesCallbackList, hc.sessionId.get.value)
+        _   <- sessionCacheService.cache(ersUtil.CSV_FILES_UPLOAD, csvFilesCallbackList)
       } yield {
         Redirect(routes.CheckingServiceController.checkCSVFilePage())
       }).recover {
@@ -89,9 +90,9 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
     }
   }
 
-  def cacheUpscanIds(ids: Seq[UpscanIds])(implicit hc: HeaderCarrier): Seq[Future[CacheMap]] = {
+  def cacheUpscanIds(ids: Seq[UpscanIds])(implicit request: Request[AnyRef]): Seq[Future[(String, String)]] = {
     ids map { id =>
-      ersUtil.cache[UpscanIds](id.uploadId.value, id)
+      sessionCacheService.cache[UpscanIds](id.uploadId.value, id)
     }
   }
 

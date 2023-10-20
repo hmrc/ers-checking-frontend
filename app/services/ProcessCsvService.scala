@@ -28,6 +28,8 @@ import models.{ERSFileProcessingException, RowValidationResults, SheetErrors}
 import org.apache.commons.io.FilenameUtils
 import play.api.Logging
 import play.api.i18n.Messages
+import play.api.mvc.Request
+import repository.ErsCheckingFrontendSessionCacheRepository
 import services.FlowOps.eitherFromFunction
 import services.validation.ErsValidator
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
@@ -45,6 +47,7 @@ import scala.util.{Failure, Success, Try}
 class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
                                   dataGenerator: DataGenerator,
                                   appConfig: ApplicationConfig,
+                                  sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
                                   ersUtil: ERSUtil,
                                   ersValidator: ErsValidator
                                  )(implicit executionContext: ExecutionContext,
@@ -71,7 +74,7 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
       }
 
   def processFiles(callback: Option[UpscanCsvFilesCallbackList], scheme: String, source: String => Source[HttpResponse, _])(
-    implicit hc: HeaderCarrier, messages: Messages
+    implicit request: Request[_], hc: HeaderCarrier, messages: Messages
   ): List[Future[Either[Throwable, Boolean]]] =
     callback.get.files map { file =>
 
@@ -170,14 +173,14 @@ private[services] final def processDisplayedErrors(errorsLeftToDisplay: Int,
   }
 
   def checkValidityOfRows(listOfErrors: Seq[List[ValidationError]], name: String, file: UpscanCsvFilesCallback)(
-    implicit hc: HeaderCarrier): Future[Either[Throwable, Boolean]] = {
+    implicit request: Request[_]): Future[Either[Throwable, Boolean]] = {
     listOfErrors.filter(rowErrors => rowErrors.nonEmpty) match {
       case allGood if allGood.isEmpty => Future.successful(Right(true))
       case errors =>
         val errorsToCache = ListBuffer(parserUtil.getSheetErrors(SheetErrors(FilenameUtils.removeExtension(name), errors.flatten.to(ListBuffer))))
         for {
-          _ <- ersUtil.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${file.uploadId.value}", errors.flatten.length)
-          _ <- ersUtil.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${file.uploadId.value}",
+          _ <- sessionCacheService.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${file.uploadId.value}", errors.flatten.length)
+          _ <- sessionCacheService.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${file.uploadId.value}",
             errorsToCache)
         } yield Right(false)
     }

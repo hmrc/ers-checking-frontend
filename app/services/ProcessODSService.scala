@@ -25,6 +25,7 @@ import play.api.Logging
 import play.api.i18n.Messages
 import play.api.libs.Files
 import play.api.mvc.{AnyContent, MultipartFormData, Request}
+import repository.ErsCheckingFrontendSessionCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{ERSUtil, ParserUtil, UploadedFileUtil}
 
@@ -36,13 +37,14 @@ import scala.util.{Failure, Try}
 class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
                                   parserUtil: ParserUtil,
                                   dataGenerator: DataGenerator,
+                                  sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
                                   ersUtil: ERSUtil
                                  )(implicit ec: ExecutionContext) extends Logging {
   def performODSUpload(fileName: String, processor: StaxProcessor)
                       (implicit request: RequestWithOptionalEmpRef[AnyContent], scheme: String, hc: HeaderCarrier, messages: Messages): Future[Try[Boolean]] = {
     try {
       val errorList: ListBuffer[SheetErrors] = checkFileType(processor, fileName)(scheme, hc, request, messages)
-      val cache = ersUtil.cache[String](ersUtil.FILE_NAME_CACHE, fileName).recover {
+      val cache = sessionCacheService.cache[String](ersUtil.FILE_NAME_CACHE, fileName).recover {
         case e: Exception =>
           logger.error("[ProcessODSService][performODSUpload] Unable to save File Name. Error: " + e.getMessage)
           throw e

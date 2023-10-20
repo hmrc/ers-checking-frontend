@@ -16,25 +16,26 @@
 
 package controllers.internal
 
-import javax.inject.{Inject, Singleton}
 import models.upscan._
 import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc._
-import services.SessionService
-import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
+import repository.ErsCheckingFrontendSessionCacheRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import utils.CacheUtil
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @Singleton
-class UpscanCallbackController @Inject()(sessionService: SessionService,
-                                         mcc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends FrontendController(mcc) with Logging {
+class UpscanCallbackController @Inject()(sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
+                                         mcc: MessagesControllerComponents)
+                                        (implicit ec: ExecutionContext) extends FrontendController(mcc) with Logging with CacheUtil {
 
   def callbackCsv(uploadId: UploadId, sessionId: String): Action[JsValue] = Action.async(parse.json) {
-    implicit request =>
-      request.body.validate[UpscanCallback].fold (
+    request: MessagesRequest[JsValue] =>
+      request.body.validate[UpscanCallback].fold(
         invalid = errors => {
           logger.error(s"[UpscanController][callbackCsv] Failed to validate UpscanCallback json with errors: $errors")
           Future.successful(BadRequest)
@@ -48,10 +49,10 @@ class UpscanCallbackController @Inject()(sessionService: SessionService,
               if (details.message.contains("MIME type")) FailedMimeType else Failed
           }
           logger.info(s"[UpscanController][callbackCsv] Updating CSV callback for upload id: ${uploadId.value} to ${uploadStatus.getClass.getSimpleName}")
-
-          (for{
-            upscanId   <- sessionService.ersUtil.fetch[UpscanIds](uploadId.value, sessionId)
-            _          <- sessionService.ersUtil.cache(uploadId.value, upscanId.copy(uploadStatus = uploadStatus), sessionId)
+          implicit val updatedRequest: Request[JsValue] = RequestWithUpdatedSession(request, sessionId)
+          (for {
+            upscanId <- sessionCacheService.fetch[UpscanIds](uploadId.value)
+            _ <- sessionCacheService.cache[UpscanIds](uploadId.value, upscanId.head.copy(uploadStatus = uploadStatus))
           } yield {
             Ok
           }) recover {
@@ -64,30 +65,33 @@ class UpscanCallbackController @Inject()(sessionService: SessionService,
       )
   }
 
-  def callbackOds(sessionId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    implicit val headerCarrier: HeaderCarrier = hc.copy(sessionId = Some(SessionId(sessionId)))
-    request.body.validate[UpscanCallback].fold (
-      invalid = errors => {
-        logger.error(s"[UpscanController][callbackOds] Failed to validate UpscanCallback json with errors: $errors")
-        Future.successful(BadRequest)
-      },
-      valid = callback => {
-        val uploadStatus = callback match {
-          case callback: UpscanReadyCallback =>
-            UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
-          case UpscanFailedCallback(_, details) =>
-            logger.warn(s"[UpscanController][callbackOds] Callback for session id: $sessionId failed. " +
-              s"Reason: ${details.failureReason}. Message: ${details.message}")
-            if (details.message.contains("MIME type")) FailedMimeType else Failed
+  def callbackOds(sessionId: String): Action[JsValue] = Action.async(parse.json) {
+    request =>
+      request.body.validate[UpscanCallback].fold(
+        invalid = errors => {
+          logger.error(s"[UpscanController][callbackOds] Failed to validate UpscanCallback json with errors: $errors")
+          Future.successful(BadRequest)
+        },
+        valid = callback => {
+          val uploadStatus = callback match {
+            case callback: UpscanReadyCallback =>
+              UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
+            case UpscanFailedCallback(_, details) =>
+              logger.warn(s"[UpscanController][callbackOds] Callback for session id: $sessionId failed. " +
+                s"Reason: ${details.failureReason}. Message: ${details.message}")
+              if (details.message.contains("MIME type")) FailedMimeType else Failed
+          }
+          logger.info(s"[UpscanController][callbackOds] Updating callback for session: $sessionId to ${uploadStatus.getClass.getSimpleName}")
+          implicit val updatedRequest: Request[JsValue] = RequestWithUpdatedSession(request, sessionId)
+          sessionCacheService.cache[UploadStatus](key = CALLBACK_DATA_KEY, uploadStatus)
+            .map(_ => Ok)
+            .recover {
+              case e: Throwable =>
+                logger.error(s"[UpscanController][callbackOds] Failed to update callback record for session: $sessionId, " +
+                  s"timestamp: ${java.time.LocalTime.now()}.", e)
+                InternalServerError("Exception occurred when attempting to update callback data")
+            }
         }
-        logger.info(s"[UpscanController][callbackOds] Updating callback for session: $sessionId to ${uploadStatus.getClass.getSimpleName}")
-        sessionService.updateCallbackRecord(uploadStatus)(headerCarrier, ec).map(_ => Ok) recover {
-          case e: Throwable =>
-            logger.error(s"[UpscanController][callbackOds] Failed to update callback record for session: $sessionId, " +
-              s"timestamp: ${java.time.LocalTime.now()}.", e)
-            InternalServerError("Exception occurred when attempting to update callback data")
-        }
-      }
-    )
+      )
   }
 }
