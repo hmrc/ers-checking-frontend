@@ -12,3 +12,5 @@ addSbtPlugin("org.scoverage"        % "sbt-scoverage"       % "2.0.9")
 addSbtPlugin("com.beautiful-scala"  % "sbt-scalastyle"      % "1.5.1")
 addSbtPlugin("com.timushev.sbt"     % "sbt-updates"         % "0.6.4")
 addSbtPlugin("io.github.irundaia"   % "sbt-sassify"         % "1.5.2")
+addSbtPlugin("uk.gov.hmrc"    % "sbt-accessibility-linter"  % "0.37.0")
+
