@@ -22,7 +22,7 @@
 
 <div class="govuk-!-display-none" id="file-processing-alert">
     <div class="govuk-!-margin-bottom-2 spinner">
-        <img id="file-processing-alert-img" src="@routes.Assets.versioned("images/spinner.gif")" alt="@Text(messages("ers_upload_form.processing_spinner_alt"))" />
+        <img id="file-processing-alert-img" src="@routes.Assets.versioned("images/spinner.gif")" alt="@Html(messages("ers_upload_form.processing_spinner_alt"))" />
     </div>
     @govukWarningText(WarningText(
         iconFallbackText = Some(messages("ers.warning")),
