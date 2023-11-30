@@ -22,6 +22,7 @@ You can use the `./run_all_tests` script to quickly run the unit tests, along wi
 | Acceptance tests  | https://github.com/hmrc/ers-checking-acceptance-tests |
 | Performance tests | https://github.com/hmrc/ers-checking-perf-tests       |
 
+
 ### Useful Links
 
 | Context              | Link                                                                        |
@@ -31,7 +32,15 @@ You can use the `./run_all_tests` script to quickly run the unit tests, along wi
 | Staging              | https://www.staging.tax.service.gov.uk/check-your-ers-files                 |
 | Test files to upload | https://github.com/hmrc/ers-checking-acceptance-tests/tree/master/resources |
 
-### License
+
+### Running Accessibility Tests
+
+The [Accessibility Linter](https://github.com/hmrc/sbt-accessibility-linter) has been added to SBT for this project.
+
+To run the tests, execute `sbt clean A11y/test` from the command line.
+
+
+### Licence
 
 This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html").
     
