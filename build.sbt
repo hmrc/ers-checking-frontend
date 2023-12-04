@@ -14,6 +14,8 @@ lazy val scoverageSettings: Seq[Def.Setting[?]] =
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
+  // To resolve dependency clash between flexmark v0.64.4+ and play-language to run accessibility tests, remove when versions align
+  .settings(dependencyOverrides += "com.ibm.icu" % "icu4j" % "69.1")
   .settings(scoverageSettings *)
   .settings(PlayKeys.playDefaultPort := 9225)
   .settings(scalaSettings *)

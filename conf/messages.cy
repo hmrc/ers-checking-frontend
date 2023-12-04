@@ -106,6 +106,7 @@ ers_check_file.file_type_error =Gwnaethoch ddewis gwirio ffeil ODS, ond nid yw {
 ers_check_file.no_file_error =Dim ffeil wedi’i dewis. Dewiswch eich ffeil.
 
 ers_upload_form.processing_alert = Rydym yn gwirio eich ffeil am wallau. Peidiwch ag adnewyddu’r dudalen.
+ers_upload_form.processing_spinner_alt = Rydym yn gwirio eich ffeil am wallau...
 
 #********************************************************************
 # Error messages
