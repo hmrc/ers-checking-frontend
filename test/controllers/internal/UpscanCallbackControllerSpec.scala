@@ -18,7 +18,6 @@ package controllers.internal
 
 import java.net.URL
 import java.time.Instant
-
 import helpers.ErsTestHelper
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -29,8 +28,6 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.SessionService
-import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
 
@@ -47,7 +44,6 @@ class UpscanCallbackControllerSpec extends AnyWordSpecLike with Matchers with Op
   implicit val readWrites: OWrites[UpscanReadyCallback] =
     Json.writes[UpscanReadyCallback].transform((js: JsValue) => js.as[JsObject] + ("fileStatus" -> JsString("READY")))
 
-  override val mockSessionService: SessionService = mock[SessionService]
   val sessionId = "sessionId"
 
   val uploadDetails: UploadDetails = UploadDetails(Instant.now(), "checksum", "fileMimeType", "fileName")
@@ -56,10 +52,10 @@ class UpscanCallbackControllerSpec extends AnyWordSpecLike with Matchers with Op
 
   def request(body: JsValue): FakeRequest[JsValue] = FakeRequest().withBody(body)
 
-  lazy val upscanCallbackController: UpscanCallbackController = new UpscanCallbackController(mockSessionService, testMCC(fakeApplication()))
+  lazy val upscanCallbackController: UpscanCallbackController = new UpscanCallbackController(mockSessionCacheRepo, testMCC(fakeApplication()))
 
   override def beforeEach(): Unit = {
-    reset(mockSessionService)
+    reset(mockSessionCacheRepo)
     reset(mockErsUtil)
     super.beforeEach()
   }
@@ -72,14 +68,13 @@ class UpscanCallbackControllerSpec extends AnyWordSpecLike with Matchers with Op
         val uploadedSuccessfully = UploadedSuccessfully("name", "downloadUrl", noOfRows = None)
         val upscanId = UpscanIds(uploadId, "fileId", uploadedSuccessfully)
 
-        when(mockSessionService.ersUtil).thenReturn(mockErsUtil)
-        when(mockErsUtil.fetch[UpscanIds](any(), any())(any(), any(), any())).thenReturn(Future.successful(upscanId))
-        when(mockErsUtil.cache(any(), any(), any())(any(), any(), any())).thenReturn(Future.successful(CacheMap("id", Map())))
+        when(mockSessionCacheRepo.fetch[UpscanIds](any())(any(), any())).thenReturn(Future.successful(Some(upscanId)))
+        when(mockSessionCacheRepo.cache(any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
 
         val result = upscanCallbackController.callbackCsv(uploadId, sessionId)(request(Json.toJson(readyCallback)))
         status(result) shouldBe OK
-        verify(mockErsUtil, times(1)).fetch[UpscanIds](any(), any())(any(), any(), any())
-        verify(mockErsUtil, times(1)).cache(any(), any(), any())(any(), any(), any())
+        verify(mockSessionCacheRepo, times(1)).fetch[UpscanIds](any())(any(), any())
+        verify(mockSessionCacheRepo, times(1)).cache(any(), any())(any(), any())
       }
     }
 
@@ -87,15 +82,14 @@ class UpscanCallbackControllerSpec extends AnyWordSpecLike with Matchers with Op
       "callback is UpscanFailedCallback and upload is InProgress" in {
         val upscanId = UpscanIds(uploadId, "fileId", Failed)
 
-        when(mockSessionService.ersUtil).thenReturn(mockErsUtil)
-        when(mockErsUtil.fetch[UpscanIds](any(), any())(any(), any(), any())).thenReturn(Future.successful(upscanId))
-        when(mockErsUtil.cache(any(), any(), any())(any(), any(), any())).thenReturn(Future.successful(CacheMap("id", Map())))
+        when(mockSessionCacheRepo.fetch[UpscanIds](any())(any(), any())).thenReturn(Future.successful(Some(upscanId)))
+        when(mockSessionCacheRepo.cache(any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
 
         val result = upscanCallbackController.callbackCsv(uploadId, sessionId)(request(Json.toJson(failedCallback)))
 
         status(result) shouldBe OK
-        verify(mockErsUtil, times(1)).fetch[UpscanIds](any(), any())(any(), any(), any())
-        verify(mockErsUtil, times(1)).cache(any(), any(), any())(any(), any(), any())
+        verify(mockSessionCacheRepo, times(1)).fetch[UpscanIds](any())(any(), any())
+        verify(mockSessionCacheRepo, times(1)).cache(any(), any())(any(), any())
       }
     }
 
@@ -103,13 +97,12 @@ class UpscanCallbackControllerSpec extends AnyWordSpecLike with Matchers with Op
       "updating the cache fails" in {
         val body = UpscanFailedCallback(Reference("ref"), ErrorDetails("failed", "message"))
 
-        when(mockSessionService.ersUtil).thenReturn(mockErsUtil)
-        when(mockErsUtil.fetch[UpscanIds](any(), any())(any(), any(), any())).thenReturn(Future.failed(new Exception("Test Exception")))
+        when(mockSessionCacheRepo.fetch[UpscanIds](any())(any(), any())).thenReturn(Future.failed(new Exception("Test Exception")))
 
         val result = upscanCallbackController.callbackCsv(uploadId, sessionId)(request(Json.toJson(body)))
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockErsUtil, times(1)).fetch[UpscanIds](any(), any())(any(), any(), any())
+        verify(mockSessionCacheRepo, times(1)).fetch[UpscanIds](any())(any(), any())
       }
     }
 
@@ -118,11 +111,9 @@ class UpscanCallbackControllerSpec extends AnyWordSpecLike with Matchers with Op
         val jsonBody = Json.parse("""{"key":"value"}""")
         val result = upscanCallbackController.callbackCsv(uploadId, sessionId)(request(jsonBody))
 
-        when(mockSessionService.ersUtil).thenReturn(mockErsUtil)
-
         status(result) shouldBe BAD_REQUEST
-        verify(mockErsUtil, never()).fetch[UpscanIds](any(), any())(any(), any(), any())
-        verify(mockErsUtil, never()).cache(any(), any(), any())(any(), any(), any())
+        verify(mockSessionCacheRepo, never()).fetchAndGetEntry[UpscanIds](any())(any(), any())
+        verify(mockSessionCacheRepo, never()).cache(any(), any())(any(), any())
       }
     }
   }
@@ -131,29 +122,29 @@ class UpscanCallbackControllerSpec extends AnyWordSpecLike with Matchers with Op
 
     "update callback" when {
       "Upload status is UpscanReadyCallback" in {
-        when(mockSessionService.updateCallbackRecord(any())(any(), any())).thenReturn(Future.successful(mock[CacheMap]))
+        when(mockSessionCacheRepo.cache(any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
 
         val result = upscanCallbackController.callbackOds(sessionId)(request(Json.toJson(readyCallback)))
         status(result) shouldBe OK
-        verify(mockSessionService, times(1)).updateCallbackRecord(any())(any(), any())
+        verify(mockSessionCacheRepo, times(1)).cache(any(), any())(any(), any())
       }
 
       "Upload status is failed" in {
-        when(mockSessionService.updateCallbackRecord(any())(any(), any())).thenReturn(Future.successful(mock[CacheMap]))
+        when(mockSessionCacheRepo.cache(any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
         val result = upscanCallbackController.callbackOds(sessionId)(request(Json.toJson(failedCallback)))
 
         status(result) shouldBe OK
-        verify(mockSessionService, times(1)).updateCallbackRecord(any())(any(), any())
+        verify(mockSessionCacheRepo, times(1)).cache(any(), any())(any(), any())
       }
     }
 
     "return InternalServerError" when {
       "updating the cache fails" in {
-        when(mockSessionService.updateCallbackRecord(any())(any(), any())).thenReturn(Future.failed(new Exception("Test exception")))
+        when(mockSessionCacheRepo.cache(any(), any())(any(), any())).thenReturn(Future.failed(new Exception("Test exception")))
         val result = upscanCallbackController.callbackOds(sessionId)(request(Json.toJson(readyCallback)))
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockSessionService, times(1)).updateCallbackRecord(any())(any(), any())
+        verify(mockSessionCacheRepo, times(1)).cache(any(), any())(any(), any())
       }
     }
 
@@ -163,7 +154,7 @@ class UpscanCallbackControllerSpec extends AnyWordSpecLike with Matchers with Op
         val result = upscanCallbackController.callbackOds(sessionId)(request(jsonBody))
 
         status(result) shouldBe BAD_REQUEST
-        verify(mockSessionService, never()).updateCallbackRecord(any())(any(), any())
+        verify(mockSessionCacheRepo, never()).cache(any(), any())(any(), any())
       }
     }
   }

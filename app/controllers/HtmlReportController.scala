@@ -24,9 +24,11 @@ import models.SheetErrors
 import models.upscan.{UploadId, UpscanCsvFilesCallbackList}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
+import play.api.libs.json.Reads
 import play.api.mvc._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
+import repository.ErsCheckingFrontendSessionCacheRepository
+import uk.gov.hmrc.http.InternalServerException
+import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{ERSUtil, JsonParser}
 import uk.gov.hmrc.services.validation.models.ValidationError
@@ -37,6 +39,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class HtmlReportController @Inject()(authAction: AuthAction,
                                      mcc: MessagesControllerComponents,
+                                     sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
                                      html_error_report: views.html.html_error_report,
                                      override val global_error: views.html.global_error
                                     )(implicit executionContext: ExecutionContext, ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
@@ -47,11 +50,11 @@ class HtmlReportController @Inject()(authAction: AuthAction,
         showHtmlErrorReportPage(isCsv)
   }
 
-  def csvExtractErrors(ids: Seq[UploadId], all: CacheMap): (ListBuffer[SheetErrors], Long, Int) = {
+  def csvExtractErrors(ids: Seq[UploadId], all: CacheItem): (ListBuffer[SheetErrors], Long, Int) = {
     var totalErrors = 0
     val listBufferAndCount: Seq[(ListBuffer[SheetErrors], Long)] = ids map { id =>
-      val errors = all.getEntry[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${id.value}").getOrElse(ListBuffer())
-      val errorCount = all.getEntry[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${id.value}").getOrElse(0L)
+      val errors = getEntry[ListBuffer[SheetErrors]](all, s"${ersUtil.ERROR_LIST_CACHE}${id.value}").getOrElse(ListBuffer())
+      val errorCount = getEntry[Long](all, s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${id.value}").getOrElse(0L)
 
       for (sheet <- errors) {
         val sheetErrors: ListBuffer[ValidationError] = sheet.errors
@@ -69,19 +72,20 @@ class HtmlReportController @Inject()(authAction: AuthAction,
   }
 
 
-  def showHtmlErrorReportPage(isCsv: Boolean)(implicit request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
-    ersUtil.fetchAll().map { all =>
-      val scheme: (String, String) = all.getEntry[String](ersUtil.SCHEME_CACHE) match {
+  def showHtmlErrorReportPage(isCsv: Boolean)(implicit request: Request[AnyRef], messages: Messages): Future[Result] = {
+    sessionCacheService.fetchAll().map { all =>
+      val scheme: (String, String) = getEntry[String](all, ersUtil.SCHEME_CACHE) match {
         case Some(name) => ersUtil.getSchemeName(name)
         case _ => ("", "")
       }
-
       lazy val (errorsList, errorCountLong, totalErrorsCount) = if(isCsv) {
-        val uploadIds: Seq[UploadId] = all.getEntry[UpscanCsvFilesCallbackList]("callback_data_key_csv").get.files.map(_.uploadId)
+        val uploadIds: Seq[UploadId] = getEntry[UpscanCsvFilesCallbackList](all, ersUtil.CALLBACK_DATA_KEY_CSV)
+          .get.files.map(_.uploadId)
         csvExtractErrors(uploadIds, all)
       } else {
-        val schemeErrors: ListBuffer[SheetErrors] = all.getEntry[ListBuffer[SheetErrors]](ersUtil.ERROR_LIST_CACHE).getOrElse(new ListBuffer[SheetErrors]())
-        val schemeErrorCount: Long = all.getEntry[Long](ersUtil.SCHEME_ERROR_COUNT_CACHE).getOrElse(0)
+        val schemeErrors: ListBuffer[SheetErrors] = getEntry[ListBuffer[SheetErrors]](all, ersUtil.ERROR_LIST_CACHE)
+          .getOrElse(new ListBuffer[SheetErrors]())
+        val schemeErrorCount: Long = getEntry[Long](all, ersUtil.SCHEME_ERROR_COUNT_CACHE).getOrElse(0)
         val odsErrors = schemeErrors.flatMap(sheet => sheet.errors).length
         (schemeErrors, schemeErrorCount, odsErrors)
       }
@@ -95,4 +99,14 @@ class HtmlReportController @Inject()(authAction: AuthAction,
         getGlobalErrorPage(request, messages)
     }
   }
+
+  def getEntry[T](cacheItem: CacheItem, key: String)(implicit reads: Reads[T]): Option[T] =
+    cacheItem.data.value
+      .get(key).map(json =>
+      json.validate[T].fold(
+        errors => throw new InternalServerException(s"CacheItem entry for $key could not be parsed, errors: $errors"),
+        valid => valid
+      )
+    )
+
 }

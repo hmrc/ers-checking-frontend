@@ -23,9 +23,13 @@ import services.validation.ValidationErrorHelper.ErrorFromMessagesOps
 import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models.{Cell, Row, ValidationError}
 
-class SIPAwardsV4ValidationTest extends PlaySpec with ERSValidationSIPAwardsTestData with ValidationTestRunner {
+class SIPAwardsV4ValidationTest
+  extends PlaySpec
+    with ERSValidationSIPAwardsTestData
+    with ValidationTestRunner {
 
-  val validator: DataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-sip-awards-validation-config"))
+  val validator: DataValidator =
+    new DataValidator(ConfigFactory.load.getConfig("ers-sip-awards-validation-config"))
 
   "Ers Validation tests for SIP Awards" should {
     runValidationTests(validator, getDescriptions, getTestData, getExpectedResults)
@@ -86,7 +90,11 @@ class SIPAwardsV4ValidationTest extends PlaySpec with ERSValidationSIPAwardsTest
 
 
 }
-class SIPOutV4ValidationTest extends PlaySpec with ERSValidationSIPOutTestData with ValidationTestRunner{
+
+class SIPOutV4ValidationTest
+  extends PlaySpec
+    with ERSValidationSIPOutTestData
+    with ValidationTestRunner{
 
   val validator: DataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-sip-out-validation-config"))
 

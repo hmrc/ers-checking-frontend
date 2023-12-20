@@ -33,7 +33,6 @@ import play.api.i18n.{Messages, MessagesImpl}
 import play.api.mvc.{Call, DefaultMessagesControllerComponents, Result}
 import play.api.test.Helpers._
 import play.api.test.Injecting
-import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html._
 
 import scala.concurrent.Future
@@ -57,7 +56,7 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
   "start Page GET" should {
 
     def buildFakeCheckingServiceController(): CheckingServiceController =
-      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
+      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView,
         invalidErrorView, fileUploadErrorView, globalErrorView) {
         mockAnyContentAction
@@ -80,7 +79,7 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
   "Scheme Type Page GET" should {
 
     def buildFakeCheckingServiceController(): CheckingServiceController =
-      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
+      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, fileUploadErrorView, globalErrorView) {
         mockAnyContentAction
       }
@@ -104,9 +103,9 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
   "Scheme Type Page POST" should {
 
     def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
-      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
+      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, fileUploadErrorView, globalErrorView) {
-        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any()))
+        when(mockSessionCacheRepo.cache[String](refEq(mockErsUtil.SCHEME_CACHE), any())(any(), any()))
           .thenReturn(if (schemeRes) Future.successful(null) else Future.failed(new Exception))
         mockAnyContentAction
       }
@@ -151,10 +150,8 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
   "Check File Type Page GET" should {
 
     def buildFakeCheckingServiceController(fileTypeRes: Boolean = true): CheckingServiceController =
-      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
+      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, fileUploadErrorView, globalErrorView) {
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(), any(), any()))
-          .thenReturn(if (fileTypeRes) Future.successful("csv") else Future.failed(new NoSuchElementException))
         mockAnyContentAction
       }
 
@@ -187,9 +184,9 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
   "Check File Type Page POST" should {
 
     def buildFakeCheckingServiceController(fileTypeRes: Boolean = true): CheckingServiceController =
-      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
+      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, fileUploadErrorView, globalErrorView) {
-        when(mockErsUtil.cache(refEq(mockErsUtil.FILE_TYPE_CACHE), anyString())(any(), any(), any()))
+        when(mockSessionCacheRepo.cache(refEq(mockErsUtil.FILE_TYPE_CACHE), anyString())(any(), any()))
           .thenReturn(if (fileTypeRes) Future.successful(null) else Future.failed(new Exception))
         mockAnyContentAction
       }
@@ -244,17 +241,24 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
   "Check file page GET" should {
 
     def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
-      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
+      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView,
         invalidErrorView, fileUploadErrorView, globalErrorView) {
-        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any()))
-          .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any(), any()))
+
+        when(mockSessionCacheRepo.cache[String](refEq(mockErsUtil.SCHEME_CACHE), any())(any(), any()))
+          .thenReturn(if (schemeRes) Future.successful(("", "")) else Future.failed(new Exception))
+
+        when(mockSessionCacheRepo.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any()))
+          .thenReturn(if (schemeRes) Future.successful(Some("1")) else Future.successful(None))
+        when(mockSessionCacheRepo.fetchAndGetEntry[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any()))
           .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
+
         when(mockUpscanService.getUpscanFormData(any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(UpscanInitiateResponse(Reference("ref"), Call("GET", "/"), Map.empty)))
-        when(mockSessionService.createCallbackRecord(any(), any()))
-          .thenReturn(Future.successful(CacheMap("", Map.empty)))
+        when(mockSessionCacheRepo.cache(any(), any())(any(), any()))
+          .thenReturn(Future.successful(("", "")))
+        when(mockSessionCacheRepo.cache[UploadStatus](any(), any())(any(), any()))
+          .thenReturn(Future.successful(("", "")))
 
         mockAnyContentAction
       }
@@ -285,14 +289,14 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
   "Check CSV file page GET" should {
 
     def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
-      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
+      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView,
         invalidErrorView, fileUploadErrorView, globalErrorView) {
-        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any()))
-          .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any(), any()))
+        when(mockSessionCacheRepo.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any()))
+          .thenReturn(if (schemeRes) Future.successful(("", "")) else Future.failed(new Exception))
+        when(mockSessionCacheRepo.fetchAndGetEntry[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any()))
           .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
-        when(mockErsUtil.fetch[UpscanCsvFilesList](refEq(mockErsUtil.CSV_FILES_UPLOAD), any())(any(), any(), any()))
+        when(mockSessionCacheRepo.fetchAndGetEntry[UpscanCsvFilesList](refEq(mockErsUtil.CSV_FILES_UPLOAD))(any(), any()))
           .thenReturn(if (schemeRes) Future.successful(UpscanCsvFilesList(Seq(UpscanIds(UploadId("id"), "fileId", NotStarted)))) else Future.failed(new Exception))
         when(mockUpscanService.getUpscanFormData(any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(UpscanInitiateResponse(Reference("ref"), Call("GET", "/"), Map.empty)))
@@ -328,16 +332,16 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
                                            errorRes: Boolean = true,
                                            errorCount: String = "0"
                                           ): CheckingServiceController =
-      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
+      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView,
         invalidErrorView, fileUploadErrorView, globalErrorView) {
-        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any()))
-          .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
+        when(mockSessionCacheRepo.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any()))
+          .thenReturn(if (schemeRes) Future.successful(("", "")) else Future.failed(new Exception))
 
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any(), any()))
+        when(mockSessionCacheRepo.fetchAndGetEntry[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any()))
           .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
 
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_ERROR_COUNT_CACHE))(any(), any(), any()))
+        when(mockSessionCacheRepo.fetchAndGetEntry[String](refEq(mockErsUtil.SCHEME_ERROR_COUNT_CACHE))(any(), any()))
           .thenReturn(if (errorRes) Future.successful(errorCount) else Future.failed(new Exception))
 
         mockAnyContentAction
@@ -364,23 +368,23 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
                                            errorRes: Boolean = true,
                                            errorCount: String = "0"
                                           ): CheckingServiceController =
-      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
+      new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView,
         invalidErrorView, fileUploadErrorView, globalErrorView) {
 
-        when(mockErsUtil.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any(), any()))
-          .thenReturn(if (schemeRes) Future.successful(CacheMap("", Map.empty)) else Future.failed(new Exception))
+        when(mockSessionCacheRepo.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any()))
+          .thenReturn(if (schemeRes) Future.successful(("", "")) else Future.failed(new Exception))
         when(mockErsUtil.getSchemeName(any())).thenReturn(("a", "b"))
 
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(), any(), any()))
+        when(mockSessionCacheRepo.fetchAndGetEntry[String](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(), any()))
           .thenReturn(if (schemeRes) Future.successful(fileTypeRes) else Future.failed(new Exception))
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any(), any()))
+        when(mockSessionCacheRepo.fetchAndGetEntry[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any()))
           .thenReturn(if (schemeRes) Future.successful("csop") else Future.failed(new Exception))
-        when(mockErsUtil.fetch[Boolean](refEq(mockErsUtil.FORMAT_ERROR_EXTENDED_CACHE))(any(), any(), any()))
+        when(mockSessionCacheRepo.fetchAndGetEntry[Boolean](refEq(mockErsUtil.FORMAT_ERROR_EXTENDED_CACHE))(any(), any()))
           .thenReturn(if (errorRes) Future.successful(false) else Future.failed(new Exception))
-        when(mockErsUtil.fetch[String](refEq(mockErsUtil.FORMAT_ERROR_CACHE))(any(), any(), any()))
+        when(mockSessionCacheRepo.fetchAndGetEntry[String](refEq(mockErsUtil.FORMAT_ERROR_CACHE))(any(), any()))
           .thenReturn(if (errorRes) Future.successful(errorCount) else Future.failed(new Exception))
-        when(mockErsUtil.fetch[Seq[String]](refEq(mockErsUtil.FORMAT_ERROR_CACHE_PARAMS))(any(), any(), any()))
+        when(mockSessionCacheRepo.fetchAndGetEntry[Seq[String]](refEq(mockErsUtil.FORMAT_ERROR_CACHE_PARAMS))(any(), any()))
           .thenReturn(if (errorRes) Future.successful(Seq(errorCount)) else Future.failed(new Exception))
 
         mockAnyContentAction
@@ -394,13 +398,13 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
 
     "give a status OK and shows check errors page if fetch successful for scheme type and error count" in {
       val controllerUnderTest = buildFakeCheckingServiceController(fileTypeRes = "csv")
-      val result = controllerUnderTest.showFormatErrorsPage(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val result = controllerUnderTest.showFormatErrorsPage()(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
     }
 
     "direct to ers errors page if fetch fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
-      val res: Future[Result] = controllerUnderTest.showFormatErrorsPage(Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val res: Future[Result] = controllerUnderTest.showFormatErrorsPage()(Fixtures.buildFakeRequestWithSessionId("GET"))
       res.map { result =>
         result shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request, testMessages)))
       }

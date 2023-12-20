@@ -16,7 +16,7 @@
 
 package helpers
 
-import config.{ApplicationConfig, ERSShortLivedCache}
+import config.ApplicationConfig
 import controllers.auth.AuthAction
 import metrics.Metrics
 import org.jsoup.Jsoup
@@ -27,19 +27,26 @@ import org.mockito.stubbing.OngoingStubbing
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.i18n.MessagesApi
+import play.api.libs.json.{JsObject, JsString, JsValue}
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessagesApi}
 import play.twirl.api.Html
+import repository.ErsCheckingFrontendSessionCacheRepository
 import services.audit.AuditEvents
 import services.validation.ErsValidator
-import services.{SessionService, UpscanService}
+import services.UpscanService
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
+import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import utils.ERSUtil
 
+import java.time.{LocalDate, ZoneOffset}
 import scala.concurrent.{ExecutionContext, Future}
+
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
 trait ErsTestHelper extends MockitoSugar {
   lazy val mockAuthAction = new AuthAction(mockAuthConnector, mockAppConfig, testBodyParser)
@@ -63,8 +70,7 @@ trait ErsTestHelper extends MockitoSugar {
   implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
   implicit val mockErsUtil: ERSUtil = mock[ERSUtil]
   val mockAuditEvents: AuditEvents = mock[AuditEvents]
-  val mockShortLivedCache: ERSShortLivedCache = mock[ERSShortLivedCache]
-  val mockSessionService: SessionService = mock[SessionService]
+  val mockSessionCacheRepo: ErsCheckingFrontendSessionCacheRepository = mock[ErsCheckingFrontendSessionCacheRepository]
   val mockUpscanService: UpscanService = mock[UpscanService]
 
   def doc(result: Html): Document = Jsoup.parse(contentAsString(result))
@@ -91,11 +97,9 @@ trait ErsTestHelper extends MockitoSugar {
   when(mockAppConfig.signOut).thenReturn("http://localhost:9553/bas-gateway/sign-out-without-state")
   when(mockAppConfig.appName).thenReturn("ers-checking-frontend")
   when(mockAppConfig.loginCallback).thenReturn("http://localhost:9225/check-your-ers-files")
+  when(mockAppConfig.mongoTTLInSeconds).thenReturn(3600)
   when(mockAppConfig.odsSuccessRetryAmount).thenReturn(5)
   when(mockAppConfig.odsValidationRetryAmount).thenReturn(1)
-
-  import scala.concurrent.duration._
-  import scala.language.postfixOps
 
   when(mockAppConfig.retryDelay).thenReturn(3 milliseconds)
   when(mockAppConfig.errorCount).thenReturn(20)
@@ -108,7 +112,6 @@ trait ErsTestHelper extends MockitoSugar {
   when(mockErsUtil.SCHEME_OTHER).thenReturn("3")
   when(mockErsUtil.SCHEME_SAYE).thenReturn("4")
   when(mockErsUtil.SCHEME_SIP).thenReturn("5")
-
   when(mockErsUtil.OPTION_CSV).thenReturn("csv")
   when(mockErsUtil.OPTION_ODS).thenReturn("ods")
   when(mockErsUtil.OPTION_YES).thenReturn("1")
@@ -117,6 +120,8 @@ trait ErsTestHelper extends MockitoSugar {
   when(mockErsUtil.OPTION_NIL_RETURN).thenReturn("2")
 
   //Cache Util
+  when(mockErsUtil.CALLBACK_DATA_KEY).thenReturn("callback_data_key")
+  when(mockErsUtil.CALLBACK_DATA_KEY_CSV).thenReturn("callback_data_key_csv")
   when(mockErsUtil.SCHEME_CACHE).thenReturn("scheme-type")
   when(mockErsUtil.FILE_TYPE_CACHE).thenReturn("check-file-type")
   when(mockErsUtil.SCHEME_ERROR_COUNT_CACHE).thenReturn("scheme-error-count")
@@ -128,4 +133,14 @@ trait ErsTestHelper extends MockitoSugar {
   when(mockErsUtil.FORMAT_ERROR_EXTENDED_CACHE).thenReturn("format_extended_error")
   when(mockErsUtil.FILE_NAME_CACHE).thenReturn("file-name")
   when(mockErsUtil.CSV_FILES_UPLOAD).thenReturn("csv-files-upload")
+
+  def generateTestCacheItem(id: String = "id",
+                            data: Seq[(String, JsValue)] = Seq("" -> JsString(""))): CacheItem = {
+    CacheItem(
+      id = id,
+      data = JsObject(data),
+      createdAt = LocalDate.parse("2023-11-17").atStartOfDay().toInstant(ZoneOffset.UTC),
+      modifiedAt = LocalDate.parse("2023-11-17").atStartOfDay().toInstant(ZoneOffset.UTC)
+    )
+  }
 }

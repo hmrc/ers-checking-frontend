@@ -35,8 +35,7 @@ import play.api.i18n.{Messages, MessagesImpl}
 import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents, Request, Result}
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Injecting}
-import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HttpResponse
 import views.html._
 
 import scala.concurrent.duration.Duration
@@ -60,7 +59,7 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
   val fileUploadErrorView: file_upload_error = inject[file_upload_error]
 
   def buildFakeCheckingServiceController(): CheckingServiceController =
-    new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionService, mcc,
+    new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
       formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView,
       invalidErrorView, fileUploadErrorView, globalErrorView) {
       mockAnyContentAction
@@ -69,9 +68,9 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
   "selectCsvFilesPage" should {
 
     "call showCheckCsvFilesPage if user is authenticated" in {
-      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, selectFileTypeView, globalErrorView) {
+      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, mockSessionCacheRepo, selectFileTypeView, globalErrorView) {
         override def showCheckCsvFilesPage()(
-          implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Result] = Future.successful(Ok("Authenticated"))
+          implicit request: RequestWithOptionalEmpRef[AnyContent]): Future[Result] = Future.successful(Ok("Authenticated"))
         mockAnyContentAction
       }
       val result = controllerUnderTest.selectCsvFilesPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
@@ -82,32 +81,34 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
 
   "showCheckCsvFilesPage" should {
     "go to global error page if an exception was thrown" in {
-      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, selectFileTypeView, globalErrorView) {
+      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, mockSessionCacheRepo, selectFileTypeView, globalErrorView) {
         override def getGlobalErrorPage(implicit request: Request[AnyRef], messages: Messages): Result =
           InternalServerError("this is very bad")
         mockAnyContentAction
       }
-      when(mockErsUtil.remove(refEq(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())).thenReturn(Future.failed(new RuntimeException("this failed tbh")))
+      when(mockSessionCacheRepo.delete(refEq(mockErsUtil.CSV_FILES_UPLOAD))(any()))
+        .thenReturn(Future.failed(new RuntimeException("this failed tbh")))
 
-      val result = controllerUnderTest.showCheckCsvFilesPage()(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc)
+      val result = controllerUnderTest.showCheckCsvFilesPage()(Fixtures.buildEmpRefRequestWithSessionId("GET"))
 
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
       contentAsString(result) shouldBe "this is very bad"
     }
 
     "go to the select_csv_file_types page when successful" in {
-      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, selectFileTypeView, globalErrorView) {
+      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, mockSessionCacheRepo, selectFileTypeView, globalErrorView) {
         override def getGlobalErrorPage(implicit request: Request[AnyRef], messages: Messages): Result =
           InternalServerError("this is very bad")
         mockAnyContentAction
       }
-      when(mockErsUtil.remove(refEq(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())).thenReturn(Future.successful(HttpResponse(Status.OK, "we uploadin")))
-      when(mockErsUtil.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any(), any()))
+      when(mockSessionCacheRepo.delete(refEq(mockErsUtil.CSV_FILES_UPLOAD))(any()))
+        .thenReturn(Future.successful(HttpResponse(Status.OK, "we uploadin")))
+      when(mockSessionCacheRepo.fetchAndGetEntry[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any()))
         .thenReturn(Future.successful("a string"))
       when(mockErsUtil.getCsvFilesList(any())).thenReturn(Seq(CsvFiles("a file")))
       when(mockErsUtil.getPageElement(any(), any(), any())).thenReturn("this is okay!")
 
-      val result = controllerUnderTest.showCheckCsvFilesPage()(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc)
+      val result = controllerUnderTest.showCheckCsvFilesPage()(Fixtures.buildEmpRefRequestWithSessionId("GET"))
 
       status(result) shouldBe Status.OK
       assert(contentAsString(result).contains("this is okay!"))
@@ -118,9 +119,9 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
   "checkCsvFilesPageSelected" should {
 
     "call validateCsvFilesPageSelected if user is authenticated" in {
-      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, selectFileTypeView, globalErrorView) {
+      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, mockSessionCacheRepo, selectFileTypeView, globalErrorView) {
         override def validateCsvFilesPageSelected()(
-          implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier): Future[Result] = Future.successful(Ok("here we go!"))
+          implicit request: RequestWithOptionalEmpRef[AnyContent]): Future[Result] = Future.successful(Ok("here we go!"))
         mockAnyContentAction
       }
       val result = controllerUnderTest.checkCsvFilesPageSelected().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
@@ -132,7 +133,7 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
   "validateCsvFilesPageSelected" should {
 
     "call reloadWithError if form has errors" in {
-      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, selectFileTypeView, globalErrorView) {
+      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, mockSessionCacheRepo, selectFileTypeView, globalErrorView) {
         override def reloadWithError(form: Option[Form[List[CsvFiles]]])(implicit messages: Messages): Future[Result] =
           Future.successful(Ok("this is a reload"))
 
@@ -140,30 +141,30 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
       }
       val request = FakeRequest("GET", "").withFormUrlEncodedBody(("files", "file"), ("fileId", "asdasd£$aaa"))
 
-      val result = controllerUnderTest.validateCsvFilesPageSelected()(RequestWithOptionalEmpRef(request, None), hc)
+      val result = controllerUnderTest.validateCsvFilesPageSelected()(RequestWithOptionalEmpRef(request, None))
       status(result) shouldBe Status.OK
       contentAsString(result) shouldBe "this is a reload"
     }
 
     "call reloadWithError if no file selected" in {
-      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, selectFileTypeView, globalErrorView) {
+      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, mockSessionCacheRepo, selectFileTypeView, globalErrorView) {
         mockAnyContentAction
       }
       val request = FakeRequest("GET", "")
 
-      val result = controllerUnderTest.validateCsvFilesPageSelected()(RequestWithOptionalEmpRef(request, None), hc)
+      val result = controllerUnderTest.validateCsvFilesPageSelected()(RequestWithOptionalEmpRef(request, None))
       status(result) shouldBe Status.SEE_OTHER
     }
 
     "call reloadWithError if form does not have errors" in {
-      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, selectFileTypeView, globalErrorView) {
+      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, mockSessionCacheRepo, selectFileTypeView, globalErrorView) {
         override def performCsvFilesPageSelected(formData: Seq[CsvFiles])(
-          implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = Future.successful(Ok("form good"))
+          implicit request: Request[AnyRef]): Future[Result] = Future.successful(Ok("form good"))
         mockAnyContentAction
       }
       val request = FakeRequest("GET", "").withFormUrlEncodedBody(("files", "file"), ("fileId", "1234"))
 
-      val result = controllerUnderTest.validateCsvFilesPageSelected()(RequestWithOptionalEmpRef(request, None), hc)
+      val result = controllerUnderTest.validateCsvFilesPageSelected()(RequestWithOptionalEmpRef(request, None))
       status(result) shouldBe Status.OK
       contentAsString(result) shouldBe "form good"
     }
@@ -172,7 +173,7 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
 
   "performCsvFilesPageSelected" should {
     "reloadWithError if ids are empty" in {
-      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, selectFileTypeView, globalErrorView) {
+      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, mockSessionCacheRepo, selectFileTypeView, globalErrorView) {
         override def reloadWithError(form: Option[Form[List[CsvFiles]]])(implicit messages: Messages): Future[Result] =
           Future.successful(Ok("this is a reload"))
 
@@ -180,28 +181,24 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
         mockAnyContentAction
       }
 
-      val result = controllerUnderTest.performCsvFilesPageSelected(Seq.empty)(FakeRequest("GET", ""), hc)
+      val result = controllerUnderTest.performCsvFilesPageSelected(Seq.empty)(FakeRequest("GET", ""))
       status(result) shouldBe Status.OK
       contentAsString(result) shouldBe "this is a reload"
 
     }
 
     "redirect to checkCSVFilePage if everything is good" in {
-      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, selectFileTypeView, globalErrorView) {
+      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, mockSessionCacheRepo, selectFileTypeView, globalErrorView) {
         override def reloadWithError(form: Option[Form[List[CsvFiles]]])(implicit messages: Messages): Future[Result] =
           Future.successful(Ok("this is a reload"))
 
         override def createCacheData(csvFilesList: Seq[CsvFiles]): UpscanCsvFilesList =
           UpscanCsvFilesList(Seq(UpscanIds(UploadId("value"), "field", UploadedSuccessfully("name", "download"))))
-
-        override def cacheUpscanIds(ids: Seq[UpscanIds])(implicit hc: HeaderCarrier): Seq[Future[CacheMap]] =
-          Seq.empty
-        mockAnyContentAction
       }
-      when(mockErsUtil.cache(refEq(mockErsUtil.CSV_FILES_UPLOAD), any(), any())(any(), any(), any()))
-        .thenReturn(Future.successful(CacheMap("id", Map.empty)))
+      when(mockSessionCacheRepo.cache[UpscanCsvFilesList](any(), any())(any(), any()))
+        .thenReturn(Future.successful(("", "")))
 
-      val result = controllerUnderTest.performCsvFilesPageSelected(Seq.empty)(FakeRequest("GET", ""), hc)
+      val result = controllerUnderTest.performCsvFilesPageSelected(Seq.empty)(FakeRequest("GET", ""))
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe "/check-your-ers-files/choose-and-check-csv-files"
 
@@ -209,18 +206,19 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
   }
 
   "cacheUpscanIds" should {
+    // TODO: What is this meant to be testing???
     "cache IDs" in {
-      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, selectFileTypeView, globalErrorView) {
+      val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, mockSessionCacheRepo, selectFileTypeView, globalErrorView) {
         mockAnyContentAction
       }
-      when(mockErsUtil.cache[UpscanIds](any(), any())(any(), any(), any()))
-        .thenReturn(Future.successful(CacheMap("id", Map.empty)))
+      when(mockSessionCacheRepo.cache[UpscanIds](any(), any())(any(), any()))
+        .thenReturn(Future.successful(("", "")))
 
-      val result = controllerUnderTest
-        .cacheUpscanIds(Seq(UpscanIds(UploadId("value"), "field", UploadedSuccessfully("name", "download"))))(hc)
+      val result: Seq[Future[(String, String)]] = controllerUnderTest
+        .cacheUpscanIds(Seq(UpscanIds(UploadId("value"), "field", UploadedSuccessfully("name", "download"))))
 
       assert(result.length == 1)
-      Await.result(result.head, Duration.Inf) shouldBe CacheMap("id", Map.empty)
+      Await.result(result.head, Duration.Inf) shouldBe ("", "")
     }
   }
 }

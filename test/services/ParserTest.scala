@@ -25,18 +25,40 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Messages, MessagesImpl}
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.DefaultMessagesControllerComponents
-import play.api.{Logger, i18n}
+import play.api.{Application, Logger, i18n}
 import services.XMLTestData._
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.test.MongoSupport
 import utils.{CsvParserUtil, ParserUtil}
 
 
-class ParserTest extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with ErsTestHelper with BeforeAndAfter with EitherValues {
+class ParserTest
+  extends PlaySpec
+    with GuiceOneAppPerSuite
+    with ScalaFutures
+    with ErsTestHelper
+    with BeforeAndAfter
+    with EitherValues
+    with MongoSupport {
+
+  override lazy val fakeApplication: Application = new GuiceApplicationBuilder()
+    .configure(
+      Map(
+        "play.i18n.langs" -> List("en", "cy"),
+        "metrics.enabled" -> "false"
+      )
+    )
+    .overrides(
+      bind(classOf[MongoComponent]).toInstance(mongoComponent)
+    ).build()
 
   val mockParserUtil: ParserUtil = mock[ParserUtil]
   val mockCsvParserUtil: CsvParserUtil = mock[CsvParserUtil]
   val realErsValidationConfigs: ERSValidationConfigs = app.injector.instanceOf[ERSValidationConfigs]
-  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
+  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication)
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
 
   object TestDataParser extends DataParser {

@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.ERSShortLivedCache
+import utils.CacheUtil
 import helpers.ErsTestHelper
 import models.SheetErrors
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
@@ -29,153 +29,145 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n.MessagesImpl
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json
 import play.api.libs.json._
-import play.api.mvc.{DefaultMessagesControllerComponents, Request, Result}
+import play.api.mvc.{DefaultMessagesControllerComponents, Result}
 import play.api.test.Helpers._
 import play.api.test.Injecting
 import play.api.{Application, i18n}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
-import utils.ERSUtil
 import views.html.{global_error, html_error_report}
 
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-class HtmlReportControllerTest extends AnyWordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite with ErsTestHelper with Injecting {
+class HtmlReportControllerTest
+  extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with GuiceOneAppPerSuite
+    with ErsTestHelper
+    with Injecting
+    with CacheUtil {
 
-  val config: Map[String, Any] = Map("application.secret" -> "test",
+  val config: Map[String, Any] = Map(
+    "application.secret" -> "test",
     "login-callback.url" -> "test",
     "contact-frontend.host" -> "localhost",
     "contact-frontend.port" -> "9250",
-    "metrics.enabled" -> false)
-
+    "metrics.enabled" -> false
+  )
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(app)
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
-  val mockErsShortLivedCache: ERSShortLivedCache = mock[ERSShortLivedCache]
   val view: html_error_report = inject[html_error_report]
   val globalErrorView: global_error = inject[global_error]
 
+  val uploadId: UploadId = UploadId("uploadId")
+
   "html Error Report Page GET" should {
-
     "gives a call to showHtmlErrorReportPage if user is authenticated" in {
-      lazy val controllerUnderTest = new HtmlReportController(mockAuthAction, mcc, view, globalErrorView)
-      val successfully: UploadedSuccessfully = UploadedSuccessfully("thefilename", "downloadUrl", Some(1000))
-      val upscanCsvFilesCallback= UpscanCsvFilesCallback(UploadId("uploadId"), successfully)
-      val upscanCsvFilesListCallbackList = UpscanCsvFilesCallbackList(files = List(upscanCsvFilesCallback))
+      lazy val controllerUnderTest = new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, globalErrorView)
+      val upscanCsvFilesListCallbackList = UpscanCsvFilesCallbackList(
+        files = List(UpscanCsvFilesCallback(uploadId, UploadedSuccessfully("thefilename", "downloadUrl", Some(1000))))
+      )
 
-      lazy val storedValues = Map(
+      lazy val storedValues: Seq[(String, JsValue)] = Seq(
         "scheme-error-count" -> JsString("test"),
         "error-list" -> JsString("test"),
-        "scheme-type" -> JsString("test"),
+        "scheme-type" -> JsString("csop"),
         "callback_data_key_csv" -> Json.toJson(upscanCsvFilesListCallbackList)
       )
 
+      val cacheItem = generateTestCacheItem(id = "test", data = storedValues)
       mockAnyContentAction
+
+      when(mockSessionCacheRepo.fetchAll()(any())).thenReturn(Future.successful(cacheItem))
       when(mockErsUtil.getSchemeName(any())).thenReturn(("ers_pdf_error_report.csop", "CSOP"))
-      when(mockErsUtil.fetchAll()(any(), any(), any())).thenReturn(Future.successful(CacheMap("test", storedValues)))
 
       lazy val result = controllerUnderTest.htmlErrorReportPage(true).apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
     }
   }
 
-  def buildFakeHtmlReportController(fetchAllMapVal: String = "e"): HtmlReportController = {
-    class TestERSUtil extends ERSUtil(mockErsShortLivedCache){
-      val FIVE = 5
-      val ELEVEN = 11
-      val TEN = 10
-      var data: ListBuffer[ValidationError] = ListBuffer(ValidationError(Cell("A",FIVE,"abc"),"001", "error.1", "This entry must be 'yes' or 'no'."))
-      data += ValidationError(Cell("D",FIVE,"abc"),"002", "error.2", "This entry must be within the specified number range.")
-      data += ValidationError(Cell("F",ELEVEN,"abc"),"003", "error.3", "This entry must contain 35 characters or less.")
-
-      override def cache[T](key:String, body:T)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T]) = {
-        Future.successful(null)
-      }
-
-      @throws(classOf[NoSuchElementException])
-      override def fetchAll()(implicit hc:HeaderCarrier, ec:ExecutionContext, request: Request[AnyRef]):  Future[CacheMap] = {
-        fetchAllMapVal match {
-          case "e" => Future(throw new NoSuchElementException)
-          case "withErrorListSchemeTypeFileTypeErrorCountSummary" =>
-            val data : Map[String, JsValue] = Map(
-              mockErsUtil.ERROR_LIST_CACHE -> Fixtures.getMockErrorList,
-              mockErsUtil.SCHEME_CACHE -> Json.toJson("csop"),
-              mockErsUtil.FILE_TYPE_CACHE -> Json.toJson(mockErsUtil.OPTION_ODS),
-              mockErsUtil.SCHEME_ERROR_COUNT_CACHE -> Json.toJson(TEN),
-              mockErsUtil.ERROR_SUMMARY_CACHE -> Fixtures.getMockSummaryErrors)
-            val cm : CacheMap = new CacheMap("idcsop", data)
-            Future.successful(cm)
-          case "withErrorListSchemeTypeFileTypeZeroErrorCountSummary" =>
-            val data : Map[String, JsValue] = Map(
-              mockErsUtil.ERROR_LIST_CACHE -> Fixtures.getMockErrorList,
-              mockErsUtil.SCHEME_CACHE -> Json.toJson("csop"),
-              mockErsUtil.FILE_TYPE_CACHE -> Json.toJson(mockErsUtil.OPTION_ODS),
-              mockErsUtil.SCHEME_ERROR_COUNT_CACHE -> Json.toJson(0),
-              mockErsUtil.ERROR_SUMMARY_CACHE -> Fixtures.getMockSummaryErrors
-            )
-            val cm : CacheMap = new CacheMap("idcsop", data)
-            Future.successful(cm)
-          case "withSchemeType" =>
-            val data : Map[String, JsValue] = Map("mock_scheme" -> Json.toJson("csop"))
-            val cm : CacheMap = new CacheMap("idcsop", data)
-            Future.successful(cm)
-        }
-      }
-    }
-
-    new HtmlReportController(mockAuthAction, mcc, view, globalErrorView)(
-      implicitly, new TestERSUtil, mockAppConfig) {
-      mockAnyContentAction
-    }
-  }
-
   "Calling HtmlReportController.showHtmlErrorReportPage with authentication, and nothing in cache" should {
     "throw exception" in {
-      val controllerUnderTest = buildFakeHtmlReportController()
-      val res: Future[Result] = controllerUnderTest.showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"), hc, testMessages)
+      val controllerUnderTest = new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, globalErrorView)
+      when(mockSessionCacheRepo.fetchAll()(any())).thenReturn(Future(throw new NoSuchElementException))
+      val res: Future[Result] = controllerUnderTest
+        .showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"), testMessages)
       res.map { result =>
-        result shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request, testMessages)))}
+        result shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request, testMessages)))
+      }
     }
   }
 
   "Calling HtmlReportController.showHtmlErrorReportPage with authentication, and error count > 0" should {
     "give a status 500 and show error report" in {
-      val controllerUnderTest = buildFakeHtmlReportController("withErrorListSchemeTypeFileTypeZeroErrorCountSummary")
-      val result = controllerUnderTest.showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"),hc, testMessages)
+      val controllerUnderTest = new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, globalErrorView)
+      val cacheItem: CacheItem = generateTestCacheItem(
+        id = "idcsop",
+        data = Seq(
+          mockErsUtil.ERROR_LIST_CACHE -> Fixtures.getMockErrorList,
+          mockErsUtil.SCHEME_CACHE -> Json.toJson("csop"),
+          mockErsUtil.FILE_TYPE_CACHE -> Json.toJson(mockErsUtil.OPTION_ODS),
+          mockErsUtil.SCHEME_ERROR_COUNT_CACHE -> Json.toJson(0),
+          mockErsUtil.ERROR_SUMMARY_CACHE -> Fixtures.getMockSummaryErrors
+        )
+      )
+
+      when(mockSessionCacheRepo.fetchAll()(any())).thenReturn(Future.successful(cacheItem))
+
+      val result = controllerUnderTest
+        .showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"), testMessages)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
   }
 
   "csvExtractErrors" should {
-    val uploadId = UploadId("uploadId")
     "return no errors when none are present" in {
-      val cacheMap = CacheMap("uploadId", Map.empty)
+      val cacheItem = generateTestCacheItem("uploadId")
 
-      val result = buildFakeHtmlReportController().csvExtractErrors(Seq(uploadId), cacheMap)
+      val result = new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, globalErrorView)
+        .csvExtractErrors(Seq(uploadId), cacheItem)
       result shouldBe ((ListBuffer(), 0, 0))
     }
 
     "return the errors and count when the sheet has errors" in {
-      val errorList = ListBuffer(
+      val errorList: ListBuffer[SheetErrors] = ListBuffer(
         SheetErrors("CSOP_OptionsExercised_V4",
           ListBuffer(
-            ValidationError(Cell("A",1,"23-07-2015"),"error.1","001","ers.upload.error.date")
+            ValidationError(Cell("A", 1, "23-07-2015"), "error.1", "001", "ers.upload.error.date")
           )
         )
       )
-      val errorJson = Json.toJson(errorList)
-      val cacheMapWithErrors = CacheMap("uploadId",
-        Map(s"error-list${uploadId.value}" -> errorJson,
-           s"scheme-error-count${uploadId.value}" -> Json.toJson(1)
+      val cacheItemWithErrors = generateTestCacheItem(
+        id = uploadId.value,
+        data = Seq(
+        s"$ERROR_LIST_CACHE${uploadId.value}" -> Json.toJson(errorList),
+        s"$SCHEME_ERROR_COUNT_CACHE${uploadId.value}" -> Json.toJson(1)
       ))
 
-      val result = buildFakeHtmlReportController().csvExtractErrors(Seq(uploadId), cacheMapWithErrors)
+      val result = new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, globalErrorView)
+        .csvExtractErrors(Seq(uploadId), cacheItemWithErrors)
       result shouldBe ((errorList, 1, 1))
+    }
+  }
+
+  "getEntry" must {
+    "return None when key isn't found" in {
+      val data = generateTestCacheItem(
+        "sessionId",
+        Seq(
+          "name" -> JsString("some-name"),
+          "downloadUrl" -> JsString("some-url")
+        )
+      )
+      val result = new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, globalErrorView)
+        .getEntry[UploadedSuccessfully](data, "key-not-found")
+
+      result shouldBe None
     }
   }
 }

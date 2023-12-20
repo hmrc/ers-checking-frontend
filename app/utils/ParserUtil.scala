@@ -22,8 +22,9 @@ import javax.inject.{Inject, Singleton}
 import models.SheetErrors
 import models.upscan.UpscanCsvFilesCallback
 import play.api.Logging
+import play.api.mvc.Request
+import repository.ErsCheckingFrontendSessionCacheRepository
 import services.ERSTemplatesInfo
-import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,7 +32,8 @@ import scala.util.{Failure, Success, Try}
 
 @Singleton
 class ParserUtil @Inject()(val ersUtil: ERSUtil,
-                           appConfig: ApplicationConfig
+                           appConfig: ApplicationConfig,
+                           sessionCacheService: ErsCheckingFrontendSessionCacheRepository
                           )(implicit ec: ExecutionContext) extends Logging {
   val HUNDRED = 100
 
@@ -48,7 +50,7 @@ class ParserUtil @Inject()(val ersUtil: ERSUtil,
   }
 
   def isFileValid(errorList: ListBuffer[SheetErrors], file: Option[UpscanCsvFilesCallback] = None)
-                 (implicit hc: HeaderCarrier): Future[Try[Boolean]] = {
+                 (implicit request: Request[_]): Future[Try[Boolean]] = {
     if (isValid(errorList)) {
       Future.successful(Success(true))
     }
@@ -58,8 +60,8 @@ class ParserUtil @Inject()(val ersUtil: ERSUtil,
       val id = if (file.isDefined) file.get.uploadId else ""
 
       val result = for {
-        _ <- ersUtil.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}$id", updatedErrorCount)
-        _ <- ersUtil.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}$id", updatedErrorList)
+        _ <- sessionCacheService.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}$id", updatedErrorCount)
+        _ <- sessionCacheService.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}$id", updatedErrorList)
       } yield Success(false)
 
       result recover {

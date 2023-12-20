@@ -25,12 +25,16 @@ import org.mockito.Mockito._
 import org.scalatest.EitherValues
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import play.api.i18n
+import play.api.{Application, i18n}
 import play.api.i18n.{Messages, MessagesImpl}
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.DefaultMessagesControllerComponents
 import services.ERSTemplatesInfo._
 import services.headers.HeaderData
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.test.MongoSupport
 import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 import utils.ParserUtil
@@ -38,13 +42,30 @@ import utils.ParserUtil
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
-class DataGeneratorSpec extends PlaySpec with GuiceOneServerPerSuite with ErsTestHelper with HeaderData with EitherValues {
+class DataGeneratorSpec
+  extends PlaySpec
+    with GuiceOneServerPerSuite
+    with ErsTestHelper
+    with HeaderData
+    with EitherValues
+    with MongoSupport {
+
+  override lazy val fakeApplication: Application = new GuiceApplicationBuilder()
+    .configure(
+      Map(
+        "play.i18n.langs" -> List("en", "cy"),
+        "metrics.enabled" -> "false"
+      )
+    )
+    .overrides(
+      bind(classOf[MongoComponent]).toInstance(mongoComponent)
+    ).build()
 
   lazy val mockParserUtil: ParserUtil = mock[ParserUtil]
-  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
+  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication)
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
-  lazy val testParserUtil: ParserUtil = fakeApplication().injector.instanceOf[ParserUtil]
-  lazy val testErsValidationConfigs: ERSValidationConfigs = fakeApplication().injector.instanceOf[ERSValidationConfigs]
+  lazy val testParserUtil: ParserUtil = fakeApplication.injector.instanceOf[ParserUtil]
+  lazy val testErsValidationConfigs: ERSValidationConfigs = fakeApplication.injector.instanceOf[ERSValidationConfigs]
 
   class DataGeneratorObj(scheme: String) extends DataGenerator(mockAuditEvents, mockMetrics,
     testParserUtil, testErsValidationConfigs, mockErsUtil, mockErsValidator){

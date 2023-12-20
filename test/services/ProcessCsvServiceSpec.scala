@@ -35,12 +35,14 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{EitherValues, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.i18n
+import play.api.{Application, i18n}
 import play.api.i18n.{Messages, MessagesImpl}
-import play.api.libs.json.Json
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.DefaultMessagesControllerComponents
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.test.MongoSupport
 import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 import utils.CsvParserUtil
@@ -50,20 +52,41 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with AnyWordSpecLike with Matchers
-  with OptionValues with EitherValues with ErsTestHelper with GuiceOneAppPerSuite with TimeLimits with ScalaFutures {
+class ProcessCsvServiceSpec
+  extends TestKit(ActorSystem("Test"))
+    with AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with EitherValues
+    with ErsTestHelper
+    with GuiceOneAppPerSuite
+    with TimeLimits
+    with ScalaFutures
+    with MongoSupport {
+
+  override lazy val fakeApplication: Application = new GuiceApplicationBuilder()
+    .configure(
+      Map(
+        "play.i18n.langs" -> List("en", "cy"),
+        "metrics.enabled" -> "false"
+      )
+    )
+    .overrides(
+      bind(classOf[MongoComponent]).toInstance(mongoComponent)
+    ).build()
 
   def convertToAkkaSource(file: File): Source[List[ByteString], Future[IOResult]] = {
     FileIO.fromPath(file.toPath)
       .via(CsvParsing.lineScanner())
   }
 
-  lazy val testParserUtil: CsvParserUtil = fakeApplication().injector.instanceOf[CsvParserUtil]
+  lazy val testParserUtil: CsvParserUtil = fakeApplication.injector.instanceOf[CsvParserUtil]
   val mockDataGenerator: DataGenerator = mock[DataGenerator]
-  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
+  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication)
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
 
-  def testProcessCsvService: ProcessCsvService = new ProcessCsvService(testParserUtil, mockDataGenerator, mockAppConfig, mockErsUtil, mockErsValidator)
+  def testProcessCsvService: ProcessCsvService = new ProcessCsvService(testParserUtil, mockDataGenerator, mockAppConfig,
+    mockSessionCacheRepo, mockErsUtil, mockErsValidator)
 
   "processRow" should {
 
@@ -117,7 +140,7 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with AnyWordSpe
     when(mockDataGenerator.identifyAndDefineSheetCsv(any())(any(), any())).thenReturn(Right("CSOP_OptionsGranted_V4"))
     when(mockDataGenerator.setValidatorCsv(any())(any(), any())).thenReturn(Right(new DataValidator(ConfigFactory.load.getConfig("ers-csop-granted-validation-config"))))
     when(mockErsUtil.SCHEME_ERROR_COUNT_CACHE).thenReturn("10")
-    when(mockErsUtil.cache[Any](any(), any())(any(), any(), any())).thenReturn(Future(CacheMap("1", Map("test" -> Json.obj("test" -> "test")))))
+    when(mockSessionCacheRepo.cache[Any](any(), any())(any(), any())).thenReturn(Future(("", "")))
 
     def returnStubSource(x: String, data: String): Source[HttpResponse, NotUsed] = {
       Source.single(HttpResponse(entity = data))
@@ -409,8 +432,8 @@ class ProcessCsvServiceSpec extends TestKit(ActorSystem("Test")) with AnyWordSpe
 
     "return false and cache errors if there are validation errors in any row" in {
       when(mockErsUtil.SCHEME_ERROR_COUNT_CACHE).thenReturn("10")
-      when(mockErsUtil.cache[Long](any(), any())(any(), any(), any())).thenReturn(Future(CacheMap("1", Map("x" -> Json.obj("test" -> "test")))))
-      when(mockErsUtil.cache[ListBuffer[SheetErrors]](any(), any())(any(), any(), any())).thenReturn(Future(CacheMap("1", Map("x" -> Json.obj("test" -> "test")))))
+      when(mockSessionCacheRepo.cache[Long](any(), any())(any(), any())).thenReturn(Future(("", "")))
+      when(mockSessionCacheRepo.cache[ListBuffer[SheetErrors]](any(), any())(any(), any())).thenReturn(Future(("", "")))
       val errors = Seq(
         List(ValidationError(Cell("A", 1, "test"), "001", "error.1", "ers.upload.error.date")),
         List.empty[ValidationError],
