@@ -64,7 +64,7 @@ class ParserTest
   object TestDataParser extends DataParser {
     val logger: Logger = Logger(getClass)
   }
-  object TestDataGenerator extends DataGenerator(mockAuditEvents, mockMetrics, mockParserUtil, realErsValidationConfigs, mockErsUtil, mockErsValidator)
+  object TestDataGenerator extends DataGenerator(mockAuditEvents, mockMetrics, mockParserUtil, realErsValidationConfigs, mockErsUtil, mockErsValidator, mockAppConfig)
 
   when(mockErsUtil.withArticle(ArgumentMatchers.any())).thenReturn("article")
 

@@ -16,12 +16,13 @@
 
 package services
 
+import config.ApplicationConfig
 import controllers.auth.RequestWithOptionalEmpRef
 import metrics.Metrics
 import models.{ERSFileProcessingException, SheetErrors}
 import play.api.Logger
 import play.api.i18n.Messages
-import services.ERSTemplatesInfo.ersSheets
+import services.ERSTemplatesInfo.{ersSheets, ersSheetsWithCsopV5}
 import services.audit.AuditEvents
 import services.validation.ErsValidator
 import uk.gov.hmrc.http.HeaderCarrier
@@ -40,11 +41,14 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
                               parserUtil: ParserUtil,
                               ersValidationConfigs: ERSValidationConfigs,
                               ersUtil: ERSUtil,
-                              ersValidator: ErsValidator
+                              ersValidator: ErsValidator,
+                              appConfig: ApplicationConfig
                              )(implicit ec: ExecutionContext) extends DataParser {
 
   val logger: Logger = Logger(getClass)
   // scalastyle:off magic.number
+
+  private[services] val ersSheetsConfig = if (appConfig.csopV5Enabled) ersSheetsWithCsopV5 else ersSheets
 
   def getErrors(iterator: Iterator[String], scheme: String, fileName: String)
                (implicit hc: HeaderCarrier, request: RequestWithOptionalEmpRef[_], messages: Messages): ListBuffer[SheetErrors] = {
@@ -130,13 +134,11 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
 
   def setValidator(sheetName: String)(implicit hc: HeaderCarrier, messages: Messages): DataValidator = {
     try {
-      ersValidationConfigs.getValidator(ersSheets(sheetName).configFileName)
+      getValidator(sheetName)
     } catch {
       case e: Exception =>
         auditEvents.auditRunTimeError(e,"Could not set the validator", sheetName)
-        // Adjusting this log until this investigation is complete https://jira.tools.tax.service.gov.uk/browse/DDCE-3208
-        // logger.error("[DataGenerator][setValidator] setValidator has thrown an exception, SheetName: " + sheetName + " Exception message: " + e.getMessage)
-        logger.error("[DataGenerator][setValidator] setValidator has thrown an exception. Exception message: " + e.getMessage)
+        logger.error("[DataGenerator][setValidator] setValidator has thrown an exception, SheetName: " + sheetName + " Exception message: " + e.getMessage)
         throw ERSFileProcessingException(
           "ers.exceptions.dataParser.configFailure",
           Messages("ers.exceptions.dataParser.validatorError"),
@@ -147,7 +149,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
 
   def setValidatorCsv(sheetName: String)(implicit hc : HeaderCarrier, messages: Messages): Either[Throwable, DataValidator] = {
     Try {
-      ersValidationConfigs.getValidator(ersSheets(sheetName).configFileName)
+      getValidator(sheetName)
     } match {
       case Success(validator) => Right(validator)
       case Failure(e) =>
@@ -159,6 +161,15 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
           optionalParams = Seq(sheetName)
         ))
     }
+  }
+
+  private def getValidator(sheetName: String): DataValidator = {
+    val configFileName = if (appConfig.csopV5Enabled) {
+      ersSheetsWithCsopV5(sheetName).configFileName
+    } else {
+      ersSheets(sheetName).configFileName
+    }
+    ersValidationConfigs.getValidator(configFileName)
   }
 
   def identifyAndDefineSheet(filename: String, scheme: String)(implicit hc: HeaderCarrier, messages: Messages): String = {
@@ -204,7 +215,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
 
   def getSheet(sheetName: String, scheme: String)(implicit messages: Messages): SheetInfo = {
     logger.info(s"[DataGenerator][getSheet] Looking for sheetName: $sheetName")
-    ersSheets.getOrElse(sheetName, {
+    ersSheetsConfig.getOrElse(sheetName, {
       logger.warn("[DataGenerator][getSheet] Couldn't identify SheetName")
       val schemeName = ersUtil.getSchemeName(scheme)._2
       throw ERSFileProcessingException(
@@ -219,7 +230,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
   def getSheetCsv(sheetName: String, scheme: String)(implicit messages: Messages): Either[Throwable, (SheetInfo, String)] = {
     logger.info(s"[DataGenerator][getSheetCsv] Looking for sheetName: $sheetName")
     val selectedSchemeName = ersUtil.getSchemeName(scheme)._2
-    ersSheets.get(sheetName) match {
+    ersSheetsConfig.get(sheetName) match {
       case Some(sheetInfo) => Right((sheetInfo, selectedSchemeName))
       case _ =>
         logger.warn("[DataGenerator][getSheetCsv] Couldn't identify SheetName")

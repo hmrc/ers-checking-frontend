@@ -23,9 +23,9 @@ import services.validation.ValidationErrorHelper._
 import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models.{Cell, Row, ValidationError}
 
-class CSOPOptionsGrantedV4ValidationCSOPTest extends PlaySpec with ERSValidationCSOPGrantedTestData with ValidationTestRunner {
+class CSOPOptionsGrantedCSOPTest extends PlaySpec with ERSValidationCSOPGrantedTestData with ValidationTestRunner {
 
-  " ERS CSOP Granted Validation tests" should {
+  "ERS CSOP Granted V4 Validation tests" should {
     val validator = new DataValidator(ConfigFactory.load.getConfig("ers-csop-granted-validation-config"))
     runValidationTests(validator, getDescriptions, getTestData, getExpectedResults)
 
@@ -47,6 +47,43 @@ class CSOPOptionsGrantedV4ValidationCSOPTest extends PlaySpec with ERSValidation
       assert(resOpt.isDefined)
       resOpt.withErrorsFromMessages.get must contain
         ValidationError(cellH,"mandatoryH","G02","Enter the HMRC reference (must be less than 11 characters)")
+    }
+
+    "when a valid row of data is provided, no ValidationErrors should be raised" in {
+      val row = Row(1,getValidRowData)
+      val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
+      resOpt.withErrorsFromMessages mustBe None
+    }
+
+    "when a invalid row of data is provided, a list of ValidationErrors should be raised" in {
+      val row = Row(1,getInvalidRowData)
+      val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
+      resOpt.get.size mustBe 7
+    }
+  }
+
+  "ERS CSOP Granted V5 Validation tests" should {
+    val validator = new DataValidator(ConfigFactory.load.getConfig("ers-csop-granted-validation-config-v5"))
+    runValidationTests(validator, getDescriptionsV5, getTestData, getExpectedResults)
+
+    "when sharesListedOnSE is answered no, mvAgreedHMRC is a mandatory field" in {
+      val cellG = Cell("G", rowNumber, "")
+      val cellF = Cell("F", rowNumber, "no")
+      val row = Row(1,Seq(cellG,cellF))
+      val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
+      assert(resOpt.isDefined)
+      resOpt.withErrorsFromMessages.get must contain
+      ValidationError(cellG,"mandatoryG","G01","Enter ‘yes’ or ‘no’")
+    }
+
+    "when sharesListedOnSE is answered yes, hmrcRef is a mandatory field" in {
+      val cellH = Cell("H", rowNumber, "")
+      val cellG = Cell("G", rowNumber, "yes")
+      val row = Row(1,Seq(cellH,cellG))
+      val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
+      assert(resOpt.isDefined)
+      resOpt.withErrorsFromMessages.get must contain
+      ValidationError(cellH,"mandatoryH","G02","Enter the HMRC reference (must be less than 11 characters)")
     }
 
     "when a valid row of data is provided, no ValidationErrors should be raised" in {

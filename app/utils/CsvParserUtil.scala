@@ -26,7 +26,7 @@ import javax.inject.{Inject, Singleton}
 class CsvParserUtil @Inject()(appConfig: ApplicationConfig) {
 
   def formatDataToValidate(rowData: Seq[String], sheetName: String): Seq[String] = {
-    val sheetColSize = ERSTemplatesInfo.ersSheets(sheetName.replace(".csv", "")).headerRow.length
+    val sheetColSize = ERSTemplatesInfo.ersSheetsWithCsopV5(sheetName.replace(".csv", "")).headerRow.length
     rowData.take(sheetColSize).map(_.trim)
   }
 

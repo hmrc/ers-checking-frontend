@@ -18,7 +18,7 @@ package utils
 
 import play.api.Logger
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Singleton
 
 @Singleton
 class ERSUtil
