@@ -68,9 +68,11 @@ class DataGeneratorSpec
   lazy val testErsValidationConfigs: ERSValidationConfigs = fakeApplication.injector.instanceOf[ERSValidationConfigs]
 
   class DataGeneratorObj(scheme: String) extends DataGenerator(mockAuditEvents, mockMetrics,
-    testParserUtil, testErsValidationConfigs, mockErsUtil, mockErsValidator){
+    testParserUtil, testErsValidationConfigs, mockErsUtil, mockErsValidator, mockAppConfig){
     when(mockErsUtil.getSchemeName(any())).thenReturn((s"ers_pdf_error_report.${scheme.toLowerCase}", scheme))
   }
+
+  when(mockAppConfig.csopV5Enabled).thenReturn(true)
 
   "The File Processing Service" must {
 
@@ -89,14 +91,16 @@ class DataGeneratorSpec
       result.isFailure must be (true)
     }
 
-    "validate CSOP_OptionsGranted_V4 headerRow as valid" in new DataGeneratorObj("CSOP") {
-      validateHeaderRow(csopHeaderSheet1Data, "CSOP_OptionsGranted_V4", "CSOP", "CSOP_OptionsGranted_V4.csv") must be (9)
-    }
-    "validate CSOP_OptionsRCL_V4 headerRow as valid" in new DataGeneratorObj("CSOP") {
-      validateHeaderRow(csopHeaderSheet2Data, "CSOP_OptionsRCL_V4", "CSOP", "CSOP_OptionsRCL_V4.csv") must be (9)
-    }
-    "validate CSOP_OptionsExercised_V4 headerRow as valid" in new DataGeneratorObj("CSOP") {
-      validateHeaderRow(csopHeaderSheet3Data, "CSOP_OptionsExercised_V4", "CSOP", "CSOP_OptionsExercised_V4.csv") must be (20)
+    for((suffix, testData) <- Map("V4" -> csopHeaderSheet1Data, "V5" -> csopHeaderSheet1DataV5)) {
+      s"validate CSOP_OptionsGranted_$suffix headerRow as valid" in new DataGeneratorObj("CSOP") {
+        validateHeaderRow(testData, s"CSOP_OptionsGranted_$suffix", "CSOP", s"CSOP_OptionsGranted_$suffix.csv") must be(9)
+      }
+      s"validate CSOP_OptionsRCL_$suffix headerRow as valid" in new DataGeneratorObj("CSOP") {
+        validateHeaderRow(csopHeaderSheet2Data, s"CSOP_OptionsRCL_$suffix", s"CSOP", s"CSOP_OptionsRCL_$suffix.csv") must be(9)
+      }
+      s"validate CSOP_OptionsExercised_$suffix headerRow as valid" in new DataGeneratorObj("CSOP") {
+        validateHeaderRow(csopHeaderSheet3Data, s"CSOP_OptionsExercised_$suffix", s"CSOP", s"CSOP_OptionsExercised_$suffix.csv") must be(20)
+      }
     }
 
     "validate SIP_Awards_V4 headerRow as valid" in new DataGeneratorObj("SIP") {
@@ -238,7 +242,7 @@ class DataGeneratorSpec
 
   "setValidatorCsv" must {
     val mockErsValidationConfigs: ERSValidationConfigs = mock[ERSValidationConfigs]
-    class DataGeneratorCsv extends DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, mockErsValidationConfigs, mockErsUtil, mockErsValidator)
+    class DataGeneratorCsv extends DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, mockErsValidationConfigs, mockErsUtil, mockErsValidator, mockAppConfig)
 
     "return a Right with the validator when receiving happy response from tabular-data-validator" in new DataGeneratorCsv {
       val returnValidator: DataValidator = mock[DataValidator]
@@ -249,7 +253,7 @@ class DataGeneratorSpec
 
     "return a Failure with the exception when receiving an exception" in {
       val thrownException = new RuntimeException("this is bad")
-      val testDataGen = new DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, mockErsValidationConfigs, mockErsUtil, mockErsValidator)
+      val testDataGen = new DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, mockErsValidationConfigs, mockErsUtil, mockErsValidator, mockAppConfig)
       when(mockErsValidationConfigs.getValidator(any())).thenThrow(thrownException)
       val failedValue: Either[Throwable, DataValidator] = testDataGen.setValidatorCsv("CSOP_OptionsGranted_V4")
 
@@ -280,7 +284,7 @@ class DataGeneratorSpec
 
     "return Left with a processing exception if given invalid input" in {
       when(mockErsUtil.withArticle(any())).thenReturn("ersUtilReturn")
-      val testDataGen: DataGenerator = new DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, testErsValidationConfigs, mockErsUtil, mockErsValidator)
+      val testDataGen: DataGenerator = new DataGenerator(mockAuditEvents, mockMetrics, testParserUtil, testErsValidationConfigs, mockErsUtil, mockErsValidator, mockAppConfig)
 
       val failedValue: Either[Throwable, String] = testDataGen
         .identifyAndDefineSheetCsv((SheetInfo("differentInput",1,"aSheetName","","",List("")), "SOMEINPUT"))

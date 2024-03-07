@@ -41,6 +41,7 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
   lazy val mongoTTLInSeconds: Int = config.getInt("mongodb.timeToLiveInSeconds")
 
   lazy val languageTranslationEnabled: Boolean = config.getConfBool("features.welsh-translation", defBool = true)
+  lazy val csopV5Enabled: Boolean = config.getConfBool("features.csop-v5.enabled", defBool = false)
   def languageMap: Map[String, Lang] = Map("english" -> Lang("en"), "cymraeg" -> Lang("cy"))
   def routeToSwitchLanguage: String => Call = (lang: String) => routes.LanguageSwitchController.switchToLanguage(lang)
 

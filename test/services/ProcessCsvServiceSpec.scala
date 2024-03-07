@@ -88,6 +88,8 @@ class ProcessCsvServiceSpec
   def testProcessCsvService: ProcessCsvService = new ProcessCsvService(testParserUtil, mockDataGenerator, mockAppConfig,
     mockSessionCacheRepo, mockErsUtil, mockErsValidator)
 
+  when(mockAppConfig.csopV5Enabled).thenReturn(true)
+
   "processRow" should {
 
     "process a row and return the errors it contains" in {
@@ -112,8 +114,8 @@ class ProcessCsvServiceSpec
     }
 
     "process a row and return an empty list if there are no errors" in {
-      val source = convertToAkkaSource(new File(System.getProperty("user.dir") + "/test/resources/copy/CSOP_OptionsGranted_V4.csv"))
-      val dataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-csop-granted-validation-config"))
+      val source = convertToAkkaSource(new File(System.getProperty("user.dir") + "/test/resources/copy/CSOP_OptionsGranted_V5.csv"))
+      val dataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-csop-granted-validation-config-v5"))
       when(mockErsValidator.validateRow(any())(any(), any()))
         .thenReturn(None)
       when(mockErsValidator.getCells(any(), any()))
@@ -125,7 +127,7 @@ class ProcessCsvServiceSpec
 
       val resultFuture = source
         .runWith(Sink.seq).map { fileCopied =>
-        testProcessCsvService.processRow(fileCopied.flatten.toList, "CSOP_OptionsGranted_V4.csv", dataValidator)
+        testProcessCsvService.processRow(fileCopied.flatten.toList, "CSOP_OptionsGranted_V5.csv", dataValidator)
       }
 
       val result = Await.result(resultFuture, Duration.Inf)
@@ -135,10 +137,9 @@ class ProcessCsvServiceSpec
   }
 
   "processFiles" should {
-
-    when(mockDataGenerator.getSheetCsv(any(), any())(any())).thenReturn(Right((ERSTemplatesInfo.ersSheets("CSOP_OptionsGranted_V4"), "csop")))
-    when(mockDataGenerator.identifyAndDefineSheetCsv(any())(any(), any())).thenReturn(Right("CSOP_OptionsGranted_V4"))
-    when(mockDataGenerator.setValidatorCsv(any())(any(), any())).thenReturn(Right(new DataValidator(ConfigFactory.load.getConfig("ers-csop-granted-validation-config"))))
+    when(mockDataGenerator.getSheetCsv(any(), any())(any())).thenReturn(Right((ERSTemplatesInfo.ersSheetsWithCsopV5("CSOP_OptionsGranted_V5"), "csop")))
+    when(mockDataGenerator.identifyAndDefineSheetCsv(any())(any(), any())).thenReturn(Right("CSOP_OptionsGranted_V5"))
+    when(mockDataGenerator.setValidatorCsv(any())(any(), any())).thenReturn(Right(new DataValidator(ConfigFactory.load.getConfig("ers-csop-granted-validation-config-v5"))))
     when(mockErsUtil.SCHEME_ERROR_COUNT_CACHE).thenReturn("10")
     when(mockSessionCacheRepo.cache[Any](any(), any())(any(), any())).thenReturn(Future(("", "")))
 
@@ -147,7 +148,7 @@ class ProcessCsvServiceSpec
     }
 
     "return true if all rows are valid" in {
-      val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V4.csv", "no", Some(1)))))
+      val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))))
       val data = "2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no"
 
       when(mockErsValidator.getCells(any(), any()))
@@ -163,7 +164,7 @@ class ProcessCsvServiceSpec
       result shouldBe List(Right(true))
     }
     "return false when the data contains at least one invalid row" in {
-      val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V4.csv", "no", Some(1)))))
+      val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))))
       val data = "2015-09-23,test,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no"
 
       when(mockErsValidator.validateRow(any())(any(), any()))
@@ -178,18 +179,18 @@ class ProcessCsvServiceSpec
     }
 
     "return a throwable when an error occurs during the file validation" in {
-      val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V4.csv", "no", Some(1)))))
+      val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))))
       val data = ""
       val resultFuture = testProcessCsvService.processFiles(Some(callback), "csop", returnStubSource(_, data))
 
       val result = resultFuture.map(_.futureValue)
       assert(result.forall(_.isLeft))
       result.head.left.value
-        .getMessage shouldBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload CSOP_OptionsGranted_V4.csv as part of your annual return."
+        .getMessage shouldBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload CSOP_OptionsGranted_V5.csv as part of your annual return."
     }
 
     "return a throwable when an error occurs during the file processing" in {
-      val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V4.csv", "no", Some(1)))))
+      val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))))
       val data = "2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no"
       when(mockDataGenerator.setValidatorCsv(any())(any(), any())).thenReturn(Left(ERSFileProcessingException(
         "ers.exceptions.dataParser.configFailure",
@@ -420,9 +421,9 @@ class ProcessCsvServiceSpec
 
     "return true if there are no validation errors in any row" in {
       val errors = Seq(List.empty[ValidationError], List.empty[ValidationError], List.empty[ValidationError])
-      val callback = UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V4.csv", "no", Some(1)))
+      val callback = UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))
 
-      val resultFuture = testProcessCsvService.checkValidityOfRows(errors, "CSOP_OptionsGranted_V4.csv", callback)
+      val resultFuture = testProcessCsvService.checkValidityOfRows(errors, "CSOP_OptionsGranted_V5.csv", callback)
 
       val result = Await.result(resultFuture, Duration.Inf)
 
@@ -439,9 +440,9 @@ class ProcessCsvServiceSpec
         List.empty[ValidationError],
         List(ValidationError(Cell("A", 3, "test"), "001", "error.1", "ers.upload.error.date"))
       )
-      val callback = UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V4.csv", "no", Some(1)))
+      val callback = UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))
 
-      val resultFuture = testProcessCsvService.checkValidityOfRows(errors, "CSOP_OptionsGranted_V4.csv", callback)
+      val resultFuture = testProcessCsvService.checkValidityOfRows(errors, "CSOP_OptionsGranted_V5.csv", callback)
 
       val result = Await.result(resultFuture, Duration.Inf)
 

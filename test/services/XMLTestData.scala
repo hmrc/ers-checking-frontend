@@ -46,6 +46,7 @@ object XMLTestData extends BESIntegrationTestData with HeaderData{
 
 
   besParserTests +=(("Stream CSOP Options Granted Header", csopXMLHeaderSheet1, csopHeaderSheet1Data))
+  besParserTests +=(("Stream CSOP Options Granted Header V5", csopXMLHeaderSheet1V5, csopHeaderSheet1DataV5))
   besParserTests +=(("Stream CSOP Options RCL Header", csopXMLHeaderSheet2,csopHeaderSheet2Data))
   besParserTests +=(("Stream CSOP Options Exercised Header", csopXMLHeaderSheet3,csopHeaderSheet3Data))
   besParserTests +=(("Stream EMI Adjustments Header", emiXMLHeaderSheet1, emiHeaderSheet1Data))
@@ -90,6 +91,7 @@ object XMLTestData extends BESIntegrationTestData with HeaderData{
   besIntegrationTests += (("Stream Other Enhancement xml Row", otherEnhancementXML, otherEnhancementXMLRow1 ))
   besIntegrationTests += (("Stream Other Sold xml Row", otherSoldXML, otherSoldXMLRow1))
   besIntegrationTests += (("Stream CSOP Options Granted xml Row", csopOptionsGrantedXML, csopOptionsGrantedXMLRow1))
+  besIntegrationTests += (("Stream CSOP Options Granted xml Row V5", csopOptionsGrantedXMLV5, csopOptionsGrantedXMLRow1))
   besIntegrationTests += (("Stream CSOP Options RCL xml Row", csopOptionsRCLXML, csopOptionsRCLXMLRow1))
   besIntegrationTests += (("Stream CSOP Options Exercised xml Row", csopOptionsExercisedXML, csopOptionsExercisedXMLRow1))
 

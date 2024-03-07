@@ -35,10 +35,9 @@ class ParserUtil @Inject()(val ersUtil: ERSUtil,
                            appConfig: ApplicationConfig,
                            sessionCacheService: ErsCheckingFrontendSessionCacheRepository
                           )(implicit ec: ExecutionContext) extends Logging {
-  val HUNDRED = 100
 
   def formatDataToValidate(rowData: Seq[String], sheetName: String): Seq[String] = {
-    val sheetColSize = ERSTemplatesInfo.ersSheets(sheetName.replace(".csv", "")).headerRow.size
+    val sheetColSize = ERSTemplatesInfo.ersSheetsWithCsopV5(sheetName.replace(".csv", "")).headerRow.size
     if (rowData.size < sheetColSize) {
       logger.debug(s"Difference between amount of columns ${rowData.size} and amount of headers $sheetColSize")
       val additionalEmptyCells: Seq[String] = Seq.fill(sheetColSize - rowData.size)("")

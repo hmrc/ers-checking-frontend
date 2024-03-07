@@ -66,6 +66,48 @@ trait ERSValidationCSOPGrantedTestData {
     descriptions
   }
 
+  def getDescriptionsV5: List[String] ={
+    val descriptions =
+      List(
+        //Column A
+        "when dateOfGrant contains a date formated yyy-mm-dd, no validationErrors will be raised",
+        "when dateOfGrant contains an empty value a ValidationError will be raised",
+        "when dateOfGrant contains anything but a valid date a ValidationError will be raised",
+        //Column B
+        "when numberOfIndividuals contains a string of up to 6 numbers",
+        "return a error message provided in config given a number larger than that expected",
+        "return a error message provided in config given a number with decimal places",
+        "return error messages provided in config given a number larger than that expected with decimals",
+        //Column C
+        "return None after validating a string of 11 numbers and 2 decimal places for row C",
+        "when numberOfSharesGrantedOver contains a number without 2 digits after the decimal point, a ValidationError will be raised",
+        "when numberOfSharesGrantedOver contains a number greater than 11 in length, a ValidationError will be raised",
+        "when numberOfSharesGrantedOver contains an alphanumeric string, a ValidationError will be raised",
+        //Column D
+        "when umvPerShareUsedToDetermineTheExPrice contains a number up to 13 in length with 4 decimal places, no ValidationErrors will be raised",
+        "when umvPerShareUsedToDetermineTheExPrice contains a number with fewer than 4 decimal places, a ValidationError will be raised",
+        "when umvPerShareUsedToDetermineTheExPrice contains an alphanumeric string, a ValidationError will be raised",
+        "when umvPerShareUsedToDetermineTheExPrice contains a number greater than 11 in length, a ValidationError will be raised",
+        //Column E
+        "return None if the correct input of a number with 4 decimal places is received for exercisePricePerShare",
+        "return an error when an invalid value for exercisePricePerShare is given",
+        //Column F
+        "return None if the correct input (yes/no) is received for sharesListedOnSE",
+        "return an error when an empty value for sharesListedOnSE is given",
+        "return an error when an invalid value for sharesListedOnSE is given",
+        //Column G
+        "return None if the correct input (yes/no) is received for mvAgreedHMRC",
+        "return an error when an invalid value for mvAgreedHMRC is given",
+        //Column H
+        "return no errors when given a correct hmrcRef number",
+        "return an error when an invalid hmrc reference number is given",
+        //Column I
+        "return no errors when given a correct input for the employeeHoldSharesGreaterThan60K question",
+        "return a list[ValidationError] when given invalid data for the employeeHoldSharesGreaterThan60K question"
+      )
+    descriptions
+  }
+
   def getTestData: List[Cell] ={
     val testData = List(
       Cell("A", rowNumber, "2014-12-10"),
