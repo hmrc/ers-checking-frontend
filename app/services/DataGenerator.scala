@@ -163,14 +163,8 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
     }
   }
 
-  private def getValidator(sheetName: String): DataValidator = {
-    val configFileName = if (appConfig.csopV5Enabled) {
-      ersSheetsWithCsopV5(sheetName).configFileName
-    } else {
-      ersSheets(sheetName).configFileName
-    }
-    ersValidationConfigs.getValidator(configFileName)
-  }
+  private def getValidator(sheetName: String): DataValidator =
+    ersValidationConfigs.getValidator(ersSheetsConfig(sheetName).configFileName)
 
   def identifyAndDefineSheet(filename: String, scheme: String)(implicit hc: HeaderCarrier, messages: Messages): String = {
     logger.debug("5.1  case 0 identifyAndDefineSheet  " )

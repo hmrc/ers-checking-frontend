@@ -20,8 +20,8 @@ import helpers.ErsTestHelper
 import models.ERSFileProcessingException
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatest.{BeforeAndAfter, EitherValues}
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.{BeforeAndAfter, EitherValues}
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Messages, MessagesImpl}
@@ -64,7 +64,8 @@ class ParserTest
   object TestDataParser extends DataParser {
     val logger: Logger = Logger(getClass)
   }
-  object TestDataGenerator extends DataGenerator(mockAuditEvents, mockMetrics, mockParserUtil, realErsValidationConfigs, mockErsUtil, mockErsValidator, mockAppConfig)
+
+  def testDataGenerator = new DataGenerator(mockAuditEvents, mockMetrics, mockParserUtil, realErsValidationConfigs, mockErsUtil, mockErsValidator, mockAppConfig)
 
   when(mockErsUtil.withArticle(ArgumentMatchers.any())).thenReturn("article")
 
@@ -86,7 +87,7 @@ class ParserTest
     when(mockErsUtil.getSchemeName(ArgumentMatchers.any())).thenReturn(("ers_pdf_error_report.emi", "EMI"))
 
     val thrown = the[ERSFileProcessingException] thrownBy
-      TestDataGenerator.identifyAndDefineSheet("EMI40_Taxable","EMI")(hc, implicitly[Messages])
+      testDataGenerator.identifyAndDefineSheet("EMI40_Taxable","EMI")(hc, implicitly[Messages])
 
     thrown.getMessage mustBe "ers.exceptions.dataParser.incorrectSheetName"
     thrown.optionalParams mustBe Seq("EMI40_Taxable", "EMI")
@@ -95,32 +96,56 @@ class ParserTest
   "display incorrectHeader exception in validateHeaderRow method" in {
 
     val thrown = the[ERSFileProcessingException] thrownBy
-      TestDataGenerator.validateHeaderRow(Seq("",""), "CSOP_OptionsRCL_V4", "CSOP", "CSOP_OptionsRCL_V4.csv")
+      testDataGenerator.validateHeaderRow(Seq("",""), "CSOP_OptionsRCL_V4", "CSOP", "CSOP_OptionsRCL_V4.csv")
 
     thrown.getMessage mustBe "ers.exceptions.dataParser.incorrectHeader"
     thrown.optionalParams mustBe Seq("CSOP_OptionsRCL_V4", "CSOP_OptionsRCL_V4.csv")
   }
 
   "return sheetInfo given a valid sheet name" in {
-    val sheet = TestDataGenerator.getSheet(ERSTemplatesInfo.emiSheet5Name, "EMI")
+    val sheet = testDataGenerator.getSheet(ERSTemplatesInfo.emiSheet5Name, "EMI")
     sheet.schemeType mustBe "EMI"
     sheet.sheetId mustBe 5
   }
 
   "return sheetInfo for CSOP_OptionsGranted_V4" in {
-    val sheet = TestDataGenerator.getSheet(ERSTemplatesInfo.csopSheet1Name, "CSOP")
+    val sheet = testDataGenerator.getSheet(ERSTemplatesInfo.csopSheet1Name, "CSOP")
     sheet.schemeType mustBe "CSOP"
     sheet.sheetId mustBe 1
   }
 
   "return sheetInfo for CSOP_OptionsRCL_V4" in {
-    val sheet = TestDataGenerator.getSheet(ERSTemplatesInfo.csopSheet2Name, "CSOP")
+    val sheet = testDataGenerator.getSheet(ERSTemplatesInfo.csopSheet2Name, "CSOP")
     sheet.schemeType mustBe "CSOP"
     sheet.sheetId mustBe 2
   }
 
   "return sheetInfo for CSOP_OptionsExercised_V4" in {
-    val sheet = TestDataGenerator.getSheet(ERSTemplatesInfo.csopSheet3Name, "CSOP")
+    val sheet = testDataGenerator.getSheet(ERSTemplatesInfo.csopSheet3Name, "CSOP")
+    sheet.schemeType mustBe "CSOP"
+    sheet.sheetId mustBe 3
+  }
+
+  "return sheetInfo for CSOP_OptionsGranted_V5" in {
+    when(mockAppConfig.csopV5Enabled).thenReturn(true)
+
+    val sheet = testDataGenerator.getSheet(ERSTemplatesInfo.csopSheet1NameV5, "CSOP")
+    sheet.schemeType mustBe "CSOP"
+    sheet.sheetId mustBe 1
+  }
+
+  "return sheetInfo for CSOP_OptionsRCL_V5" in {
+    when(mockAppConfig.csopV5Enabled).thenReturn(true)
+
+    val sheet = testDataGenerator.getSheet(ERSTemplatesInfo.csopSheet2NameV5, "CSOP")
+    sheet.schemeType mustBe "CSOP"
+    sheet.sheetId mustBe 2
+  }
+
+  "return sheetInfo for CSOP_OptionsExercised_V5" in {
+    when(mockAppConfig.csopV5Enabled).thenReturn(true)
+
+    val sheet = testDataGenerator.getSheet(ERSTemplatesInfo.csopSheet3NameV5, "CSOP")
     sheet.schemeType mustBe "CSOP"
     sheet.sheetId mustBe 3
   }
@@ -129,7 +154,7 @@ class ParserTest
     when(mockErsUtil.getSchemeName(ArgumentMatchers.any())).thenReturn(("ers_pdf_error_report.csop", "CSOP"))
 
     val result = intercept[ERSFileProcessingException]{
-      TestDataGenerator.getSheet("abc", "csop")
+      testDataGenerator.getSheet("abc", "csop")
     }
     result.message mustBe "ers.exceptions.dataParser.incorrectSheetName"
     result.optionalParams mustBe Seq("abc", "CSOP")
