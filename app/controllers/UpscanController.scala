@@ -16,7 +16,7 @@
 
 package controllers
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import config.ApplicationConfig
 import controllers.auth.AuthAction
 import models.upscan._

@@ -16,7 +16,7 @@
 
 package controllers.auth
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import controllers.routes
 import helpers.ErsTestHelper
 import org.mockito.ArgumentMatchers

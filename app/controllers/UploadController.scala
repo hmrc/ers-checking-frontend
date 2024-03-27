@@ -16,10 +16,10 @@
 
 package controllers
 
-import akka.actor.ActorSystem
-import akka.http.scaladsl._
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
-import akka.stream.scaladsl.Source
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl._
+import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse}
+import org.apache.pekko.stream.scaladsl.Source
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRef}
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallbackList}

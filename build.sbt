@@ -23,7 +23,6 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     scalaVersion := "2.13.12",
     libraryDependencies ++= AppDependencies(),
-    libraryDependencySchemes ++= Seq("org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always),
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
     routesImport += "models.upscan.UploadId"
