@@ -16,14 +16,14 @@
 
 package services
 
-import akka.NotUsed
-import akka.actor.ActorSystem
-import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
-import akka.stream.IOResult
-import akka.stream.alpakka.csv.scaladsl.CsvParsing
-import akka.stream.scaladsl.{FileIO, Sink, Source}
-import akka.testkit.TestKit
-import akka.util.ByteString
+import org.apache.pekko.NotUsed
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl.model.{HttpResponse, StatusCodes}
+import org.apache.pekko.stream.IOResult
+import org.apache.pekko.stream.connectors.csv.scaladsl.CsvParsing
+import org.apache.pekko.stream.scaladsl.{FileIO, Sink, Source}
+import org.apache.pekko.testkit.TestKit
+import org.apache.pekko.util.ByteString
 import com.typesafe.config.ConfigFactory
 import helpers.ErsTestHelper
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
@@ -75,7 +75,7 @@ class ProcessCsvServiceSpec
       bind(classOf[MongoComponent]).toInstance(mongoComponent)
     ).build()
 
-  def convertToAkkaSource(file: File): Source[List[ByteString], Future[IOResult]] = {
+  def convertToPekkoSource(file: File): Source[List[ByteString], Future[IOResult]] = {
     FileIO.fromPath(file.toPath)
       .via(CsvParsing.lineScanner())
   }
@@ -93,7 +93,7 @@ class ProcessCsvServiceSpec
   "processRow" should {
 
     "process a row and return the errors it contains" in {
-      val source = convertToAkkaSource(new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V4.csv"))
+      val source = convertToPekkoSource(new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V4.csv"))
       val dataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-other-grants-validation-config"))
       when(mockErsValidator.validateRow(any())(any(), any()))
         .thenReturn(Some(List(ValidationError(Cell("A", 0, "25  2015"), "error.1", "001", "ers.upload.error.date"))))
@@ -114,7 +114,7 @@ class ProcessCsvServiceSpec
     }
 
     "process a row and return an empty list if there are no errors" in {
-      val source = convertToAkkaSource(new File(System.getProperty("user.dir") + "/test/resources/copy/CSOP_OptionsGranted_V5.csv"))
+      val source = convertToPekkoSource(new File(System.getProperty("user.dir") + "/test/resources/copy/CSOP_OptionsGranted_V5.csv"))
       val dataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-csop-granted-validation-config-v5"))
       when(mockErsValidator.validateRow(any())(any(), any()))
         .thenReturn(None)
