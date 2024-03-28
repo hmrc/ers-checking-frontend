@@ -21,13 +21,19 @@ lazy val microservice = Project(appName, file("."))
   .settings(scalaSettings *)
   .settings(defaultSettings() *)
   .settings(
-    scalaVersion := "2.13.12",
+    scalaVersion := "2.13.13",
     libraryDependencies ++= AppDependencies(),
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
     routesImport += "models.upscan.UploadId"
   )
   .settings(majorVersion := 4)
+
+ThisBuild / excludeDependencies ++= Seq(
+  // As of Play 3.0, groupId has changed to org.playframework; exclude transitive dependencies to the old artifacts
+  // Specifically affects play-json-extensions dependency
+  ExclusionRule(organization = "com.typesafe.play")
+)
 
 scalacOptions ++= Seq(
   "-Wconf:src=routes/.*:s", "-Wconf:cat=unused-imports&src=html/.*:s"
