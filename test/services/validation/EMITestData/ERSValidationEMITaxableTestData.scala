@@ -121,7 +121,7 @@ trait ERSValidationEMITaxableTestData {
     descriptions
   }
 
-  def getTestData: List[Cell] = {
+  def getTestData: List[Cell] = {// scalastyle:off magic.number
     val testData = List(
       Cell("A", rowNumber, "2015-06-04"),
       Cell("A", rowNumber, ""),

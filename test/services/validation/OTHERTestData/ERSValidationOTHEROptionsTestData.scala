@@ -179,7 +179,7 @@ trait ERSValidationOTHEROptionsTestData {
     descriptions
   }
 
-  def getTestData: List[Cell] = {
+  def getTestData: List[Cell] = {// scalastyle:off magic.number
     val testData = List(
       Cell("A",rowNumber,"2014-08-09"),
       Cell("A",rowNumber,"2014/08/09"),

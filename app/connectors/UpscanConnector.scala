@@ -17,28 +17,32 @@
 package connectors
 
 import config.ApplicationConfig
-
-import javax.inject.{Inject, Singleton}
 import models.upscan.{PreparedUpload, UpscanInitiateRequest, UpscanInitiateResponse}
 import play.api.http.HeaderNames
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
+
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class UpscanConnector @Inject()(appConfig: ApplicationConfig,
-                                httpClient: HttpClient
+                                httpClient: HttpClientV2
                                )(implicit ec: ExecutionContext) {
 
   private val headers = Map(HeaderNames.CONTENT_TYPE -> "application/json")
   private val upscanInitiateHost: String = appConfig.upscanInitiateHost
   private[connectors] val upscanInitiatePath: String = "/upscan/v2/initiate"
   private val upscanInitiateUrl: String = upscanInitiateHost + upscanInitiatePath
+  val url = s"$upscanInitiateUrl"
 
   def getUpscanFormData(body: UpscanInitiateRequest)
                        (implicit hc: HeaderCarrier): Future[UpscanInitiateResponse] = {
-    httpClient.POST[UpscanInitiateRequest, PreparedUpload](upscanInitiateUrl, body, headers.toSeq).map {
-      _.toUpscanInitiateResponse
-    }
-  }
+           httpClient.post(url"$upscanInitiateUrl")
+          .withBody(Json.toJson(body))
+          .setHeader(headers.toSeq: _*)
+          .execute[PreparedUpload]
+          .map(_.toUpscanInitiateResponse)
+      }
 }

@@ -26,6 +26,7 @@ import services.validation.EMITestData.ERSValidationEMIAdjustmentsTestData
 import uk.gov.hmrc.services.validation.DataValidator
 
 class ERSValidatorTest extends PlaySpec with GuiceOneServerPerTest with MockitoSugar with ERSValidationEMIAdjustmentsTestData {
+  // scalastyle:off magic.number
 
   val validator: DataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-emi-adjustments-validation-config"))
   val ersValidator: ErsValidator = new ErsValidator

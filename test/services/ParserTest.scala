@@ -42,7 +42,7 @@ class ParserTest
     with ErsTestHelper
     with BeforeAndAfter
     with EitherValues
-    with MongoSupport {
+    with MongoSupport {// scalastyle:off magic.number
 
   override lazy val fakeApplication: Application = new GuiceApplicationBuilder()
     .configure(

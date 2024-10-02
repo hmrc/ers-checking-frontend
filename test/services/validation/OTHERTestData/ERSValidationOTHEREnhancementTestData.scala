@@ -88,7 +88,7 @@ trait ERSValidationOTHEREnhancementTestData {
     descriptions
   }
 
-  def getTestData: List[Cell] = {
+  def getTestData: List[Cell] = {// scalastyle:off magic.number
     val testData = List(
       Cell("A", rowNumber, "2014-12-10"),
       Cell("A", rowNumber, "12-2014-10"),

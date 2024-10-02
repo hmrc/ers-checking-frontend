@@ -48,7 +48,7 @@ class DataGeneratorSpec
     with ErsTestHelper
     with HeaderData
     with EitherValues
-    with MongoSupport {
+    with MongoSupport {// scalastyle:off magic.number
 
   override lazy val fakeApplication: Application = new GuiceApplicationBuilder()
     .configure(
