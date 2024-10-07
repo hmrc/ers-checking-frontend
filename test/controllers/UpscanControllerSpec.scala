@@ -38,7 +38,7 @@ import views.html.global_error
 import scala.concurrent.Future
 
 class UpscanControllerSpec extends AnyWordSpecLike with Matchers with OptionValues
-  with ErsTestHelper with GuiceOneAppPerSuite with Injecting with ScalaFutures {
+  with ErsTestHelper with GuiceOneAppPerSuite with Injecting with ScalaFutures {// scalastyle:off magic.number
 
   val config: Map[String, Any] = Map("application.secret" -> "test",
     "login-callback.url" -> "test",

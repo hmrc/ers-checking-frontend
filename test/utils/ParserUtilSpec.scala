@@ -31,6 +31,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 class ParserUtilSpec extends AnyWordSpecLike with Matchers with OptionValues with ErsTestHelper with ScalaFutures {
+  // scalastyle:off magic.number
   def parserUtil: ParserUtil = new ParserUtil(mockErsUtil, mockAppConfig, mockSessionCacheRepo)
 
   "getDataToValidate" must {

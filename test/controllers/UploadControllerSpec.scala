@@ -47,7 +47,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) with AnyWordSpecLike with Matchers
-  with OptionValues with ErsTestHelper with GuiceOneAppPerSuite with Injecting with ScalaFutures {
+  with OptionValues with ErsTestHelper with GuiceOneAppPerSuite with Injecting with ScalaFutures {// scalastyle:off magic.number
 
   val config: Map[String, Any] = Map("application.secret" -> "test",
     "login-callback.url" -> "test",

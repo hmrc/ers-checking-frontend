@@ -67,7 +67,6 @@ class UpscanController @Inject()(authAction: AuthAction,
 
   def successCSV(uploadId: UploadId, scheme: String): Action[AnyContent] = authAction.async { implicit request =>
     logger.info(s"[UpscanController][successCSV] Upload form submitted for ID: $uploadId")
-    val sessionId = hc.sessionId.get.value
 
     val upscanCsvFilesList = for {
       csvFileList   <- sessionCacheService.fetchAndGetEntry[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)

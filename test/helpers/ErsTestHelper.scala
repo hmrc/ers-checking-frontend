@@ -48,7 +48,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-trait ErsTestHelper extends MockitoSugar {
+trait ErsTestHelper extends MockitoSugar {// scalastyle:off magic.number
   lazy val mockAuthAction = new AuthAction(mockAuthConnector, mockAppConfig, testBodyParser)
   lazy val authResultDefault: Enrolments = Enrolments(enrolments)
   val messagesActionBuilder: MessagesActionBuilder = new DefaultMessagesActionBuilderImpl(stubBodyParser[AnyContent](), stubMessagesApi())

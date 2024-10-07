@@ -19,7 +19,7 @@ package services.validation.SAYETestData
 import models.ValidationErrorData
 import uk.gov.hmrc.services.validation.models.Cell
 
-trait ERSValidationSAYEGrantedTestData {
+trait ERSValidationSAYEGrantedTestData {// scalastyle:off magic.number
 
   val rowNumber : Int =1
 

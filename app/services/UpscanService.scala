@@ -28,11 +28,11 @@ import scala.concurrent.Future
 @Singleton
 class UpscanService @Inject()(upscanConnector: UpscanConnector, appConfig: ApplicationConfig) {
 
-  def urlToString(c: Call): String = redirectUrlBase + c.url
+  private def urlToString(c: Call): String = redirectUrlBase + c.url
   def callbackCsv(uploadId: UploadId)(implicit sessionId: String): Call = controllers.internal.routes.UpscanCallbackController.callbackCsv(uploadId, sessionId)
   def callbackOds(implicit sessionId: String): Call = controllers.internal.routes.UpscanCallbackController.callbackOds(sessionId)
-  def successCsv(uploadId: UploadId, scheme: String): String = urlToString(controllers.routes.UpscanController.successCSV(uploadId, scheme))
-  def successOds(scheme: String): String = urlToString(controllers.routes.UpscanController.successODS(scheme))
+  private def successCsv(uploadId: UploadId, scheme: String): String = urlToString(controllers.routes.UpscanController.successCSV(uploadId, scheme))
+  private def successOds(scheme: String): String = urlToString(controllers.routes.UpscanController.successODS(scheme))
 
   lazy val isSecure: Boolean = appConfig.upscanProtocol == "https"
   lazy val redirectUrlBase: String = appConfig.upscanRedirectBase
@@ -51,7 +51,7 @@ class UpscanService @Inject()(upscanConnector: UpscanConnector, appConfig: Appli
       if (isCsvAndUploadId) {
         UpscanInitiateRequest(callback.absoluteURL(isSecure), success, failure, Some(1))
       } else {
-        UpscanInitiateRequest(callback.absoluteURL(isSecure), success, failure, Some(1), Some(10000000))
+        UpscanInitiateRequest(callback.absoluteURL(isSecure), success, failure, Some(1), Some(10000000)) // scalastyle:off magic.number
       }
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }

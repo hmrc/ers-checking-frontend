@@ -62,7 +62,7 @@ class ProcessCsvServiceSpec
     with GuiceOneAppPerSuite
     with TimeLimits
     with ScalaFutures
-    with MongoSupport {
+    with MongoSupport {// scalastyle:off magic.number
 
   override lazy val fakeApplication: Application = new GuiceApplicationBuilder()
     .configure(
