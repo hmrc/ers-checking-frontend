@@ -19,7 +19,7 @@ class FrontendAccessibilitySpec extends AutomaticAccessibilitySpec {
   implicit val arbitraryConfig: Arbitrary[ApplicationConfig] = fixed(app.injector.instanceOf[ApplicationConfig])
   implicit val arbitraryErsUtil: Arbitrary[ERSUtil] = fixed(app.injector.instanceOf[ERSUtil])
   implicit val arbitraryHtml: Arbitrary[Html] = fixed(Html("<span />"))
-  override implicit val arbAsciiString: Typeclass[String] = fixed("plain-text") // many strings are sensitive to HTML chars like <> in these tests
+  override implicit val arbAsciiString: Arbitrary[String] = fixed("plain-text") // many strings are sensitive to HTML chars like <> in these tests
 
   val viewPackageName = "views.html"
 
