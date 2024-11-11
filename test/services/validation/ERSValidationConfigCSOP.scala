@@ -103,8 +103,10 @@ class CSOPOptionsGrantedCSOPTest extends PlaySpec with ERSValidationCSOPGrantedT
 class CSOPOptionsRCLTest extends PlaySpec with ERSValidationCSOPRCLTestData with ValidationTestRunner {
 
   "ERS CSOP Options RCL Validation Test " should {
+
     val validator = new DataValidator(ConfigFactory.load.getConfig("ers-csop-rcl-validation"))
     runValidationTests(validator, getDescriptions, getTestData, getExpectedResults)
+
 
     "when colB is answered yes, colC is a mandatory field" in {
       val cellC = Cell("C", rowNumber, "")
@@ -116,8 +118,24 @@ class CSOPOptionsRCLTest extends PlaySpec with ERSValidationCSOPRCLTestData with
       )
     }
 
-  }
+    "when colB is answered yes then remaining columns from C to I are mandatory and if entered invalid or missing data then it should throw error " in {
+      val row = Row(1,getWronglyEnteredCellData)
+      val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
+      resOpt.withErrorsFromMessages.get.size mustBe 3
+    }
 
+    "when colB is answered yes then remaining columns from C to I are mandatory and if entered valid data then it should not throw any error" in {
+      val row = Row(1,getAllCellData)
+      val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
+      resOpt.withErrorsFromMessages mustBe None
+    }
+
+    "when colB is answered no then remaining columns from C to I are optional " in {
+      val row = Row(1,getRequiredCellData)
+      val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
+      resOpt.withErrorsFromMessages mustBe None
+    }
+  }
 }
 
 class CSOPOptionsExercisedTest extends PlaySpec with ERSValidationCSOPExercisedTestData with ValidationTestRunner {
