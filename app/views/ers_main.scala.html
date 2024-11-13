@@ -62,16 +62,16 @@
 
 
 @hmrcStandardPage(
-        HmrcStandardPageParams(
+    HmrcStandardPageParams(
         serviceURLs = ServiceURLs(
-        serviceUrl = Some(controllers.routes.CheckingServiceController.startPage().url),
-        signOutUrl = Some(applicationConfig.signOut)
+            serviceUrl = Some(controllers.routes.CheckingServiceController.startPage().url),
+            signOutUrl = Some(applicationConfig.signOut)
         ),
-
         templateOverrides = TemplateOverrides(
-        additionalScriptsBlock = Some(hmrcScripts(scriptsBlock = Some(scripts))),
-        additionalHeadBlock = Some(head)
+            additionalScriptsBlock = Some(hmrcScripts(scriptsBlock = Some(scripts))),
+            additionalHeadBlock = Some(head)
         ),
         isWelshTranslationAvailable = applicationConfig.languageTranslationEnabled,
-        pageTitle = Some(title))
+        pageTitle = Some(title)
+    )
 )(content)
