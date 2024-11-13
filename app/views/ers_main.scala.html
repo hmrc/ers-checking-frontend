@@ -1,5 +1,5 @@
 @*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@
 @import config.ApplicationConfig
 @import uk.gov.hmrc.hmrcfrontend.config.AssetsConfig
 @import views.html.helper.CSPNonce
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcStandardFooter, HmrcStandardHeader, HmrcHead, HmrcScripts, HmrcLayout}
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage.{HmrcStandardPageParams, ServiceURLs, TemplateOverrides}
 
 @this(
         govUkLayout: GovukLayout,
-        hmrcLayout: HmrcLayout,
+        hmrcStandardPage: HmrcStandardPage,
         header: GovukHeader,
         hmrcHead: HmrcHead,
         hmrcStandardHeader: HmrcStandardHeader,
@@ -60,12 +60,18 @@
     </div>
 }
 
-@hmrcLayout(
-    pageTitle = Some(title),
-    additionalHeadBlock = Some(head),
-    isWelshTranslationAvailable = applicationConfig.languageTranslationEnabled,
-    serviceName = Some(messages("service.name")),
-    serviceUrl = Some(controllers.routes.CheckingServiceController.startPage().url),
-    signOutUrl = Some(applicationConfig.signOut),
-    additionalScriptsBlock = Some(hmrcScripts(scriptsBlock = Some(scripts)))
+
+@hmrcStandardPage(
+    HmrcStandardPageParams(
+        serviceURLs = ServiceURLs(
+            serviceUrl = Some(controllers.routes.CheckingServiceController.startPage().url),
+            signOutUrl = Some(applicationConfig.signOut)
+        ),
+        templateOverrides = TemplateOverrides(
+            additionalScriptsBlock = Some(hmrcScripts(scriptsBlock = Some(scripts))),
+            additionalHeadBlock = Some(head)
+        ),
+        isWelshTranslationAvailable = applicationConfig.languageTranslationEnabled,
+        pageTitle = Some(title)
+    )
 )(content)
