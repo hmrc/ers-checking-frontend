@@ -28,7 +28,7 @@ import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import utils.WireMockHelper
 
 class UpscanConnectorSpec extends AnyWordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite with MockitoSugar with WireMockHelper {
@@ -68,7 +68,7 @@ class UpscanConnectorSpec extends AnyWordSpecLike with Matchers with OptionValue
                 .withStatus(BAD_REQUEST)
             )
         )
-        an[BadRequestException] should be thrownBy await(connector.getUpscanFormData(request))
+        an[UpstreamErrorResponse] should be thrownBy await(connector.getUpscanFormData(request))
       }
 
       "upscan returns 5xx response" in {
