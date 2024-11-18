@@ -106,8 +106,6 @@ class CSOPOptionsRCLTest extends PlaySpec with ERSValidationCSOPRCLTestData with
 
     val validator = new DataValidator(ConfigFactory.load.getConfig("ers-csop-rcl-validation"))
     runValidationTests(validator, getDescriptions, getTestData, getExpectedResults)
-
-
     "when colB is answered yes, colC is a mandatory field" in {
       val cellC = Cell("C", rowNumber, "")
       val cellB = Cell("B", rowNumber, "yes")
@@ -121,7 +119,12 @@ class CSOPOptionsRCLTest extends PlaySpec with ERSValidationCSOPRCLTestData with
     "when colB is answered yes then remaining columns from C to I are mandatory and if entered invalid or missing data then it should throw error " in {
       val row = Row(1,getWronglyEnteredCellData)
       val resOpt: Option[List[ValidationError]] = validator.validateRow(row)
-      resOpt.withErrorsFromMessages.get.size mustBe 3
+      resOpt.withErrorsFromMessages.get must equal(List(
+        ValidationError(Cell("E", rowNumber, ""), "mandatoryE", "E01", "Must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes"),
+        ValidationError(Cell("C", rowNumber, "12.444"), "error.3", "003", "Must be a number with 4 digits after the decimal point (and no more than 13 digits in front of it)"),
+        ValidationError(Cell("D", rowNumber, "AbcdefghijklmnopqrstuvwxyzAbcdefghijklmnopqrstuvwxyz"), "error.4", "004", "Enter a first name (must be less than 36 characters and can only have letters, numbers, hyphens or apostrophes)")
+      ))
+
     }
 
     "when colB is answered yes then remaining columns from C to I are mandatory and if entered valid data then it should not throw any error" in {

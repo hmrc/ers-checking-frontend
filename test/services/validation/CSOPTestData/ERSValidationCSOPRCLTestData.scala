@@ -61,7 +61,6 @@ trait ERSValidationCSOPRCLTestData {
         "Return Enter an employer PAYE reference. For example ‘123/AB456’. When the submitted text is empty.",
         //Column I
         "When payeOperatedApplied is Yes or No, no validation error should be raised",
-        "Return Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated. When an empty string is given for payeOperatedApplied.",
         "Return Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated. When the characters entered do not match yes or no for payeOperatedApplied."
       )
     descriptions
@@ -95,7 +94,6 @@ trait ERSValidationCSOPRCLTestData {
       Cell("H", rowNumber, "1234/12345/67890abcd"),
       Cell("H", rowNumber, "1234/12345/67890abcd"),
       Cell("I", rowNumber, "Yes"),
-      Cell("I", rowNumber, "YyEeSs"),
       Cell("I", rowNumber, "YyEeSs")
     )
     testData
@@ -129,7 +127,6 @@ trait ERSValidationCSOPRCLTestData {
       Some(List(ValidationErrorData("error.8", "008", "Enter an employer PAYE reference. For example ‘123/AB456’"))),
       Some(List(ValidationErrorData("error.8", "008", "Enter an employer PAYE reference. For example ‘123/AB456’"))),
       None,
-      Some(List(ValidationErrorData("error.9", "009", "Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated"))),
       Some(List(ValidationErrorData("error.9", "009", "Enter ‘yes’ or ‘no’ to tell HMRC if PAYE was operated")))
     )
 
