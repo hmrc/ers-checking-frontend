@@ -106,6 +106,10 @@ class UpscanController @Inject()(authAction: AuthAction,
       } else {
         Future.successful(Redirect(routes.CheckingServiceController.checkCSVFilePage()))
       }
+    } recover {
+      case e: Exception =>
+        logger.error("[UpscanController][successCSV] Error: " + e.getMessage)
+        getGlobalErrorPage
     }
 
   }
