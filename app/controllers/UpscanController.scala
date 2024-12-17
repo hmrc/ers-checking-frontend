@@ -108,7 +108,7 @@ class UpscanController @Inject()(authAction: AuthAction,
       }
     } recover {
       case e: Exception =>
-        logger.error("[UpscanController][successCSV] Failed to update the ids: " + e.getMessage)
+        logger.error(s"[UpscanController][successCSV] Failed to update the ids with exception ${e.getMessage}.", e)
         getGlobalErrorPage
     }
 
