@@ -106,6 +106,10 @@ class UpscanController @Inject()(authAction: AuthAction,
       } else {
         Future.successful(Redirect(routes.CheckingServiceController.checkCSVFilePage()))
       }
+    } recover {
+      case e: Exception =>
+        logger.error(s"[UpscanController][successCSV] Failed to update the ids with exception ${e.getMessage}.", e)
+        getGlobalErrorPage
     }
 
   }

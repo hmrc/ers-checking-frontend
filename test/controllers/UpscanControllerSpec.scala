@@ -113,6 +113,17 @@ class UpscanControllerSpec extends AnyWordSpecLike with Matchers with OptionValu
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
 
+    "send a user to the global error page when  upload id is not found" in {
+      val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET")
+      val singleCsvFile: UpscanCsvFilesList = UpscanCsvFilesList(Nil)
+
+      when(mockSessionCacheRepo.fetchAndGetEntry[UpscanCsvFilesList](any())(any(), any())).thenReturn(Future.successful(singleCsvFile))
+      when(mockSessionCacheRepo.cache(any(), any())(any(), any())).thenReturn(Future.successful(null))
+
+      val result = upscanController(upscanCsvFilesListCallbackList).successCSV(uploadId, Fixtures.getMockSchemeTypeString).apply(fakeRequest)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+    }
+
     "return a 500 when an exception occurs" in {
       val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET")
       val upscanId: UpscanIds = UpscanIds(uploadId, "fileId", NotStarted)
