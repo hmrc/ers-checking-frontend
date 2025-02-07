@@ -3,7 +3,7 @@
 /*********************/
 
 const MAX_FILENAME_LENGTH = 240
-const MAX_FILESIZE = 10000000  //10Mb
+const MAX_FILESIZE = 524288000  //500Mb
 
 const checkFileButton = document.getElementById("check-file-button")
 if (checkFileButton) checkFileButton.disabled = true
