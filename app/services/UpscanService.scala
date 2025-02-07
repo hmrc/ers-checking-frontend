@@ -49,10 +49,9 @@ class UpscanService @Inject()(upscanConnector: UpscanConnector, appConfig: Appli
     val failure = urlToString(controllers.routes.UpscanController.failure())
     val upscanInitiateRequest: UpscanInitiateRequest =
       if (isCsvAndUploadId) {
-        UpscanInitiateRequest(callback.absoluteURL(isSecure), success, failure, Some(1), Some(524288000))
+        UpscanInitiateRequest(callback.absoluteURL(isSecure), success, failure, Some(1), Some(524288000)) // scalastyle:off magic.number
       } else {
         UpscanInitiateRequest(callback.absoluteURL(isSecure), success, failure, Some(1), Some(524288000)) // scalastyle:off magic.number
-//        UpscanInitiateRequest(callback.absoluteURL(isSecure), success, failure, Some(1), Some(10000000)) // scalastyle:off magic.number
       }
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }
