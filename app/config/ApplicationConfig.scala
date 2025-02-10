@@ -46,7 +46,7 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
   def routeToSwitchLanguage: String => Call = (lang: String) => routes.LanguageSwitchController.switchToLanguage(lang)
 
   lazy val errorCount: Int = config.getInt("errorDisplayCount")
-  lazy val uploadCsvSizeLimit: Int = config.getInt("csv.uploadSizeLimit")
+  lazy val uploadSizeLimit: Int = config.getInt("file-size.uploadSizeLimit")
 
   //ExternalUrls
   lazy val basGatewayHost: String = config.getString("govuk-tax.auth.bas-gateway.host")
