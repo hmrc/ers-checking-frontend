@@ -49,7 +49,7 @@ class UpscanService @Inject()(upscanConnector: UpscanConnector, appConfig: Appli
     val failure = urlToString(controllers.routes.UpscanController.failure())
 
     val upscanInitiateRequest: UpscanInitiateRequest =
-      UpscanInitiateRequest(callback.absoluteURL(isSecure), success, failure, Some(1), Some(appConfig.uploadSizeLimit))
+      UpscanInitiateRequest(callback.absoluteURL(isSecure), success, failure, Some(1), Some(appConfig.upscanFileSizeLimit))
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }
 }
