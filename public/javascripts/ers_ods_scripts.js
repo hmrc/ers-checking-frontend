@@ -2,7 +2,7 @@
 /* Check ODS file page */
 /***********************/
 
-const MAX_ODS_FILESIZE = 10000000// 10 MB
+const MAX_ODS_FILESIZE = 524288000// 500 MB
 
 document.getElementById("input-file-name").onchange = function (e) {
     const input = document.getElementById('input-file-name');

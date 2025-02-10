@@ -53,7 +53,7 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
                                  )(implicit executionContext: ExecutionContext,
                                    actorSystem: ActorSystem) extends Logging {
 
-  private val uploadCsvSizeLimit: Int = appConfig.uploadCsvSizeLimit
+  private val uploadCsvSizeLimit: Int = appConfig.upscanFileSizeLimit
 
   def extractEntityData(response: HttpResponse): Source[ByteString, _] =
     response match {

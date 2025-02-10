@@ -2,7 +2,7 @@
 /* Check CSV file page */
 /***********************/
 
-const MAX_CSV_FILESIZE = 100000000// 100 MB
+const MAX_CSV_FILESIZE = 524288000// 500 MB
 document.getElementById("check-file-button").disabled = true;
 
 function csvFileSizeOK(fileSize) {

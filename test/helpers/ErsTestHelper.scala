@@ -103,7 +103,7 @@ trait ErsTestHelper extends MockitoSugar {// scalastyle:off magic.number
 
   when(mockAppConfig.retryDelay).thenReturn(3 milliseconds)
   when(mockAppConfig.errorCount).thenReturn(20)
-  when(mockAppConfig.uploadCsvSizeLimit).thenReturn(1000000)
+  when(mockAppConfig.upscanFileSizeLimit).thenReturn(524288000)
   when(mockAppConfig.allCsvFilesCacheRetryAmount).thenReturn(3)
 
   //PageBuilder
