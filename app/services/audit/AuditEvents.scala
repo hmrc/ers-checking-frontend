@@ -24,7 +24,15 @@ import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AuditEvents @Inject()(val auditConnector: AuditConnector) extends AuditService {
+class AuditEvents @Inject()(val auditConnector: AuditConnector)(implicit val ec: ExecutionContext) extends AuditService {
+
+  def auditFileSize(fileSize: String)(implicit hc: HeaderCarrier): Future[AuditResult] =
+    sendEvent(
+      "UploadFileSizeFromUpscanCallback",
+      Map(
+        "fileSize" -> fileSize
+      )
+    )
 
   def auditRunTimeError(exception : Throwable, contextInfo : String, sheetName : String)
                        (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AuditResult] = {

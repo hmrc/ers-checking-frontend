@@ -46,13 +46,15 @@ class UpscanCallbackControllerSpec extends AnyWordSpecLike with Matchers with Op
 
   val sessionId = "sessionId"
 
-  val uploadDetails: UploadDetails = UploadDetails(Instant.now(), "checksum", "fileMimeType", "fileName")
+  val uploadDetails: UploadDetails = UploadDetails(Instant.now(), "checksum", "fileMimeType", "fileName", 100)
   val readyCallback: UpscanReadyCallback = UpscanReadyCallback(Reference("Reference"), new URL("https://callbackUrl.com"), uploadDetails)
   val failedCallback: UpscanFailedCallback = UpscanFailedCallback(Reference("Reference"), ErrorDetails("failureReason", "message"))
 
   def request(body: JsValue): FakeRequest[JsValue] = FakeRequest().withBody(body)
 
-  lazy val upscanCallbackController: UpscanCallbackController = new UpscanCallbackController(mockSessionCacheRepo, testMCC(fakeApplication()))
+  val fileSizeUtils: FileSizeUtils = mock[FileSizeUtils]
+
+  lazy val upscanCallbackController: UpscanCallbackController = new UpscanCallbackController(mockSessionCacheRepo, testMCC(fakeApplication()), fileSizeUtils)
 
   override def beforeEach(): Unit = {
     reset(mockSessionCacheRepo)
