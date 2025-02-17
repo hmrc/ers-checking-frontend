@@ -89,8 +89,10 @@ class UpscanController @Inject()(authAction: AuthAction,
           val callbackData = UpscanCsvFilesCallbackList(files.toList.reverse)
           sessionCacheService.cache[UpscanCsvFilesCallbackList](ersUtil.CALLBACK_DATA_KEY_CSV, callbackData)
           if(callbackData.areAllFilesSuccessful()) {
+            logger.debug(s"[UpscanController][successCsv] - callback upscan successful, callback: $callbackData")
             Redirect(routes.UploadController.uploadCSVFile(scheme))
           } else if (callbackData.areAnyFilesWrongMimeType()) {
+            logger.info(s"[UpscanController][successCsv] - callback upscan rejected due to wrong mime type")
             Redirect(routes.CheckingServiceController.checkingInvalidFilePage())
           } else {
             logger.error(s"[UpscanController][successCSV] Not all files are completed uploading - (${callbackData.areAllFilesComplete()}) " +
@@ -104,6 +106,7 @@ class UpscanController @Inject()(authAction: AuthAction,
             getGlobalErrorPage
         }
       } else {
+        logger.info(s"[UpscanController][successCsv] - checking the number of files upload to checking service, fileList: $fileList")
         Future.successful(Redirect(routes.CheckingServiceController.checkCSVFilePage()))
       }
     } recover {
