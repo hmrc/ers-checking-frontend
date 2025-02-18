@@ -21,7 +21,9 @@ import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc._
 import repository.ErsCheckingFrontendSessionCacheRepository
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.CacheUtil
 
 import javax.inject.{Inject, Singleton}
@@ -35,7 +37,7 @@ class UpscanCallbackController @Inject()(sessionCacheService: ErsCheckingFronten
                                         (implicit ec: ExecutionContext) extends FrontendController(mcc) with Logging with CacheUtil {
 
   def callbackCsv(uploadId: UploadId, sessionId: String): Action[JsValue] = Action.async(parse.json) {
-    implicit request: MessagesRequest[JsValue] =>
+    request: MessagesRequest[JsValue] =>
       request.body.validate[UpscanCallback].fold(
         invalid = errors => {
           logger.error(s"[UpscanController][callbackCsv] Failed to validate UpscanCallback json with errors: $errors")
@@ -44,7 +46,7 @@ class UpscanCallbackController @Inject()(sessionCacheService: ErsCheckingFronten
         valid = callback => {
           val uploadStatus: UploadStatus = callback match {
             case callback: UpscanReadyCallback =>
-              fileSizeUtils.logFileSize(callback.uploadDetails.size)
+              fileSizeUtils.logFileSize(callback.uploadDetails.size)(HeaderCarrierConverter.fromRequestAndSession(request, request.session))
               UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
             case UpscanFailedCallback(_, details) =>
               logger.warn(s"[UpscanController][callbackCsv] Upload id: ${uploadId.value} failed. Reason: ${details.failureReason}. Message: ${details.message}")
@@ -68,7 +70,7 @@ class UpscanCallbackController @Inject()(sessionCacheService: ErsCheckingFronten
   }
 
   def callbackOds(sessionId: String): Action[JsValue] = Action.async(parse.json) {
-    implicit request =>
+    request =>
       request.body.validate[UpscanCallback].fold(
         invalid = errors => {
           logger.error(s"[UpscanController][callbackOds] Failed to validate UpscanCallback json with errors: $errors")
@@ -77,7 +79,7 @@ class UpscanCallbackController @Inject()(sessionCacheService: ErsCheckingFronten
         valid = callback => {
           val uploadStatus = callback match {
             case callback: UpscanReadyCallback =>
-              fileSizeUtils.logFileSize(callback.uploadDetails.size)
+              fileSizeUtils.logFileSize(callback.uploadDetails.size)(HeaderCarrierConverter.fromRequestAndSession(request, request.session))
               UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
             case UpscanFailedCallback(_, details) =>
               logger.warn(s"[UpscanController][callbackOds] Callback for session id: $sessionId failed. " +
