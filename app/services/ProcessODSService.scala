@@ -64,6 +64,9 @@ class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
       case e: ERSFileProcessingException =>
         logger.warn(s"[ProcessODSService][performODSUpload] ERSFileProcessingException thrown trying to upload file - $e")
         Future.successful(Failure(e))
+      case e: javax.xml.stream.XMLStreamException =>
+        logger.warn(s"[ProcessODSService][performODSUpload] XMLStreamException - $e")
+        Future.successful(Failure(e))
     }
   }
 

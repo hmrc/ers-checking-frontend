@@ -209,6 +209,14 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
       contentAsString(result) shouldBe "Test body"
     }
+
+    "redirect to globalErrorPage if it's given a XMLStreamException" in {
+      val controllerUnderTest = buildFakeUploadControllerCsv()
+      val result = controllerUnderTest.handleException(new javax.xml.stream.XMLStreamException("file to big"))(FakeRequest("", ""))
+
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      contentAsString(result) shouldBe "Test body"
+    }
   }
 
 }
