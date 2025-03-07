@@ -35,3 +35,5 @@ GET         /file-upload-error-page                     controllers.CheckingServ
 GET			/not-authorised                             controllers.AuthorisationController.notAuthorised()
 
 GET			/language/:lang                             @controllers.LanguageSwitchController.switchToLanguage(lang: String)
+
+GET 		/signed-out                 	            controllers.ApplicationController.timedOut()

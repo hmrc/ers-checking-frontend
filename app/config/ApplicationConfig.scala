@@ -54,4 +54,8 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
   lazy val loginPath: String = Option(config.getString("govuk-tax.auth.login_path")).getOrElse("sign-in")
   lazy val signIn: String = s"$basGatewayHost/bas-gateway/$loginPath"
   lazy val signOut: String = s"$basGatewayHost/bas-gateway/sign-out-without-state"
+  lazy val timeOut: String = s"$loginCallback/signed-out"
+
+  lazy val timeOutSeconds: Int = config.getInt("sessionTimeout.timeoutSeconds")
+  lazy val timeOutCountDownSeconds: Int = config.getInt("sessionTimeout.time-out-countdown-seconds")
 }
