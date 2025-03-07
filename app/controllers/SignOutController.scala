@@ -25,9 +25,9 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ApplicationController @Inject() (val mcc: MessagesControllerComponents,
-                                      signedOutView: views.html.signed_out)
-                                     (implicit val ec: ExecutionContext,
+class SignOutController @Inject()(val mcc: MessagesControllerComponents,
+                                  signedOutView: views.html.signed_out)
+                                 (implicit val ec: ExecutionContext,
                                       val appConfig: ApplicationConfig) extends FrontendController(mcc) with I18nSupport {
 
 

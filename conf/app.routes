@@ -36,4 +36,4 @@ GET			/not-authorised                             controllers.AuthorisationContr
 
 GET			/language/:lang                             @controllers.LanguageSwitchController.switchToLanguage(lang: String)
 
-GET 		/signed-out                 	            controllers.ApplicationController.timedOut()
+GET 		/signed-out                 	            controllers.SignOutController.timedOut()
