@@ -44,11 +44,11 @@ ers_start.start_now_button = Start now
 #********************************************************************
 
 ers_scheme_type.page_title = Which type of Employment Related Securities (ERS) scheme or arrangement is this file for?
-ers_scheme_type.csop = Company Share Option Plan (CSOP - Form 35)
-ers_scheme_type.emi = Enterprise Management Incentives (EMI - Form EMI40)
-ers_scheme_type.saye = Save As You Earn (SAYE - Form 34)
-ers_scheme_type.sip = Share Incentive Plan (SIP - Form 39)
-ers_scheme_type.other = Other (Form 42)
+ers_scheme_type.csop = Company Share Option Plan (CSOP)
+ers_scheme_type.emi = Enterprise Management Incentives (EMI)
+ers_scheme_type.saye = Save As You Earn (SAYE)
+ers_scheme_type.sip = Share Incentive Plan (SIP)
+ers_scheme_type.other = Other
 ers_scheme_type.continue = Continue
 ers_scheme_type.select_scheme_type = Select the type of Employment Related Securities (ERS) scheme or arrangement
 
