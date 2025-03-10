@@ -25,23 +25,27 @@
 
 
 @this(
-govuk_wrapper: views.html.ers_main,
-govukBackLink: GovukBackLink,
-hmrcPageHeading: HmrcPageHeading,
-govukButton: GovukButton
+    govuk_wrapper: views.html.ers_main,
+    govukBackLink: GovukBackLink,
+    hmrcPageHeading: HmrcPageHeading,
+    govukButton: GovukButton,
+    formHelper: FormWithCSRF,
 )
 
 @(implicit request: Request[AnyContent], messages: Messages, appConfig: ApplicationConfig)
 
-@govuk_wrapper(title = messages("ers.header"), timeoutDialogEnabled = false){
+@govuk_wrapper(title = messages("ers.header"), timeoutDialogEnabled = false, disableSignOut = true) {
 
 @hmrcPageHeading(PageHeading(
-text = messages("ers_signed_out.info")
-))
+                            text = messages("ers_signed_out.info")
+                            )
+                )
+@formHelper(action = routes.SignOutController.onSubmit(), Symbol("autoComplete") -> "off") {
+            @govukButton(Button(
+                                content = Text(messages("ers_signed_out.link")),
+                        attributes = Map("id" -> "continue")
+                                )
+)
+}
 
-@govukButton(Button(
-content = Text(messages("ers_signed_out.link")),
-href = Some(appConfig.signIn),
-attributes = Map("id" -> "continue")
-))
 }

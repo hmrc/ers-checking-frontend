@@ -17,13 +17,16 @@
 package controllers
 
 import helpers.ErsTestHelper
+import org.scalatest.OptionValues.convertOptionToValuable
+import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.mvc.{MessagesControllerComponents, Result}
-import play.api.test.Helpers.{OK, contentAsString, defaultAwaitTimeout, status, stubMessages}
+import play.api.test.Helpers.{OK, contentAsString, defaultAwaitTimeout, redirectLocation, status, stubMessages}
 import play.api.test.{FakeRequest, Injecting}
+import play.mvc.Http.Status
 import views.html.signed_out
 
 import scala.concurrent.Future
@@ -64,6 +67,17 @@ class SignOutControllerSpec extends AnyWordSpecLike with Matchers with GuiceOneA
       pageAsString must include(title)
       pageAsString must include(header)
       pageAsString must include(signInButton)
+    }
+
+    "redirect for a POST" in {
+
+      val result = signOutController.onSubmit().apply(FakeRequest())
+      result.futureValue.header.status shouldBe Status.SEE_OTHER
+
+      redirectLocation(result).value mustBe
+        "http://localhost:9553/bas-gateway/" +
+          "sign-in?continue_url=http%3A%2F%2Flocalhost%3A9225%2Fcheck-your-ers-files&origin=ers-checking-frontend"
+
     }
   }
 }

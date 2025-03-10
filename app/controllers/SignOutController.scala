@@ -32,6 +32,14 @@ class SignOutController @Inject()(val mcc: MessagesControllerComponents,
 
 
   def timedOut(): Action[AnyContent] = Action { implicit request =>
-        Ok(signedOutView(request,request2Messages,appConfig))
+        Ok(signedOutView(request,request2Messages,appConfig)).withNewSession
+  }
+
+  def onSubmit(): Action[AnyContent] = Action { _ =>
+    Redirect(
+      appConfig.signIn,
+      Map("continue_url" -> Seq(appConfig.loginCallback),
+          "origin" -> Seq(appConfig.appName))
+    )
   }
 }

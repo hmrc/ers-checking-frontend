@@ -56,6 +56,12 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
   lazy val signOut: String = s"$basGatewayHost/bas-gateway/sign-out-without-state"
   lazy val timeOut: String = s"$loginCallback/signed-out"
 
+  lazy val timeOutUrl: String = getSignOutUrl(timeOut)
   lazy val timeOutSeconds: Int = config.getInt("sessionTimeout.timeoutSeconds")
   lazy val timeOutCountDownSeconds: Int = config.getInt("sessionTimeout.time-out-countdown-seconds")
+
+  def getSignOutUrl(callbackUrl: String): String = {
+    val encodedCallbackUrl = java.net.URLEncoder.encode(callbackUrl, "UTF-8")
+    s"$basGatewayHost/bas-gateway/sign-out-without-state/?continue=$encodedCallbackUrl"
+  }
 }

@@ -37,3 +37,5 @@ GET			/not-authorised                             controllers.AuthorisationContr
 GET			/language/:lang                             @controllers.LanguageSwitchController.switchToLanguage(lang: String)
 
 GET 		/signed-out                 	            controllers.SignOutController.timedOut()
+POST 		/signed-out                 	            controllers.SignOutController.onSubmit()
+
