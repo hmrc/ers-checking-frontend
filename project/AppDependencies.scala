@@ -16,11 +16,11 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "bootstrap-frontend-play-30"   % bootstrapVersion,
     "uk.gov.hmrc"                 %% "domain-play-30"               % "10.0.0",
     "uk.gov.hmrc"                 %% "tabular-data-validator"       % "1.8.0",
-    "uk.gov.hmrc"                 %% "play-frontend-hmrc-play-30"   % "11.11.0"
+    "uk.gov.hmrc"                 %% "play-frontend-hmrc-play-30"   % "11.12.0"
   )
 
   val test: Seq[ModuleID] = Seq(
-    "org.wiremock"           %  "wiremock-standalone"     % "3.12.0",
+    "org.wiremock"           %  "wiremock-standalone"     % "3.12.1",
     "org.apache.pekko"       %% "pekko-testkit"            % pekkoVersion,
     "org.jsoup"              %  "jsoup"                   % "1.19.1",
     "uk.gov.hmrc"            %% "bootstrap-test-play-30"  % bootstrapVersion,
