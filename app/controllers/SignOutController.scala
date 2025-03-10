@@ -22,7 +22,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class SignOutController @Inject()(val mcc: MessagesControllerComponents,
@@ -31,7 +31,7 @@ class SignOutController @Inject()(val mcc: MessagesControllerComponents,
                                       val appConfig: ApplicationConfig) extends FrontendController(mcc) with I18nSupport {
 
 
-  def timedOut: Action[AnyContent] = Action.async { implicit request =>
-    Future.successful(Ok(signedOutView(request,request2Messages,appConfig)))
+  def timedOut(): Action[AnyContent] = Action { implicit request =>
+        Ok(signedOutView(request,request2Messages,appConfig))
   }
 }
