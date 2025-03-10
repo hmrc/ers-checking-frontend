@@ -17,6 +17,7 @@
 package controllers
 
 import config.ApplicationConfig
+import play.api.Logging
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -28,10 +29,11 @@ import scala.concurrent.ExecutionContext
 class SignOutController @Inject()(val mcc: MessagesControllerComponents,
                                   signedOutView: views.html.signed_out)
                                  (implicit val ec: ExecutionContext,
-                                      val appConfig: ApplicationConfig) extends FrontendController(mcc) with I18nSupport {
+                                  val appConfig: ApplicationConfig) extends FrontendController(mcc) with I18nSupport with Logging{
 
 
   def timedOut(): Action[AnyContent] = Action { implicit request =>
+        logger.info(s"[SignOutContoller][timeout] user remained inactive on the service, user has been signed out")
         Ok(signedOutView(request,request2Messages,appConfig)).withNewSession
   }
 
