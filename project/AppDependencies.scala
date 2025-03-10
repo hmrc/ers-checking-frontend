@@ -4,7 +4,7 @@ import sbt.*
 object AppDependencies {
 
   val pekkoVersion = "1.0.3"
-  val bootstrapVersion = "9.9.0"
+  val bootstrapVersion = "9.11.0"
   val mongoVersion = "2.5.0"
 
   val compile: Seq[ModuleID] = Seq(
@@ -22,7 +22,7 @@ object AppDependencies {
   val test: Seq[ModuleID] = Seq(
     "org.wiremock"           %  "wiremock-standalone"     % "3.12.0",
     "org.apache.pekko"       %% "pekko-testkit"            % pekkoVersion,
-    "org.jsoup"              %  "jsoup"                   % "1.18.3",
+    "org.jsoup"              %  "jsoup"                   % "1.19.1",
     "uk.gov.hmrc"            %% "bootstrap-test-play-30"  % bootstrapVersion,
     "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-30" % mongoVersion,
   ).map(_ % Test)
