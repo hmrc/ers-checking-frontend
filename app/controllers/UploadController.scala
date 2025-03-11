@@ -172,6 +172,10 @@ class UploadController @Inject()(authAction: AuthAction,
         logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${notERSProcessingException.getClass}. Redirecting to global error page.")
         Future(getGlobalErrorPage)
+      case e: javax.xml.stream.XMLStreamException =>
+        logger.error(s"[UploadController][handleException] " +
+          s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
+        Future(getGlobalErrorPage)
     }
   }
 }
