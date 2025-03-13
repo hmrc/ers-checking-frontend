@@ -34,7 +34,7 @@
 
 @(implicit request: Request[AnyContent], messages: Messages, appConfig: ApplicationConfig)
 
-@govuk_wrapper(title = messages("ers.header"), timeoutDialogEnabled = false, disableSignOut = true) {
+@govuk_wrapper(title = messages("ers_signed_out.title"), timeoutDialogEnabled = false, disableSignOut = true) {
 
 @hmrcPageHeading(PageHeading(
                             text = messages("ers_signed_out.info")

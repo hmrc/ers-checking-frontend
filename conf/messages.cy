@@ -16,6 +16,7 @@ ers.continue = Yn eich blaen
 ers.back = Yn ôl
 ers.warning = Rhybudd
 
+ers_signed_out.title = Er eich diogelwch, gwnaethom eich allgofnodi
 ers_signed_out.info = Er eich diogelwch, gwnaethom eich allgofnodi
 ers_signed_out.link = Mewngofnodi
 
