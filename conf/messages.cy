@@ -44,11 +44,11 @@ ers_start.start_now_button = Dechrau nawr
 #********************************************************************
 
 ers_scheme_type.page_title = Pa fath o gynllun neu drefniant Gwarantau Ar Sail Cyflogaeth (ERS) y mae’r ffeil hon ar ei gyfer?
-ers_scheme_type.csop = Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni (CSOP - Ffurflen 35)
-ers_scheme_type.emi = Cymhellion Rheoli Mentrau (EMI - Ffurflen EMI40)
-ers_scheme_type.saye = Cynilo Wrth Ennill (SAYE - Ffurflen 34)
-ers_scheme_type.sip = Cynllun Cymell Cyfranddaliadau (SIP - Ffurflen 39)
-ers_scheme_type.other = Arall (Ffurflen 42)
+ers_scheme_type.csop = Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni (CSOP)
+ers_scheme_type.emi = Cymhellion Rheoli Mentrau (EMI)
+ers_scheme_type.saye = Cynilo Wrth Ennill (SAYE)
+ers_scheme_type.sip = Cynllun Cymell Cyfranddaliadau (SIP)
+ers_scheme_type.other = Arall
 ers_scheme_type.continue = Yn eich blaen
 ers_scheme_type.select_scheme_type = Dewiswch y math o gynllun neu drefniant Gwarantau Ar Sail Cyflogaeth (ERS)
 
