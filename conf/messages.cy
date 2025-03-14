@@ -16,6 +16,10 @@ ers.continue = Yn eich blaen
 ers.back = Yn ôl
 ers.warning = Rhybudd
 
+ers_signed_out.title = Er eich diogelwch, gwnaethom eich allgofnodi - Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS) - GOV.UK
+ers_signed_out.info = Er eich diogelwch, gwnaethom eich allgofnodi
+ers_signed_out.link = Mewngofnodi
+
 
 ers.start.page_title = Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS) – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.scheme_types.page_title = Dewis math o gynllun neu drefniant – Gwarantau ar Sail Cyflogaeth – GOV.UK

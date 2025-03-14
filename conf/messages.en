@@ -16,6 +16,10 @@ ers.continue = Continue
 ers.back = Back
 ers.warning = Warning
 
+ers_signed_out.title = For your security, we signed you out - Check your Employment Related Securities (ERS) files - GOV.UK
+ers_signed_out.info = For your security, we signed you out.
+ers_signed_out.link = Sign in
+
 
 ers.start.page_title = Check your Employment Related Securities (ERS) files – Employment Related Securities – GOV.UK
 ers.scheme_types.page_title = Choose scheme or arrangement type – Employment Related Securities – GOV.UK

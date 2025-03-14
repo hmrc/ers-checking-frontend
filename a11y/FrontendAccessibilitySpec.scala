@@ -2,7 +2,7 @@ import config.ApplicationConfig
 import models.{CsvFiles, SheetErrors}
 import org.scalacheck.Arbitrary
 import play.api.data.Form
-import play.api.mvc.Request
+import play.api.mvc.{AnyContent, Request}
 import play.twirl.api.Html
 import uk.gov.hmrc.scalatestaccessibilitylinter.views.AutomaticAccessibilitySpec
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
@@ -51,6 +51,10 @@ class FrontendAccessibilitySpec extends AutomaticAccessibilitySpec {
       implicit val arbitraryCsvFileSequence: Arbitrary[Seq[CsvFiles]] = fixed(Seq(CsvFiles("file-id1"), CsvFiles("file-id2")))
       render(select_csv_file_types)
     case start: start => render(start)
+    case signed_out: signed_out =>
+      implicit val arbitraryRequest: Arbitrary[Request[AnyContent]] = fixed(fakeRequest)
+      render(signed_out)
+
   }
 
   runAccessibilityTests()
