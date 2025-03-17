@@ -96,11 +96,21 @@ class HtmlReportController @Inject()(authAction: AuthAction,
 
       val sheetNameList = errorsList.map(ele => ele.sheetName)
       val sheetName = if (sheetNameList.nonEmpty) sheetNameList.head else ""
-      val errorMsg = errorsList.flatMap(ele => ele.errors.map(_.errorMsg)).mkString(",")
+      val errorMsg = errorsList.flatMap(ele => ele.errors.map(e => e.errorMsg))
+                                .flatMap{ ele =>
+                                  if(ele.contains(".")){
+                                    ele.split("\\.").last
+                                  }else{
+                                    None
+                                  }
+                                }
+                                .distinct
+                                .mkString(",")
       auditEvents.fileProcessingErrorAudit(schemeName,sheetName,errorMsg)
       Ok(html_error_report(schemeName, schemeNameShort, totalErrorsCount, errorCountLong, errorsList.toSeq)(request, messages, appConfig))
     } recover {
       case e: NoSuchElementException =>
+        auditEvents.auditRunTimeError(e, "Failed to get values ", "")
         logger.error("Unable to display error report in HtmlReportController.showHtmlErrorReportPage. Error: " + e.getMessage, e)
         getGlobalErrorPage(request, messages)
     }
