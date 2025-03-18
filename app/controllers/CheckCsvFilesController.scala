@@ -65,8 +65,10 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
 
   def validateCsvFilesPageSelected()(implicit request: RequestWithOptionalEmpRef[AnyContent]): Future[Result] = {
     CSformMappings.csvFileCheckForm().bindFromRequest().fold(
-      formWithError =>
-        reloadWithError(Some(formWithError)),
+      formWithError =>{
+        logger.debug(s"[CheckCsvFilesController][validateCsvFilesPageSelected] Failed to validate with errors: ${formWithError}")
+        reloadWithError(Some(formWithError))
+      },
       formData =>
         performCsvFilesPageSelected(formData)
     )
@@ -75,6 +77,7 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
   def performCsvFilesPageSelected(formData: Seq[CsvFiles])(implicit request: Request[AnyRef]): Future[Result] = {
     val csvFilesCallbackList: UpscanCsvFilesList = createCacheData(formData)
     if(csvFilesCallbackList.ids.isEmpty) {
+      logger.debug("[CheckCsvFilesController][csvFilesCallbackList] ids are empty")
       reloadWithError()
     } else {
       (for{
