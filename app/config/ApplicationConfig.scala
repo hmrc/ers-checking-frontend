@@ -62,6 +62,6 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
 
   def getSignOutUrl(callbackUrl: String): String = {
     val encodedCallbackUrl = java.net.URLEncoder.encode(callbackUrl, "UTF-8")
-    s"$basGatewayHost/bas-gateway/sign-out-without-state/?continue=$encodedCallbackUrl"
+    s"$basGatewayHost/bas-gateway/sign-out-without-state?continue=$encodedCallbackUrl"
   }
 }
