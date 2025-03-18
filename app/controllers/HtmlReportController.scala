@@ -95,17 +95,20 @@ class HtmlReportController @Inject()(authAction: AuthAction,
       val (schemeName, schemeNameShort) = scheme
 
       val sheetNameList = errorsList.map(ele => ele.sheetName)
-      val sheetName = if (sheetNameList.nonEmpty) sheetNameList.head else ""
-      val errorMsg = errorsList.flatMap(ele => ele.errors.map(e => e.errorMsg))
-                                .flatMap{ ele =>
-                                  if(ele.contains(".")){
-                                    ele.split("\\.").last
-                                  }else{
-                                    None
-                                  }
-                                }
-                                .distinct
-                                .mkString(",")
+      val sheetName = sheetNameList.headOption.getOrElse("SheetName Not Found")
+      val errorMsg = errorsList
+        .flatMap(ele => ele.errors.map(e => e.errorMsg))
+        .toSeq
+        .flatMap( error =>{
+          if(error.contains(".")){
+            Some(error.split("\\.").last)
+          }else{
+            None
+          }
+        })
+        .distinct
+        .mkString(",")
+
       auditEvents.fileProcessingErrorAudit(schemeName,sheetName,errorMsg)
       Ok(html_error_report(schemeName, schemeNameShort, totalErrorsCount, errorCountLong, errorsList.toSeq)(request, messages, appConfig))
     } recover {
