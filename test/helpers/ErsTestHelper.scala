@@ -44,7 +44,6 @@ import utils.ERSUtil
 
 import java.time.{LocalDate, ZoneOffset}
 import scala.concurrent.{ExecutionContext, Future}
-
 import scala.concurrent.duration._
 import scala.language.postfixOps
 

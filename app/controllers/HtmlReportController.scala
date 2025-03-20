@@ -27,6 +27,7 @@ import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.Reads
 import play.api.mvc._
 import repository.ErsCheckingFrontendSessionCacheRepository
+import services.audit.AuditEvents
 import uk.gov.hmrc.http.InternalServerException
 import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -41,6 +42,7 @@ class HtmlReportController @Inject()(authAction: AuthAction,
                                      mcc: MessagesControllerComponents,
                                      sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
                                      html_error_report: views.html.html_error_report,
+                                     auditEvents: AuditEvents,
                                      override val global_error: views.html.global_error
                                     )(implicit executionContext: ExecutionContext, ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
   extends FrontendController(mcc) with JsonParser with I18nSupport with ErsBaseController with Logging {
@@ -92,9 +94,26 @@ class HtmlReportController @Inject()(authAction: AuthAction,
 
       val (schemeName, schemeNameShort) = scheme
 
+      val sheetNameList = errorsList.map(ele => ele.sheetName)
+      val sheetName = sheetNameList.headOption.getOrElse("SheetName Not Found")
+      val errorMsg = errorsList
+        .flatMap(ele => ele.errors.map(e => e.errorMsg))
+        .toSeq
+        .flatMap( error =>{
+          if(error.contains(".")){
+            Some(error.split("\\.").last)
+          }else{
+            None
+          }
+        })
+        .distinct
+        .mkString(",")
+
+      auditEvents.fileProcessingErrorAudit(schemeName, sheetName, errorMsg)
       Ok(html_error_report(schemeName, schemeNameShort, totalErrorsCount, errorCountLong, errorsList.toSeq)(request, messages, appConfig))
     } recover {
       case e: NoSuchElementException =>
+        auditEvents.auditRunTimeError(e, "Failed to get values ", "")
         logger.error("Unable to display error report in HtmlReportController.showHtmlErrorReportPage. Error: " + e.getMessage, e)
         getGlobalErrorPage(request, messages)
     }
