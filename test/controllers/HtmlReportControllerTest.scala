@@ -175,7 +175,7 @@ class HtmlReportControllerTest
         )
       )
 
-      val errorMsgRes:String = processErrorMessages(errorList)
+      val errorMsgRes: String = processErrorMessages(errorList)
       errorMsgRes shouldBe("date,yes-no")
     }
 
