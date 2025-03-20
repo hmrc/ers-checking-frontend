@@ -154,7 +154,8 @@ class HtmlReportControllerTest
         .csvExtractErrors(Seq(uploadId), cacheItemWithErrors)
       result shouldBe ((errorList, 1, 1))
     }
-    "return the unique error messages which have the duplicates" in {
+
+    "return the unique error messages keys which have the duplicates errors" in {
 
       val errorList: ListBuffer[SheetErrors] = ListBuffer(
         SheetErrors("CSOP_OptionsExercised_V4",
