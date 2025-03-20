@@ -204,7 +204,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
       errorMsg <- sessionCacheService.fetchAndGetEntry[String](ersUtil.FORMAT_ERROR_CACHE)
       errorParams <- sessionCacheService.fetchAndGetEntry[Seq[String]](ersUtil.FORMAT_ERROR_CACHE_PARAMS)
     } yield {
-      auditEvents.fileProcessingErrorAudit(fileType,schemeName,errorMsg)
+      auditEvents.fileProcessingErrorAudit(fileType, schemeName, errorMsg)
       Ok(format_errors(
         fileType,
         ersUtil.getSchemeName(schemeName)._1,
