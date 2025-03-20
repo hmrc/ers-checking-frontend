@@ -154,6 +154,30 @@ class HtmlReportControllerTest
         .csvExtractErrors(Seq(uploadId), cacheItemWithErrors)
       result shouldBe ((errorList, 1, 1))
     }
+    "return the unique error messages which have the duplicates" in {
+
+      val errorList: ListBuffer[SheetErrors] = ListBuffer(
+        SheetErrors("CSOP_OptionsExercised_V4",
+          ListBuffer(
+            ValidationError(Cell("A", 1, "23-07-2015"), "error.1", "001", "ers.upload.error.date")
+          )
+        ),
+        SheetErrors("CSOP_OptionsExercised_V4",
+          ListBuffer(
+            ValidationError(Cell("F", 6, "yes"), "error.6", "006", "ers.upload.error.yes-no")
+          )
+        ),
+        SheetErrors("CSOP_OptionsExercised_V4",
+          ListBuffer(
+            ValidationError(Cell("A", 1, "23-07-2015"), "error.1", "001", "ers.upload.error.date")
+          )
+        )
+      )
+
+      val errorMsgRes:String = processErrorMessages(errorList)
+      errorMsgRes shouldBe("date,yes-no")
+    }
+
   }
 
   "getEntry" must {
