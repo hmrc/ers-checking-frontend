@@ -19,7 +19,6 @@ package helpers
 import config.ApplicationConfig
 import controllers.auth.AuthAction
 import metrics.Metrics
-import models.SheetErrors
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.mockito.ArgumentMatchers
@@ -44,7 +43,6 @@ import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import utils.ERSUtil
 
 import java.time.{LocalDate, ZoneOffset}
-import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -144,20 +142,4 @@ trait ErsTestHelper extends MockitoSugar {// scalastyle:off magic.number
       modifiedAt = LocalDate.parse("2023-11-17").atStartOfDay().toInstant(ZoneOffset.UTC)
     )
   }
-
-  def processErrorMessages(errorsList: ListBuffer[SheetErrors]): String = {
-    val errorMsg = errorsList
-      .flatMap(ele => ele.errors.map(e => e.errorMsg))
-      .flatMap(error => {
-        if (error.contains(".")) {
-          Some(error.split("\\.").last)
-        } else {
-          None
-        }
-      })
-      .distinct
-      .mkString(",")
-    errorMsg
-  }
-
 }

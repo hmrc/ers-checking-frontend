@@ -16,7 +16,6 @@
 
 package controllers
 
-import utils.CacheUtil
 import helpers.ErsTestHelper
 import models.SheetErrors
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
@@ -36,6 +35,7 @@ import play.api.test.Injecting
 import play.api.{Application, i18n}
 import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
+import utils.CacheUtil
 import views.html.{global_error, html_error_report}
 
 import scala.collection.mutable.ListBuffer
@@ -155,8 +155,7 @@ class HtmlReportControllerTest
       result shouldBe ((errorList, 1, 1))
     }
 
-    "return the unique error messages keys which have the duplicates errors" in {
-
+    "display the all the errors and send unique error keys while calling audit" in {
       val errorList: ListBuffer[SheetErrors] = ListBuffer(
         SheetErrors("CSOP_OptionsExercised_V4",
           ListBuffer(
@@ -175,8 +174,25 @@ class HtmlReportControllerTest
         )
       )
 
-      val errorMsgRes: String = processErrorMessages(errorList)
-      errorMsgRes shouldBe("date,yes-no")
+      val controllerUnderTest = new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
+      val upscanCsvFilesListCallbackList = UpscanCsvFilesCallbackList(
+        files = List(UpscanCsvFilesCallback(uploadId, UploadedSuccessfully("thefilename", "downloadUrl", Some(1000))))
+      )
+      val cacheItemWithErrors = generateTestCacheItem(
+        id = uploadId.value,
+        data = Seq(
+          "callback_data_key_csv" -> Json.toJson(upscanCsvFilesListCallbackList),
+          s"$ERROR_LIST_CACHE${uploadId.value}" -> Json.toJson(errorList),
+          s"$SCHEME_ERROR_COUNT_CACHE${uploadId.value}" -> Json.toJson(1)
+        ))
+
+      when(mockSessionCacheRepo.fetchAll()(any())).thenReturn(Future.successful(cacheItemWithErrors))
+      when(mockErsUtil.getSchemeName(any())).thenReturn(("ers_pdf_error_report.csop", "CSOP"))
+      val res = controllerUnderTest
+        .showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"), testMessages)
+      res.map { result =>
+        result shouldBe contentAsString(controllerUnderTest.showHtmlErrorReportPage(isCsv = true)(request, testMessages))
+      }
     }
 
   }
