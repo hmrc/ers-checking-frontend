@@ -109,7 +109,7 @@ class HtmlReportController @Inject()(authAction: AuthAction,
         .distinct
         .mkString(",")
 
-      auditEvents.fileProcessingErrorAudit(schemeName,sheetName,errorMsg)
+      auditEvents.fileProcessingErrorAudit(schemeName, sheetName, errorMsg)
       Ok(html_error_report(schemeName, schemeNameShort, totalErrorsCount, errorCountLong, errorsList.toSeq)(request, messages, appConfig))
     } recover {
       case e: NoSuchElementException =>
