@@ -1,0 +1,50 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.{HmrcPageHeading, PageHeading}
+@import config.ApplicationConfig
+
+@this(ers_main: views.html.ers_main,
+        govukWarningText: GovukWarningText,
+        govukButton: GovukButton,
+        formHelper: FormWithCSRF,
+        hmrcPageHeading: HmrcPageHeading)
+
+@(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
+
+@ers_main(title = messages("individual_not_authorised.page_title"), disablePageNotWorkLink = false) {
+
+    @hmrcPageHeading(PageHeading(text = messages("individual_not_authorised.H1")))
+
+        <p class="govuk-list">@messages("individual_not_authorised.para")</p>
+        <p class="govuk-list">@messages("individual_not_authorised.lead")</p>
+        <ul class="govuk-list govuk-list--bullet ">
+            <li>@messages("individual_not_authorised.bullet1")</li>
+            <li>
+                @messages("individual_not_authorised.bullet2")
+            </li>
+        </ul>
+
+        <div class="govuk-!-padding-bottom-5"></div>
+
+    @formHelper(action = routes.AuthorisationController.individualSignout(), Symbol("autoComplete") -> "off") {
+        @govukButton(Button(
+            content = Text(messages("ers.signout")),
+            attributes = Map("id" -> "signout")
+        ))
+    }
+
+}
