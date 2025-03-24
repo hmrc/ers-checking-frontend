@@ -47,6 +47,7 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
 
   lazy val errorCount: Int = config.getInt("errorDisplayCount")
   lazy val upscanFileSizeLimit: Int = config.getInt("file-size.uploadSizeLimit")
+  lazy val upscanFileSizeInMB: Int = upscanFileSizeLimit/1024/1024
 
   //ExternalUrls
   lazy val basGatewayHost: String = config.getString("govuk-tax.auth.bas-gateway.host")
