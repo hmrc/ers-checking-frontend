@@ -30,7 +30,6 @@ class AuthorisationController @Inject()(mcc: MessagesControllerComponents,
                                         not_authorised: views.html.not_authorised,
                                         individual_not_authorised: views.html.individual_not_authorised,
                                         individual_signout: views.html.individual_signout
-
                                        ) extends FrontendController(mcc) with I18nSupport {
   def notAuthorised: Action[AnyContent] = Action.async {
     implicit request =>
@@ -43,7 +42,10 @@ class AuthorisationController @Inject()(mcc: MessagesControllerComponents,
   }
 
   def individualSignout: Action[AnyContent] = Action { implicit request =>
-//    Future.successful(individual_signout(request, request2Messages, appConfig))
-    Ok(individual_signout(request,request2Messages,appConfig)).withNewSession
+    Ok(individual_signout(request,request2Messages,appConfig))
+  }
+
+  def individualSignoutRedirect: Action[AnyContent] = Action { implicit request =>
+    Redirect(routes.AuthorisationController.individualSignout()).withNewSession
   }
 }

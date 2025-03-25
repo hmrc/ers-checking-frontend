@@ -40,4 +40,6 @@ GET 		/signed-out                 	            controllers.SignOutController.tim
 POST 		/signed-out                 	            controllers.SignOutController.onSubmit()
 
 GET         /signed-in-as-individual                    controllers.AuthorisationController.individualNotAuthorised()
-POST        /signed-in-as-individual                    controllers.AuthorisationController.individualSignout()
+POST        /signed-in-as-individual                    controllers.AuthorisationController.individualSignoutRedirect()
+
+GET        /signout-in-as-individual                    controllers.AuthorisationController.individualSignout()
