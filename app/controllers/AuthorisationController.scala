@@ -45,7 +45,7 @@ class AuthorisationController @Inject()(mcc: MessagesControllerComponents,
     Ok(individual_signout(request,request2Messages,appConfig))
   }
 
-  def individualSignoutRedirect: Action[AnyContent] = Action { implicit request =>
+  def individualSignoutRedirect: Action[AnyContent] = Action { _ =>
     Redirect(routes.AuthorisationController.individualSignout()).withNewSession
   }
 }
