@@ -42,4 +42,4 @@ POST 		/signed-out                 	            controllers.SignOutController.on
 GET         /signed-in-as-individual                    controllers.AuthorisationController.individualNotAuthorised()
 POST        /signed-in-as-individual                    controllers.AuthorisationController.individualSignoutRedirect()
 
-GET        /signout-in-as-individual                    controllers.AuthorisationController.individualSignout()
+GET         /you-have-signed-out                         controllers.AuthorisationController.individualSignout()

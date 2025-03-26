@@ -29,8 +29,8 @@
 
     @hmrcPageHeading(PageHeading(text = messages("individual_not_authorised.H1")))
 
-        <p class="govuk-list">@messages("individual_not_authorised.para")</p>
-        <p class="govuk-list">@messages("individual_not_authorised.lead")</p>
+        <p class="govuk-body">@messages("individual_not_authorised.para")</p>
+        <p class="govuk-body">@messages("individual_not_authorised.lead")</p>
         <ul class="govuk-list govuk-list--bullet ">
             <li>@messages("individual_not_authorised.bullet1")</li>
             <li>
@@ -40,7 +40,7 @@
 
         <div class="govuk-!-padding-bottom-5"></div>
 
-    @formHelper(action = routes.AuthorisationController.individualSignout(), Symbol("autoComplete") -> "off") {
+    @formHelper(action = routes.AuthorisationController.individualSignoutRedirect(), Symbol("autoComplete") -> "off") {
         @govukButton(Button(
             content = Text(messages("ers.signout")),
             attributes = Map("id" -> "signout")

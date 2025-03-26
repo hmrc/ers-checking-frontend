@@ -27,7 +27,7 @@
 
 @ers_main(title = messages("individual_signout.title"), timeoutDialogEnabled = false, disableSignOut = true) {
     @hmrcPageHeading(PageHeading(text = messages("individual_signout.H1")))
-        <p class="govuk-list">@messages("individual_signout.para")</p>
+        <p class="govuk-body">@messages("individual_signout.para")</p>
         <div class="govuk-!-padding-bottom-5"></div>
     @formHelper(action = routes.SignOutController.onSubmit(), Symbol("autoComplete") -> "off") {
         @govukButton(Button(
