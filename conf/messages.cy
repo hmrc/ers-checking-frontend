@@ -185,6 +185,18 @@ validation.summary.heading =Mae problem wedi codi
 csv_file_upload.summary_error =Dewiswch ffeil wahanol - rhaid iddi fod yn ffeil CSV
 ods_file_upload.summary_error =Dewiswch ffeil wahanol - rhaid iddi fod yn ffeil ODS
 
+individual_not_authorised.page_title = Mae problem – Gwarantau Ar Sail Cyflogaeth – GOV.UK
+individual_not_authorised.H1 = Mae problem.
+individual_not_authorised.para = Gwnaethoch fewngofnodi gan ddefnyddio Dynodydd Defnyddiwr (ID) unigolyn ar gyfer Porth y Llywodraeth.
+individual_not_authorised.lead = Er mwyn gwirio ffeil Gwarantau Ar Sail Cyflogaeth, mae’n rhaid i chi wneud y canlynol:
+individual_not_authorised.bullet1 = allgofnodi
+individual_not_authorised.bullet2 = mewngofnodi gan ddefnyddio ID ar gyfer Porth y Llywodraeth rydych chi’n ei ddefnyddio i reoli TWE i gyflogwyr yn eich cyfrif treth busnes
+
+
+individual_signout.page_title = Rydych wedi allgofnodi – Gwarantau Ar Sail Cyflogaeth – GOV.UK
+individual_signout.H1 = Rydych wedi allgofnodi
+individual_signout.para = Er mwyn gwirio ffeil Gwarantau Ar Sail Cyflogaeth (ERS), mae’n rhaid i chi ddefnyddio’r Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth a’r cyfrinair rydych yn eu defnyddio i reoli TWE i gyflogwyr yn eich cyfrif treth busnes.
+
 #********************************************************************
 # Upload Error Messages
 #********************************************************************
