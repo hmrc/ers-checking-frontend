@@ -77,8 +77,8 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
     )
 
   type RetrievalType = Enrolments ~ Option[AffinityGroup]
-  val buildRetrieval: ~[Enrolments, Option[AffinityGroup]] = new ~(ersEnrolments, Some(AffinityGroup.Organisation))
-  val nonePayeEnrolmentsP: ~[Enrolments, Option[AffinityGroup]] = new ~(nonePayeEnrolments, Some(AffinityGroup.Organisation))
+  val buildRetrieval: ~[Enrolments, Option[AffinityGroup]] = new~(ersEnrolments, Some(AffinityGroup.Organisation))
+  val nonePayeEnrolmentsP: ~[Enrolments, Option[AffinityGroup]] = new~(nonePayeEnrolments, Some(AffinityGroup.Organisation))
 
   "AuthAction" should {
     "return a perform the action if the user is authorised with an empref in the request" in {
@@ -110,7 +110,7 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
         defaultAsyncBody(_.optionalEmpRef shouldBe None)
       )(FakeRequest())
       status(result) shouldBe Status.OK
-        contentAsString(result) shouldBe "Successful"
+      contentAsString(result) shouldBe "Successful"
     }
 
     "return a perform the action if the user is authorised without and empref when user has no enrolments" in {
@@ -190,7 +190,7 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
           )(
             ArgumentMatchers.any(), ArgumentMatchers.any()
           )
-      ).thenReturn(Future.successful(new ~(Enrolments(Set()), Some(AffinityGroup.Individual))))
+      ).thenReturn(Future.successful(new~(Enrolments(Set()), Some(AffinityGroup.Individual))))
 
       val result: Future[Result] = authAction(defaultAsyncBody(_.optionalEmpRef shouldBe None))(FakeRequest())
       status(result) shouldBe Status.SEE_OTHER

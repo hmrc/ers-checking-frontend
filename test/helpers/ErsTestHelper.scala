@@ -48,7 +48,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
-trait ErsTestHelper extends MockitoSugar {// scalastyle:off magic.number
+trait ErsTestHelper extends MockitoSugar { // scalastyle:off magic.number
   lazy val mockAuthAction = new AuthAction(mockAuthConnector, mockAppConfig, testBodyParser)
   lazy val authResultDefault: Enrolments = Enrolments(enrolments)
   val messagesActionBuilder: MessagesActionBuilder = new DefaultMessagesActionBuilderImpl(stubBodyParser[AnyContent](), stubMessagesApi())
@@ -93,7 +93,7 @@ trait ErsTestHelper extends MockitoSugar {// scalastyle:off magic.number
   def mockAnyContentAction: OngoingStubbing[Future[Enrolments ~ Option[AffinityGroup]]] = {
     when(mockAuthConnector.authorise[Enrolments ~ Option[AffinityGroup]]
       (ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-      .thenReturn(Future.successful(new ~(authResultDefault, Some(AffinityGroup.Organisation))))
+      .thenReturn(Future.successful(new~(authResultDefault, Some(AffinityGroup.Organisation))))
   }
 
   when(mockAppConfig.signIn).thenReturn("http://localhost:9553/bas-gateway/sign-in")

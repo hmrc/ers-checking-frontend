@@ -36,7 +36,7 @@ class AuthorisationControllerSpec extends AnyWordSpecLike with Matchers with Opt
   val view: not_authorised = inject[not_authorised]
   val individual_not_authorised_view: individual_not_authorised = inject[individual_not_authorised]
   val individual_signout_view: individual_signout = inject[individual_signout]
-  val authController: AuthorisationController = new AuthorisationController(mcc, mockAppConfig, view,individual_not_authorised_view,individual_signout_view)
+  val authController: AuthorisationController = new AuthorisationController(mcc, mockAppConfig, view, individual_not_authorised_view, individual_signout_view)
 
   "AuthorisationController" should {
     "call notAuthorised" in {

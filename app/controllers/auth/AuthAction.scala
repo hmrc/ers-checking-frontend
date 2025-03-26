@@ -33,6 +33,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 case class RequestWithOptionalEmpRef[A](request: Request[A], optionalEmpRef: Option[EmpRef]) extends WrappedRequest[A](request)
+
 trait AuthIdentifierAction extends ActionBuilder[RequestWithOptionalEmpRef, AnyContent] with ActionFunction[Request, RequestWithOptionalEmpRef]
 
 @Singleton
@@ -52,7 +53,7 @@ class AuthAction @Inject()(override val authConnector: AuthConnector,
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    def getIdentifierValue(identifiers: Seq[EnrolmentIdentifier])(key: String): Option[String] = identifiers.collectFirst{
+    def getIdentifierValue(identifiers: Seq[EnrolmentIdentifier])(key: String): Option[String] = identifiers.collectFirst {
       case EnrolmentIdentifier(`key`, value) => value
     }
 

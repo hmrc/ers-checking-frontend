@@ -36,13 +36,13 @@ class AuthorisationController @Inject()(mcc: MessagesControllerComponents,
       Future.successful(Unauthorized(not_authorised(request, request2Messages, appConfig)))
   }
 
-  def individualNotAuthorised: Action[AnyContent] = Action.async{
+  def individualNotAuthorised: Action[AnyContent] = Action.async {
     implicit request =>
       Future.successful(Unauthorized(individual_not_authorised(request, request2Messages, appConfig)))
   }
 
   def individualSignout: Action[AnyContent] = Action { implicit request =>
-    Ok(individual_signout(request,request2Messages,appConfig))
+    Ok(individual_signout(request, request2Messages, appConfig))
   }
 
   def individualSignoutRedirect: Action[AnyContent] = Action { _ =>
