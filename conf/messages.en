@@ -20,13 +20,12 @@ ers_signed_out.title = For your security, we signed you out - Check your Employm
 ers_signed_out.info = For your security, we signed you out.
 ers_signed_out.link = Sign in
 
-
 ers.start.page_title = Check your Employment Related Securities (ERS) files – Employment Related Securities – GOV.UK
 ers.scheme_types.page_title = Choose scheme or arrangement type – Employment Related Securities – GOV.UK
 ers.file_type.page_title = Choose file type – Employment Related Securities – GOV.UK
-ers.choose_csv_files.title = Choose the .csv files – Employment Related Securities – GOV.UK
+ers.choose_csv_files.title = Choose the CSV files – Employment Related Securities – GOV.UK
 ers.upload_csv.page_title = Upload your ‘{0}’ file – Employment Related Securities – GOV.UK
-ers.upload_ods.page_title = Choose and check the .ods file – Employment Related Securities – GOV.UK
+ers.upload_ods.page_title = Choose and check the ODS file – Employment Related Securities – GOV.UK
 ers.error_report.page_title = Error report – Employment Related Securities – GOV.UK
 ers.confirmation.page_title = Confirmation – Employment Related Securities – GOV.UK
 
@@ -37,9 +36,11 @@ ers.confirmation.page_title = Confirmation – Employment Related Securities –
 ers_start.page_title = Check your Employment Related Securities (ERS) files
 ers_start.intro_para_1 = Use this service to check for errors in the files you need to upload as part of your Employment Related Securities (ERS) annual return.
 ers_start.sub_title = Before you start
-ers_start.intro_para_3 = You’ll need to know which type of ERS scheme or arrangement the file is for.
-ers_start.intro_para_4 = If you’re checking a spreadsheet it needs to be an OpenDocument Spreadsheet (.ods) file. You can also check comma separated values (.csv) files.
-ers_start.intro_para_5 = The time it takes to check a file depends on the speed of your internet connection and the size of your spreadsheet or .csv file.
+ers_start.intro_para_3 = You need to know what type of ERS scheme or arrangement the file is for.
+ers_start.intro_para_4 = You can check either:
+ers_start.intro_para_4_bullet_1 = an Open Document Spreadsheet (ODS) file
+ers_start.intro_para_4_bullet_2 = a comma-separated values (CSV) file
+ers_start.intro_para_5 = The time it takes to check a file depends on the speed of your internet connection and the size of your file.
 ers_start.ers_help = <a href="https://www.gov.uk/government/collections/employment-related-securities" id="ers-help-link" class="govuk-link">Use the Employment Related Securities (ERS) guidance documents</a> to help you create error-free files.
 ers_start.start_now_button = Start now
 
@@ -47,7 +48,7 @@ ers_start.start_now_button = Start now
 # Scheme type messages
 #********************************************************************
 
-ers_scheme_type.page_title = Which type of Employment Related Securities (ERS) scheme or arrangement is this file for?
+ers_scheme_type.page_title = What type of Employment Related Securities (ERS) Scheme or arrangement is this file for?
 ers_scheme_type.csop = Company Share Option Plan (CSOP)
 ers_scheme_type.emi = Enterprise Management Incentives (EMI)
 ers_scheme_type.saye = Save As You Earn (SAYE)
@@ -61,12 +62,12 @@ ers_scheme_type.select_scheme_type = Select the type of Employment Related Secur
 #********************************************************************
 csv_file_upload.upload_your_file_header = Upload your ‘{0}’ file
 
-ers_check_file_type.title = Which type of file do you want to check?
-ers_check_file_type.option_1 = Comma separated values (.csv)
-ers_check_file_type.option_2 = OpenDocument Spreadsheet (.ods)
+ers_check_file_type.title = What type of file do you want to check?
+ers_check_file_type.option_1 = Comma-separated values (CSV) file
+ers_check_file_type.option_2 = Open Document Spreadsheet (ODS) file
 ers_check_file_type.alert = Choose the type of file you want to check
 
-ers_check_csv_file.title = Choose the .csv file or files that you want to check for errors
+ers_check_csv_file.title = Choose the CSV file or files that you want to check for errors
 ers_check_csv_file.check_file_button = Check for errors
 ers_check_csv_file.file_type_error = You chose to check a CSV file, but {0} isn’t a CSV file.
 ers_check_csv_file.noData = The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload {0} as part of your annual return.
@@ -103,7 +104,7 @@ ers_check_csv_file.other.OTHER_NOTIONAL = Discharge of notional loans post-acqui
 ers_check_csv_file.other.OTHER_ENCHANCEMENT = Artificial enhancement of market value. Value of securities post acquisition
 ers_check_csv_file.other.OTHER_SOLD = Securities sold for more than market value post acquisition
 
-ers_check_file.title = Choose the .ods file that you want to check for errors
+ers_check_file.title = Choose the ODS file or files that you want to check for errors
 ers_check_file.file_upload_label = Upload a file.
 ers_check_file.check_file_button = Check for errors
 ers_check_file.file_type_error = You chose to check an ODS file, but {0} isn’t an ODS file.
