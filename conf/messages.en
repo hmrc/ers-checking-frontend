@@ -104,7 +104,7 @@ ers_check_csv_file.other.OTHER_NOTIONAL = Discharge of notional loans post-acqui
 ers_check_csv_file.other.OTHER_ENCHANCEMENT = Artificial enhancement of market value. Value of securities post acquisition
 ers_check_csv_file.other.OTHER_SOLD = Securities sold for more than market value post acquisition
 
-ers_check_file.title = Choose the ODS file or files that you want to check for errors
+ers_check_file.title = Choose the ODS file that you want to check for errors
 ers_check_file.file_upload_label = Upload a file.
 ers_check_file.check_file_button = Check your file
 ers_check_file.file_type_error = You chose to check an ODS file, but {0} isn’t an ODS file.

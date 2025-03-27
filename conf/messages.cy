@@ -104,7 +104,7 @@ ers_check_csv_file.other.OTHER_NOTIONAL =Rhyddhau benthyciadau tybiannol ar ôl 
 ers_check_csv_file.other.OTHER_ENCHANCEMENT =Gwelliant artiffisial y gwerth marchnad. Gwerth gwarantau ar ôl caffael
 ers_check_csv_file.other.OTHER_SOLD =Gwarantau sydd wedi’u gwerthu am fwy na’r gwerth marchnadol ar ôl caffael
 
-ers_check_file.title =Dewis y ffeil neu ffeiliau ODS rydych am eu gwirio am wallau
+ers_check_file.title =Dewiswch y ffeil ODS rydych am ei gwirio am wallau
 ers_check_file.file_upload_label = Uwchlwytho ffeil
 ers_check_file.check_file_button =Gwiriwch eich ffeil
 ers_check_file.file_type_error =Gwnaethoch ddewis gwirio ffeil ODS, ond nid yw {0} yn ffeil ODS.
