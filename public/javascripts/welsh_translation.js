@@ -10,7 +10,8 @@ const content = {
     "csv.file.name.invalid.chars" : "Choose a different file &ndash; the file's name can't contain invalid characters",
     "ods.file.too.large" : "The attached file is to large. We only accept files less than {0}MB",
     "ods.file.name.too.long" : "Choose a different file &ndash; the file's name must be {0} characters or less",
-    "ods.file.name.invalid.chars" : "Choose a different file &ndash; the file's name can't contain invalid characters"
+    "ods.file.name.invalid.chars" : "Choose a different file &ndash; the file's name can't contain invalid characters",
+    "select.a.file" : "Select a file to upload"
   },
   "cy" : {
     "ogl.pt.1" : "Mae'r holl gynnwys ar gael dan y",
@@ -23,7 +24,8 @@ const content = {
     "csv.file.name.invalid.chars" : "Dewiswch ffeil wahanol &ndash; na all enw’r ffeil gynnwys cymeriadau annilys",
     "ods.file.too.large" : "Mae’r ffeil a atodwyd yn rhy fawr. Rydym dim ond yn derbyn ffeiliau sy’n llai na {0}MB",
     "ods.file.name.too.long" : "Dewiswch ffeil wahanol – rhaid i enw’r ffeil fod yn {0} o gymeriadau neu lai",
-    "ods.file.name.invalid.chars" : "Dewiswch ffeil wahanol &ndash; na all enw’r ffeil gynnwys cymeriadau annilys"
+    "ods.file.name.invalid.chars" : "Dewiswch ffeil wahanol &ndash; na all enw’r ffeil gynnwys cymeriadau annilys",
+    "select.a.file" : "Dewiswch ffeil i’w huwchlwytho"
   }
 }
 

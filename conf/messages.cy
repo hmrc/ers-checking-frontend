@@ -106,7 +106,7 @@ ers_check_csv_file.other.OTHER_SOLD =Gwarantau sydd wedi’u gwerthu am fwy na�
 
 ers_check_file.title =Dewis y ffeil neu ffeiliau ODS rydych am eu gwirio am wallau
 ers_check_file.file_upload_label = Uwchlwytho ffeil
-ers_check_file.check_file_button =Gwirio am wallau
+ers_check_file.check_file_button =Gwiriwch eich ffeil
 ers_check_file.file_type_error =Gwnaethoch ddewis gwirio ffeil ODS, ond nid yw {0} yn ffeil ODS.
 ers_check_file.no_file_error =Dim ffeil wedi’i dewis. Dewiswch eich ffeil.
 
