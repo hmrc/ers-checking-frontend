@@ -3,7 +3,6 @@
 /***********************/
 
 const MAX_CSV_FILESIZE = 209715200// 200 MB
-document.getElementById("check-file-button").disabled = true;
 
 function csvFileSizeOK(fileSize) {
     if (ie < 10) {
