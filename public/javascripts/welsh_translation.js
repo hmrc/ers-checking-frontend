@@ -11,7 +11,7 @@ const content = {
     "ods.file.too.large" : "The attached file is to large. We only accept files less than {0}MB",
     "ods.file.name.too.long" : "Choose a different file &ndash; the file's name must be {0} characters or less",
     "ods.file.name.invalid.chars" : "Choose a different file &ndash; the file's name can't contain invalid characters",
-    "select.a.file" : "select a file to upload"
+    "select.a.file" : "Select a file to upload"
   },
   "cy" : {
     "ogl.pt.1" : "Mae'r holl gynnwys ar gael dan y",
