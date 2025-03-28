@@ -28,6 +28,7 @@ import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import repository.ErsCheckingFrontendSessionCacheRepository
 import services.UpscanService
+import services.audit.AuditEvents
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
@@ -48,6 +49,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
                                           checking_success: views.html.checking_success,
                                           invalid_file: views.html.file_upload_problem,
                                           file_upload_error: views.html.file_upload_error,
+                                          auditEvents: AuditEvents,
                                           override val global_error: views.html.global_error
                                          )(implicit ec: ExecutionContext, ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
   extends FrontendController(mcc) with I18nSupport with ErsBaseController with Logging {
@@ -200,6 +202,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
       errorMsg <- sessionCacheService.fetchAndGetEntry[String](ersUtil.FORMAT_ERROR_CACHE)
       errorParams <- sessionCacheService.fetchAndGetEntry[Seq[String]](ersUtil.FORMAT_ERROR_CACHE_PARAMS)
     } yield {
+      auditEvents.fileProcessingErrorAudit(fileType, schemeName, errorMsg)
       Ok(format_errors(
         fileType,
         ersUtil.getSchemeName(schemeName)._1,
