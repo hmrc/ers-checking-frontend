@@ -72,7 +72,7 @@ function showErrorMsg(msg) {
         document.getElementById("errors").classList.remove("govuk-!-display-none")
     }
     document.getElementById("input-file-name")
-        .insertAdjacentHTML('beforebegin',"<p id='error-summary' class='govuk-error-message' tabindex'-1' role='alert' aria-labelledby='error-heading'>" + msg + ".</p>")
+        .insertAdjacentHTML('beforebegin',"<p id='error-summary' class='govuk-error-message' tabindex'-1' role='alert' aria-labelledby='error-heading'>" + msg + "</p>")
     document.querySelector(".govuk-form-group").classList.add("govuk-form-group--error")
 
     document.querySelector(".govuk-error-summary__list a").innerHTML = msg
