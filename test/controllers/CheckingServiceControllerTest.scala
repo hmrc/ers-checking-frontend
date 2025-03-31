@@ -16,6 +16,7 @@
 
 package controllers
 
+import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import helpers.ErsTestHelper
 import models.CSformMappings
 import models.upscan._
@@ -30,7 +31,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesImpl}
-import play.api.mvc.{Call, DefaultMessagesControllerComponents, Result}
+import play.api.mvc.{AnyContent, Call, DefaultMessagesControllerComponents, Result}
 import play.api.test.Helpers._
 import play.api.test.Injecting
 import views.html._
@@ -359,7 +360,14 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
 
     "give a status OK and shows check success page" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.showCheckingSuccessPage()(Fixtures.buildFakeRequestWithSessionId("GET"), implicitly[Messages])
+      val result = controllerUnderTest.showCheckingSuccessPage()(
+        RequestWithOptionalEmpRefAndPAYE(
+          Fixtures.buildFakeRequestWithSessionId("GET"),
+          None,
+          PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig)
+        ),
+        implicitly[Messages]
+      )
       status(result) shouldBe Status.OK
     }
 

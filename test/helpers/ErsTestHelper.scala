@@ -37,19 +37,20 @@ import services.UpscanService
 import services.audit.AuditEvents
 import services.validation.ErsValidator
 import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
+import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import utils.ERSUtil
 import java.time.{LocalDate, ZoneOffset}
-import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
 import scala.language.postfixOps
 
 trait ErsTestHelper extends MockitoSugar { // scalastyle:off magic.number
   lazy val mockAuthAction = new AuthAction(mockAuthConnector, mockAppConfig, testBodyParser)
-  lazy val authResultDefault: Enrolments = Enrolments(enrolments)
+  lazy val authResultDefault: Enrolments ~ Option[AffinityGroup.Organisation.type] = Enrolments(enrolments) and organisationAffinityGroup
   val messagesActionBuilder: MessagesActionBuilder = new DefaultMessagesActionBuilderImpl(stubBodyParser[AnyContent](), stubMessagesApi())
   val cc: ControllerComponents = stubControllerComponents()
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
@@ -58,9 +59,8 @@ trait ErsTestHelper extends MockitoSugar { // scalastyle:off magic.number
     EnrolmentIdentifier("TaxOfficeNumber", "123"),
     EnrolmentIdentifier("TaxOfficeReference", "4567890")),
     "Activated"))
-
   val agentOrg: Some[AffinityGroup] = Some(AffinityGroup.Organisation)
-
+  val organisationAffinityGroup: Option[AffinityGroup.Organisation.type] = Some(AffinityGroup.Organisation)
   val mockHttp: DefaultHttpClient = mock[DefaultHttpClient]
   val mockErsValidator: ErsValidator = mock[ErsValidator]
   val realErsValidator: ErsValidator = new ErsValidator
@@ -92,7 +92,7 @@ trait ErsTestHelper extends MockitoSugar { // scalastyle:off magic.number
   def mockAnyContentAction: OngoingStubbing[Future[Enrolments ~ Option[AffinityGroup]]] = {
     when(mockAuthConnector.authorise[Enrolments ~ Option[AffinityGroup]]
       (ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-      .thenReturn(Future.successful(new~(authResultDefault, Some(AffinityGroup.Organisation))))
+      .thenReturn(Future.successful(authResultDefault))
   }
 
   when(mockAppConfig.signIn).thenReturn("http://localhost:9553/bas-gateway/sign-in")
@@ -107,6 +107,9 @@ trait ErsTestHelper extends MockitoSugar { // scalastyle:off magic.number
   when(mockAppConfig.errorCount).thenReturn(20)
   when(mockAppConfig.upscanFileSizeLimit).thenReturn(209715200)
   when(mockAppConfig.allCsvFilesCacheRetryAmount).thenReturn(3)
+  when(mockAppConfig.dassAgentClientsPath).thenReturn("/ers/agent/clients")
+  when(mockAppConfig.addBusinessTaxAccountPath).thenReturn("/business-account")
+  when(mockAppConfig.dassGatewayHost).thenReturn("/dassGatewayHost")
 
   //PageBuilder
   when(mockErsUtil.SCHEME_CSOP).thenReturn("1")

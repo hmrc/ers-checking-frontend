@@ -17,7 +17,7 @@
 package controllers
 
 import config.ApplicationConfig
-import controllers.auth.AuthAction
+import controllers.auth.{AuthAction, RequestWithOptionalEmpRefAndPAYE}
 
 import javax.inject.{Inject, Singleton}
 import models.upscan.{NotStarted, UploadStatus, UpscanCsvFilesList}
@@ -54,7 +54,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
                                          )(implicit ec: ExecutionContext, ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
   extends FrontendController(mcc) with I18nSupport with ErsBaseController with Logging {
 
-  def startPage(): Action[AnyContent] = authAction.async { implicit request =>
+  def startPage(): Action[AnyContent] = authAction.async { implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent] =>
     showStartPage()
   }
 
@@ -172,11 +172,11 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
   }
 
   def checkingSuccessPage(): Action[AnyContent] = authAction.async {
-    implicit request =>
+    implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent] =>
       showCheckingSuccessPage()
   }
 
-  def showCheckingSuccessPage()(implicit request: Request[AnyRef], messages: Messages): Future[Result] = {
+  def showCheckingSuccessPage()(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], messages: Messages): Future[Result] = {
     Future.successful(Ok(checking_success(request, messages, appConfig)))
   }
 

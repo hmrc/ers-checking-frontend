@@ -1,5 +1,5 @@
 @*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  *@
 
 @import config.ApplicationConfig
+@import controllers.auth.RequestWithOptionalEmpRefAndPAYE
 
 @this(ers_main: views.html.ers_main,
         govukPanel: GovukPanel
 )
 
-@(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
+@(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], messages: Messages, appConfig: ApplicationConfig)
 
 @ers_main(title = messages("ers.confirmation.page_title")) {
     @govukPanel(Panel(
@@ -29,8 +30,27 @@
     ))
 
     <h2 class="govuk-heading-m">@messages("ers_file_format_successful.sub_heading")</h2>
-    <p class="govuk-body">@messages("ers_file_format_successful.instructions")</p>
-    <p class="govuk-body"><a class="govuk-link" href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@messages("ers_file_format_successful.return_to_start_page_link")</a></p>
+    <p class="govuk-body">@messages("ers_file_format_successful.lead_in")</p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li>
+            @defining(request.orgOrAgentPAYEDetails.getPAYERedirectCall) { payeRedirect =>
+                @if(request.orgOrAgentPAYEDetails.isAgent){
+                    <p class="govuk-body">
+                        <a class="govuk-link" href="@payeRedirect" id="chose-a-client-link-agent">@messages("ers_file_format_successful.agent.bullet_one_link")</a>
+                        @messages("ers_file_format_successful.agent.bullet_one_end")
+                    </p>
+                } else {
+                    <p class="govuk-body">
+                        <a class="govuk-link" href="@payeRedirect" id="chose-a-client-link-org">@messages("ers_file_format_successful.org.bullet_one_link")</a>
+                        @messages("ers_file_format_successful.org.bullet_one_end")
+                    </p>
+                }
+            }
+        </li>
+        <li>
+            <p class="govuk-body"><a class="govuk-link" href="@routes.CheckingServiceController.schemeTypePage()" id="check-another-return-file-link">@messages("ers_file_format_successful.return_to_start_page_link")</a></p>
+        </li>
+    </ul>
     <p class="govuk-body">
         <a class="govuk-link" href="https://www.gov.uk/done/employment-related-securities-files" id="finished">@messages("ers_file_format_successful.feedback")</a>
         @messages("ers_file_format_successful.feedback_time")

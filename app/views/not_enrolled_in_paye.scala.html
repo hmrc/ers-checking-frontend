@@ -1,0 +1,81 @@
+@*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.ApplicationConfig
+@import controllers.auth.RequestWithOptionalEmpRefAndPAYE
+
+@this(
+    ers_main: views.html.ers_main,
+    govukPanel: GovukPanel,
+    govukButton: GovukButton,
+    formHelper: FormWithCSRF
+)
+
+@(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], messages: Messages, appConfig: ApplicationConfig)
+
+@ers_main(title = messages("ers.not_enrolled_paye.page_title"), disableSignOut = true) {
+
+    <h1 class="govuk-heading-l">@messages("ers.not_enrolled_paye.header")</h1>
+
+    @if(request.orgOrAgentPAYEDetails.isAgent){
+        <p class="govuk-body">@messages("ers.not_enrolled_paye.agent.lead_in")</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li>
+                @messages("ers.not_enrolled_paye.agent.bullet_one")
+            </li>
+            <li>
+                @messages("ers.not_enrolled_paye.agent.bullet_two")
+            </li>
+        </ul>
+        <h2 class="govuk-heading-m">@messages("ers.not_enrolled_paye.agent.second_header")</h2>
+        <p class="govuk-body">@messages("ers.not_enrolled_paye.agent.paragraph_one")</p>
+        <p class="govuk-body">
+            @messages("ers.not_enrolled_paye.agent.paragraph_two.start")
+            <a class="govuk-link" href="https://www.gov.uk/guidance/payecis-for-agents-online-service" id="chose-a-client-link-agent">@messages("ers.not_enrolled_paye.agent.paragraph_two.link_text")</a>
+            @messages("ers.not_enrolled_paye.agent.paragraph_two.end")
+        </p>
+        <h2 class="govuk-heading-m">@messages("ers.not_enrolled_paye.agent.third_header")</h2>
+        <p class="govuk-body">@messages("ers.not_enrolled_paye.agent.lead_in_two")</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li>
+                @messages("ers.not_enrolled_paye.agent.bullet_three")
+            </li>
+            <li>
+                @messages("ers.not_enrolled_paye.agent.bullet_four")
+            </li>
+        </ul>
+    } else {
+        <p class="govuk-body">@messages("ers.not_enrolled_paye.org.paragraph_one")</p>
+        <p class="govuk-body">@messages("ers.not_enrolled_paye.org.paragraph_two")</p>
+        <h2 class="govuk-heading-m">@messages("ers.not_enrolled_paye.org.second_header")</h2>
+        <p class="govuk-body">
+            @messages("ers.not_enrolled_paye.org.paragraph_three.start")
+            <a class="govuk-link" href=@appConfig.addBusinessTaxAccountPath id="chose-a-client-link-org">@messages("ers.not_enrolled_paye.org.paragraph_three.link_text")</a>
+            @messages("ers.not_enrolled_paye.org.paragraph_three.end")
+        </p>
+        <h2 class="govuk-heading-m">@messages("ers.not_enrolled_paye.org.third_header")</h2>
+        <p class="govuk-body">@messages("ers.not_enrolled_paye.org.paragraph_four")</p>
+    }
+
+    @formHelper(action = routes.CheckPAYEController.signOutPAYE(), Symbol("autoComplete") -> "off") {
+        @govukButton(
+            Button(
+                content = Text(messages("ers.signout")),
+                attributes = Map("id" -> "continue")
+            )
+        )
+    }
+}

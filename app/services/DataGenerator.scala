@@ -17,7 +17,7 @@
 package services
 
 import config.ApplicationConfig
-import controllers.auth.RequestWithOptionalEmpRef
+import controllers.auth.RequestWithOptionalEmpRefAndPAYE
 import metrics.Metrics
 import models.{ERSFileProcessingException, SheetErrors}
 import play.api.Logger
@@ -51,7 +51,7 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
   private[services] val ersSheetsConfig = if (appConfig.csopV5Enabled) ersSheetsWithCsopV5 else ersSheets
 
   def getErrors(iterator: Iterator[String], scheme: String, fileName: String)
-               (implicit hc: HeaderCarrier, request: RequestWithOptionalEmpRef[_], messages: Messages): ListBuffer[SheetErrors] = {
+               (implicit hc: HeaderCarrier, request: RequestWithOptionalEmpRefAndPAYE[_], messages: Messages): ListBuffer[SheetErrors] = {
 
     var rowNum = 0
     implicit var sheetName: String = ""

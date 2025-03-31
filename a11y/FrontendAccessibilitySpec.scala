@@ -1,9 +1,14 @@
 import config.ApplicationConfig
+import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import models.{CsvFiles, SheetErrors}
 import org.scalacheck.Arbitrary
+import play.api.Configuration
 import play.api.data.Form
 import play.api.mvc.{AnyContent, Request}
+import play.api.test.FakeRequest
 import play.twirl.api.Html
+import uk.gov.hmrc.domain.EmpRef
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.scalatestaccessibilitylinter.views.AutomaticAccessibilitySpec
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 import utils.ERSUtil
@@ -24,6 +29,9 @@ class FrontendAccessibilitySpec extends AutomaticAccessibilitySpec {
   val viewPackageName = "views.html"
 
   val layoutClasses: Seq[Class[_]] = Seq(classOf[ers_main])
+  def dassOrgSchemesPath(empRef: EmpRef): String = s"/ers/org/${empRef.value}/schemes"
+  val config: ApplicationConfig = new ApplicationConfig(new ServicesConfig(app.configuration))
+  val payeDetails: PAYEDetails = PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, config)
 
   override def renderViewByClass: PartialFunction[Any, Html] = {
     case check_csv_file: check_csv_file =>
@@ -33,7 +41,11 @@ class FrontendAccessibilitySpec extends AutomaticAccessibilitySpec {
     case check_file_type: check_file_type =>
       implicit val arbitraryCheckFileTypeForm: Arbitrary[Form[models.CS_checkFileType]] = fixed(models.CSformMappings.checkFileTypeForm)
       render(check_file_type)
-    case checking_success: checking_success => render(checking_success)
+    case checking_success: checking_success =>
+      implicit val requestWithOptionalEmpRefAndPAYE: Arbitrary[RequestWithOptionalEmpRefAndPAYE[AnyContent]] =
+        fixed(RequestWithOptionalEmpRefAndPAYE(fakeRequest, None, payeDetails
+        ))
+      render(checking_success)
     case file_upload_error: file_upload_error => render(file_upload_error)
     case file_upload_problem: file_upload_problem => render(file_upload_problem)
     case format_errors: format_errors =>
@@ -54,7 +66,16 @@ class FrontendAccessibilitySpec extends AutomaticAccessibilitySpec {
     case signed_out: signed_out =>
       implicit val arbitraryRequest: Arbitrary[Request[AnyContent]] = fixed(fakeRequest)
       render(signed_out)
-
+    case not_enrolled_in_paye: not_enrolled_in_paye =>
+      implicit val requestWithOptionalEmpRefAndPAYE: Arbitrary[RequestWithOptionalEmpRefAndPAYE[AnyContent]] =
+        fixed(RequestWithOptionalEmpRefAndPAYE(fakeRequest, None, payeDetails))
+      render(not_enrolled_in_paye)
+    case sign_out_paye: sign_out_paye =>
+      implicit val requestWithOptionalEmpRefAndPAYE: Arbitrary[RequestWithOptionalEmpRefAndPAYE[AnyContent]] =
+        fixed(RequestWithOptionalEmpRefAndPAYE(fakeRequest, None, payeDetails))
+      render(sign_out_paye)
+    case individual_signout: individual_signout => render(individual_signout)
+    case individual_not_authorised: individual_not_authorised => render(individual_not_authorised)
   }
 
   runAccessibilityTests()
