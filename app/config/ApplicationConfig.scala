@@ -56,6 +56,10 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
   lazy val signIn: String = s"$basGatewayHost/bas-gateway/$loginPath"
   lazy val signOut: String = s"$basGatewayHost/bas-gateway/sign-out-without-state"
   lazy val timeOut: String = s"$loginCallback/signed-out"
+  lazy val dassGatewayHost: String = config.getString("govuk-tax.dass-gateway.host")
+  lazy val dassAgentClientsPath: String = s"$dassGatewayHost/ers/agent/clients"
+  lazy val businessTaxAccountHost: String = config.getString("govuk-tax.business-tax-account.host")
+  lazy val addBusinessTaxAccountPath: String = s"$businessTaxAccountHost/business-account"
 
   lazy val timeOutUrl: String = getSignOutUrl(timeOut)
   lazy val timeOutSeconds: Int = config.getInt("sessionTimeout.timeoutSeconds")

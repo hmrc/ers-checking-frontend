@@ -17,7 +17,7 @@
 package services
 
 import controllers.Fixtures
-import controllers.auth.RequestWithOptionalEmpRef
+import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import helpers.ErsTestHelper
 import models.{ERSFileProcessingException, SheetErrors}
 import org.mockito.ArgumentMatchers
@@ -78,7 +78,7 @@ class ProcessODSServiceSpec
   lazy val testParserUtil: ParserUtil = fakeApplication.injector.instanceOf[ParserUtil]
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
   implicit val scheme: String = "testScheme"
-  implicit val fakeRequest: RequestWithOptionalEmpRef[AnyContent] = RequestWithOptionalEmpRef(FakeRequest(), None)
+  implicit val fakeRequest: RequestWithOptionalEmpRefAndPAYE[AnyContent] = RequestWithOptionalEmpRefAndPAYE(FakeRequest(), None, PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, None, mockAppConfig))
 
   "calling performODSUpload" should {
 

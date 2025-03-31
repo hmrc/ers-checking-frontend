@@ -16,7 +16,7 @@
 
 package services.audit
 
-import controllers.auth.RequestWithOptionalEmpRef
+import controllers.auth.RequestWithOptionalEmpRefAndPAYE
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
@@ -54,7 +54,7 @@ class AuditEvents @Inject()(val auditConnector: AuditConnector)(implicit val ec:
   }
 
   def numRowsInSchemeData(sheetName : String, rowsWithData : Int)
-                         (implicit hc: HeaderCarrier, request: RequestWithOptionalEmpRef[_], ec: ExecutionContext): Future[AuditResult] = {
+                         (implicit hc: HeaderCarrier, request: RequestWithOptionalEmpRefAndPAYE[_], ec: ExecutionContext): Future[AuditResult] = {
     val empRef = request.optionalEmpRef.map(_.value).getOrElse("")
     sendEvent("CheckingServiceNumRowsInSchemeData", Map(
     "sheetName" -> sheetName,

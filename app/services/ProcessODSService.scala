@@ -17,7 +17,7 @@
 package services
 
 import java.nio.file.Path
-import controllers.auth.RequestWithOptionalEmpRef
+import controllers.auth.RequestWithOptionalEmpRefAndPAYE
 
 import javax.inject.{Inject, Singleton}
 import models.{ERSFileProcessingException, FileObject, SheetErrors}
@@ -41,7 +41,7 @@ class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
                                   ersUtil: ERSUtil
                                  )(implicit ec: ExecutionContext) extends Logging {
   def performODSUpload(fileName: String, processor: StaxProcessor)
-                      (implicit request: RequestWithOptionalEmpRef[AnyContent], scheme: String, hc: HeaderCarrier, messages: Messages): Future[Try[Boolean]] = {
+                      (implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], scheme: String, hc: HeaderCarrier, messages: Messages): Future[Try[Boolean]] = {
     try {
       val errorList: ListBuffer[SheetErrors] = checkFileType(processor, fileName)(scheme, hc, request, messages)
       val cache = sessionCacheService.cache[String](ersUtil.FILE_NAME_CACHE, fileName).recover {
@@ -87,7 +87,7 @@ class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
   }
 
   def checkFileType(processor: StaxProcessor, fileName: String)
-                   (implicit scheme: String, hc: HeaderCarrier, request: RequestWithOptionalEmpRef[_], messages: Messages): ListBuffer[SheetErrors] = {
+                   (implicit scheme: String, hc: HeaderCarrier, request: RequestWithOptionalEmpRefAndPAYE[_], messages: Messages): ListBuffer[SheetErrors] = {
     if (!uploadedFileUtil.checkODSFileType(fileName)) {
       throw ERSFileProcessingException(
         messages("ers_check_file.file_type_error", fileName),
@@ -97,7 +97,7 @@ class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
   }
 
   def parseOdsContent(processor: StaxProcessor, uploadedFileName: String)
-                     (implicit scheme: String, hc: HeaderCarrier, request: RequestWithOptionalEmpRef[_], messages: Messages): ListBuffer[SheetErrors] = {
+                     (implicit scheme: String, hc: HeaderCarrier, request: RequestWithOptionalEmpRefAndPAYE[_], messages: Messages): ListBuffer[SheetErrors] = {
     dataGenerator.getErrors(processor, scheme, uploadedFileName)
   }
 }

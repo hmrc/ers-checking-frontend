@@ -182,7 +182,7 @@ class DataGeneratorSpec
 
     "get an exception if ods file has less than 9 rows and doesn't have header data" in new DataGeneratorObj("CSOP") {
       val result: ERSFileProcessingException = intercept[ERSFileProcessingException] {
-        getErrors(XMLTestData.getInvalidCSOPWithoutHeaders,"csop","CSOP.ods")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
+        getErrors(XMLTestData.getInvalidCSOPWithoutHeaders,"csop","CSOP.ods")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), implicitly[Messages])
       }
       result.message mustBe "ers.exceptions.dataParser.incorrectHeader"
       result.optionalParams mustBe Seq("CSOP_OptionsGranted_V4", "CSOP.ods")
@@ -190,7 +190,7 @@ class DataGeneratorSpec
 
     "get an exception if ods file has more than 1 sheet but 1 of the sheets has less than 9 rows and doesn't have header data" in new DataGeneratorObj("CSOP") {
       val result: ERSFileProcessingException = intercept[ERSFileProcessingException] {
-        getErrors(XMLTestData.getInvalidCSOPWith2Sheets1WithoutHeaders,"csop","CSOP.ods")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
+        getErrors(XMLTestData.getInvalidCSOPWith2Sheets1WithoutHeaders,"csop","CSOP.ods")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), implicitly[Messages])
       }
       result.message mustBe "ers.exceptions.dataParser.incorrectHeader"
       result.optionalParams mustBe Seq("CSOP_OptionsGranted_V4", "CSOP.ods")
@@ -198,14 +198,14 @@ class DataGeneratorSpec
 
     "get an exception if ods file doesn't contain any data" in new DataGeneratorObj("CSOP") {
       val result: ERSFileProcessingException = intercept[ERSFileProcessingException] {
-        getErrors(XMLTestData.getCSOPWithoutData,"csop","CSOP.ods")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
+        getErrors(XMLTestData.getCSOPWithoutData,"csop","CSOP.ods")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), implicitly[Messages])
       }
       result.message mustBe "ers.exceptions.dataParser.noData"
       result.optionalParams mustBe Seq.empty[String]
     }
 
     "get no errors for EMI" in new DataGeneratorObj("EMI") {
-      val result: ListBuffer[SheetErrors] = getErrors(XMLTestData.getEMIAdjustmentsTemplate,"emi","")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
+      val result: ListBuffer[SheetErrors] = getErrors(XMLTestData.getEMIAdjustmentsTemplate,"emi","")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), implicitly[Messages])
       result.foreach(_.errors.size mustBe 0)
     }
 
@@ -214,7 +214,7 @@ class DataGeneratorSpec
         .thenReturn(Some(List(ValidationError(Cell("A", 1, "badValue"), "rule", "error", "errorMessage"))))
         .thenReturn(None)
       val result: ListBuffer[SheetErrors] = getErrors(XMLTestData.getInvalidEMIAdjustmentsTemplate,"emi","")(
-        hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
+        hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), implicitly[Messages])
       result.head.errors.size mustBe 1
     }
 
@@ -225,7 +225,7 @@ class DataGeneratorSpec
             ValidationError(Cell("A", 1, "badValue"), "rule", "error", "errorMessage")
           )))
         .thenReturn(None)
-      val result: ListBuffer[SheetErrors] = getErrors(XMLTestData.getEMIAdjustmentsTemplate ++ XMLTestData.getInvalidEMIReplacedTemplate,"emi","")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
+      val result: ListBuffer[SheetErrors] = getErrors(XMLTestData.getEMIAdjustmentsTemplate ++ XMLTestData.getInvalidEMIReplacedTemplate,"emi","")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), implicitly[Messages])
       result(1).errors.size mustBe 1
     }
 
@@ -233,7 +233,7 @@ class DataGeneratorSpec
       when(mockErsValidator.validateRow(any())(any(), any()))
         .thenReturn(Some(List(ValidationError(Cell("A", 13, "badValue"), "rule", "error", "errorMessage"))))
         .thenReturn(None)
-      val result: ListBuffer[SheetErrors] = getErrors(XMLTestData.getInvalidEMIWithRepeats,"emi","")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET"), implicitly[Messages])
+      val result: ListBuffer[SheetErrors] = getErrors(XMLTestData.getInvalidEMIWithRepeats,"emi","")(hc = HeaderCarrier(),Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), implicitly[Messages])
       result.head.errors.size mustBe 1
       result.head.errors.head.cell.row mustBe 13
     }

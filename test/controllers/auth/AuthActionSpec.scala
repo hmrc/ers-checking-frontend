@@ -54,7 +54,7 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
 
   def authAction: AuthAction = new AuthAction(mockAuthConnector, mockAppConfig, testBodyParser)
 
-  def defaultAsyncBody(requestTestCase: RequestWithOptionalEmpRef[_] => Assertion): RequestWithOptionalEmpRef[_] => Result = testRequest => {
+  def defaultAsyncBody(requestTestCase: RequestWithOptionalEmpRefAndPAYE[_] => Assertion): RequestWithOptionalEmpRefAndPAYE[_] => Result = testRequest => {
     requestTestCase(testRequest)
     Results.Ok("Successful")
   }

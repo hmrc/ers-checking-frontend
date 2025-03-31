@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.auth.RequestWithOptionalEmpRef
+import controllers.auth.{RequestWithOptionalEmpRefAndPAYE, PAYEDetails}
 import helpers.ErsTestHelper
 import models.CsvFiles
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesList, UpscanIds}
@@ -32,7 +32,7 @@ import play.api.data.Form
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesImpl}
-import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents, Request, Result}
+import play.api.mvc.{AnyContent, AnyContentAsFormUrlEncoded, DefaultMessagesControllerComponents, Request, Result}
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Injecting}
 import uk.gov.hmrc.http.HttpResponse
@@ -70,7 +70,7 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
     "call showCheckCsvFilesPage if user is authenticated" in {
       val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, mockSessionCacheRepo, selectFileTypeView, globalErrorView) {
         override def showCheckCsvFilesPage()(
-          implicit request: RequestWithOptionalEmpRef[AnyContent]): Future[Result] = Future.successful(Ok("Authenticated"))
+          implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Result] = Future.successful(Ok("Authenticated"))
         mockAnyContentAction
       }
       val result = controllerUnderTest.selectCsvFilesPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
@@ -89,7 +89,7 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
       when(mockSessionCacheRepo.delete(refEq(mockErsUtil.CSV_FILES_UPLOAD))(any()))
         .thenReturn(Future.failed(new RuntimeException("this failed tbh")))
 
-      val result = controllerUnderTest.showCheckCsvFilesPage()(Fixtures.buildEmpRefRequestWithSessionId("GET"))
+      val result = controllerUnderTest.showCheckCsvFilesPage()(Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig))
 
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
       contentAsString(result) shouldBe "this is very bad"
@@ -108,7 +108,7 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
       when(mockErsUtil.getCsvFilesList(any())).thenReturn(Seq(CsvFiles("a file")))
       when(mockErsUtil.getPageElement(any(), any(), any())).thenReturn("this is okay!")
 
-      val result = controllerUnderTest.showCheckCsvFilesPage()(Fixtures.buildEmpRefRequestWithSessionId("GET"))
+      val result = controllerUnderTest.showCheckCsvFilesPage()(Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig))
 
       status(result) shouldBe Status.OK
       assert(contentAsString(result).contains("this is okay!"))
@@ -121,7 +121,7 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
     "call validateCsvFilesPageSelected if user is authenticated" in {
       val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, mockSessionCacheRepo, selectFileTypeView, globalErrorView) {
         override def validateCsvFilesPageSelected()(
-          implicit request: RequestWithOptionalEmpRef[AnyContent]): Future[Result] = Future.successful(Ok("here we go!"))
+          implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Result] = Future.successful(Ok("here we go!"))
         mockAnyContentAction
       }
       val result = controllerUnderTest.checkCsvFilesPageSelected().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
@@ -141,7 +141,7 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
       }
       val request = FakeRequest("GET", "").withFormUrlEncodedBody(("files", "file"), ("fileId", "asdasd£$aaa"))
 
-      val result = controllerUnderTest.validateCsvFilesPageSelected()(RequestWithOptionalEmpRef(request, None))
+      val result = controllerUnderTest.validateCsvFilesPageSelected()(RequestWithOptionalEmpRefAndPAYE(request, None, PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig)))
       status(result) shouldBe Status.OK
       contentAsString(result) shouldBe "this is a reload"
     }
@@ -152,7 +152,7 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
       }
       val request = FakeRequest("GET", "")
 
-      val result = controllerUnderTest.validateCsvFilesPageSelected()(RequestWithOptionalEmpRef(request, None))
+      val result = controllerUnderTest.validateCsvFilesPageSelected()(RequestWithOptionalEmpRefAndPAYE(request, None, PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig)))
       status(result) shouldBe Status.SEE_OTHER
     }
 
@@ -164,7 +164,7 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
       }
       val request = FakeRequest("GET", "").withFormUrlEncodedBody(("files", "file"), ("fileId", "1234"))
 
-      val result = controllerUnderTest.validateCsvFilesPageSelected()(RequestWithOptionalEmpRef(request, None))
+      val result = controllerUnderTest.validateCsvFilesPageSelected()(RequestWithOptionalEmpRefAndPAYE(request, None, PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig)))
       status(result) shouldBe Status.OK
       contentAsString(result) shouldBe "form good"
     }

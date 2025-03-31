@@ -21,7 +21,7 @@ import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes}
 import org.apache.pekko.stream.scaladsl.{Sink, Source}
 import org.apache.pekko.testkit.TestKit
-import controllers.auth.RequestWithOptionalEmpRef
+import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import helpers.ErsTestHelper
 import models.ERSFileProcessingException
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
@@ -118,7 +118,7 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
     }
 
   "Calling UploadController.uploadCSVFile" should {
-    implicit val fakeRequest: RequestWithOptionalEmpRef[AnyContent] = RequestWithOptionalEmpRef(Fixtures.buildFakeRequestWithSessionId("GET"), None)
+    implicit val fakeRequest: RequestWithOptionalEmpRefAndPAYE[AnyContent] = RequestWithOptionalEmpRefAndPAYE(Fixtures.buildFakeRequestWithSessionId("GET"), None, PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig))
 
     "give a redirect status and show checkingSuccessPage if authenticated and no validation errors" in {
       val controllerUnderTest = buildFakeUploadControllerCsv()
@@ -157,7 +157,7 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
       val controllerUnderTest = buildFakeUploadControllerCsv()
       val result = controllerUnderTest.finaliseRequestAndRedirect(List(
         Future.successful(Left(ERSFileProcessingException("this is a problem", "help"))))
-      )(RequestWithOptionalEmpRef(FakeRequest("GET", ""), None))
+      )(RequestWithOptionalEmpRefAndPAYE(FakeRequest("GET", ""), None, PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig)))
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.CheckingServiceController.formatErrorsPage().toString
     }
@@ -166,7 +166,7 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
       val controllerUnderTest = buildFakeUploadControllerCsv()
       val result = controllerUnderTest.finaliseRequestAndRedirect(List(
         Future.successful(Left(new Exception("taste the pain"))))
-      )(RequestWithOptionalEmpRef(FakeRequest("GET", ""), None))
+      )(RequestWithOptionalEmpRefAndPAYE(FakeRequest("GET", ""), None, PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig)))
 
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
       contentAsString(result) shouldBe "Test body"

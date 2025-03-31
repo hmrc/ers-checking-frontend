@@ -16,7 +16,7 @@
 
 package services.audit
 
-import controllers.auth.RequestWithOptionalEmpRef
+import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import helpers.ErsTestHelper
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers._
@@ -92,7 +92,9 @@ class AuditEventsTest extends AnyWordSpecLike with Matchers with OptionValues wi
     "include the 'CheckingServiceFileProcessingError' audit type when the request has no EmpRef" in {
       val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
       val testAuditEvent = new AuditEvents(mockAuditConnector)
-      implicit val fakeRequest: RequestWithOptionalEmpRef[_] = RequestWithOptionalEmpRef(FakeRequest(), None)
+      implicit val fakeRequest: RequestWithOptionalEmpRefAndPAYE[_] = RequestWithOptionalEmpRefAndPAYE(
+        FakeRequest(), None, PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig)
+      )
       val eventCaptor = ArgumentCaptor.forClass(classOf[DataEvent])
       val expectedDataEvent: DataEvent = dataEvent.copy(
         auditType = "CheckingServiceNumRowsInSchemeData",
@@ -113,7 +115,9 @@ class AuditEventsTest extends AnyWordSpecLike with Matchers with OptionValues wi
     "include the 'CheckingServiceFileProcessingError' audit type when the request has an EmpRef" in {
       val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
       val testAuditEvent = new AuditEvents(mockAuditConnector)
-      implicit val fakeRequest: RequestWithOptionalEmpRef[_] = RequestWithOptionalEmpRef(FakeRequest(), Some(EmpRef("1234", "GA4567")))
+      implicit val fakeRequest: RequestWithOptionalEmpRefAndPAYE[_] = RequestWithOptionalEmpRefAndPAYE(
+        FakeRequest(), Some(EmpRef("1234", "GA4567")), PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig)
+      )
       val eventCaptor = ArgumentCaptor.forClass(classOf[DataEvent])
       val expectedDataEvent: DataEvent = dataEvent.copy(
         auditType = "CheckingServiceNumRowsInSchemeData",

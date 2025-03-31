@@ -36,9 +36,11 @@ GET			/not-authorised                             controllers.AuthorisationContr
 
 GET			/language/:lang                             @controllers.LanguageSwitchController.switchToLanguage(lang: String)
 
+GET			/not-enrolled-for-PAYE                      @controllers.CheckPAYEController.missingPAYE()
+GET         /signed-out-PAYE                            @controllers.CheckPAYEController.signOutPAYE()
+
 GET 		/signed-out                 	            controllers.SignOutController.timedOut()
 POST 		/signed-out                 	            controllers.SignOutController.onSubmit()
-
 
 GET         /signed-in-as-individual                    controllers.AuthorisationController.individualNotAuthorised()
 POST        /signed-in-as-individual                    controllers.AuthorisationController.individualSignoutRedirect()

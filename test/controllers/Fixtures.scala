@@ -16,7 +16,8 @@
 
 package controllers
 
-import controllers.auth.RequestWithOptionalEmpRef
+import config.ApplicationConfig
+import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import models.SheetErrors
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, AnyContentAsEmpty}
@@ -27,11 +28,11 @@ import scala.collection.mutable.ListBuffer
 
 object Fixtures {
 
-  def buildFakeRequestWithSessionId(method: String, url: String = ""): FakeRequest[AnyContentAsEmpty.type] =
+  def buildFakeRequestWithSessionId(method: String, url: String = "") =
     FakeRequest(method, url).withSession("sessionId" -> "FAKE_SESSION_ID")
 
-  def buildEmpRefRequestWithSessionId(method: String): RequestWithOptionalEmpRef[AnyContent] =
-    RequestWithOptionalEmpRef(FakeRequest(method, "").withSession("sessionId" -> "FAKE_SESSION_ID"), None)
+  def buildEmpRefRequestWithSessionId(method: String, mockAppConfig: ApplicationConfig): RequestWithOptionalEmpRefAndPAYE[AnyContent] =
+    RequestWithOptionalEmpRefAndPAYE(FakeRequest(method, "").withSession("sessionId" -> "FAKE_SESSION_ID"), None, PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig))
 
   def buildSheetErrors: ListBuffer[SheetErrors] =  {
     val schemeErrors = new ListBuffer[SheetErrors]()
