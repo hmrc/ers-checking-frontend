@@ -20,13 +20,12 @@ ers_signed_out.title = Er eich diogelwch, gwnaethom eich allgofnodi - Gwirio’c
 ers_signed_out.info = Er eich diogelwch, gwnaethom eich allgofnodi
 ers_signed_out.link = Mewngofnodi
 
-
 ers.start.page_title = Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS) – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.scheme_types.page_title = Dewis math o gynllun neu drefniant – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.file_type.page_title = Dewis math o ffeil – Gwarantau ar Sail Cyflogaeth – GOV.UK
-ers.choose_csv_files.title = Dewis a gwirio’r ffeiliau .csv – Gwarantau ar Sail Cyflogaeth – GOV.UK
+ers.choose_csv_files.title = Dewis a gwirio’r ffeiliau CSV – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.upload_csv.page_title = Uwchlwytho’ch ffeil ‘{0}’ – Gwarantau ar Sail Cyflogaeth – GOV.UK
-ers.upload_ods.page_title = Dewis a gwirio’r ffeiliau .ods – Gwarantau ar Sail Cyflogaeth – GOV.UK
+ers.upload_ods.page_title = Dewis a gwirio’r ffeiliau ODS – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.error_report.page_title = Adroddiad o wallau – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.confirmation.page_title = Cadarnhad – Gwarantau ar Sail Cyflogaeth – GOV.UK
 
@@ -37,9 +36,11 @@ ers.confirmation.page_title = Cadarnhad – Gwarantau ar Sail Cyflogaeth – GOV
 ers_start.page_title = Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS)
 ers_start.intro_para_1 = Defnyddiwch y gwasanaeth hwn i wirio am wallau yn y ffeiliau y mae angen i chi eu huwchlwytho fel rhan o’ch Datganiad Blynyddol ar gyfer Gwarantau ar Sail Cyflogaeth (ERS)
 ers_start.sub_title = Cyn i chi ddechrau
-ers_start.intro_para_3 = Bydd angen i chi wybod ar gyfer pa fath o gynllun neu drefniant ERS y mae’r ffeil.
-ers_start.intro_para_4 = Os ydych yn gwirio taenlen, mae’n rhaid iddi fod yn ffeil Taenlen OpenDocument (.ods). Gallwch hefyd wirio ffeiliau gwerthoedd wedi’u gwahanu gan goma (.csv).
-ers_start.intro_para_5 = Mae’r amser y mae’n cymryd i wirio ffeil yn dibynnu ar gyflymder eich cysylltiad i’r rhyngrwyd a maint eich taenlen neu’ch ffeil .csv.
+ers_start.intro_para_3 = Bydd angen i chi wybod pa fath o drefniant neu gynllun ERS y mae’r ffeil ar ei gyfer.
+ers_start.intro_para_4 = Gallwch wirio’r naill neu’r llall:
+ers_start.intro_para_4_bullet_1 = ffeil ar ffurf Taenlen Dogfen Agored (ODS)
+ers_start.intro_para_4_bullet_2 = ffeil ar ffurf gwerthoedd wedi’u gwahanu gan goma (CSV)
+ers_start.intro_para_5 = Mae’r amser y mae’n ei gymryd i wirio ffeil yn dibynnu ar gyflymder eich cysylltiad â’r rhyngrwyd a maint eich ffeil.
 ers_start.ers_help = <a href="https://www.gov.uk/government/collections/employment-related-securities" id="ers-help-link" class="govuk-link">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i’ch helpu i greu ffeiliau heb wallau.
 ers_start.start_now_button = Dechrau nawr
 
@@ -47,7 +48,7 @@ ers_start.start_now_button = Dechrau nawr
 # Scheme type messages
 #********************************************************************
 
-ers_scheme_type.page_title = Pa fath o gynllun neu drefniant Gwarantau Ar Sail Cyflogaeth (ERS) y mae’r ffeil hon ar ei gyfer?
+ers_scheme_type.page_title = Pa fath o drefniant neu gynllun Gwarantau Ar Sail Cyflogaeth (ERS) y mae’r ffeil hon ar ei gyfer?
 ers_scheme_type.csop = Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni (CSOP)
 ers_scheme_type.emi = Cymhellion Rheoli Mentrau (EMI)
 ers_scheme_type.saye = Cynilo Wrth Ennill (SAYE)
@@ -61,12 +62,12 @@ ers_scheme_type.select_scheme_type = Dewiswch y math o gynllun neu drefniant Gwa
 #********************************************************************
 csv_file_upload.upload_your_file_header = Uwchlwytho’ch ffeil ‘{0}’
 
-ers_check_file_type.title =Pa fath o ffeil rydych am ei gwirio?
-ers_check_file_type.option_1 =Gwerthoedd wedi’u gwahanu gan goma (.csv)
-ers_check_file_type.option_2 =Taenlen OpenDocument (.ods)
+ers_check_file_type.title =Pa fath o ffeil ydych chi am ei gwirio?
+ers_check_file_type.option_1 =ffeil ar ffurf gwerthoedd wedi’u gwahanu gan goma (CSV)
+ers_check_file_type.option_2 =ffeil ar ffurf Taenlen Dogfen Agored (ODS)
 ers_check_file_type.alert =Dewiswch y math o ffeil rydych am ei gwirio
 
-ers_check_csv_file.title =Dewiswch y ffeiliau .csv rydych am eu gwirio am wallau
+ers_check_csv_file.title =Dewis y ffeil neu ffeiliau CSV rydych am eu gwirio am wallau
 ers_check_csv_file.check_file_button =Gwirio am wallau
 ers_check_csv_file.file_type_error =Gwnaethoch ddewis gwirio ffeil CSV, ond nid yw {0} yn ffeil CSV.
 ers_check_csv_file.noData =Nid yw’r ffeil a ddewisoch yn cynnwys unrhyw ddata.<br/><br/>Ni fyddwch yn gallu uwchlwytho {0} fel rhan o’ch Datganiad Blynyddol.
@@ -103,7 +104,7 @@ ers_check_csv_file.other.OTHER_NOTIONAL =Rhyddhau benthyciadau tybiannol ar ôl 
 ers_check_csv_file.other.OTHER_ENCHANCEMENT =Gwelliant artiffisial y gwerth marchnad. Gwerth gwarantau ar ôl caffael
 ers_check_csv_file.other.OTHER_SOLD =Gwarantau sydd wedi’u gwerthu am fwy na’r gwerth marchnadol ar ôl caffael
 
-ers_check_file.title =Dewiswch y ffeil .ods rydych am ei gwirio am wallau
+ers_check_file.title =Dewiswch y ffeil ODS rydych am ei gwirio am wallau
 ers_check_file.file_upload_label = Uwchlwytho ffeil
 ers_check_file.check_file_button =Gwiriwch eich ffeil
 ers_check_file.file_type_error =Gwnaethoch ddewis gwirio ffeil ODS, ond nid yw {0} yn ffeil ODS.
