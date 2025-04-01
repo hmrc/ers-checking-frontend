@@ -25,7 +25,7 @@
 
 @(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
 
-@ers_main(title = messages("individual_signout.title"), timeoutDialogEnabled = false, disableSignOut = true) {
+@ers_main(title = messages("individual_signout.page_title"), timeoutDialogEnabled = false, disableSignOut = true) {
     @hmrcPageHeading(PageHeading(text = messages("individual_signout.H1")))
         <p class="govuk-body">@messages("individual_signout.para")</p>
         <div class="govuk-!-padding-bottom-5"></div>
