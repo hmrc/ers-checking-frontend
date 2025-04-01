@@ -33,13 +33,18 @@
         assetsConfig: AssetsConfig
 )
 
-@(title: String, otherScripts: Html = Html(""))(mainContent: Html)(implicit request: Request[AnyRef], messages: Messages, applicationConfig: ApplicationConfig)
+@(title: String, otherScripts: Html = Html(""),timeoutDialogEnabled: Boolean = true, disableSignOut: Boolean = false)(mainContent: Html)(implicit request: Request[AnyRef], messages: Messages, applicationConfig: ApplicationConfig)
 
 @head = {
     <meta name="format-detection" content="telephone=no"/>
     <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/ers.css")'>
 
-    @hmrcTimeoutDialogHelper(signOutUrl = applicationConfig.signOut)
+    @if(timeoutDialogEnabled) {
+        @hmrcTimeoutDialogHelper(signOutUrl = applicationConfig.signOut,
+                            timeoutUrl = Some(applicationConfig.timeOutUrl),
+                            timeout = Some(applicationConfig.timeOutSeconds),
+                            countdown = Some(applicationConfig.timeOutCountDownSeconds))
+                            }
 }
 
 @scripts = {
@@ -65,7 +70,7 @@
     HmrcStandardPageParams(
         serviceURLs = ServiceURLs(
             serviceUrl = Some(controllers.routes.CheckingServiceController.startPage().url),
-            signOutUrl = Some(applicationConfig.signOut)
+            signOutUrl = if(!disableSignOut) Some(applicationConfig.signOut) else None
         ),
         templateOverrides = TemplateOverrides(
             additionalScriptsBlock = Some(hmrcScripts(scriptsBlock = Some(scripts))),

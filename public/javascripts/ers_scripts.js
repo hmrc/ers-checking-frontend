@@ -5,9 +5,6 @@
 const MAX_FILENAME_LENGTH = 240
 const MAX_FILESIZE = 209715200  //200MB
 
-const checkFileButton = document.getElementById("check-file-button")
-if (checkFileButton) checkFileButton.disabled = true
-
 // ----------------------------------------------------------
 // If you're not in IE (or IE version is less than 5) then:
 // ie === undefined
@@ -56,7 +53,6 @@ function fileSizeOK() {
 
 function removeErrorMsg() {
     const errorSummary = document.getElementById("error-summary")
-    const checkFileButton = document.getElementById("check-file-button")
     const allErrors = document.querySelectorAll(".govuk-form-group--error")
     if (allErrors.length !== 0) {
         allErrors.forEach(error => error.classList.remove("govuk-form-group--error"))
@@ -65,28 +61,18 @@ function removeErrorMsg() {
     if (errorSummary) {
         errorSummary.parentNode.removeChild(errorSummary)
     }
-    if (checkFileButton) {
-        if (document.getElementById("input-file-name").files.length !== 0) {
-            checkFileButton.disabled = false
-            checkFileButton.focus()
-        } else {
-            checkFileButton.disabled = true
-        }
-
-    }
 }
 
 function showErrorMsg(msg) {
-    const button = document.getElementById("check-file-button");
-
     if (document.getElementById("error-summary")) {
         document.getElementById("error-summary").remove()
     }
 
-    document.querySelector(".govuk-\\!-display-none").classList.remove("govuk-!-display-none")
-    button.disabled = true
+    if (document.getElementById("errors")) {
+        document.getElementById("errors").classList.remove("govuk-!-display-none")
+    }
     document.getElementById("input-file-name")
-        .insertAdjacentHTML('beforebegin',"<p id='error-summary' class='govuk-error-message' tabindex'-1' role='alert' aria-labelledby='error-heading'>" + msg + ".</p>")
+        .insertAdjacentHTML('beforebegin',"<p id='error-summary' class='govuk-error-message' tabindex'-1' role='alert' aria-labelledby='error-heading'>" + msg + "</p>")
     document.querySelector(".govuk-form-group").classList.add("govuk-form-group--error")
 
     document.querySelector(".govuk-error-summary__list a").innerHTML = msg
@@ -95,14 +81,18 @@ function showErrorMsg(msg) {
 
 document.addEventListener("DOMContentLoaded", function () {
     const fileProcessingAlertDiv = document.getElementById("file-processing-alert")
-
+    const checkFileButton = document.getElementById("check-file-button")
     /* Spinner */
-    if (checkFileButton) {
-            checkFileButton.addEventListener('click', function () {
-                fileProcessingAlertDiv.style.display = ''
-                fileProcessingAlertDiv.classList.remove("govuk-!-display-none")
-            })
-    }
+    checkFileButton.addEventListener('click', function (e) {
+        var file = document.getElementById("input-file-name").value
+        if (file == "") { //if file is not selected throw validation error on screen
+            showErrorMsg(getLocalisedContent("select.a.file"))
+            e.preventDefault()
+            return false
+        }
+        fileProcessingAlertDiv.style.display = ''
+        fileProcessingAlertDiv.classList.remove("govuk-!-display-none")
+    })
 
     const errors = document.getElementById("errors")
     if (errors) {

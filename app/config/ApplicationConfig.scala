@@ -47,6 +47,7 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
 
   lazy val errorCount: Int = config.getInt("errorDisplayCount")
   lazy val upscanFileSizeLimit: Int = config.getInt("file-size.uploadSizeLimit")
+  lazy val upscanFileSizeInMB: Int = upscanFileSizeLimit/1024/1024
 
   //ExternalUrls
   lazy val basGatewayHost: String = config.getString("govuk-tax.auth.bas-gateway.host")
@@ -54,4 +55,14 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
   lazy val loginPath: String = Option(config.getString("govuk-tax.auth.login_path")).getOrElse("sign-in")
   lazy val signIn: String = s"$basGatewayHost/bas-gateway/$loginPath"
   lazy val signOut: String = s"$basGatewayHost/bas-gateway/sign-out-without-state"
+  lazy val timeOut: String = s"$loginCallback/signed-out"
+
+  lazy val timeOutUrl: String = getSignOutUrl(timeOut)
+  lazy val timeOutSeconds: Int = config.getInt("sessionTimeout.timeoutSeconds")
+  lazy val timeOutCountDownSeconds: Int = config.getInt("sessionTimeout.time-out-countdown-seconds")
+
+  def getSignOutUrl(callbackUrl: String): String = {
+    val encodedCallbackUrl = java.net.URLEncoder.encode(callbackUrl, "UTF-8")
+    s"$basGatewayHost/bas-gateway/sign-out-without-state?continue=$encodedCallbackUrl"
+  }
 }

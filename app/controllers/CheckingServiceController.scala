@@ -93,7 +93,6 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
     )
   }
 
-
   def checkFileTypePage(form: Form[CS_checkFileType] = CSformMappings.checkFileTypeForm): Action[AnyContent] = authAction.async {
     implicit request =>
       showCheckFileTypePage(form: Form[CS_checkFileType])
@@ -140,7 +139,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
       csvFilesList <- sessionCacheService.fetchAndGetEntry[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
       currentCsvFile = csvFilesList.ids.find(ids => ids.uploadStatus == NotStarted)
       if currentCsvFile.isDefined
-      upscanResponse <- upscanService.getUpscanFormData(isCSV = true, scheme, currentCsvFile)
+        upscanResponse <- upscanService.getUpscanFormData(isCSV = true, scheme, currentCsvFile)
     } yield {
       Ok(check_csv_file(scheme, currentCsvFile.get.fileId)(request, messages, upscanResponse, appConfig, ersUtil))
     }) recover {
@@ -152,7 +151,6 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
         getGlobalErrorPage(request, messages)
     }
   }
-
 
   def checkODSFilePage(): Action[AnyContent] = authAction.async {
     implicit request =>
