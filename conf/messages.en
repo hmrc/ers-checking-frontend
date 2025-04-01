@@ -48,7 +48,7 @@ ers_start.start_now_button = Start now
 # Scheme type messages
 #********************************************************************
 
-ers_scheme_type.page_title = What type of Employment Related Securities (ERS) Scheme or arrangement is this file for?
+ers_scheme_type.page_title = What type of Employment Related Securities (ERS) scheme or arrangement is this file for?
 ers_scheme_type.csop = Company Share Option Plan (CSOP)
 ers_scheme_type.emi = Enterprise Management Incentives (EMI)
 ers_scheme_type.saye = Save As You Earn (SAYE)
