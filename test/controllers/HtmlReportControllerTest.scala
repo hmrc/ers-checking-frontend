@@ -146,9 +146,9 @@ class HtmlReportControllerTest
       val cacheItemWithErrors = generateTestCacheItem(
         id = uploadId.value,
         data = Seq(
-        s"$ERROR_LIST_CACHE${uploadId.value}" -> Json.toJson(errorList),
-        s"$SCHEME_ERROR_COUNT_CACHE${uploadId.value}" -> Json.toJson(1)
-      ))
+          s"$ERROR_LIST_CACHE${uploadId.value}" -> Json.toJson(errorList),
+          s"$SCHEME_ERROR_COUNT_CACHE${uploadId.value}" -> Json.toJson(1)
+        ))
 
       val result = new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
         .csvExtractErrors(Seq(uploadId), cacheItemWithErrors)
