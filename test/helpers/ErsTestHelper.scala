@@ -33,22 +33,22 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessagesApi}
 import play.twirl.api.Html
 import repository.ErsCheckingFrontendSessionCacheRepository
+import services.UpscanService
 import services.audit.AuditEvents
 import services.validation.ErsValidator
-import services.UpscanService
-import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, EnrolmentIdentifier, Enrolments}
+import uk.gov.hmrc.auth.core.retrieve.~
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import utils.ERSUtil
 
 import java.time.{LocalDate, ZoneOffset}
-import scala.concurrent.{ExecutionContext, Future}
-
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
-trait ErsTestHelper extends MockitoSugar {// scalastyle:off magic.number
+trait ErsTestHelper extends MockitoSugar { // scalastyle:off magic.number
   lazy val mockAuthAction = new AuthAction(mockAuthConnector, mockAppConfig, testBodyParser)
   lazy val authResultDefault: Enrolments = Enrolments(enrolments)
   val messagesActionBuilder: MessagesActionBuilder = new DefaultMessagesActionBuilderImpl(stubBodyParser[AnyContent](), stubMessagesApi())
@@ -59,6 +59,9 @@ trait ErsTestHelper extends MockitoSugar {// scalastyle:off magic.number
     EnrolmentIdentifier("TaxOfficeNumber", "123"),
     EnrolmentIdentifier("TaxOfficeReference", "4567890")),
     "Activated"))
+
+  val agentOrg: Some[AffinityGroup] = Some(AffinityGroup.Organisation)
+
   val mockHttp: DefaultHttpClient = mock[DefaultHttpClient]
   val mockErsValidator: ErsValidator = mock[ErsValidator]
   val realErsValidator: ErsValidator = new ErsValidator
@@ -87,10 +90,10 @@ trait ErsTestHelper extends MockitoSugar {// scalastyle:off magic.number
     )
   }
 
-  def mockAnyContentAction: OngoingStubbing[Future[Enrolments]] = {
-    when(mockAuthConnector.authorise[Enrolments]
+  def mockAnyContentAction: OngoingStubbing[Future[Enrolments ~ Option[AffinityGroup]]] = {
+    when(mockAuthConnector.authorise[Enrolments ~ Option[AffinityGroup]]
       (ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-      .thenReturn(Future.successful(authResultDefault))
+      .thenReturn(Future.successful(new~(authResultDefault, Some(AffinityGroup.Organisation))))
   }
 
   when(mockAppConfig.signIn).thenReturn("http://localhost:9553/bas-gateway/sign-in")

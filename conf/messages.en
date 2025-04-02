@@ -187,6 +187,17 @@ validation.summary.heading = There is a problem
 csv_file_upload.summary_error = Choose a different file - it must be a CSV file
 ods_file_upload.summary_error = Choose a different file - it must be an ODS file
 
+individual_not_authorised.page_title = There is a problem – Employment Related Securities – GOV.UK
+individual_not_authorised.H1 = There is a problem
+individual_not_authorised.para = You signed in using a Government Gateway user ID for an individual.
+individual_not_authorised.lead = To check an Employment Related Securities file you must:
+individual_not_authorised.bullet1 = sign out
+individual_not_authorised.bullet2 = sign in with the Government Gateway user ID that you use to manage PAYE for employers in your business tax account
+
+individual_signout.page_title = You have signed out – Employment Related Securities – GOV.UK
+individual_signout.H1 = You have signed out
+individual_signout.para = To check your Employment Related Securities (ERS) file you will need to sign in with the Government Gateway user ID and password that you use to manage PAYE for employers in your business tax account.
+
 #********************************************************************
 # Upload Error Messages
 #********************************************************************

@@ -33,7 +33,7 @@
         assetsConfig: AssetsConfig
 )
 
-@(title: String, otherScripts: Html = Html(""),timeoutDialogEnabled: Boolean = true, disableSignOut: Boolean = false)(mainContent: Html)(implicit request: Request[AnyRef], messages: Messages, applicationConfig: ApplicationConfig)
+@(title: String, otherScripts: Html = Html(""),timeoutDialogEnabled: Boolean = true, disableSignOut: Boolean = false, disablePageNotWorkLink: Boolean = true)(mainContent: Html)(implicit request: Request[AnyRef], messages: Messages, applicationConfig: ApplicationConfig)
 
 @head = {
     <meta name="format-detection" content="telephone=no"/>
@@ -61,7 +61,9 @@
         @mainContent
         </article>
 
-        @hmrcReportTechnicalIssueHelper()
+        @if(disablePageNotWorkLink) {
+            @hmrcReportTechnicalIssueHelper()
+        }
     </div>
 }
 
