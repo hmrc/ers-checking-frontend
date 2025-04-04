@@ -39,3 +39,8 @@ GET			/language/:lang                             @controllers.LanguageSwitchCon
 GET 		/signed-out                 	            controllers.SignOutController.timedOut()
 POST 		/signed-out                 	            controllers.SignOutController.onSubmit()
 
+
+GET         /signed-in-as-individual                    controllers.AuthorisationController.individualNotAuthorised()
+POST        /signed-in-as-individual                    controllers.AuthorisationController.individualSignoutRedirect()
+
+GET         /you-have-signed-out                         controllers.AuthorisationController.individualSignout()
