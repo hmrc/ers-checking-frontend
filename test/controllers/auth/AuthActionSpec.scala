@@ -16,9 +16,9 @@
 
 package controllers.auth
 
-import org.apache.pekko.stream.Materializer
 import controllers.routes
 import helpers.ErsTestHelper
+import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -34,7 +34,7 @@ import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.allEnrolments
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.domain.EmpRef
 
 import scala.concurrent.Future
@@ -76,21 +76,23 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
       Enrolment("IR-PAYE", Seq(EnrolmentIdentifier("TaxOfficeNumber", "1234")), "Activated", None))
     )
 
+  type RetrievalType = Enrolments ~ Option[AffinityGroup]
+  val buildRetrieval: ~[Enrolments, Option[AffinityGroup]] = new~(ersEnrolments, Some(AffinityGroup.Organisation))
+  val nonePayeEnrolmentsP: ~[Enrolments, Option[AffinityGroup]] = new~(nonePayeEnrolments, Some(AffinityGroup.Organisation))
+
   "AuthAction" should {
     "return a perform the action if the user is authorised with an empref in the request" in {
       when(
         mockAuthConnector
-          .authorise(
-            ArgumentMatchers.eq(getPredicate),
-            ArgumentMatchers.eq(allEnrolments)
+          .authorise[RetrievalType](
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any()
           )(
             ArgumentMatchers.any(), ArgumentMatchers.any()
           )
-      ).thenReturn(Future.successful(ersEnrolments))
+      ).thenReturn(Future.successful(buildRetrieval))
 
-      val result: Future[Result] = authAction(
-        defaultAsyncBody(_.optionalEmpRef shouldBe Some(EmpRef("1234", "1234")))
-      )(FakeRequest())
+      val result: Future[Result] = authAction(defaultAsyncBody(_.optionalEmpRef shouldBe Some(EmpRef("1234", "1234"))))(FakeRequest())
       status(result) shouldBe Status.OK
       contentAsString(result) shouldBe "Successful"
     }
@@ -98,31 +100,29 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
     "return a perform the action if the user is authorised without and empref when user has multiple enrolments" in {
       when(
         mockAuthConnector
-          .authorise(
-            ArgumentMatchers.eq(getPredicate),
-            ArgumentMatchers.eq(allEnrolments)
-          )(
-            ArgumentMatchers.any(), ArgumentMatchers.any()
+          .authorise[RetrievalType](ArgumentMatchers.any(), ArgumentMatchers.any())(
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any()
           )
-      ).thenReturn(Future.successful(nonePayeEnrolments))
+      ).thenReturn(Future.successful(nonePayeEnrolmentsP))
 
       val result: Future[Result] = authAction(
         defaultAsyncBody(_.optionalEmpRef shouldBe None)
       )(FakeRequest())
       status(result) shouldBe Status.OK
-        contentAsString(result) shouldBe "Successful"
+      contentAsString(result) shouldBe "Successful"
     }
 
     "return a perform the action if the user is authorised without and empref when user has no enrolments" in {
       when(
         mockAuthConnector
-          .authorise(
-            ArgumentMatchers.eq(getPredicate),
-            ArgumentMatchers.eq(allEnrolments)
+          .authorise[RetrievalType](
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any()
           )(
             ArgumentMatchers.any(), ArgumentMatchers.any()
           )
-      ).thenReturn(Future.successful(Enrolments(Set())))
+      ).thenReturn(Future.successful(nonePayeEnrolmentsP))
 
       val result: Future[Result] = authAction(
         defaultAsyncBody(_.optionalEmpRef shouldBe None)
@@ -134,9 +134,9 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
     "return a 401 if an SessionRecordNotFound Exception (NoActiveSession) is experienced" in {
       when(
         mockAuthConnector
-          .authorise(
-            ArgumentMatchers.eq(getPredicate),
-            ArgumentMatchers.eq(allEnrolments)
+          .authorise[RetrievalType](
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any()
           )(
             ArgumentMatchers.any(), ArgumentMatchers.any()
           )
@@ -151,9 +151,9 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
     "return a 401 if an UnsupportedAuthProvider Exception is experienced" in {
       when(
         mockAuthConnector
-          .authorise(
-            ArgumentMatchers.eq(getPredicate),
-            ArgumentMatchers.eq(allEnrolments)
+          .authorise[RetrievalType](
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any()
           )(
             ArgumentMatchers.any(), ArgumentMatchers.any()
           )
@@ -167,9 +167,9 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
     "return a 401 if an InsufficientConfidenceLevel Exception is experienced" in {
       when(
         mockAuthConnector
-          .authorise(
-            ArgumentMatchers.eq(getPredicate),
-            ArgumentMatchers.eq(allEnrolments)
+          .authorise[RetrievalType](
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any()
           )(
             ArgumentMatchers.any(), ArgumentMatchers.any()
           )
@@ -179,5 +179,23 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.AuthorisationController.notAuthorised().url
     }
+
+
+    "return a 401 if affinityGroup is Individual" in {
+      when(
+        mockAuthConnector
+          .authorise[RetrievalType](
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any()
+          )(
+            ArgumentMatchers.any(), ArgumentMatchers.any()
+          )
+      ).thenReturn(Future.successful(new~(Enrolments(Set()), Some(AffinityGroup.Individual))))
+
+      val result: Future[Result] = authAction(defaultAsyncBody(_.optionalEmpRef shouldBe None))(FakeRequest())
+      status(result) shouldBe Status.SEE_OTHER
+      result.futureValue.header.headers("Location") shouldBe routes.AuthorisationController.individualNotAuthorised().url
+    }
+
   }
 }
