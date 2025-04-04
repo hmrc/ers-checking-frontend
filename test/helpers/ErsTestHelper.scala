@@ -42,7 +42,6 @@ import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import utils.ERSUtil
-
 import java.time.{LocalDate, ZoneOffset}
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}

@@ -58,7 +58,7 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
     def buildFakeCheckingServiceController(): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView,
-        invalidErrorView, fileUploadErrorView, globalErrorView) {
+        invalidErrorView, fileUploadErrorView, mockAuditEvents, globalErrorView) {
         mockAnyContentAction
       }
 
@@ -80,7 +80,8 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
 
     def buildFakeCheckingServiceController(): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
-        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, fileUploadErrorView, globalErrorView) {
+        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView,
+        checkingSuccessView, invalidErrorView, fileUploadErrorView, mockAuditEvents, globalErrorView) {
         mockAnyContentAction
       }
 
@@ -104,7 +105,8 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
 
     def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
-        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, fileUploadErrorView, globalErrorView) {
+        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView,
+        checkingSuccessView, invalidErrorView, fileUploadErrorView, mockAuditEvents, globalErrorView) {
         when(mockSessionCacheRepo.cache[String](refEq(mockErsUtil.SCHEME_CACHE), any())(any(), any()))
           .thenReturn(if (schemeRes) Future.successful(null) else Future.failed(new Exception))
         mockAnyContentAction
@@ -151,7 +153,8 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
 
     def buildFakeCheckingServiceController(fileTypeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
-        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, fileUploadErrorView, globalErrorView) {
+        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView,
+        checkingSuccessView, invalidErrorView, fileUploadErrorView, mockAuditEvents, globalErrorView) {
         mockAnyContentAction
       }
 
@@ -185,7 +188,8 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
 
     def buildFakeCheckingServiceController(fileTypeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
-        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView, invalidErrorView, fileUploadErrorView, globalErrorView) {
+        formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView,
+        checkingSuccessView, invalidErrorView, fileUploadErrorView, mockAuditEvents, globalErrorView) {
         when(mockSessionCacheRepo.cache(refEq(mockErsUtil.FILE_TYPE_CACHE), anyString())(any(), any()))
           .thenReturn(if (fileTypeRes) Future.successful(null) else Future.failed(new Exception))
         mockAnyContentAction
@@ -243,7 +247,7 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
     def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView,
-        invalidErrorView, fileUploadErrorView, globalErrorView) {
+        invalidErrorView, fileUploadErrorView, mockAuditEvents, globalErrorView) {
 
         when(mockSessionCacheRepo.cache[String](refEq(mockErsUtil.SCHEME_CACHE), any())(any(), any()))
           .thenReturn(if (schemeRes) Future.successful(("", "")) else Future.failed(new Exception))
@@ -291,7 +295,7 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
     def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView,
-        invalidErrorView, fileUploadErrorView, globalErrorView) {
+        invalidErrorView, fileUploadErrorView, mockAuditEvents, globalErrorView) {
         when(mockSessionCacheRepo.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any()))
           .thenReturn(if (schemeRes) Future.successful(("", "")) else Future.failed(new Exception))
         when(mockSessionCacheRepo.fetchAndGetEntry[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any()))
@@ -334,7 +338,7 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
                                           ): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView,
-        invalidErrorView, fileUploadErrorView, globalErrorView) {
+        invalidErrorView, fileUploadErrorView, mockAuditEvents, globalErrorView) {
         when(mockSessionCacheRepo.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any()))
           .thenReturn(if (schemeRes) Future.successful(("", "")) else Future.failed(new Exception))
 
@@ -370,7 +374,7 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
                                           ): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
         formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView,
-        invalidErrorView, fileUploadErrorView, globalErrorView) {
+        invalidErrorView, fileUploadErrorView, mockAuditEvents, globalErrorView) {
 
         when(mockSessionCacheRepo.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any()))
           .thenReturn(if (schemeRes) Future.successful(("", "")) else Future.failed(new Exception))
