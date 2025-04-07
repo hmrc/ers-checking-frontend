@@ -14,7 +14,7 @@ object AppDependencies {
     "org.apache.pekko"            %% "pekko-connectors-csv"         % "1.0.2",
     "uk.gov.hmrc.mongo"           %% "hmrc-mongo-play-30"           % mongoVersion,
     "uk.gov.hmrc"                 %% "bootstrap-frontend-play-30"   % bootstrapVersion,
-    "uk.gov.hmrc"                 %% "domain-play-30"               % "10.0.0",
+    "uk.gov.hmrc"                 %% "domain-play-30"               % "11.0.0",
     "uk.gov.hmrc"                 %% "tabular-data-validator"       % "1.8.0",
     "uk.gov.hmrc"                 %% "play-frontend-hmrc-play-30"   % "12.0.0"
   )
