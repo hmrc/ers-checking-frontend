@@ -61,7 +61,7 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
   def buildFakeCheckingServiceController(): CheckingServiceController =
     new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
       formatErrorsView, startView, schemeTypeView, checkFileTypeView, checkCsvFileView, checkFileView, checkingSuccessView,
-      invalidErrorView, fileUploadErrorView, globalErrorView) {
+      invalidErrorView, fileUploadErrorView, mockAuditEvents, globalErrorView) {
       mockAnyContentAction
     }
 
