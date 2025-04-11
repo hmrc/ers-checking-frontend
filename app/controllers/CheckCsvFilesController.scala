@@ -17,7 +17,7 @@
 package controllers
 
 import config.ApplicationConfig
-import controllers.auth.{AuthAction, RequestWithOptionalEmpRef}
+import controllers.auth.{AuthAction, RequestWithOptionalEmpRefAndPAYE}
 
 import javax.inject.{Inject, Singleton}
 import models._
@@ -46,7 +46,7 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
         showCheckCsvFilesPage()
   }
 
-  def showCheckCsvFilesPage()(implicit request: RequestWithOptionalEmpRef[AnyContent]): Future[Result] = {
+  def showCheckCsvFilesPage()(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Result] = {
     (for {
       _           <- sessionCacheService.delete(ersUtil.CSV_FILES_UPLOAD)
       scheme      <- sessionCacheService.fetchAndGetEntry[String](ersUtil.SCHEME_CACHE)
@@ -63,7 +63,7 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
         validateCsvFilesPageSelected()
   }
 
-  def validateCsvFilesPageSelected()(implicit request: RequestWithOptionalEmpRef[AnyContent]): Future[Result] = {
+  def validateCsvFilesPageSelected()(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Result] = {
     CSformMappings.csvFileCheckForm().bindFromRequest().fold(
       formWithError =>{
         reloadWithError(Some(formWithError))

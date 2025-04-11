@@ -20,7 +20,6 @@ import config.ApplicationConfig
 import play.api.Logging
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
-import uk.gov.hmrc.auth.core.AffinityGroup.Individual
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
@@ -32,9 +31,12 @@ import uk.gov.hmrc.auth.core.retrieve.~
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-case class RequestWithOptionalEmpRef[A](request: Request[A], optionalEmpRef: Option[EmpRef]) extends WrappedRequest[A](request)
-
-trait AuthIdentifierAction extends ActionBuilder[RequestWithOptionalEmpRef, AnyContent] with ActionFunction[Request, RequestWithOptionalEmpRef]
+case class RequestWithOptionalEmpRefAndPAYE[A](
+                                                request: Request[A],
+                                                optionalEmpRef: Option[EmpRef],
+                                                orgOrAgentPAYEDetails: PAYEDetails) extends WrappedRequest[A](request)
+trait AuthIdentifierAction extends ActionBuilder[RequestWithOptionalEmpRefAndPAYE, AnyContent]
+  with ActionFunction[Request, RequestWithOptionalEmpRefAndPAYE]
 
 @Singleton
 class AuthAction @Inject()(override val authConnector: AuthConnector,
@@ -44,36 +46,66 @@ class AuthAction @Inject()(override val authConnector: AuthConnector,
 
   val origin: String = "ers-checking-frontend"
 
+  val orgEnrolmentIdentifier: String = "IR-PAYE"
+  val agentEnrolmentIdentifier: String = "IR-PAYE-AGENT"
+
   def loginParams: Map[String, Seq[String]] = Map(
     "continue_url" -> Seq(appConfig.loginCallback),
     "origin" -> Seq(origin)
   )
 
-  override def invokeBlock[A](request: Request[A], block: RequestWithOptionalEmpRef[A] => Future[Result]): Future[Result] = {
+  def getIdentifierValue(identifiers: Seq[EnrolmentIdentifier])(key: String): Option[String] = identifiers.collectFirst{
+    case EnrolmentIdentifier(`key`, value) => value
+  }
+
+  def getIdentifier(enrollements: Enrolments, enrolmentIdentifier: String, key: String): Option[String] = getIdentifierValue(
+    enrollements
+      .getEnrolment(enrolmentIdentifier)
+      .map(_.identifiers)
+      .getOrElse(Seq.empty[EnrolmentIdentifier])
+  )(key)
+
+  def checkAgentPAYE(enrollments: Enrolments): Boolean = getIdentifier(enrollments, agentEnrolmentIdentifier, "AgentReference")
+    .exists(_.nonEmpty)
+
+  def getOptionalEmpRef(enrollements: Enrolments): Option[EmpRef] =
+    (getIdentifier(enrollements, orgEnrolmentIdentifier, "TaxOfficeNumber"), getIdentifier(enrollements, orgEnrolmentIdentifier, "TaxOfficeReference")) match {
+      case (Some(taxOfficeNumber), Some(taxOfficeReference)) => Some(EmpRef(taxOfficeNumber, taxOfficeReference))
+      case _ => None
+    }
+
+  override def invokeBlock[A](request: Request[A], block: RequestWithOptionalEmpRefAndPAYE[A] => Future[Result]): Future[Result] = {
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    def getIdentifierValue(identifiers: Seq[EnrolmentIdentifier])(key: String): Option[String] = identifiers.collectFirst {
-      case EnrolmentIdentifier(`key`, value) => value
-    }
-
     authorised(AuthProviders(GovernmentGateway) and ConfidenceLevel.L50).retrieve(allEnrolments and affinityGroup) {
-      case _ ~ Some(Individual) =>
-        Future.successful(Redirect(controllers.routes.AuthorisationController.individualNotAuthorised()))
-      case allEnrols ~ _ =>
-        allEnrols match {
-          case enrolments: Enrolments =>
-            val getIdentifier = getIdentifierValue(
-              enrolments
-                .getEnrolment("IR-PAYE")
-                .map(_.identifiers)
-                .getOrElse(Seq.empty[EnrolmentIdentifier])
-            ) _
-            val optionalEmpRef = (getIdentifier("TaxOfficeNumber"), getIdentifier("TaxOfficeReference")) match {
-              case (Some(taxOfficeNumber), Some(taxOfficeReference)) => Some(EmpRef(taxOfficeNumber, taxOfficeReference))
-              case _ => None
+      case (enrollements ~ maybeAffinityGroup) =>
+        maybeAffinityGroup match {
+          case Some(affinityGroup: AffinityGroup) =>
+            affinityGroup match {
+              case AffinityGroup.Agent => {
+                block(
+                  RequestWithOptionalEmpRefAndPAYE(
+                    request,
+                    optionalEmpRef = None,
+                    orgOrAgentPAYEDetails = PAYEDetails(isAgent = true, agentHasPAYEEnrollement = checkAgentPAYE(enrollements), optionalEmpRef = None, appConfig)
+                  )
+                )
+              }
+              case AffinityGroup.Individual =>
+                Future.successful(Redirect(controllers.routes.AuthorisationController.individualNotAuthorised()))
+              case AffinityGroup.Organisation =>
+                val optionalEmpRef: Option[EmpRef] = getOptionalEmpRef(enrollements)
+                block(
+                  RequestWithOptionalEmpRefAndPAYE(
+                    request,
+                    optionalEmpRef = optionalEmpRef,
+                    orgOrAgentPAYEDetails = PAYEDetails(isAgent = false, agentHasPAYEEnrollement = optionalEmpRef.isDefined, optionalEmpRef = optionalEmpRef, appConfig)
+                  )
+                )
             }
-            block(RequestWithOptionalEmpRef(request, optionalEmpRef))
+          case None =>
+            Future.successful(Redirect(controllers.routes.AuthorisationController.notAuthorised().url))
         }
     } recover {
       case er: NoActiveSession =>

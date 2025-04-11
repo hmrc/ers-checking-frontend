@@ -98,21 +98,21 @@ class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) 
 
     "give a redirect status to checkingSuccessPage if no formatting or structural errors" in {
       val controllerUnderTest = buildFakeUploadControllerOds()
-      val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
+      val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), hc, implicitly[Messages])
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.CheckingServiceController.checkingSuccessPage().toString
     }
 
     "give a redirect status to checkingSuccessPage if formatting errors" in {
       val controllerUnderTest = buildFakeUploadControllerOds(uploadRes = false)
-      val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
+      val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), hc, implicitly[Messages])
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.HtmlReportController.htmlErrorReportPage(false).toString
     }
 
     "send the user to the global error page if the error cache fails to clear" in {
       val controllerUnderTest = buildFakeUploadControllerOds(clearCacheResponse = false)
-      val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET"), hc, implicitly[Messages])
+      val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), hc, implicitly[Messages])
 
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }

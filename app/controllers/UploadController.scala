@@ -21,7 +21,7 @@ import org.apache.pekko.http.scaladsl._
 import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse}
 import org.apache.pekko.stream.scaladsl.Source
 import config.ApplicationConfig
-import controllers.auth.{AuthAction, RequestWithOptionalEmpRef}
+import controllers.auth.{AuthAction, RequestWithOptionalEmpRefAndPAYE}
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallbackList}
 import models.{ERSFileProcessingException, SheetErrors}
 import play.api.Logging
@@ -102,7 +102,7 @@ class UploadController @Inject()(authAction: AuthAction,
   }
 
   def uploadCSVFile(scheme: String): Action[AnyContent] = authAction.async {
-    implicit request =>
+    implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent] =>
       clearErrorCache() flatMap {
         case false => Future(getGlobalErrorPage)
         case _ =>
@@ -114,7 +114,7 @@ class UploadController @Inject()(authAction: AuthAction,
   }
 
   def finaliseRequestAndRedirect(validationResults: List[Future[Either[Throwable, Boolean]]])(
-    implicit request: RequestWithOptionalEmpRef[AnyContent]): Future[Result] =
+    implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Result] =
     Future.sequence(validationResults).flatMap {
       case noFailures if noFailures.forall(_.contains(true)) =>
         Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
@@ -133,7 +133,7 @@ class UploadController @Inject()(authAction: AuthAction,
   }
 
   def showuploadODSFile(scheme: String)
-                       (implicit request: RequestWithOptionalEmpRef[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
+                       (implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
 
     clearErrorCache().flatMap { clearedSuccessfully =>
       if (clearedSuccessfully) {

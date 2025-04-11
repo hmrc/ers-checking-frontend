@@ -131,10 +131,9 @@ ers_format_errors.page_title =Adroddiad o wallau
 ers_format_errors.sub_heading =Yr hyn sy’n digwydd nesaf
 
 ers_file_format_successful.page_title =Gwiriad wedi’i gwblhau
-ers_file_format_successful.sub_heading =Yr hyn sy’n digwydd nesaf
-ers_file_format_successful.instructions =Gwiriwch eich ffeiliau bob tro y byddwch yn eu diweddaru (bydd gwiriadau rheolaidd yn eich helpu i ddod o hyd i wallau, a’u cywiro, yn gynt).
+ers_file_format_successful.sub_heading =Yr hyn y gallwch ei wneud nesaf
 ers_file_format_successful.return_to_start_page_link =Gwirio ffeil wahanol
-ers_file_format_successful.banner =Ni ddarganfuwyd unrhyw wallau.
+ers_file_format_successful.banner =Nid oes unrhyw wallau ar y dudalen hon.
 ers_file_format_successful.feedback =Beth oedd eich barn ar y gwasanaeth hwn?
 ers_file_format_successful.feedback_time =(mae’n cymryd 30 eiliad)
 
@@ -260,3 +259,58 @@ ers.file_problem.fileTooSmall = yn wag
 ers.file_problem.invalidFileType = mae’r ffeil wedi’i chadw ar ffurf anghywir – dylai fod ar ffurf CSV neu ODS yn dibynnu ar yr hyn rydych eisoes wedi’i ddewis
 ers.file_problem.invalidFileNameCharacters = mae’r ffeil yn cynnwys cymeriadau annilys
 ers.file_problem.tryAgain = Rhowch gynnig arall arni
+
+#********************************************************************
+# Successful checking messages
+#********************************************************************
+ers_file_format_successful.lead_in=Gallwch wneud y canlynol:
+ers_file_format_successful.org.bullet_one=<link>bwrw golwg dros eich cynlluniau a’ch trefniadau</link>
+
+ers_file_format_successful.agent.bullet_one_link=dewis cleient
+ers_file_format_successful.agent.bullet_one_end= a chyflwyno’u datganiad
+
+ers_file_format_successful.org.bullet_one_link=bwrw golwg dros eich cynlluniau a’ch trefniadau
+ers_file_format_successful.org.bullet_one_end= er mwyn cyflwyno Ffurflen Dreth
+
+#********************************************************************
+# Common not enrolled in PAYE messages
+#********************************************************************
+ers.not_enrolled_paye.page_title=Mae problem – Gwarantau Ar Sail Cyflogaeth (ERS) – GOV.UK
+ers.not_enrolled_paye.header=Mae problem.
+
+#********************************************************************
+# Agent not enrolled in PAYE messages
+#********************************************************************
+ers.not_enrolled_paye.agent.lead_in=Rydych wedi mewngofnodi gyda Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth nad yw’n cael ei ddefnyddio ar gyfer cyflwyno datganiadau blynyddol ar gyfer ERS. Mae’n rhaid i chi wneud y naill neu’r llall o’r canlynol:
+ers.not_enrolled_paye.agent.bullet_one=gwirio eich bod wedi mewngofnodi gyda’r Dynodydd Defnyddiwr (ID) cywir ar gyfer Porth y Llywodraeth
+ers.not_enrolled_paye.agent.bullet_two=gwirio bod gennych fynediad at wasanaeth ar-lein TWE i Asiantau
+ers.not_enrolled_paye.agent.second_header=Os nad oes gennych fynediad at wasanaeth ar-lein TWE i Asiantau
+ers.not_enrolled_paye.agent.paragraph_one=Er mwyn rheoli cyfrifoldebau ERS eich cleient bydd angen i chi gael mynediad at wasanaeth ar-lein TWE i Asiantau.
+ers.not_enrolled_paye.agent.paragraph_two.start=Dysgwch
+ers.not_enrolled_paye.agent.paragraph_two.link_text= sut i ddefnyddio’r gwasanaeth ar-lein TWE i Asiantau
+ers.not_enrolled_paye.agent.paragraph_two.end=.
+ers.not_enrolled_paye.agent.third_header=Os ydych eisoes yn cyflwyno datganiadau ERS ar ran eich cleient
+ers.not_enrolled_paye.agent.paragraph_three=Os oes gennych fynediad at wasanaeth ar-lein TWE i Asiantau byddwch yn gallu rheoli cyfrifoldebau ERS eich cleient.
+ers.not_enrolled_paye.agent.lead_in_two=Mae’n rhaid i chi wneud y canlynol:
+ers.not_enrolled_paye.agent.bullet_three=allgofnodi
+ers.not_enrolled_paye.agent.bullet_four=mewngofnodi gyda’r Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth rydych chi’n ei ddefnyddio i gyflwyno datganiadau ERS ar ran eich cleientiaid
+
+#********************************************************************
+# Organisation not enrolled in PAYE messages
+#********************************************************************
+ers.not_enrolled_paye.org.paragraph_one=Rydych wedi mewngofnodi gyda’r Dynodydd Defnyddiwr (ID) ar gyfer Porth y Llywodraeth nad yw’n cael ei ddefnyddio ar gyfer rheoli TWE i gyflogwyr.
+ers.not_enrolled_paye.org.paragraph_two=Gwiriwch eich bod wedi mewngofnodi gyda’r ID cywir ar gyfer Porth y Llywodraeth.
+ers.not_enrolled_paye.org.second_header=Os nad ydych yn rheoli TWE i gyflogwyr yn eich cyfrif treth busnes
+ers.not_enrolled_paye.org.paragraph_three.start=I gyflwyno’ch datganiad blynyddol o ran Gwarantau Ar Sail Cyflogaeth, mae angen i chi
+ers.not_enrolled_paye.org.paragraph_three.link_text= ychwanegu TWE i gyflogwyr i’ch cyfrif treth busnes
+ers.not_enrolled_paye.org.paragraph_three.end=.
+ers.not_enrolled_paye.org.third_header=Os ydych eisoes yn rheoli TWE i gyflogwyr yn eich cyfrif treth busnes
+ers.not_enrolled_paye.org.paragraph_four=Mae’n rhaid i chi allgofnodi a mewngofnodi gan ddefnyddio ID ar gyfer Porth y Llywodraeth rydych chi’n ei ddefnyddio i reoli TWE i cyflogwyr yn eich cyfrif treth busnes.
+
+#********************************************************************
+# PAYE Sign Out messages
+#********************************************************************
+ers.paye.sign_out.title=Rydych wedi allgofnodi – Gwarantau Ar Sail Cyflogaeth – GOV.UK
+ers.paye.sign_out.header=Rydych wedi allgofnodi
+ers.paye.sign_out.agent.paragraph=I gyflwyno datganiad blynyddol ar gyfer ERS, mae’n rhaid i chi fewngofnodi gyda Dynodydd Defnyddiwr (ID) a chyfrinair ar gyfer Porth y Llywodraeth sy’n cael ei ddefnyddio i gyflwyno datganiadau ERS ar ran eich cleient.
+ers.paye.sign_out.org.paragraph=I gyflwyno’ch datganiad blynyddol o ran Gwarantau Ar Sail Cyflogaeth mae’n rhaid i chi allgofnodi a mewngofnodi gan ddefnyddio ID ar gyfer Porth y Llywodraeth rydych chi’n ei ddefnyddio i reoli TWE i gyflogwyr yn eich cyfrif treth busnes.

@@ -131,10 +131,9 @@ ers_format_errors.page_title = Error report
 ers_format_errors.sub_heading = What to do next
 
 ers_file_format_successful.page_title = Check complete
-ers_file_format_successful.sub_heading = What to do next
-ers_file_format_successful.instructions = Check your files whenever you update them (regular checks help you to find and fix errors earlier).
+ers_file_format_successful.sub_heading = What you can do next
 ers_file_format_successful.return_to_start_page_link = Check a different file
-ers_file_format_successful.banner = No errors were found.
+ers_file_format_successful.banner = There are no errors in the file.
 ers_file_format_successful.feedback = What did you think of this service?
 ers_file_format_successful.feedback_time = (takes 30 seconds)
 
@@ -261,3 +260,57 @@ ers.file_problem.fileTooSmall = is empty
 ers.file_problem.invalidFileType = is the wrong type - it should be a CSV or an ODS depending on what you have already selected
 ers.file_problem.invalidFileNameCharacters = contains invalid characters
 ers.file_problem.tryAgain = Try again
+
+#********************************************************************
+# Successful checking messages
+#********************************************************************
+ers_file_format_successful.lead_in=You can:
+
+ers_file_format_successful.agent.bullet_one_link=choose a client
+ers_file_format_successful.agent.bullet_one_end= and submit their return
+
+ers_file_format_successful.org.bullet_one_link=view your schemes and arrangements
+ers_file_format_successful.org.bullet_one_end= to submit your return
+
+#********************************************************************
+# Common not enrolled in PAYE messages
+#********************************************************************
+ers.not_enrolled_paye.page_title=There is a problem – Employment Related Securities – GOV.UK
+ers.not_enrolled_paye.header=There is a problem
+
+#********************************************************************
+# Agent not enrolled in PAYE messages
+#********************************************************************
+ers.not_enrolled_paye.agent.lead_in=You signed in with a Government Gateway user ID that is not used for submitting ERS annual returns. You need to either:
+ers.not_enrolled_paye.agent.bullet_one=check you have signed in with the correct Government Gateway user ID
+ers.not_enrolled_paye.agent.bullet_two=check that you have access to the PAYE for Agents online service
+ers.not_enrolled_paye.agent.second_header=If you do not have access to PAYE for Agents
+ers.not_enrolled_paye.agent.paragraph_one=To manage your clients’ ERS responsibilities online you will need to get access to the PAYE for Agents online service.
+ers.not_enrolled_paye.agent.paragraph_two.start=Find out
+ers.not_enrolled_paye.agent.paragraph_two.link_text= how to use the PAYE for Agents online service
+ers.not_enrolled_paye.agent.paragraph_two.end=.
+ers.not_enrolled_paye.agent.third_header=If you already submit ERS returns for your clients
+ers.not_enrolled_paye.agent.paragraph_three=If you have access to Paye for Agents online you will be able to manage your clients’ ERS responsibilities.
+ers.not_enrolled_paye.agent.lead_in_two=You must:
+ers.not_enrolled_paye.agent.bullet_three=sign out
+ers.not_enrolled_paye.agent.bullet_four=sign in using the Government Gateway user ID that you use to manage submit ERS returns for your clients
+
+#********************************************************************
+# Organisation not enrolled in PAYE messages
+#********************************************************************
+ers.not_enrolled_paye.org.paragraph_one=You signed in with a Government Gateway user ID that is not used for managing PAYE for employers.
+ers.not_enrolled_paye.org.paragraph_two=Check that you have signed in with the correct Government Gateway user ID.
+ers.not_enrolled_paye.org.second_header=If you don’t manage PAYE for employers in your business tax account
+ers.not_enrolled_paye.org.paragraph_three.start=To submit your Employment Related Securities annual return you need to
+ers.not_enrolled_paye.org.paragraph_three.link_text= add PAYE for employers to your business tax account
+ers.not_enrolled_paye.org.paragraph_three.end=.
+ers.not_enrolled_paye.org.third_header=If you already manage PAYE for employers in your business tax account
+ers.not_enrolled_paye.org.paragraph_four=You must sign out and sign in using the Government Gateway user ID that you use to manage PAYE for employers in your business tax account.
+
+#********************************************************************
+# PAYE Sign Out messages
+#********************************************************************
+ers.paye.sign_out.title=You have signed out – Employment Related Securities – GOV.UK
+ers.paye.sign_out.header=You have signed out
+ers.paye.sign_out.agent.paragraph=To submit an ERS annual return, you must sign in using the Government Gateway user ID and password that you use to submit ERS returns for your clients.
+ers.paye.sign_out.org.paragraph=To submit an Employment Related Securities annual return you must sign in using the Government Gateway user ID and password that you use to manage PAYE for employers in your business tax account.
