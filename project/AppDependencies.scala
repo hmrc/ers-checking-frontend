@@ -9,7 +9,7 @@ object AppDependencies {
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "commons-io"                  %  "commons-io"                   % "2.18.0",
+    "commons-io"                  %  "commons-io"                   % "2.19.0",
     "org.apache.pekko"            %% "pekko-stream"                 % pekkoVersion,
     "org.apache.pekko"            %% "pekko-connectors-csv"         % "1.0.2",
     "uk.gov.hmrc.mongo"           %% "hmrc-mongo-play-30"           % mongoVersion,
