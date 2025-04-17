@@ -20,7 +20,7 @@ import config.ApplicationConfig
 import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import models.SheetErrors
 import play.api.libs.json._
-import play.api.mvc.{AnyContent, AnyContentAsEmpty}
+import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import uk.gov.hmrc.services.validation.models._
 

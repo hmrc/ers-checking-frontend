@@ -2,10 +2,8 @@ import config.ApplicationConfig
 import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import models.{CsvFiles, SheetErrors}
 import org.scalacheck.Arbitrary
-import play.api.Configuration
 import play.api.data.Form
 import play.api.mvc.{AnyContent, Request}
-import play.api.test.FakeRequest
 import play.twirl.api.Html
 import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
