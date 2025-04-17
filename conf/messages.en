@@ -287,7 +287,7 @@ ers.not_enrolled_paye.agent.bullet_two=check that you have access to the PAYE fo
 ers.not_enrolled_paye.agent.second_header=If you do not have access to PAYE for Agents
 ers.not_enrolled_paye.agent.paragraph_one=To manage your clients’ ERS responsibilities online you will need to get access to the PAYE for Agents online service.
 ers.not_enrolled_paye.agent.paragraph_two.start=Find out
-ers.not_enrolled_paye.agent.paragraph_two.link_text= how to use the PAYE for Agents online service.
+ers.not_enrolled_paye.agent.paragraph_two.link_text= how to use the PAYE for Agents online service
 ers.not_enrolled_paye.agent.third_header=If you already submit ERS returns for your clients
 ers.not_enrolled_paye.agent.paragraph_three=If you have access to Paye for Agents online you will be able to manage your clients’ ERS responsibilities.
 ers.not_enrolled_paye.agent.lead_in_two=You must:
@@ -301,7 +301,7 @@ ers.not_enrolled_paye.org.paragraph_one=You signed in with a Government Gateway 
 ers.not_enrolled_paye.org.paragraph_two=Check that you have signed in with the correct Government Gateway user ID.
 ers.not_enrolled_paye.org.second_header=If you don’t manage PAYE for employers in your business tax account
 ers.not_enrolled_paye.org.paragraph_three.start=To submit your Employment Related Securities annual return you need to
-ers.not_enrolled_paye.org.paragraph_three.link_text= add PAYE for employers to your business tax account.
+ers.not_enrolled_paye.org.paragraph_three.link_text= add PAYE for employers to your business tax account
 ers.not_enrolled_paye.org.third_header=If you already manage PAYE for employers in your business tax account
 ers.not_enrolled_paye.org.paragraph_four=You must sign out and sign in using the Government Gateway user ID that you use to manage PAYE for employers in your business tax account.
 

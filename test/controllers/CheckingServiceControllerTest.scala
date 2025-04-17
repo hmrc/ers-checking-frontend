@@ -31,7 +31,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesImpl}
-import play.api.mvc.{AnyContent, Call, DefaultMessagesControllerComponents, Result}
+import play.api.mvc.{Call, DefaultMessagesControllerComponents, Result}
 import play.api.test.Helpers._
 import play.api.test.Injecting
 import views.html._

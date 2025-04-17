@@ -287,7 +287,7 @@ ers.not_enrolled_paye.agent.bullet_two=gwirio bod gennych fynediad at wasanaeth 
 ers.not_enrolled_paye.agent.second_header=Os nad oes gennych fynediad at wasanaeth ar-lein TWE i Asiantau
 ers.not_enrolled_paye.agent.paragraph_one=Er mwyn rheoli cyfrifoldebau ERS eich cleient bydd angen i chi gael mynediad at wasanaeth ar-lein TWE i Asiantau.
 ers.not_enrolled_paye.agent.paragraph_two.start=Dysgwch
-ers.not_enrolled_paye.agent.paragraph_two.link_text= sut i ddefnyddio’r gwasanaeth ar-lein TWE i Asiantau.
+ers.not_enrolled_paye.agent.paragraph_two.link_text= sut i ddefnyddio’r gwasanaeth ar-lein TWE i Asiantau
 ers.not_enrolled_paye.agent.third_header=Os ydych eisoes yn cyflwyno datganiadau ERS ar ran eich cleient
 ers.not_enrolled_paye.agent.paragraph_three=Os oes gennych fynediad at wasanaeth ar-lein TWE i Asiantau byddwch yn gallu rheoli cyfrifoldebau ERS eich cleient.
 ers.not_enrolled_paye.agent.lead_in_two=Mae’n rhaid i chi wneud y canlynol:
@@ -301,7 +301,7 @@ ers.not_enrolled_paye.org.paragraph_one=Rydych wedi mewngofnodi gyda’r Dynodyd
 ers.not_enrolled_paye.org.paragraph_two=Gwiriwch eich bod wedi mewngofnodi gyda’r ID cywir ar gyfer Porth y Llywodraeth.
 ers.not_enrolled_paye.org.second_header=Os nad ydych yn rheoli TWE i gyflogwyr yn eich cyfrif treth busnes
 ers.not_enrolled_paye.org.paragraph_three.start=I gyflwyno’ch datganiad blynyddol o ran Gwarantau Ar Sail Cyflogaeth, mae angen i chi
-ers.not_enrolled_paye.org.paragraph_three.link_text= ychwanegu TWE i gyflogwyr i’ch cyfrif treth busnes.
+ers.not_enrolled_paye.org.paragraph_three.link_text= ychwanegu TWE i gyflogwyr i’ch cyfrif treth busnes
 ers.not_enrolled_paye.org.third_header=Os ydych eisoes yn rheoli TWE i gyflogwyr yn eich cyfrif treth busnes
 ers.not_enrolled_paye.org.paragraph_four=Mae’n rhaid i chi allgofnodi a mewngofnodi gan ddefnyddio ID ar gyfer Porth y Llywodraeth rydych chi’n ei ddefnyddio i reoli TWE i cyflogwyr yn eich cyfrif treth busnes.
 
