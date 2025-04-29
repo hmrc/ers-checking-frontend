@@ -91,7 +91,7 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
   val agentErsEnrolmentsWithPAYE: Enrolments =
     Enrolments(
       Set(
-        Enrolment("IR-PAYE-AGENT", Seq(EnrolmentIdentifier("AgentReference", "1234")), "Activated", None)
+        Enrolment("IR-PAYE-AGENT", Seq(EnrolmentIdentifier("IRAgentReference", "1234")), "Activated", None)
       )
     )
 
@@ -213,5 +213,43 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
         contentAsString(result) shouldBe "Successful"
       }
     }
+  }
+
+  "checkAgentPAYE" should {
+    "return true when agent has only IR-PAYE-AGENT enrolment with IRAgentReference identifier" in {
+      val enrollments: Enrolments = Enrolments(
+        Set(
+          Enrolment("IR-PAYE-AGENT", Seq(EnrolmentIdentifier("IRAgentReference", "A12345")), "Activated"),
+        )
+      )
+      authAction.checkAgentPAYE(enrollments) shouldBe true
+    }
+
+    "return true when agent has multiple enrolments including IR-PAYE-AGENT enrolment with IRAgentReference identifier" in {
+      val enrollments: Enrolments = Enrolments(
+        Set(
+          Enrolment("TEST", Seq(), "Activated"),
+          Enrolment("IR-PAYE-AGENT", Seq(EnrolmentIdentifier("IRAgentReference", "A12345")), "Activated"),
+          Enrolment("ANOTHER_TEST", Seq(EnrolmentIdentifier("IRAgentReference", "A12345")), "Activated"),
+        )
+      )
+      authAction.checkAgentPAYE(enrollments) shouldBe true
+    }
+  }
+
+  "return false when agent has no enrolments" in {
+    val enrollments: Enrolments = Enrolments(
+      Set()
+    )
+    authAction.checkAgentPAYE(enrollments) shouldBe false
+  }
+
+  "return false when agent has enrolments but not IR-PAYE-AGENT enrolment with IRAgentReference identifier" in {
+    val enrollments: Enrolments = Enrolments(
+      Set(
+        Enrolment("TEST", Seq(), "Activated")
+      )
+    )
+    authAction.checkAgentPAYE(enrollments) shouldBe false
   }
 }

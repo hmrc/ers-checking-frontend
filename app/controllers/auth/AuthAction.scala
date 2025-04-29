@@ -65,7 +65,7 @@ class AuthAction @Inject()(override val authConnector: AuthConnector,
       .getOrElse(Seq.empty[EnrolmentIdentifier])
   )(key)
 
-  def checkAgentPAYE(enrollments: Enrolments): Boolean = getIdentifier(enrollments, agentEnrolmentIdentifier, "AgentReference")
+  def checkAgentPAYE(enrollments: Enrolments): Boolean = getIdentifier(enrollments, agentEnrolmentIdentifier, "IRAgentReference")
     .exists(_.nonEmpty)
 
   def getOptionalEmpRef(enrollements: Enrolments): Option[EmpRef] =
