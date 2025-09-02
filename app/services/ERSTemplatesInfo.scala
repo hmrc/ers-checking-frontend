@@ -26,7 +26,6 @@ case class SheetInfo(schemeType: String, sheetId: Int, sheetName: String, sheetT
 
 object ERSTemplatesInfo extends EMITemplateInfo with CsopTemplateInfo with SipTemplateInfo with OtherTemplateInfo with SayeTemplateInfo {
 
-  // scalastyle:off magic.number
   val csopSheets: Map[String, SheetInfo] = Map(
     csopSheet1Name  -> SheetInfo(csop,  1, csopSheet1Name, csopSheet1title, csopSheet1ValConfig,  csopOptionsGrantedHeaderRow),
     csopSheet2Name  -> SheetInfo(csop,  2, csopSheet2Name,  csopSheet2Title, csopSheet2ValConfig,  csopOptionsRCLHeaderRow),

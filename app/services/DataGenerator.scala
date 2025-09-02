@@ -46,7 +46,6 @@ class DataGenerator @Inject()(auditEvents: AuditEvents,
                              )(implicit ec: ExecutionContext) extends DataParser {
 
   val logger: Logger = Logger(getClass)
-  // scalastyle:off magic.number
 
   private[services] val ersSheetsConfig = if (appConfig.csopV5Enabled) ersSheetsWithCsopV5 else ersSheets
 

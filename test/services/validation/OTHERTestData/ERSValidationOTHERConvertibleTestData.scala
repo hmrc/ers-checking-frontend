@@ -93,7 +93,7 @@ trait ERSValidationOTHERConvertibleTestData {
     descriptions
   }
 
-  def getTestData: List[Cell] = {// scalastyle:off magic.number
+  def getTestData: List[Cell] = {
     val testData = List(
       Cell("A",rowNumber,"2012-02-22"),
       Cell("A",rowNumber,"20120222"),
