@@ -19,7 +19,7 @@ package services.validation.SAYETestData
 import models.ValidationErrorData
 import uk.gov.hmrc.services.validation.models.Cell
 
-trait ERSValidationSAYERCLTestData {// scalastyle:off magic.number
+trait ERSValidationSAYERCLTestData {
   val rowNumber:Int = 1
 
   def getDescriptions: List[String] = {

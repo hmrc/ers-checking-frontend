@@ -15,7 +15,7 @@ This service utilises [Upscan](https://github.com/hmrc/upscan-initiate)
 
 Service Manager: `sm2 --start ERS_CHECKING_ALL`
 
-You can use the `./run_all_tests.sh` script to quickly run the unit tests, along with scalastyle and a dependency check,  for this repo
+You can use the `./run_all_tests.sh` script to quickly run the unit tests, along with dependency check,  for this repo
 
 | Repositories      | Link                                                  |
 |-------------------|-------------------------------------------------------|

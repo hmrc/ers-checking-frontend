@@ -20,7 +20,7 @@ import models.ValidationErrorData
 import org.apache.commons.lang3.StringUtils
 import uk.gov.hmrc.services.validation.models.Cell
 
-trait ERSValidationSAYEExercisedTestData {// scalastyle:off magic.number
+trait ERSValidationSAYEExercisedTestData {
   val rowNumber : Int = 1
   def getDescriptions: List[String] = List(
     //A

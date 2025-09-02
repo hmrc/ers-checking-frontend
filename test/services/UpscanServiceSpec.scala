@@ -33,7 +33,6 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 class UpscanServiceSpec extends AnyWordSpecLike with Matchers with OptionValues with ErsTestHelper {
-  // scalastyle:off magic.number
 
   override implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "http://localhost:9290/")
   val mockUpscanConnector: UpscanConnector = mock[UpscanConnector]

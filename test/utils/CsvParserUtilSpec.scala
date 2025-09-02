@@ -27,7 +27,7 @@ import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 import scala.collection.mutable.ListBuffer
 
 class CsvParserUtilSpec extends AnyWordSpecLike with Matchers with OptionValues with ErsTestHelper {
-  // scalastyle:off magic.number
+
   def parserUtil: CsvParserUtil = new CsvParserUtil(mockAppConfig)
 
   "formatDataToValidate" must {

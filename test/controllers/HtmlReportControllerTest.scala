@@ -49,7 +49,6 @@ class HtmlReportControllerTest
     with ErsTestHelper
     with Injecting
     with CacheUtil {
-  // scalastyle:off magic.number
 
   val config: Map[String, Any] = Map(
     "application.secret" -> "test",
