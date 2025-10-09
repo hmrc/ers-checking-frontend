@@ -13,4 +13,3 @@ object CodeCoverageSettings {
   def apply(): Seq[Setting[?]] = settings
 
 }
-
