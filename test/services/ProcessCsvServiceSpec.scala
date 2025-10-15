@@ -16,6 +16,10 @@
 
 package services
 
+import com.typesafe.config.ConfigFactory
+import helpers.ErsTestHelper
+import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
+import models.{ERSFileProcessingException, RowValidationResults, SheetErrors}
 import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.http.scaladsl.model.{HttpResponse, StatusCodes}
@@ -24,10 +28,6 @@ import org.apache.pekko.stream.connectors.csv.scaladsl.CsvParsing
 import org.apache.pekko.stream.scaladsl.{FileIO, Sink, Source}
 import org.apache.pekko.testkit.TestKit
 import org.apache.pekko.util.ByteString
-import com.typesafe.config.ConfigFactory
-import helpers.ErsTestHelper
-import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
-import models.{ERSFileProcessingException, RowValidationResults, SheetErrors}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.{ScalaFutures, TimeLimits}
@@ -35,11 +35,11 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{EitherValues, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, i18n}
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.DefaultMessagesControllerComponents
+import play.api.{Application, i18n}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.test.MongoSupport
@@ -185,9 +185,9 @@ class ProcessCsvServiceSpec
 
       val result = resultFuture.map(_.futureValue)
       assert(result.forall(_.isLeft))
-      val context = result.head.left.toOption.get.asInstanceOf[ERSFileProcessingException]
+      val value = result.head.left.toOption.get.asInstanceOf[ERSFileProcessingException]
 
-      context.context shouldBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload CSOP_OptionsGranted_V5.csv as part of your annual return."
+      value.context shouldBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload CSOP_OptionsGranted_V5.csv as part of your annual return."
     }
 
     "return a throwable when an error occurs during the file processing" in {
@@ -399,10 +399,10 @@ class ProcessCsvServiceSpec
     "return an exception if the file is empty" in {
       val errors = Seq.empty[Either[Throwable, RowValidationResults]]
       val result = testProcessCsvService.getRowsWithNumbers(errors, "test.csv")
-      val context = result.left.toOption.get.asInstanceOf[ERSFileProcessingException]
+      val value = result.left.toOption.get.asInstanceOf[ERSFileProcessingException]
 
       result.isLeft shouldBe true
-      context.context shouldBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload test.csv as part of your annual return."
+      value.context shouldBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload test.csv as part of your annual return."
     }
 
     "return the earliest previous exception if one exists" in {
