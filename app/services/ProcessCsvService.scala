@@ -160,9 +160,10 @@ private[services] final def processDisplayedErrors(errorsLeftToDisplay: Int,
     implicit messages: Messages): Either[Throwable, Seq[List[ValidationError]]] = listOfErrors match {
     case allEmpty if allEmpty.isEmpty || allEmpty.filter(_.isRight).forall(_.map(_.rowWasEmpty).forall(identity)) =>
       Left(ERSFileProcessingException(
+        "ers_check_csv_file.noData",
         messages("ers_check_csv_file.noData", name),
-        messages("ers_check_csv_file.noData"),
-        needsExtendedInstructions = true))
+        needsExtendedInstructions = true,
+        optionalParams = Seq(name)))
     case nonEmpty =>
       nonEmpty.find(_.isLeft) match {
       case Some(Left(issues)) => Left(issues)

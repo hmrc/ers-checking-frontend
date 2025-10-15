@@ -185,8 +185,9 @@ class ProcessCsvServiceSpec
 
       val result = resultFuture.map(_.futureValue)
       assert(result.forall(_.isLeft))
-      result.head.left.value
-        .getMessage shouldBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload CSOP_OptionsGranted_V5.csv as part of your annual return."
+      val context = result.head.left.toOption.get.asInstanceOf[ERSFileProcessingException]
+
+      context.context shouldBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload CSOP_OptionsGranted_V5.csv as part of your annual return."
     }
 
     "return a throwable when an error occurs during the file processing" in {
@@ -398,10 +399,10 @@ class ProcessCsvServiceSpec
     "return an exception if the file is empty" in {
       val errors = Seq.empty[Either[Throwable, RowValidationResults]]
       val result = testProcessCsvService.getRowsWithNumbers(errors, "test.csv")
+      val context = result.left.toOption.get.asInstanceOf[ERSFileProcessingException]
 
       result.isLeft shouldBe true
-      result.left.value
-        .getMessage shouldBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload test.csv as part of your annual return."
+      context.context shouldBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload test.csv as part of your annual return."
     }
 
     "return the earliest previous exception if one exists" in {
