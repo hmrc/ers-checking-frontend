@@ -77,28 +77,37 @@ class UploadController @Inject()(authAction: AuthAction,
 
   private[controllers] def makeRequest(request: HttpRequest): Future[HttpResponse] = Http()(actorSystem).singleRequest(request)
 
-  private[controllers] def readFileOds(downloadUrl: String): StaxProcessor = {
-    val stream: InputStream = downloadAsInputStream(downloadUrl)
-    val targetFileName = "content.xml"
-    val zipInputStream: ZipInputStream = new ZipInputStream(stream)
-
-    @scala.annotation.tailrec
-    def findFileInZip(stream: ZipInputStream): InputStream = {
-      Option(stream.getNextEntry) match {
-        case Some(entry) if entry.getName == targetFileName =>
-          stream
-        case Some(_) =>
-          findFileInZip(stream)
-        case None =>
-          throw ERSFileProcessingException(
-            "Failed to stream the data from file",
-            "Exception bulk entity streaming"
-          )
+  private[controllers] def readFileOds(downloadUrl: String) (implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Either[Result, StaxProcessor] = {
+    try {
+      val stream: InputStream = downloadAsInputStream(downloadUrl)
+      val targetFileName = "content.xml"
+      val zipInputStream = new ZipInputStream(stream)
+      @scala.annotation.tailrec
+      def findFileInZip(stream: ZipInputStream): InputStream = {
+        Option(stream.getNextEntry) match {
+          case Some(entry) if entry.getName == targetFileName =>
+            stream
+          case Some(_) =>
+            findFileInZip(stream)
+          case None =>
+            throw ERSFileProcessingException(
+              "Failed to stream the data from file",
+              "Exception bulk entity streaming"
+            )
+        }
       }
-    }
+      val contentInputStream: InputStream = findFileInZip(zipInputStream)
+      val processor = new StaxProcessor(contentInputStream)
+      Right(processor)
+    } catch {
+      case e: ERSFileProcessingException =>
+        logger.error(s"[UploadController][readFileOds]Error processing ODS file: ${e.getMessage}", e)
+        Left(getGlobalErrorPage)
 
-    val contentInputStream: InputStream = findFileInZip(zipInputStream)
-    new StaxProcessor(contentInputStream)
+      case e: Exception =>
+        logger.error(s"[UploadController][readFileOds]Unexpected error while reading ODS file: ${e.getMessage}", e)
+        Left(getGlobalErrorPage)
+    }
   }
 
   def uploadCSVFile(scheme: String): Action[AnyContent] = authAction.async {
@@ -139,12 +148,20 @@ class UploadController @Inject()(authAction: AuthAction,
       if (clearedSuccessfully) {
         //These .get's are safe because the UploadedSuccessfully model is already validated as existing in the UpscanController
         sessionCacheService.fetch[UploadedSuccessfully](ersUtil.CALLBACK_DATA_KEY).flatMap { file =>
-          val result = processODSService.performODSUpload(file.get.name, readFileOds(file.get.downloadUrl))(request, scheme, hc, messages)
-          result.flatMap[Result] {
-            case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
-            case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(false)))
-            case Failure(t) => handleException(t)
-          }
+          readFileOds(file.get.downloadUrl).fold(
+            err => {
+              logger.error(s"[UploadController][showuploadODSFile] failed in readFileOds for scheme : $scheme")
+              Future.successful(err)
+            },
+            processor =>{
+              val result = processODSService.performODSUpload(file.get.name, processor)(request, scheme, hc, messages)
+              result.flatMap[Result] {
+                case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
+                case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(false)))
+                case Failure(t) => handleException(t)
+              }
+            }
+          )
         }
       } else {
         Future.successful(getGlobalErrorPage(request, messages))
