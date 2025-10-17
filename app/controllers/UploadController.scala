@@ -101,11 +101,11 @@ class UploadController @Inject()(authAction: AuthAction,
       Right(processor)
     } catch {
       case e: ERSFileProcessingException =>
-        logger.error(s"[UploadController][readFileOds]Error processing ODS file: ${e.getMessage}", e)
+        logger.error(s"[UploadController][readFileOds] Error processing ODS file: ${e.getMessage}", e)
         Left(getGlobalErrorPage)
 
       case e: Exception =>
-        logger.error(s"[UploadController][readFileOds]Unexpected error while reading ODS file: ${e.getMessage}", e)
+        logger.error(s"[UploadController][readFileOds] Unexpected error while reading ODS file: ${e.getMessage}", e)
         Left(getGlobalErrorPage)
     }
   }
@@ -164,6 +164,7 @@ class UploadController @Inject()(authAction: AuthAction,
           )
         }
       } else {
+        logger.error(s"[UploadController][showuploadODSFile] failed for clearErrorCache scheme : $scheme")
         Future.successful(getGlobalErrorPage(request, messages))
       }
     }
