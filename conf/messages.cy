@@ -2,7 +2,7 @@
 # General messages
 #********************************************************************
 
-service.name = Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS)
+service.name = Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth
 
 ers.csop = Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni
 ers.emi = Cymhellion Rheoli Mentrau
