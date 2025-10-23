@@ -2,7 +2,7 @@
 # General messages
 #********************************************************************
 
-service.name = Check your Employment Related Securities (ERS) files
+service.name = Check your Employment Related Securities files
 
 ers.csop = Company Share Option Plan
 ers.emi = Enterprise Management Incentives
