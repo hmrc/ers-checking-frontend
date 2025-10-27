@@ -1,4 +1,5 @@
-digital-service: Employment Related Securities
+digital-service: ERS / Employment Related Securities
+description: This service Employment Related Securities (ERS) allow employers to register their employee share and other security schemes with HMRC. The service also enables customers to upload their ERS annual return files and check them for formatting errors.
 repoVisibility: public_0C3F0CE3E6E6448FAD341E7BFA50FCD333E06A20CFF05FCACE61154DDBBADF71
 test-repositories:
   - ers-checking-acceptance-tests
