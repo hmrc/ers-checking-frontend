@@ -75,9 +75,14 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
 
   def processFiles(callback: Option[UpscanCsvFilesCallbackList], scheme: String, source: String => Source[HttpResponse, _])(
     implicit request: Request[_], hc: HeaderCarrier, messages: Messages
-  ): List[Future[Either[Throwable, Boolean]]] =
-    callback.get.files map { file =>
+  ): List[Future[Either[Throwable, Boolean]]] = {
 
+    val upscanFiles = callback match {
+      case Some(fileDetails) => fileDetails.files
+      case None => Nil
+    }
+
+    upscanFiles.map { file =>
       val successUpload = file.uploadStatus.asInstanceOf[UploadedSuccessfully]
 
       val validatorFuture: Future[Either[Throwable, DataValidator]] = Source(List(successUpload.name))
@@ -105,6 +110,7 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
         )
       }
     }
+  }
 
   def processRow(rowBytes: List[ByteString], sheetName: String, validator: DataValidator): Either[Throwable, RowValidationResults] = {
     val rowStrings = rowBytes.map(byteString => byteString.utf8String)
