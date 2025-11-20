@@ -20,7 +20,7 @@ import com.typesafe.config.ConfigFactory
 import helpers.ErsTestHelper
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import models.ERSFileProcessingException
-import uk.gov.hmrc.validator.models.{RowValidationResults, SheetErrors}
+import uk.gov.hmrc.models.{RowValidationResults, SheetErrors}
 import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.http.scaladsl.model.{HttpResponse, StatusCodes}
@@ -46,7 +46,7 @@ import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.test.MongoSupport
 import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
-import uk.gov.hmrc.validator.{DataGenerator, ERSTemplatesInfo}
+import uk.gov.hmrc.{DataGenerator, ERSTemplatesInfo}
 import utils.CsvParserUtil
 
 import java.io.File
