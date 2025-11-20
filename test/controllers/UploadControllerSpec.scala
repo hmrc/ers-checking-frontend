@@ -39,7 +39,7 @@ import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents, Request, R
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, i18n}
-import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
+import services.{ProcessCsvService, ProcessODSService}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import views.html.global_error
 
@@ -65,7 +65,6 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
   val callbackList: Option[UpscanCsvFilesCallbackList] = {
     Some(UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId.generate, uploadedSuccessfully.get))))
   }
-  val mockStaxProcessor: StaxProcessor = mock[StaxProcessor]
   val globalErrorView: global_error = inject[global_error]
 
 
@@ -84,9 +83,10 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
         InternalServerError("Test body")
       }
 
-      val mockSource: Source[HttpResponse, NotUsed] = Source.fromIterator(() => List(HttpResponse(StatusCodes.OK)).iterator)
+      val mockSource: Source[HttpResponse, NotUsed] =
+        Source.fromIterator(() => List(HttpResponse(StatusCodes.OK)).iterator)
 
-      override private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, _] = if(mockReadFileCsv) {
+      override private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, NotUsed] = if(mockReadFileCsv) {
         mockSource
       } else {
         super.readFileCsv(downloadUrl)
@@ -102,7 +102,7 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
         }
       }
 
-      when(mockProcessCsvService.processFiles(any(), any(), any())(any(), any(), any())).thenReturn(returnValue)
+      when(mockProcessCsvService.processFiles(any(), any(), any())(any(), any())).thenReturn(returnValue)
 
       when(mockSessionCacheRepo.cache(refEq(ersUtil.FORMAT_ERROR_CACHE), anyString())(any(), any()))
         .thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))

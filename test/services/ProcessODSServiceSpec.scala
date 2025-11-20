@@ -19,7 +19,7 @@ package services
 import controllers.Fixtures
 import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import helpers.ErsTestHelper
-import models.{ERSFileProcessingException, SheetErrors}
+import models.ERSFileProcessingException
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -36,12 +36,15 @@ import play.api.test.FakeRequest
 import play.api.{Application, i18n}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.test.MongoSupport
-import uk.gov.hmrc.services.validation.models.ValidationError
-import utils.{ParserUtil, UploadedFileUtil}
+import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
+import uk.gov.hmrc.validator.models.SheetErrors
+import uk.gov.hmrc.validator.ODSValidator
+import utils.UploadedFileUtil
 
+import java.io.InputStream
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 class ProcessODSServiceSpec
   extends AnyWordSpecLike
@@ -64,8 +67,6 @@ class ProcessODSServiceSpec
     ).build()
 
   val mockUploadedFileUtil: UploadedFileUtil = mock[UploadedFileUtil]
-  val mockDataGenerator: DataGenerator = mock[DataGenerator]
-  val mockStaxProcessor: StaxProcessor = mock[StaxProcessor]
 
   val config: Map[String, String] = Map(
     "microservice.services.cachable.short-lived-cache-frontend.host" -> "test",
@@ -74,79 +75,114 @@ class ProcessODSServiceSpec
   )
 
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication)
-  lazy val mockParserUtil: ParserUtil = mock[ParserUtil]
-  lazy val testParserUtil: ParserUtil = fakeApplication.injector.instanceOf[ParserUtil]
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
   implicit val scheme: String = "testScheme"
   implicit val fakeRequest: RequestWithOptionalEmpRefAndPAYE[AnyContent] = RequestWithOptionalEmpRefAndPAYE(FakeRequest(), None, PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, None, mockAppConfig))
 
+  def buildProcessODSService(checkODSFileTypeResult: Boolean = true, sheetErrors: ListBuffer[SheetErrors]): ProcessODSService = {
+    val validator = new ODSValidator {
+      override def validateODSFile(csopV5Enabled: Boolean, inputStream: InputStream, scheme: String, uploadedFileName: String): ListBuffer[SheetErrors] = sheetErrors
+    }
+    new ProcessODSService(mockUploadedFileUtil, mockSessionCacheRepo, mockErsUtil, validator){
+      when(mockUploadedFileUtil.checkODSFileType(anyString())).thenReturn(checkODSFileTypeResult)
+    }
+  }
+
   "calling performODSUpload" should {
 
-    def buildProcessODSService(checkODSFileTypeResult: Boolean = true, isValid: Boolean = true): ProcessODSService = {
-      lazy val result = if(isValid) Future.successful(Success(true)) else Future.successful(Success(false))
-      new ProcessODSService(mockUploadedFileUtil, mockParserUtil, mockDataGenerator, mockSessionCacheRepo, mockErsUtil){
-        when(mockParserUtil.isFileValid(any(), any())(any())).thenReturn(result)
-        when(mockUploadedFileUtil.checkODSFileType(anyString())).thenReturn(checkODSFileTypeResult)
-      }
-    }
-
-    val sheetErrors = Fixtures.buildSheetErrors
+    val sheetErrors: ListBuffer[SheetErrors] = Fixtures.buildSheetErrors
 
     "return false if the file has validation errors" in {
-      when(mockDataGenerator.getErrors(any(), any(), any())(any(), any(), any())).thenReturn(sheetErrors)
+      // mocking calls to cache
       when(mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any()))
         .thenReturn(Future.successful(("", "")))
+      when(mockSessionCacheRepo.cache[Long](ArgumentMatchers.eq(mockErsUtil.SCHEME_ERROR_COUNT_CACHE), any())(any(), any()))
+        .thenReturn(Future.successful(("", "")))
+      when(mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.ERROR_LIST_CACHE), any())(any(), any()))
+        .thenReturn(Future.successful(("", "")))
 
-      buildProcessODSService(isValid = false).performODSUpload("testFileName", mockStaxProcessor).futureValue shouldBe Success(false)
+      val output: Future[Try[Boolean]] = buildProcessODSService(checkODSFileTypeResult = true, sheetErrors)
+        .performODSUpload(csopV5Enabled = true, 10, "testFileName", mockInputStream, "csop")
+      output.futureValue shouldBe Success(false)
     }
 
     "return true if the file doesn't have any errors" in {
-      val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
-      when(mockDataGenerator.getErrors(any(), any(), any())(any(), any(), any())).thenReturn(emptyErrors)
       when(mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any()))
         .thenReturn(Future.successful(("", "")))
 
-      buildProcessODSService().performODSUpload("testFileName", mockStaxProcessor).futureValue shouldBe Success(true)
+      val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
+      val output: Future[Try[Boolean]] = buildProcessODSService(checkODSFileTypeResult = true, emptyErrors)
+        .performODSUpload(csopV5Enabled = true, 10, "testFileName", mockInputStream, "csop")
+
+      output.futureValue shouldBe Success(true)
     }
 
     "return a failure if nothing was found in the cache" in {
-      val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
-      when(mockDataGenerator.getErrors(any(), any(), any())(any(), any(), any())).thenReturn(emptyErrors)
       when(mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any()))
         .thenReturn(Future.failed(new NoSuchElementException))
 
-      val result = buildProcessODSService().performODSUpload("testFileName", mockStaxProcessor).futureValue
+      val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
+      val result: Try[Boolean] = buildProcessODSService(checkODSFileTypeResult = true, emptyErrors)
+        .performODSUpload(csopV5Enabled = true, 10, "testFileName", mockInputStream, "csop")
+        .futureValue
+
       assert(result.isFailure)
       result.failed.get shouldBe a[NoSuchElementException]
+
     }
 
     "throw an ERSFileProcessingException if the file has an incorrect file type" in {
       val exception = ERSFileProcessingException("You chose to check an ODS file, but testFileName isn’t an ODS file.",
         "You chose to check an ODS file, but testFileName isn’t an ODS file.")
+      val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
 
-      buildProcessODSService(checkODSFileTypeResult = false).performODSUpload("testFileName", mockStaxProcessor).futureValue shouldBe Failure(exception)
+      buildProcessODSService(checkODSFileTypeResult = false, emptyErrors)
+        .performODSUpload(csopV5Enabled = true, 10, "testFileName", mockInputStream, "csop").futureValue shouldBe Failure(exception)
     }
   }
 
   "calling checkFileType" should {
 
-    def buildProcessODSService(checkODSFileTypeResult: Boolean = true): ProcessODSService =
-      new ProcessODSService(mockUploadedFileUtil, testParserUtil, mockDataGenerator, mockSessionCacheRepo, mockErsUtil){
-      when(mockUploadedFileUtil.checkODSFileType(anyString())).thenReturn(checkODSFileTypeResult)
-    }
-
     "return an exception when the file has the incorrect type" in {
-      val exceptionResult: ERSFileProcessingException = intercept[ERSFileProcessingException]{
-        buildProcessODSService(false).checkFileType(mockStaxProcessor, "testFileName")
-      }
+
+      val processODSService: ProcessODSService = new ProcessODSService(mockUploadedFileUtil, mockSessionCacheRepo, mockErsUtil, ODSValidator())
+      val exceptionResult: ERSFileProcessingException = intercept[ERSFileProcessingException](processODSService.checkFileType("testFileName"))
       exceptionResult.message shouldBe "You chose to check an ODS file, but testFileName isn’t an ODS file."
     }
 
-    "return a ListBuffer of SheetErrors" in {
+    "return Unit if the file is an ODS file" in {
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
-      when(mockDataGenerator.getErrors(any(), any(), any())(any(), any(), any())).thenReturn(emptyErrors)
-
-      buildProcessODSService().checkFileType(mockStaxProcessor, "testFileName") shouldBe emptyErrors
+      buildProcessODSService(checkODSFileTypeResult = true, emptyErrors).checkFileType("testFileName.ods") shouldBe () // Should not throw exception if file is an ODS file
     }
   }
+
+  "calling getSheetErrors" should {
+    val schemeErrors = new ListBuffer[SheetErrors]()
+
+    val list1 = ValidationError(Cell("A", 1, "abc"), "001", "error.1", "This entry must be 'yes' or 'no'.")
+    val list2 = ValidationError(Cell("B", 1, "abc"), "001", "error.1", "This entry must be 'yes' or 'no'.")
+    val list3 = ValidationError(Cell("C", 1, "abc"), "001", "error.1", "This entry must be 'yes' or 'no'.")
+
+    val sheetErrors3 = new ListBuffer[ValidationError]()
+    sheetErrors3 += list1
+    sheetErrors3 += list2
+    sheetErrors3 += list3
+    schemeErrors += SheetErrors("sheet_tab_1", sheetErrors3)
+    schemeErrors += SheetErrors("sheet_tab_2", sheetErrors3)
+
+    val sheetErrors1 = new ListBuffer[ValidationError]()
+    sheetErrors1 += list1
+    schemeErrors += SheetErrors("sheet_tab_3", sheetErrors1)
+
+    "return up to the first 100 errors of each sheet" in {
+
+      val processODSService: ProcessODSService = buildProcessODSService(checkODSFileTypeResult = true, schemeErrors)
+      val result = processODSService.getSheetErrors(schemeErrors, 100)
+
+      result.head.errors.size shouldBe 3
+      result(1).errors.size shouldBe 3
+      result(2).errors.size shouldBe 1
+    }
+  }
+
 }

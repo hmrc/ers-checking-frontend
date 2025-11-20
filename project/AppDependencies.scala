@@ -15,7 +15,7 @@ object AppDependencies {
     "uk.gov.hmrc.mongo"           %% "hmrc-mongo-play-30"           % mongoVersion,
     "uk.gov.hmrc"                 %% "bootstrap-frontend-play-30"   % bootstrapVersion,
     "uk.gov.hmrc"                 %% "domain-play-30"               % "11.0.0",
-    "uk.gov.hmrc"                 %% "tabular-data-validator"       % "1.9.0",
+    "uk.gov.hmrc"                 %% "ers-file-validator-config"    % "1.0.0-SNAPSHOT", // TODO: VERSION WILL NEED UPDATING (NO SNAPSHOT)
     "uk.gov.hmrc"                 %% "play-frontend-hmrc-play-30"   % "12.25.0"
   )
 

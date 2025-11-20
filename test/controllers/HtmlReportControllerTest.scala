@@ -17,7 +17,7 @@
 package controllers
 
 import helpers.ErsTestHelper
-import models.SheetErrors
+import models.SheetErrors.format
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -33,6 +33,7 @@ import play.api.mvc.{DefaultMessagesControllerComponents, Result}
 import play.api.test.Helpers._
 import play.api.test.Injecting
 import play.api.{Application, i18n}
+import uk.gov.hmrc.validator.models.SheetErrors
 import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
 import utils.CacheUtil

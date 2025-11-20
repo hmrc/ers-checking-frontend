@@ -18,10 +18,11 @@ package controllers
 
 import config.ApplicationConfig
 import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
-import models.SheetErrors
+import models.SheetErrors.format
 import play.api.libs.json._
 import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
+import uk.gov.hmrc.validator.models.SheetErrors
 import uk.gov.hmrc.services.validation.models._
 
 import scala.collection.mutable.ListBuffer

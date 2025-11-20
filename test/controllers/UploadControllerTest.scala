@@ -36,10 +36,10 @@ import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents, Request, R
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, i18n}
-import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
+import services.{ProcessCsvService, ProcessODSService}
 import views.html.global_error
 
-import java.io.ByteArrayInputStream
+import java.io.{ByteArrayInputStream, InputStream}
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
@@ -62,8 +62,8 @@ class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) 
     Some(UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId.generate, uploadedSuccessfully.get))))
   }
 
-  val staxProcessor = new StaxProcessor(new ByteArrayInputStream("<ok/>".getBytes("UTF-8")))
-  val mockStaxProcessor: Either[Result, StaxProcessor] = Right(staxProcessor)
+  val staxProcessor: InputStream = new ByteArrayInputStream("<ok/>".getBytes("UTF-8"))
+  val mockStaxProcessor: Either[Result, InputStream] = Right(staxProcessor)
   val globalErrorView: global_error = inject[global_error]
 
   def buildFakeUploadControllerOds(uploadRes: Boolean = true,
@@ -80,10 +80,10 @@ class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) 
 
       override private[controllers] def readFileOds(
                                                      downloadUrl: String
-                                                   )(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Either[Result, StaxProcessor] =
+                                                   )(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Either[Result, InputStream] =
         if (readFileOdsError) Left(InternalServerError("failed")) else mockStaxProcessor
 
-      when(mockProcessODSService.performODSUpload(any(), any())(any(), any(), any(), any()))
+      when(mockProcessODSService.performODSUpload(any(), any(), any(), any(), any())(any(), any()))
         .thenReturn(if (processFile) Future.successful(Success(uploadRes)) else Future.successful(Failure(ERSFileProcessingException("", ""))))
 
       when(mockSessionCacheRepo.cache(refEq(mockErsUtil.FORMAT_ERROR_CACHE), anyString())(any(), any()))
@@ -107,21 +107,21 @@ class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) 
 
     "give a redirect status to checkingSuccessPage if no formatting or structural errors" in {
       val controllerUnderTest = buildFakeUploadControllerOds()
-      val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), hc, implicitly[Messages])
+      val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), implicitly[Messages])
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.CheckingServiceController.checkingSuccessPage().toString
     }
 
     "give a redirect status to checkingSuccessPage if formatting errors" in {
       val controllerUnderTest = buildFakeUploadControllerOds(uploadRes = false)
-      val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), hc, implicitly[Messages])
+      val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), implicitly[Messages])
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.HtmlReportController.htmlErrorReportPage(false).toString
     }
 
     "send the user to the global error page if the error cache fails to clear" in {
       val controllerUnderTest = buildFakeUploadControllerOds(clearCacheResponse = false)
-      val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), hc, implicitly[Messages])
+      val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), implicitly[Messages])
 
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
@@ -129,7 +129,7 @@ class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) 
 
     "send the user to the global error page when reading the ods file is failed" in {
       val controllerUnderTest = buildFakeUploadControllerOds(clearCacheResponse = false, readFileOdsError = true)
-      val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), hc, implicitly[Messages])
+      val result = controllerUnderTest.showuploadODSFile(Fixtures.getMockSchemeTypeString)(Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), implicitly[Messages])
 
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }

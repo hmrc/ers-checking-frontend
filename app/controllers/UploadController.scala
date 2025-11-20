@@ -22,16 +22,20 @@ import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse}
 import org.apache.pekko.stream.scaladsl.Source
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRefAndPAYE}
+import models.ERSFileProcessingException
+import models.SheetErrors.format
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallbackList}
-import models.{ERSFileProcessingException, SheetErrors}
+import org.apache.pekko.NotUsed
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
+import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
 import play.api.mvc._
 import repository.ErsCheckingFrontendSessionCacheRepository
-import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
-import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+import services.{ProcessCsvService, ProcessODSService}
+import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
+import uk.gov.hmrc.validator.models.ValidationException
 
 import java.io.InputStream
 import java.net.URL
@@ -39,6 +43,8 @@ import java.util.zip.ZipInputStream
 import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.validator.models.SheetErrors
+
 import scala.util.{Failure, Success}
 
 @Singleton
@@ -69,15 +75,15 @@ class UploadController @Inject()(authAction: AuthAction,
     }
   }
 
-  private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, _] = {
+  private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, NotUsed] =
     Source
       .single(HttpRequest(uri = downloadUrl))
       .mapAsync(parallelism = 1)(makeRequest)
-  }
+
 
   private[controllers] def makeRequest(request: HttpRequest): Future[HttpResponse] = Http()(actorSystem).singleRequest(request)
 
-  private[controllers] def readFileOds(downloadUrl: String) (implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Either[Result, StaxProcessor] = {
+  private[controllers] def readFileOds(downloadUrl: String)(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Either[Result, InputStream] = {
     try {
       val stream: InputStream = downloadAsInputStream(downloadUrl)
       val targetFileName = "content.xml"
@@ -97,8 +103,7 @@ class UploadController @Inject()(authAction: AuthAction,
         }
       }
       val contentInputStream: InputStream = findFileInZip(zipInputStream)
-      val processor = new StaxProcessor(contentInputStream)
-      Right(processor)
+      Right(contentInputStream)
     } catch {
       case e: ERSFileProcessingException =>
         logger.error(s"[UploadController][readFileOds] Error processing ODS file: ${e.getMessage}", e)
@@ -142,7 +147,7 @@ class UploadController @Inject()(authAction: AuthAction,
   }
 
   def showuploadODSFile(scheme: String)
-                       (implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
+                       (implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], messages: Messages): Future[Result] = {
 
     clearErrorCache().flatMap { clearedSuccessfully =>
       if (clearedSuccessfully) {
@@ -153,8 +158,8 @@ class UploadController @Inject()(authAction: AuthAction,
               logger.error(s"[UploadController][showuploadODSFile] failed in readFileOds for scheme : $scheme")
               Future.successful(err)
             },
-            processor =>{
-              val result = processODSService.performODSUpload(file.get.name, processor)(request, scheme, hc, messages)
+            (processor: InputStream) => {
+              val result = processODSService.performODSUpload(appConfig.csopV5Enabled, appConfig.errorCount, file.get.name, processor, scheme)(request, messages)
               result.flatMap[Result] {
                 case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
                 case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(false)))
@@ -191,6 +196,10 @@ class UploadController @Inject()(authAction: AuthAction,
           s"Encountered unexpected exception: ${notERSProcessingException.getClass}. Redirecting to global error page.")
         Future(getGlobalErrorPage)
       case e: javax.xml.stream.XMLStreamException =>
+        logger.error(s"[UploadController][handleException] " +
+          s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
+        Future(getGlobalErrorPage)
+      case e: ValidationException =>
         logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
         Future(getGlobalErrorPage)

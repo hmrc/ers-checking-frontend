@@ -16,43 +16,45 @@
 
 package services
 
-import java.nio.file.Path
 import controllers.auth.RequestWithOptionalEmpRefAndPAYE
+import models.upscan.UpscanCsvFilesCallback
 
 import javax.inject.{Inject, Singleton}
-import models.{ERSFileProcessingException, FileObject, SheetErrors}
+import models.ERSFileProcessingException
 import play.api.Logging
 import play.api.i18n.Messages
-import play.api.libs.Files
-import play.api.mvc.{AnyContent, MultipartFormData, Request}
+import play.api.mvc.{AnyContent, Request}
 import repository.ErsCheckingFrontendSessionCacheRepository
-import uk.gov.hmrc.http.HeaderCarrier
-import utils.{ERSUtil, ParserUtil, UploadedFileUtil}
+import uk.gov.hmrc.validator.models.{SheetErrors, ValidationException}
+import utils.{ERSUtil, UploadedFileUtil}
 
+import java.io.InputStream
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Try}
+import scala.util.{Failure, Success, Try}
+import models.SheetErrors.format
+import uk.gov.hmrc.validator.ODSValidator
 
 @Singleton
 class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
-                                  parserUtil: ParserUtil,
-                                  dataGenerator: DataGenerator,
                                   sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
                                   ersUtil: ERSUtil
                                  )(implicit ec: ExecutionContext) extends Logging {
-  def performODSUpload(fileName: String, processor: StaxProcessor)
-                      (implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], scheme: String, hc: HeaderCarrier, messages: Messages): Future[Try[Boolean]] = {
+
+  def performODSUpload(csopV5Enabled: Boolean, errorCount: Int, fileName: String, processor: InputStream, scheme: String)
+                      (implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], messages: Messages): Future[Try[Boolean]] = {
     try {
-      val errorList: ListBuffer[SheetErrors] = checkFileType(processor, fileName)(scheme, hc, request, messages)
-      val cache = sessionCacheService.cache[String](ersUtil.FILE_NAME_CACHE, fileName).recover {
+      checkFileType(fileName) // TODO: Move up one level?
+      val cacheFileName = sessionCacheService.cache[String](ersUtil.FILE_NAME_CACHE, fileName).recover {
         case e: Exception =>
           logger.error("[ProcessODSService][performODSUpload] Unable to save File Name. Error: " + e.getMessage)
           throw e
       }
-      val valid = parserUtil.isFileValid(errorList)
+      val sheetErrors: ListBuffer[SheetErrors] = ODSValidator.validateODSFile(csopV5Enabled, processor, scheme, fileName)
+      val cacheSheetErrors: Future[Try[Boolean]] = processSheetErrors(sheetErrors, None, errorCount)
       val result = for {
-        _ <- cache
-        v <- valid
+        _ <- cacheFileName
+        v <- cacheSheetErrors
       } yield {
         v
       }
@@ -61,6 +63,9 @@ class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
       }
     }
     catch {
+      case validationException: ValidationException =>
+        logger.warn(s"[ProcessODSService][performODSUpload] ValidationException thrown trying to upload file - $validationException")
+        Future.successful(Failure(validationException))
       case e: ERSFileProcessingException =>
         logger.warn(s"[ProcessODSService][performODSUpload] ERSFileProcessingException thrown trying to upload file - $e")
         Future.successful(Failure(e))
@@ -70,34 +75,43 @@ class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
     }
   }
 
-  def createFileObject(uploadedFile: Seq[MultipartFormData.FilePart[Files.TemporaryFile]])
-                      (implicit request: Request[AnyContent]): (Boolean, java.util.ArrayList[FileObject]) = {
-    val fileSet = uploadedFile.map(file => file.key)
-    val fileSetLength = fileSet.length
-    val fileObjectList = new java.util.ArrayList[FileObject](fileSetLength)
-    var validFileExtn: Boolean = false
-    for (fileIndex <- 0 until fileSetLength - 1) {
-      val fileParam = fileSet(fileIndex)
-      val file: Path = request.body.asMultipartFormData.get.file(fileParam).get.ref.path
-      val fileName: String = request.body.asMultipartFormData.get.file(fileParam).get.filename
-      fileObjectList.add(FileObject(fileName, file))
+  // TODO: Can we remove the file argument?
+  def processSheetErrors(sheetErrors: ListBuffer[SheetErrors], file: Option[UpscanCsvFilesCallback] = None, errorCount: Int)
+                 (implicit request: Request[_]): Future[Try[Boolean]] = {
+    if (isValid(sheetErrors)) {
+      Future.successful(Success(true))
     }
-    validFileExtn = true
-    (validFileExtn, fileObjectList)
+    else {
+      val updatedErrorCount: Int = sheetErrors.map(_.errors.length).sum
+      val updatedErrorList = getSheetErrors(sheetErrors, errorCount)
+      val id = if (file.isDefined) file.get.uploadId else ""
+
+      val result = for {
+        _ <- sessionCacheService.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}$id", updatedErrorCount)
+        _ <- sessionCacheService.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}$id", updatedErrorList)
+      } yield Success(false)
+
+      result recover {
+        case ex: Exception => Failure(ex)
+      }
+    }
   }
 
-  def checkFileType(processor: StaxProcessor, fileName: String)
-                   (implicit scheme: String, hc: HeaderCarrier, request: RequestWithOptionalEmpRefAndPAYE[_], messages: Messages): ListBuffer[SheetErrors] = {
+  def checkFileType(fileName: String)(implicit messages: Messages): Unit = {
     if (!uploadedFileUtil.checkODSFileType(fileName)) {
       throw ERSFileProcessingException(
         messages("ers_check_file.file_type_error", fileName),
         messages("ers_check_file.file_type_error", fileName))
     }
-    parseOdsContent(processor, fileName)(scheme, hc, request, messages)
   }
 
-  def parseOdsContent(processor: StaxProcessor, uploadedFileName: String)
-                     (implicit scheme: String, hc: HeaderCarrier, request: RequestWithOptionalEmpRefAndPAYE[_], messages: Messages): ListBuffer[SheetErrors] = {
-    dataGenerator.getErrors(processor, scheme, uploadedFileName)
+  def isValid(schemeErrors: ListBuffer[SheetErrors]): Boolean = {
+    schemeErrors.map(_.errors.isEmpty).forall(identity)
+  }
+
+  def getSheetErrors(schemeErrors: ListBuffer[SheetErrors], errorCount: Int): ListBuffer[SheetErrors] = {
+    schemeErrors.map { schemeError =>
+      SheetErrors(schemeError.sheetName, schemeError.errors.take(errorCount))
+    }
   }
 }
