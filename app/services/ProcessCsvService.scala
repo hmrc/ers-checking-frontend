@@ -35,6 +35,7 @@ import services.validation.ErsValidator
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models._
+import uk.gov.hmrc.validator.DataGenerator
 import utils.{CsvParserUtil, ERSUtil}
 
 import javax.inject.{Inject, Singleton}

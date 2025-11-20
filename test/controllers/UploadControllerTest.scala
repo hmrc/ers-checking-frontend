@@ -36,7 +36,8 @@ import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents, Request, R
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, i18n}
-import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
+import services.ProcessCsvService
+import uk.gov.hmrc.validator.{ProcessODSService, StaxProcessor}
 import views.html.global_error
 
 import java.io.ByteArrayInputStream
@@ -83,8 +84,8 @@ class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) 
                                                    )(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Either[Result, StaxProcessor] =
         if (readFileOdsError) Left(InternalServerError("failed")) else mockStaxProcessor
 
-      when(mockProcessODSService.performODSUpload(any(), any())(any(), any(), any(), any()))
-        .thenReturn(if (processFile) Future.successful(Success(uploadRes)) else Future.successful(Failure(ERSFileProcessingException("", ""))))
+      when(mockProcessODSService.performODSUpload(any(), any())(any(), any()))
+        .thenReturn(if (processFile) uploadRes else  throw ERSFileProcessingException("", "")) // TODO: COME BACK TO
 
       when(mockSessionCacheRepo.cache(refEq(mockErsUtil.FORMAT_ERROR_CACHE), anyString())(any(), any()))
         .thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))

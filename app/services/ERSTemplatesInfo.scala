@@ -41,6 +41,7 @@ object ERSTemplatesInfo extends EMITemplateInfo with CsopTemplateInfo with SipTe
   val emiSheets: Map[String, SheetInfo] = Map(
     emiSheet1Name   -> SheetInfo(emi,   1, emiSheet1Name,   emiSheet1Desc,   emiSheet1ValConfig,   emiAdjustmentsHeaderRow),
     emiSheet2Name   -> SheetInfo(emi,   2, emiSheet2Name,   emiSheet2Desc,   emiSheet2ValConfig,   emiReplacedHeaderRow),
+    // THIS IS THE CONFIG TO INVESTIGATE
     emiSheet3Name   -> SheetInfo(emi,   3, emiSheet3Name,   emiSheet3Desc,   emiSheet3ValConfig,   emiRCLHeaderRow),
     emiSheet4Name   -> SheetInfo(emi,   4, emiSheet4Name,   emiSheet4Desc,   emiSheet4ValConfig,   emiNonTaxableHeaderRow),
     emiSheet5Name   -> SheetInfo(emi,   5, emiSheet5Name,   emiSheet5Desc,   emiSheet5ValConfig,   emiTaxableHeaderRow)

@@ -1,5 +1,3 @@
-import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings}
-
 ThisBuild / scalaVersion := "2.13.16"
 ThisBuild / majorVersion := 4
 
@@ -8,6 +6,10 @@ lazy val microservice = Project("ers-checking-frontend", file("."))
   .disablePlugins(JUnitXmlReportPlugin) // Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(CodeCoverageSettings())
   .settings(PlayKeys.playDefaultPort := 9225)
+  // TODO: REMOVE, THIS IS JUST TO PUBLISH/READ the file-validator locally
+  .settings(
+    resolvers += Resolver.defaultLocal
+  )
   .settings(
     libraryDependencies ++= AppDependencies(),
     routesGenerator := InjectedRoutesGenerator,

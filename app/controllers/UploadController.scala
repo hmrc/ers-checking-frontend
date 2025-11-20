@@ -28,9 +28,10 @@ import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import repository.ErsCheckingFrontendSessionCacheRepository
-import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
+import services.ProcessCsvService
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.validator.{ProcessODSService, StaxProcessor}
 import utils.ERSUtil
 
 import java.io.InputStream
@@ -77,7 +78,7 @@ class UploadController @Inject()(authAction: AuthAction,
 
   private[controllers] def makeRequest(request: HttpRequest): Future[HttpResponse] = Http()(actorSystem).singleRequest(request)
 
-  private[controllers] def readFileOds(downloadUrl: String) (implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Either[Result, StaxProcessor] = {
+  private[controllers] def readFileOds(downloadUrl: String)(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Either[Result, StaxProcessor] = {
     try {
       val stream: InputStream = downloadAsInputStream(downloadUrl)
       val targetFileName = "content.xml"
@@ -153,13 +154,20 @@ class UploadController @Inject()(authAction: AuthAction,
               logger.error(s"[UploadController][showuploadODSFile] failed in readFileOds for scheme : $scheme")
               Future.successful(err)
             },
-            processor =>{
-              val result = processODSService.performODSUpload(file.get.name, processor)(request, scheme, hc, messages)
-              result.flatMap[Result] {
-                case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
-                case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(false)))
-                case Failure(t) => handleException(t)
+            (processor: StaxProcessor) => {
+              val isFileValid: Boolean = processODSService.performODSUpload(file.get.name, processor)(scheme, messages)
+              if (isFileValid) {
+                Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
               }
+              else {
+                Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(false)))
+              }
+              // TODO: Come back to...
+//              result.flatMap[Result] {
+//                case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
+//                case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(false)))
+//                case Failure(t) => handleException(t)
+//              }
             }
           )
         }

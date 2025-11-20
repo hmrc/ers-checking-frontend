@@ -20,7 +20,7 @@ import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRefAndPAYE}
 
 import javax.inject.{Inject, Singleton}
-import models.upscan.{NotStarted, UploadStatus, UpscanCsvFilesList}
+import models.upscan.{NotStarted, UploadStatus, UpscanCsvFilesList, UpscanInitiateResponse}
 import models.{CS_checkFileType, CS_schemeType, CSformMappings}
 import play.api.Logging
 import play.api.data.Form
@@ -160,7 +160,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
   def showCheckODSFilePage()(implicit request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
     (for {
       scheme <- sessionCacheService.fetchAndGetEntry[String](ersUtil.SCHEME_CACHE)
-      upscanResponse <- upscanService.getUpscanFormData(isCSV = false, scheme)
+      upscanResponse: UpscanInitiateResponse <- upscanService.getUpscanFormData(isCSV = false, scheme)
       _ <- sessionCacheService.cache[UploadStatus](ersUtil.CALLBACK_DATA_KEY, NotStarted)
     } yield {
       Ok(check_file(scheme)(request, messages, upscanResponse, appConfig))

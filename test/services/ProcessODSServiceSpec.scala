@@ -37,6 +37,7 @@ import play.api.{Application, i18n}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.test.MongoSupport
 import uk.gov.hmrc.services.validation.models.ValidationError
+import uk.gov.hmrc.validator.{DataGenerator, ProcessODSService, StaxProcessor}
 import utils.{ParserUtil, UploadedFileUtil}
 
 import scala.collection.mutable.ListBuffer
@@ -84,7 +85,7 @@ class ProcessODSServiceSpec
 
     def buildProcessODSService(checkODSFileTypeResult: Boolean = true, isValid: Boolean = true): ProcessODSService = {
       lazy val result = if(isValid) Future.successful(Success(true)) else Future.successful(Success(false))
-      new ProcessODSService(mockUploadedFileUtil, mockParserUtil, mockDataGenerator, mockSessionCacheRepo, mockErsUtil){
+      new ProcessODSService(mockDataGenerator){
         when(mockParserUtil.isFileValid(any(), any())(any())).thenReturn(result)
         when(mockUploadedFileUtil.checkODSFileType(anyString())).thenReturn(checkODSFileTypeResult)
       }
@@ -93,45 +94,47 @@ class ProcessODSServiceSpec
     val sheetErrors = Fixtures.buildSheetErrors
 
     "return false if the file has validation errors" in {
-      when(mockDataGenerator.getErrors(any(), any(), any())(any(), any(), any())).thenReturn(sheetErrors)
+      when(mockDataGenerator.getErrors(any(), any(), any())(any())).thenReturn(sheetErrors)
       when(mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any()))
         .thenReturn(Future.successful(("", "")))
 
-      buildProcessODSService(isValid = false).performODSUpload("testFileName", mockStaxProcessor).futureValue shouldBe Success(false)
+      buildProcessODSService(isValid = false).performODSUpload("testFileName", mockStaxProcessor) shouldBe false
     }
 
     "return true if the file doesn't have any errors" in {
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
-      when(mockDataGenerator.getErrors(any(), any(), any())(any(), any(), any())).thenReturn(emptyErrors)
+      when(mockDataGenerator.getErrors(any(), any(), any())(any())).thenReturn(emptyErrors)
       when(mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any()))
         .thenReturn(Future.successful(("", "")))
 
-      buildProcessODSService().performODSUpload("testFileName", mockStaxProcessor).futureValue shouldBe Success(true)
+      buildProcessODSService().performODSUpload("testFileName", mockStaxProcessor) shouldBe true
     }
 
     "return a failure if nothing was found in the cache" in {
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
-      when(mockDataGenerator.getErrors(any(), any(), any())(any(), any(), any())).thenReturn(emptyErrors)
+      when(mockDataGenerator.getErrors(any(), any(), any())(any())).thenReturn(emptyErrors)
       when(mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any()))
         .thenReturn(Future.failed(new NoSuchElementException))
 
-      val result = buildProcessODSService().performODSUpload("testFileName", mockStaxProcessor).futureValue
-      assert(result.isFailure)
-      result.failed.get shouldBe a[NoSuchElementException]
+      assertThrows[NoSuchElementException] { // TODO: Come back to
+        buildProcessODSService().performODSUpload("testFileName", mockStaxProcessor)
+      }
     }
 
     "throw an ERSFileProcessingException if the file has an incorrect file type" in {
-      val exception = ERSFileProcessingException("You chose to check an ODS file, but testFileName isn’t an ODS file.",
-        "You chose to check an ODS file, but testFileName isn’t an ODS file.")
+      val expectedExceptionMessage = "You chose to check an ODS file, but testFileName isn’t an ODS file."
 
-      buildProcessODSService(checkODSFileTypeResult = false).performODSUpload("testFileName", mockStaxProcessor).futureValue shouldBe Failure(exception)
+      val caughtError = intercept[ERSFileProcessingException] { // TODO: Come back to
+        buildProcessODSService(checkODSFileTypeResult = false).performODSUpload("testFileName", mockStaxProcessor)
+      }
+      caughtError.message shouldBe expectedExceptionMessage
     }
   }
 
   "calling checkFileType" should {
 
     def buildProcessODSService(checkODSFileTypeResult: Boolean = true): ProcessODSService =
-      new ProcessODSService(mockUploadedFileUtil, testParserUtil, mockDataGenerator, mockSessionCacheRepo, mockErsUtil){
+      new ProcessODSService(mockDataGenerator){
       when(mockUploadedFileUtil.checkODSFileType(anyString())).thenReturn(checkODSFileTypeResult)
     }
 

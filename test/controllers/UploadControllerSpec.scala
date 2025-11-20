@@ -39,8 +39,9 @@ import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents, Request, R
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, i18n}
-import services.{ProcessCsvService, ProcessODSService, StaxProcessor}
+import services.ProcessCsvService
 import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.validator.{ProcessODSService, StaxProcessor}
 import views.html.global_error
 
 import scala.concurrent.duration.Duration
