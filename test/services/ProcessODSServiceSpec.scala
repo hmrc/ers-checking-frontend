@@ -37,6 +37,7 @@ import play.api.{Application, i18n}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.test.MongoSupport
 import uk.gov.hmrc.services.validation.models.ValidationError
+import uk.gov.hmrc.validator.models.SheetErrors
 import uk.gov.hmrc.validator.{DataGenerator, ProcessODSService, StaxProcessor}
 import utils.{ParserUtil, UploadedFileUtil}
 

@@ -262,7 +262,6 @@ class UploadController @Inject()(authAction: AuthAction,
               logger.error(s"[UploadController][showuploadODSFile] failed in readFileOds for scheme : $scheme")
               Future.successful(err)
             },
-<<<<<<< HEAD
             (processor: InputStream) => {
               val fileName = file.get.name
               sessionCacheService.cache[String](ersUtil.FILE_NAME_CACHE, fileName).recover { // TODO: COME BACK TO.....
@@ -280,15 +279,6 @@ class UploadController @Inject()(authAction: AuthAction,
                   else {
                     ??? // WHERE DO WE REDIRECT IF WE GET AN INVALID FILE?
                   }
-=======
-            (processor: StaxProcessor) => {
-              val isFileValid: Boolean = processODSService.performODSUpload(file.get.name, processor)(scheme, messages)
-              if (isFileValid) {
-                Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
-              }
-              else {
-                Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(false)))
->>>>>>> b2bd827 (DDCE-7176: WIP)
               }
               // TODO: Come back to...
 //              result.flatMap[Result] {
