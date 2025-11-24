@@ -42,7 +42,9 @@ import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, Enrolment, Enrolment
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import uk.gov.hmrc.validator.validation.ErsValidator
 import utils.ERSUtil
+
 import java.time.{LocalDate, ZoneOffset}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._

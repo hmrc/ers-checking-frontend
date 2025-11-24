@@ -19,7 +19,8 @@ package services
 import com.typesafe.config.ConfigFactory
 import helpers.ErsTestHelper
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
-import models.{ERSFileProcessingException, RowValidationResults, SheetErrors}
+import models.ERSFileProcessingException
+import uk.gov.hmrc.validator.models.{RowValidationResults, SheetErrors}
 import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.http.scaladsl.model.{HttpResponse, StatusCodes}
@@ -45,7 +46,7 @@ import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.test.MongoSupport
 import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
-import uk.gov.hmrc.validator.DataGenerator
+import uk.gov.hmrc.validator.{DataGenerator, ERSTemplatesInfo}
 import utils.CsvParserUtil
 
 import java.io.File
@@ -164,6 +165,7 @@ class ProcessCsvServiceSpec
       assert(result.forall(_.isRight))
       result shouldBe List(Right(true))
     }
+
     "return false when the data contains at least one invalid row" in {
       val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))))
       val data = "2015-09-23,test,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no"

@@ -16,6 +16,8 @@
 
 package models
 
-import uk.gov.hmrc.services.validation.models.ValidationError
-
-case class RowValidationResults(validationErrors: List[ValidationError], rowWasEmpty: Boolean = false)
+case class ERSFileProcessingException(message: String,
+                                      context: String,
+                                      jsonSize: Option[Int] = None,
+                                      needsExtendedInstructions: Boolean = false,
+                                      optionalParams: Seq[String] = Nil) extends Exception(message)

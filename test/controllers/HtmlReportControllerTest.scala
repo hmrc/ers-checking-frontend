@@ -17,7 +17,8 @@
 package controllers
 
 import helpers.ErsTestHelper
-import models.SheetErrors
+import uk.gov.hmrc.validator.models.SheetErrors
+
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._

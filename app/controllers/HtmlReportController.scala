@@ -20,7 +20,6 @@ import config.ApplicationConfig
 import controllers.auth.AuthAction
 
 import javax.inject.{Inject, Singleton}
-import models.SheetErrors
 import models.upscan.{UploadId, UpscanCsvFilesCallbackList}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
@@ -33,6 +32,7 @@ import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{ERSUtil, JsonParser}
 import uk.gov.hmrc.services.validation.models.ValidationError
+import uk.gov.hmrc.validator.models.SheetErrors
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}

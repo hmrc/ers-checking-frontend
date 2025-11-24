@@ -17,8 +17,8 @@
 package utils
 
 import config.ApplicationConfig
-import models.SheetErrors
-import services.ERSTemplatesInfo
+import uk.gov.hmrc.validator.ERSTemplatesInfo
+import uk.gov.hmrc.validator.models.SheetErrors
 
 import javax.inject.{Inject, Singleton}
 

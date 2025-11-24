@@ -19,12 +19,12 @@ package utils
 import config.ApplicationConfig
 
 import javax.inject.{Inject, Singleton}
-import models.SheetErrors
 import models.upscan.UpscanCsvFilesCallback
 import play.api.Logging
 import play.api.mvc.Request
 import repository.ErsCheckingFrontendSessionCacheRepository
-import services.ERSTemplatesInfo
+import uk.gov.hmrc.validator.ERSTemplatesInfo
+import uk.gov.hmrc.validator.models.SheetErrors
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}

@@ -19,7 +19,7 @@ package services
 import controllers.Fixtures
 import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import helpers.ErsTestHelper
-import models.{ERSFileProcessingException, SheetErrors}
+import models.ERSFileProcessingException
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -37,6 +37,7 @@ import play.api.{Application, i18n}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.test.MongoSupport
 import uk.gov.hmrc.services.validation.models.ValidationError
+import uk.gov.hmrc.validator.models.SheetErrors
 import uk.gov.hmrc.validator.{DataGenerator, ProcessODSService, StaxProcessor}
 import utils.{ParserUtil, UploadedFileUtil}
 
@@ -147,7 +148,7 @@ class ProcessODSServiceSpec
 
     "return a ListBuffer of SheetErrors" in {
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
-      when(mockDataGenerator.getErrors(any(), any(), any())(any(), any(), any())).thenReturn(emptyErrors)
+      when(mockDataGenerator.getErrors(any(), any(), any())(any())).thenReturn(emptyErrors)
 
       buildProcessODSService().checkFileType(mockStaxProcessor, "testFileName") shouldBe emptyErrors
     }
