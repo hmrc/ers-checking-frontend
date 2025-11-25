@@ -87,9 +87,12 @@ class UpscanController @Inject()(authAction: AuthAction,
           (list.size == fileList.noOfFilesToUpload) && list.forall(_.isComplete)
         } map { files =>
           val callbackData = UpscanCsvFilesCallbackList(files.toList.reverse)
+          logger.debug(s"[UpscanController][successCsv] - before adding into mongo: $callbackData")
           sessionCacheService.cache[UpscanCsvFilesCallbackList](ersUtil.CALLBACK_DATA_KEY_CSV, callbackData)
+          Thread.sleep(2000)
           if(callbackData.areAllFilesSuccessful()) {
             logger.debug(s"[UpscanController][successCsv] - callback upscan successful, callback: $callbackData")
+            Thread.sleep(2000)
             Redirect(routes.UploadController.uploadCSVFile(scheme))
           } else if (callbackData.areAnyFilesWrongMimeType()) {
             logger.info(s"[UpscanController][successCsv] - callback upscan rejected due to wrong mime type")
