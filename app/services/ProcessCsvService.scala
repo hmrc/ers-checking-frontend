@@ -77,9 +77,6 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
     implicit request: Request[_], hc: HeaderCarrier, messages: Messages
   ): List[Future[Either[Throwable, Boolean]]] = {
     logger.info(s"[ProcessCsvService][processFiles] callback $callback scheme : $scheme" )
-    logger.info(s"[ProcessCsvService][processFiles] callback check${callback.get} ")
-    logger.info(s"[ProcessCsvService][processFiles] callback check areAllFilesComplete ${callback.get.areAllFilesComplete()} ")
-    logger.info(s"[ProcessCsvService][processFiles] callback check areAllFilesSuccessful ${callback.get.areAllFilesSuccessful()} ")
 
     callback.get.files map { file =>
 
