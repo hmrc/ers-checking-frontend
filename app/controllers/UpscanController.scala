@@ -85,22 +85,21 @@ class UpscanController @Inject()(authAction: AuthAction,
           logger.info(s"[UpscanController][successCSV] Checking if all files have completed upload - [${list.forall(_.isComplete)}]")
 
           (list.size == fileList.noOfFilesToUpload) && list.forall(_.isComplete)
-        } map { files =>
+        } flatMap  { files =>
           val callbackData = UpscanCsvFilesCallbackList(files.toList.reverse)
           logger.debug(s"[UpscanController][successCsv] - before adding into mongo: $callbackData")
-          sessionCacheService.cache[UpscanCsvFilesCallbackList](ersUtil.CALLBACK_DATA_KEY_CSV, callbackData)
-          Thread.sleep(2000)
-          if(callbackData.areAllFilesSuccessful()) {
-            logger.debug(s"[UpscanController][successCsv] - callback upscan successful, callback: $callbackData")
-            Thread.sleep(2000)
-            Redirect(routes.UploadController.uploadCSVFile(scheme))
-          } else if (callbackData.areAnyFilesWrongMimeType()) {
-            logger.info(s"[UpscanController][successCsv] - callback upscan rejected due to wrong mime type")
-            Redirect(routes.CheckingServiceController.checkingInvalidFilePage())
-          } else {
-            logger.error(s"[UpscanController][successCSV] Not all files are completed uploading - (${callbackData.areAllFilesComplete()}) " +
-              s"or  had a successful response - (${callbackData.areAllFilesSuccessful()})")
-            getGlobalErrorPage
+          sessionCacheService.cache[UpscanCsvFilesCallbackList](ersUtil.CALLBACK_DATA_KEY_CSV, callbackData).map{ ele =>
+            if(callbackData.areAllFilesSuccessful()) {
+              logger.debug(s"[UpscanController][successCsv] - callback upscan successful, callback: $callbackData")
+              Redirect(routes.UploadController.uploadCSVFile(scheme))
+            } else if (callbackData.areAnyFilesWrongMimeType()) {
+              logger.info(s"[UpscanController][successCsv] - callback upscan rejected due to wrong mime type")
+              Redirect(routes.CheckingServiceController.checkingInvalidFilePage())
+            } else {
+              logger.error(s"[UpscanController][successCSV] Not all files are completed uploading - (${callbackData.areAllFilesComplete()}) " +
+                s"or  had a successful response - (${callbackData.areAllFilesSuccessful()})")
+              getGlobalErrorPage
+            }
           }
         } recover {
           case e: Exception =>
