@@ -79,6 +79,11 @@ function showErrorMsg(msg) {
     document.getElementById("errors").focus()
 }
 
+function hasVisibleErrorSummary() {
+    const ele = document.querySelector('.govuk-error-summary')
+    return ele && !ele.classList.contains('govuk-!-display-none')
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     const fileProcessingAlertDiv = document.getElementById("file-processing-alert")
     const checkFileButton = document.getElementById("check-file-button")
@@ -90,6 +95,13 @@ document.addEventListener("DOMContentLoaded", function () {
             e.preventDefault()
             return false
         }
+
+    //Prevent submitting the page if there is popup error on page
+        if (hasVisibleErrorSummary()) {
+                e.preventDefault()
+                return false
+        }
+
         fileProcessingAlertDiv.style.display = ''
         fileProcessingAlertDiv.classList.remove("govuk-!-display-none")
     })
