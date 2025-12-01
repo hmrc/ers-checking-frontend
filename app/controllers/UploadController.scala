@@ -26,17 +26,15 @@ import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFil
 import org.apache.commons.io.FilenameUtils
 import org.apache.pekko.stream.connectors.csv.scaladsl.CsvParsing
 import org.apache.pekko.util.ByteString
-import uk.gov.hmrc.validator.models.{ERSFileProcessingException, RowValidationResults, SheetErrors}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import repository.ErsCheckingFrontendSessionCacheRepository
+import uk.gov.hmrc.ProcessCsvService.checkFileType
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.services.validation.DataValidator
 import uk.gov.hmrc.services.validation.models.ValidationError
-import uk.gov.hmrc.validator.FlowOps.eitherFromFunction
-import uk.gov.hmrc.validator.{ProcessCsvService, ProcessODSService}
-import uk.gov.hmrc.validator.utils.CsvParserUtil
 import utils.ERSUtil
 
 import java.io.InputStream
@@ -46,6 +44,9 @@ import javax.inject.{Inject, Singleton}
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.models.{ERSFileProcessingException, RowValidationResults, SheetErrors}
+import uk.gov.hmrc.{DataGenerator, ProcessCsvService, ProcessODSService}
+import uk.gov.hmrc.utils.CsvParserUtil
 
 @Singleton
 class UploadController @Inject()(authAction: AuthAction,
@@ -121,13 +122,13 @@ class UploadController @Inject()(authAction: AuthAction,
         case false => Future(getGlobalErrorPage)
         case _ =>
           sessionCacheService.fetch[UpscanCsvFilesCallbackList](ersUtil.CALLBACK_DATA_KEY_CSV) flatMap { callback: Option[UpscanCsvFilesCallbackList] =>
-//            val successfullyUploadedFiles: Seq[UploadedSuccessfully] = callback.get.files.map(_.uploadStatus.asInstanceOf[UploadedSuccessfully]) // TODO: COME BACK AND REMOVE GET...
-//            val validatorFuture: Future[Either[Throwable, DataValidator]] = Source(List(successUpload.name))
-//              .via(Flow.fromFunction(checkFileType(_)(messages)))
-//              .via(eitherFromFunction(DataGenerator.getSheetCsv(_, scheme)(messages)))
-//              .via(eitherFromFunction(DataGenerator.identifyAndDefineSheetCsv(_)(hc, messages)))
-//              .via(eitherFromFunction(DataGenerator.setValidatorCsv(_)(hc, messages)))
-//              .runWith(Sink.head)
+            val successfullyUploadedFiles: Seq[UploadedSuccessfully] = callback.get.files.map(_.uploadStatus.asInstanceOf[UploadedSuccessfully]) // TODO: COME BACK AND REMOVE GET...
+            val validatorFuture: Future[Either[Throwable, DataValidator]] = Source(List(successUpload.name))
+              .via(Flow.fromFunction(checkFileType)
+              .via(eitherFromFunction(DataGenerator.getSheetCsv(_, scheme)))
+              .via(eitherFromFunction(DataGenerator.identifyAndDefineSheetCsv)
+              .via(eitherFromFunction(DataGenerator.setValidatorCsv)
+              .runWith(Sink.head)
             val validationResults = processFiles(callback, scheme, readFileCsv)
             finaliseRequestAndRedirect(validationResults)
           }
@@ -138,12 +139,14 @@ class UploadController @Inject()(authAction: AuthAction,
                   (implicit messages: Messages, request: Request[AnyContent]): List[Future[Either[Throwable, Boolean]]] =
     callback.get.files map { file: UpscanCsvFilesCallback =>
       val successUpload: UploadedSuccessfully = file.uploadStatus.asInstanceOf[UploadedSuccessfully]
-      ProcessCsvService.getValidator(successUpload.name, scheme)(messages) match {
+      ProcessCsvService.getValidator(successUpload.name, scheme) match {
         case Left(validatorError: Throwable) => Future.successful(Left(validatorError))
-        case Right(validator) =>
-          val futureListOfErrors: Future[Seq[Either[Throwable, RowValidationResults]]] =
+        case Right(validator: DataValidator) =>
+          val test: List[ByteString] => Either[Throwable, RowValidationResults] = ProcessCsvService.processRow(_, successUpload.name, validator)
+          val test2: Source[Either[Throwable, List[ByteString]], _] = extractBodyOfRequest(source(successUpload.downloadUrl))
+          val futureListOfErrors =
             extractBodyOfRequest(source(successUpload.downloadUrl))
-              .via(eitherFromFunction(ProcessCsvService.processRow(_, successUpload.name, validator)))
+              .via(ProcessCsvService.processRow(_, successUpload.name, validator))
               .runWith(Sink.seq)
 
           futureListOfErrors.map {
@@ -269,7 +272,7 @@ class UploadController @Inject()(authAction: AuthAction,
                   logger.error("[ProcessODSService][performODSUpload] Unable to save File Name. Error: " + e.getMessage)
                   throw e
               }
-              ProcessODSService.validateODSFile(fileName, processor)(scheme, messages) match {
+              ProcessODSService.validateODSFile(fileName, processor, scheme) match {
                 case Left(_) => // TODO: What do we want to do with this error?
                   Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(false)))
                 case Right(value) =>
