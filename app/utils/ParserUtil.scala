@@ -17,14 +17,15 @@
 package utils
 
 import config.ApplicationConfig
+import models.SheetErrors.format
 
 import javax.inject.{Inject, Singleton}
 import models.upscan.UpscanCsvFilesCallback
 import play.api.Logging
 import play.api.mvc.Request
 import repository.ErsCheckingFrontendSessionCacheRepository
-import uk.gov.hmrc.validator.ERSTemplatesInfo
-import uk.gov.hmrc.validator.models.SheetErrors
+import uk.gov.hmrc.ERSTemplatesInfo
+import uk.gov.hmrc.models.SheetErrors
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}

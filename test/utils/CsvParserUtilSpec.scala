@@ -17,7 +17,7 @@
 package utils
 
 import helpers.ErsTestHelper
-import uk.gov.hmrc.validator.models.SheetErrors
+import uk.gov.hmrc.models.SheetErrors
 
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues

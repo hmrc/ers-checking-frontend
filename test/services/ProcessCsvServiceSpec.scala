@@ -83,12 +83,10 @@ class ProcessCsvServiceSpec
   }
 
   lazy val testParserUtil: CsvParserUtil = fakeApplication.injector.instanceOf[CsvParserUtil]
-  val mockDataGenerator: DataGenerator = mock[DataGenerator]
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication)
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
 
-  def testProcessCsvService: ProcessCsvService = new ProcessCsvService(testParserUtil, mockDataGenerator, mockAppConfig,
-    mockSessionCacheRepo, mockErsUtil, mockErsValidator)
+  def testProcessCsvService: ProcessCsvService = new ProcessCsvService(testParserUtil, mockAppConfig, mockSessionCacheRepo, mockErsUtil)
 
   when(mockAppConfig.csopV5Enabled).thenReturn(true)
 
@@ -103,7 +101,7 @@ class ProcessCsvServiceSpec
         .thenReturn(Seq(Cell("A", 0, "25  2015")))
 
       val resultFuture = source
-        .runWith(Sink.seq).map { fileCopied =>
+        .runWith(Sink.seq).map { fileCopied: Seq[List[ByteString]] =>
         testProcessCsvService.processRow(fileCopied.flatten.toList, "Other_Grants_V4.csv", dataValidator)
       }
 
