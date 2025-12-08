@@ -33,16 +33,14 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessagesApi}
 import play.twirl.api.Html
 import repository.ErsCheckingFrontendSessionCacheRepository
-import services.UpscanService
+import services.{CsvBodyParser, UpscanService}
 import services.audit.AuditEvents
-import services.validation.ErsValidator
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
 import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
-import uk.gov.hmrc.validator.validation.ErsValidator
 import utils.ERSUtil
 
 import java.time.{LocalDate, ZoneOffset}
@@ -64,8 +62,6 @@ trait ErsTestHelper extends MockitoSugar {
   val agentOrg: Some[AffinityGroup] = Some(AffinityGroup.Organisation)
   val organisationAffinityGroup: Option[AffinityGroup.Organisation.type] = Some(AffinityGroup.Organisation)
   val mockHttp: DefaultHttpClient = mock[DefaultHttpClient]
-  val mockErsValidator: ErsValidator = mock[ErsValidator]
-  val realErsValidator: ErsValidator = new ErsValidator
 
   implicit val request: Request[AnyRef] = FakeRequest()
   implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId("testSessionId")))
@@ -76,6 +72,7 @@ trait ErsTestHelper extends MockitoSugar {
   val mockAuditEvents: AuditEvents = mock[AuditEvents]
   val mockSessionCacheRepo: ErsCheckingFrontendSessionCacheRepository = mock[ErsCheckingFrontendSessionCacheRepository]
   val mockUpscanService: UpscanService = mock[UpscanService]
+  val mockCsvBodyParser: CsvBodyParser = mock[CsvBodyParser]
 
   def doc(result: Html): Document = Jsoup.parse(contentAsString(result))
 

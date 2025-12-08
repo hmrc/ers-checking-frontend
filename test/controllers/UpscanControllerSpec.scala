@@ -32,8 +32,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{DefaultMessagesControllerComponents, Request, Result}
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.Injecting
-import services.ProcessCsvService
-import uk.gov.hmrc.validator.ProcessODSService
+import services.{ProcessCsvService, ProcessODSService}
 import views.html.global_error
 
 import scala.concurrent.Future

@@ -24,8 +24,8 @@ import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRefAndPAYE}
 import models.ERSFileProcessingException
 import models.SheetErrors.format
-import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
-import org.apache.commons.io.FilenameUtils
+import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallbackList}
+import org.apache.pekko.NotUsed
 import org.apache.pekko.stream.connectors.csv.scaladsl.CsvParsing
 import org.apache.pekko.util.ByteString
 import play.api.Logging
@@ -33,7 +33,8 @@ import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
 import play.api.mvc._
 import repository.ErsCheckingFrontendSessionCacheRepository
-import services.ProcessCsvService
+import services.{CsvBodyParser, ProcessCsvService, ProcessODSService}
+import uk.gov.hmrc.StaxProcessor
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.services.validation.models.ValidationError
@@ -47,14 +48,16 @@ import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.models.{RowValidationResults, SheetErrors}
-import uk.gov.hmrc.ODSValidator
-import uk.gov.hmrc.utils.CsvParserUtil
+
+import scala.util.{Failure, Success}
 
 @Singleton
 class UploadController @Inject()(authAction: AuthAction,
+                                 processODSService: ProcessODSService,
                                  processCsvService: ProcessCsvService,
                                  sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
                                  mcc: MessagesControllerComponents,
+                                 csvBodyParser: CsvBodyParser,
                                  override val global_error: views.html.global_error
                                 )(implicit executionContext: ExecutionContext,
                                   actorSystem: ActorSystem, val ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
@@ -79,10 +82,13 @@ class UploadController @Inject()(authAction: AuthAction,
     }
   }
 
-  private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, _] = {
-    Source
-      .single(HttpRequest(uri = downloadUrl))
-      .mapAsync(parallelism = 1)(makeRequest)
+  private[controllers] def readFileCsv(downloadUrl: String): Source[Either[Throwable, List[ByteString]], _] = {
+    csvBodyParser
+      .extractBodyOfRequest(
+        Source
+        .single(HttpRequest(uri = downloadUrl))
+        .mapAsync(parallelism = 1)(makeRequest)
+      )
   }
 
   private[controllers] def makeRequest(request: HttpRequest): Future[HttpResponse] = Http()(actorSystem).singleRequest(request)
@@ -131,19 +137,20 @@ class UploadController @Inject()(authAction: AuthAction,
       }
   }
 
-  def checkValidityOfRows(listOfErrors: Seq[List[ValidationError]], name: String, file: UpscanCsvFilesCallback)(
-    implicit request: Request[_]): Future[Either[Throwable, Boolean]] = {
-    listOfErrors.filter(rowErrors => rowErrors.nonEmpty) match {
-      case allGood if allGood.isEmpty => Future.successful(Right(true))
-      case errors =>
-        val errorsToCache = ListBuffer(CsvParserUtil.getSheetErrors(SheetErrors(FilenameUtils.removeExtension(name), errors.flatten.to(ListBuffer)))) // TODO: COME BACK TO...
-        for {
-          _ <- sessionCacheService.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${file.uploadId.value}", errors.flatten.length)
-          _ <- sessionCacheService.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${file.uploadId.value}",
-            errorsToCache)
-        } yield Right(false)
-    }
-  }
+  // TODO: DELETE MAYBE?
+//  def checkValidityOfRows(listOfErrors: Seq[List[ValidationError]], name: String, file: UpscanCsvFilesCallback)(
+//    implicit request: Request[_]): Future[Either[Throwable, Boolean]] = {
+//    listOfErrors.filter(rowErrors => rowErrors.nonEmpty) match {
+//      case allGood if allGood.isEmpty => Future.successful(Right(true))
+//      case errors =>
+//        val errorsToCache = ListBuffer(CsvValidator.validateCSVFile(SheetErrors(FilenameUtils.removeExtension(name), errors.flatten.to(ListBuffer)))) // TODO: COME BACK TO...
+//        for {
+//          _ <- sessionCacheService.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${file.uploadId.value}", errors.flatten.length)
+//          _ <- sessionCacheService.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${file.uploadId.value}",
+//            errorsToCache)
+//        } yield Right(false)
+//    }
+//  }
 
   def getRowsWithNumbers(listOfErrors: Seq[Either[Throwable, RowValidationResults]], name: String)(
     implicit messages: Messages): Either[Throwable, Seq[List[ValidationError]]] = listOfErrors match {
@@ -227,7 +234,7 @@ class UploadController @Inject()(authAction: AuthAction,
   }
 
   def showuploadODSFile(scheme: String)
-                       (implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], hc: HeaderCarrier, messages: Messages): Future[Result] = {
+                       (implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], messages: Messages): Future[Result] = {
 
     clearErrorCache().flatMap { clearedSuccessfully =>
       if (clearedSuccessfully) {
@@ -239,29 +246,12 @@ class UploadController @Inject()(authAction: AuthAction,
               Future.successful(err)
             },
             (processor: InputStream) => {
-              val fileName = file.get.name
-              sessionCacheService.cache[String](ersUtil.FILE_NAME_CACHE, fileName).recover { // TODO: COME BACK TO.....
-                case e: Exception =>
-                  logger.error("[ProcessODSService][performODSUpload] Unable to save File Name. Error: " + e.getMessage)
-                  throw e
+              val result = processODSService.performODSUpload(appConfig.csopV5Enabled, appConfig.errorCount, file.get.name, processor, scheme)(request, messages)
+              result.flatMap[Result] {
+                case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
+                case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(false)))
+                case Failure(t) => handleException(t)
               }
-              ODSValidator.validateODSFile(fileName, processor, scheme) match {
-                case Left(_) => // TODO: What do we want to do with this error?
-                  Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(false)))
-                case Right(value) =>
-                  if (value) {
-                    Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
-                  }
-                  else {
-                    ??? // WHERE DO WE REDIRECT IF WE GET AN INVALID FILE?
-                  }
-              }
-              // TODO: Come back to...
-//              result.flatMap[Result] {
-//                case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
-//                case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(false)))
-//                case Failure(t) => handleException(t)
-//              }
             }
           )
         }
