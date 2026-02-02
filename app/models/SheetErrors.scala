@@ -18,6 +18,7 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.validator.models._
+import uk.gov.hmrc.validator.models.ods.SheetErrors
 
 object SheetErrors {
   implicit val formatCell: OFormat[Cell] = Json.format[Cell]

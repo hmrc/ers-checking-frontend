@@ -25,7 +25,7 @@ import play.api.Logging
 import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Request}
 import repository.ErsCheckingFrontendSessionCacheRepository
-import uk.gov.hmrc.validator.models.{SheetErrors, ValidationException}
+import uk.gov.hmrc.validator.models.ValidationException
 import utils.{ERSUtil, UploadedFileUtil}
 
 import java.io.InputStream
@@ -33,7 +33,8 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 import models.SheetErrors.format
-import uk.gov.hmrc.validator.ODSValidator
+import uk.gov.hmrc.validator.models.ods.SheetErrors
+import uk.gov.hmrc.validator.ods.OdsValidator
 
 @Singleton
 class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
@@ -44,13 +45,13 @@ class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
   def performODSUpload(csopV5Enabled: Boolean, errorCount: Int, fileName: String, processor: InputStream, scheme: String)
                       (implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], messages: Messages): Future[Try[Boolean]] = {
     try {
-      checkFileType(fileName) // TODO: Move up one level?
+      checkFileType(fileName)
       val cacheFileName = sessionCacheService.cache[String](ersUtil.FILE_NAME_CACHE, fileName).recover {
         case e: Exception =>
           logger.error("[ProcessODSService][performODSUpload] Unable to save File Name. Error: " + e.getMessage)
           throw e
       }
-      val sheetErrors: ListBuffer[SheetErrors] = ODSValidator.validateODSFile(csopV5Enabled, processor, scheme, fileName)
+      val sheetErrors: ListBuffer[SheetErrors] = validateOdsFile(csopV5Enabled, fileName, processor, scheme)
       val cacheSheetErrors: Future[Try[Boolean]] = processSheetErrors(sheetErrors, None, errorCount)
       val result = for {
         _ <- cacheFileName
@@ -74,6 +75,9 @@ class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
         Future.successful(Failure(e))
     }
   }
+
+  def validateOdsFile(csopV5Enabled: Boolean, fileName: String, processor: InputStream, scheme: String): ListBuffer[SheetErrors] =
+    OdsValidator.validateOdsFile(csopV5Enabled, processor, scheme, fileName)
 
   // TODO: Can we remove the file argument?
   def processSheetErrors(sheetErrors: ListBuffer[SheetErrors], file: Option[UpscanCsvFilesCallback] = None, errorCount: Int)

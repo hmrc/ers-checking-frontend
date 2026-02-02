@@ -31,20 +31,18 @@ import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.RecoverMethods.recoverToExceptionIf
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.exceptions.TestFailedException
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import org.scalatest.{Assertion, EitherValues, OptionValues}
+import org.scalatest.{EitherValues, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.i18n.{Messages, MessagesImpl}
+import play.api.i18n.MessagesImpl
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.DefaultMessagesControllerComponents
 import play.api.{Application, i18n}
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.services.validation.DataValidator
-import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
-import uk.gov.hmrc.validator.models.{RowValidationResults, SheetErrors, ValidationException}
-import uk.gov.hmrc.validator.DataGenerator
+import uk.gov.hmrc.validator.models.{Cell, ValidationError, ValidationException}
+import uk.gov.hmrc.validator.models.csv.RowValidationResults
+import uk.gov.hmrc.validator.models.ods.SheetErrors
 
 import java.io.File
 import scala.collection.mutable.ListBuffer

@@ -36,9 +36,8 @@ import play.api.test.FakeRequest
 import play.api.{Application, i18n}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.test.MongoSupport
-import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
-import uk.gov.hmrc.validator.models.SheetErrors
-import uk.gov.hmrc.validator.ODSValidator
+import uk.gov.hmrc.validator.models.{Cell, ValidationError}
+import uk.gov.hmrc.validator.models.ods.SheetErrors
 import utils.UploadedFileUtil
 
 import java.io.InputStream
@@ -80,11 +79,9 @@ class ProcessODSServiceSpec
   implicit val fakeRequest: RequestWithOptionalEmpRefAndPAYE[AnyContent] = RequestWithOptionalEmpRefAndPAYE(FakeRequest(), None, PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, None, mockAppConfig))
 
   def buildProcessODSService(checkODSFileTypeResult: Boolean = true, sheetErrors: ListBuffer[SheetErrors]): ProcessODSService = {
-    val validator = new ODSValidator {
-      override def validateODSFile(csopV5Enabled: Boolean, inputStream: InputStream, scheme: String, uploadedFileName: String): ListBuffer[SheetErrors] = sheetErrors
-    }
-    new ProcessODSService(mockUploadedFileUtil, mockSessionCacheRepo, mockErsUtil, validator){
+    new ProcessODSService(mockUploadedFileUtil, mockSessionCacheRepo, mockErsUtil){
       when(mockUploadedFileUtil.checkODSFileType(anyString())).thenReturn(checkODSFileTypeResult)
+      override def validateOdsFile(csopV5Enabled: Boolean, fileName: String, processor: InputStream, scheme: String): ListBuffer[SheetErrors] = sheetErrors
     }
   }
 
@@ -145,7 +142,7 @@ class ProcessODSServiceSpec
 
     "return an exception when the file has the incorrect type" in {
 
-      val processODSService: ProcessODSService = new ProcessODSService(mockUploadedFileUtil, mockSessionCacheRepo, mockErsUtil, ODSValidator())
+      val processODSService: ProcessODSService = new ProcessODSService(mockUploadedFileUtil, mockSessionCacheRepo, mockErsUtil)
       val exceptionResult: ERSFileProcessingException = intercept[ERSFileProcessingException](processODSService.checkFileType("testFileName"))
       exceptionResult.message shouldBe "You chose to check an ODS file, but testFileName isn’t an ODS file."
     }

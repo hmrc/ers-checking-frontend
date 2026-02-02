@@ -43,7 +43,7 @@ import java.util.zip.ZipInputStream
 import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.validator.models.SheetErrors
+import uk.gov.hmrc.validator.models.ods.SheetErrors
 
 import scala.util.{Failure, Success}
 

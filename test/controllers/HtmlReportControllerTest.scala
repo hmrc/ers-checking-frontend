@@ -33,9 +33,9 @@ import play.api.mvc.{DefaultMessagesControllerComponents, Result}
 import play.api.test.Helpers._
 import play.api.test.Injecting
 import play.api.{Application, i18n}
-import uk.gov.hmrc.validator.models.SheetErrors
+import uk.gov.hmrc.validator.models.{Cell, ValidationError}
 import uk.gov.hmrc.mongo.cache.CacheItem
-import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
+import uk.gov.hmrc.validator.models.ods.SheetErrors
 import utils.CacheUtil
 import views.html.{global_error, html_error_report}
 

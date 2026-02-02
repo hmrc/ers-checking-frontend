@@ -17,14 +17,14 @@
 package utils
 
 import helpers.ErsTestHelper
-import models.SheetErrors
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
+import uk.gov.hmrc.validator.models.ods.SheetErrors
+import uk.gov.hmrc.validator.models.{Cell, ValidationError}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future

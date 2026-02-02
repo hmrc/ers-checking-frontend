@@ -33,8 +33,10 @@ import play.api.mvc.Request
 import repository.ErsCheckingFrontendSessionCacheRepository
 import services.FlowOps.eitherFromFunction
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.validator.CsvValidator.setValidatorAndValidateCsvRow
-import uk.gov.hmrc.validator.models.{RowValidationResults, SheetErrors, ValidationError}
+import uk.gov.hmrc.validator.csv.CsvValidator
+import uk.gov.hmrc.validator.models.csv.RowValidationResults
+import uk.gov.hmrc.validator.models.ods.SheetErrors
+import uk.gov.hmrc.validator.models.ValidationError
 import utils.ERSUtil
 
 import javax.inject.{Inject, Singleton}
@@ -85,7 +87,15 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
         extractBodyOfRequest(
           source(successUpload.downloadUrl)
         )
-          .via(eitherFromFunction(setValidatorAndValidateCsvRow(appConfig.csopV5Enabled, _, successUpload.name)))
+          .via(
+            eitherFromFunction(
+              CsvValidator.setValidatorAndValidateCsvRow(
+                appConfig.csopV5Enabled,
+                _,
+                successUpload.name
+              )
+            )
+          )
           .runWith(Sink.seq[Either[Throwable, RowValidationResults]])
 
       futureListOfErrors.map {

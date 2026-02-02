@@ -31,8 +31,9 @@ import services.audit.AuditEvents
 import uk.gov.hmrc.http.InternalServerException
 import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.validator.models.ods.SheetErrors
 import utils.{ERSUtil, JsonParser}
-import uk.gov.hmrc.validator.models.{SheetErrors, ValidationError}
+import uk.gov.hmrc.validator.models.ValidationError
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
