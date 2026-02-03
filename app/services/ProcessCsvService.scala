@@ -40,7 +40,6 @@ import uk.gov.hmrc.validator.models.{ValidationError, ValidationException}
 import utils.ERSUtil
 
 import javax.inject.{Inject, Singleton}
-import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import cats.syntax.all._
@@ -101,13 +100,13 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
                     successfulUploadName
                   )
                 )
+                  .recover{
+                    case e: ValidationException =>
+                      logger.info(s"[ProcessCsvService][processFiles] Encountered validation exception: ${e.getMessage}")
+                      throw e // TODO: COME BACK TO!
+                  }
               )
               .runWith(Sink.seq[Either[Throwable, RowValidationResults]])
-              .recover {
-                case e: ValidationException =>
-                  logger.info(s"[ProcessCsvService][processFiles] Encountered validation exception: ${e.getMessage}")
-                  throw e // TODO: COME BACK TO!
-              }
           futureListOfErrors.map {
             getRowsWithNumbers(_, successfulUploadName)(messages)
           }.flatMap {
@@ -118,48 +117,13 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
     }
   }
 
-//  @tailrec
-//  private[services] final def processDisplayedErrors(errorsLeftToDisplay: Int,
-//                                                     validationErrors: Seq[ValidationError]): Seq[ValidationError] = {
-//  if (errorsLeftToDisplay <= 0) {
-//    validationErrors
-//  }
-//  else {
-//    val indexOfFirstOccurrence: Int = rowsWithIndex.indexWhere(errorsWithIndex => errorsWithIndex._1.nonEmpty &&
-//      errorsWithIndex._1.exists(validationError => validationError.cell.row == 0))
-//    if (indexOfFirstOccurrence != -1) {
-//      val listOriginalReference = rowsWithIndex(indexOfFirstOccurrence)._1
-//      val entryReplacement = (listOriginalReference.map(validationError => {
-//        val cellReplaced = validationError.cell.copy(row = indexOfFirstOccurrence + 1)
-//        validationError.copy(cell = cellReplaced)
-//      }), indexOfFirstOccurrence)
-//      processDisplayedErrors(errorsLeftToDisplay - entryReplacement._1.length, rowsWithIndex.updated(indexOfFirstOccurrence, entryReplacement))
-//    } else {
-//      rowsWithIndex
-//    }
-//  }
-//}
-
-  def giveRowNumbers(validationErrors: Seq[ValidationError]): Seq[ValidationError] = {
-    val maximumNumberOfErrorsToDisplay: Int = appConfig.errorCount
-//    processDisplayedErrors(maximumNumberOfErrorsToDisplay, validationErrors) // TODO: COME BACK TO
-    println(s"validationErrors.take(maximumNumberOfErrorsToDisplay): ${validationErrors.take(maximumNumberOfErrorsToDisplay)}")
-    validationErrors.take(maximumNumberOfErrorsToDisplay)
-  }
-
   def getRowsWithNumbers(listOfErrors: Seq[Either[Throwable, RowValidationResults]], name: String)(
     implicit messages: Messages): Either[Throwable, Seq[ValidationError]] = {
-    println(s"listOfErrors: ${listOfErrors}")
-    println(s"listOfErrors.traverse(identity): ${listOfErrors.traverse(identity)}")
     listOfErrors.traverse(identity) match {
       case Left(e: Throwable) =>
         throw e // TODO: COME BACK TO - Validator was not set correctly!
       case Right(validationResults: Seq[RowValidationResults]) =>
-        println(s"validationResults: $validationResults")
         val allRowsEmpty: Boolean = validationResults.forall(_.rowWasEmpty)
-        println(s"allRowsEmpty: $allRowsEmpty")
-        println(s"validationResults.isEmpty: ${validationResults.isEmpty}")
-        println(s"validationResults.isEmpty || allRowsEmpty: ${validationResults.isEmpty || allRowsEmpty}")
         if (validationResults.isEmpty || allRowsEmpty){
           Left(ERSFileProcessingException(
             "ers_check_csv_file.noData",
@@ -170,7 +134,7 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
         } else {
           val validationErrors: Seq[ValidationError] = validationResults.flatMap(_.validationErrors)
           println(s"validationErrors: $validationErrors")
-          Right(giveRowNumbers(validationErrors))
+          Right(validationErrors.take(appConfig.errorCount))
         }
     }
   }
@@ -189,16 +153,6 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
           } yield Right(false)
       }
     }
-//    listOfErrors.nonEmpty match {
-//      case allGood if allGood.isEmpty => Future.successful(Right(true))
-//      case errors =>
-//        val errorsToCache = ListBuffer(getSheetErrors(SheetErrors(FilenameUtils.removeExtension(name), errors.flatten.to(ListBuffer))))
-//        for {
-//          _ <- sessionCacheService.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${file.uploadId.value}", errors.flatten.length)
-//          _ <- sessionCacheService.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${file.uploadId.value}",
-//            errorsToCache)
-//        } yield Right(false)
-//    }
 
   def getSheetErrors(schemeErrors: SheetErrors): SheetErrors = {
     schemeErrors.copy(errors = schemeErrors.errors.take(appConfig.errorCount))
@@ -212,4 +166,3 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
       Messages("ers_check_csv_file.file_type_error", name)(messages)))
   }
 }
-
