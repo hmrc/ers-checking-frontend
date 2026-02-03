@@ -12,6 +12,7 @@ object AppDependencies {
     "commons-io"                  %  "commons-io"                   % "2.20.0",
     "org.apache.pekko"            %% "pekko-stream"                 % PlayVersion.pekkoVersion,
     "org.apache.pekko"            %% "pekko-connectors-csv"         % "1.0.2", // sync with PlayVersion.pekkoVersion closes major and minor version gaps
+    "org.typelevel"               %% "cats-core"                    % "2.13.0",
     "uk.gov.hmrc.mongo"           %% "hmrc-mongo-play-30"           % mongoVersion,
     "uk.gov.hmrc"                 %% "bootstrap-frontend-play-30"   % bootstrapVersion,
     "uk.gov.hmrc"                 %% "domain-play-30"               % "11.0.0",

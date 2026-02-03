@@ -124,6 +124,10 @@ class UploadController @Inject()(authAction: AuthAction,
             val validationResults = processCsvService.processFiles(callback, scheme, readFileCsv)
             finaliseRequestAndRedirect(validationResults)
           }
+      } recover {
+        case e: ValidationException =>
+          logger.info(s"[UploadController][uploadCSVFile] Encountered validation exception: ${e.getMessage}")
+          getGlobalErrorPage
       }
   }
 
