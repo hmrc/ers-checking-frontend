@@ -76,33 +76,44 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
                    scheme: String,
                    source: String => Source[HttpResponse, NotUsed])
                   (implicit request: Request[_], messages: Messages): List[Future[Either[Throwable, Boolean]]] = {
-    logger.info(s"[ProcessCsvService][processFiles] callback $callback scheme: $scheme" )
+    logger.info(s"[ProcessCsvService][processFiles] callback $callback scheme: $scheme")
 
     callback.get.files map { file =>
 
       val successUpload: UploadedSuccessfully = file.uploadStatus.asInstanceOf[UploadedSuccessfully]
-
-      println(s"successUpload.name: ${successUpload.name}")
-      val futureListOfErrors: Future[Seq[Either[Throwable, RowValidationResults]]] =
-        extractBodyOfRequest(
-          source(successUpload.downloadUrl)
-        )
-          .via(
-            eitherFromFunction(
-              CsvValidator.setValidatorAndValidateCsvRow(
-                appConfig.csopV5Enabled,
-                _,
-                successUpload.name
-              )
+      val eitherFileNameOrError: Either[Throwable, String] = checkFileType(successUpload.name)
+      eitherFileNameOrError match {
+        case Left(value: Throwable) => {
+          logger.info("[ProcessCsvService][processFiles] Failed to remove extension from file correctly")
+          throw value
+        } // TODO: COME BACK TO
+        case Right(successfulUploadName: String) =>
+          val futureListOfErrors: Future[Seq[Either[Throwable, RowValidationResults]]] =
+            extractBodyOfRequest(
+              source(successUpload.downloadUrl)
             )
-          )
-          .runWith(Sink.seq[Either[Throwable, RowValidationResults]])
-
-      futureListOfErrors.map {
-        getRowsWithNumbers(_, successUpload.name)(messages)
-      }.flatMap{
-        case Right(errorsFromRow) => checkValidityOfRows(errorsFromRow, successUpload.name, file)
-        case Left(exception) => Future(Left(exception))
+              .via(
+                eitherFromFunction(
+                  CsvValidator.setValidatorAndValidateCsvRow(
+                    appConfig.csopV5Enabled,
+                    _,
+                    successfulUploadName
+                  )
+                )
+              )
+              .runWith(Sink.seq[Either[Throwable, RowValidationResults]])
+              .recover {
+                case e: Exception =>
+                  println("IN EXCEPTION")
+                  logger.error(e.getMessage)
+                  throw e
+              }
+          futureListOfErrors.map {
+            getRowsWithNumbers(_, successfulUploadName)(messages)
+          }.flatMap {
+            case Right(errorsFromRow) => checkValidityOfRows(errorsFromRow, successfulUploadName, file)
+            case Left(exception) => Future(Left(exception))
+          }
       }
     }
   }
