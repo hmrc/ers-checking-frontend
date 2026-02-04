@@ -36,7 +36,7 @@ import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.validator.csv.CsvValidator
 import uk.gov.hmrc.validator.models.csv.RowValidationResults
 import uk.gov.hmrc.validator.models.ods.SheetErrors
-import uk.gov.hmrc.validator.models.{ValidationError, ValidationException}
+import uk.gov.hmrc.validator.models.{Cell, ValidationError, ValidationException}
 import utils.ERSUtil
 
 import javax.inject.{Inject, Singleton}
@@ -132,7 +132,17 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
             optionalParams = Seq(name))
           )
         } else {
-          val validationErrors: Seq[ValidationError] = validationResults.flatMap(_.validationErrors)
+          val validationErrors: Seq[ValidationError] = validationResults
+            .flatMap(
+              _.validationErrors.map((error: ValidationError) => {
+                // TODO: Should the conf lib just return this with the correct row?
+                val updatedCell: Cell = error.cell.copy(
+                  row = error.cell.row + 1
+                )
+                error.copy(cell = updatedCell)
+              }
+              )
+            )
           println(s"validationErrors: $validationErrors")
           Right(validationErrors.take(appConfig.errorCount))
         }
