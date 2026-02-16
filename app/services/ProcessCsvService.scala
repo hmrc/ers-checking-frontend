@@ -43,6 +43,7 @@ import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import cats.syntax.all._
+import uk.gov.hmrc.validator.allTemplates
 
 @Singleton
 class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
@@ -95,7 +96,7 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
               .via(
                 eitherFromFunction(
                   CsvValidator.setValidatorAndValidateCsvRow(
-                    appConfig.csopV5Enabled,
+                    allTemplates,
                     _,
                     successfulUploadName
                   )

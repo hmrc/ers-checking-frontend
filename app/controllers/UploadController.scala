@@ -163,7 +163,7 @@ class UploadController @Inject()(authAction: AuthAction,
               Future.successful(err)
             },
             (processor: InputStream) => {
-              val result = processODSService.performODSUpload(appConfig.csopV5Enabled, appConfig.errorCount, file.get.name, processor, scheme)(request, messages)
+              val result = processODSService.performODSUpload(appConfig.errorCount, file.get.name, processor, scheme)(request, messages)
               result.flatMap[Result] {
                 case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
                 case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(false)))

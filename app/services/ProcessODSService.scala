@@ -35,6 +35,7 @@ import scala.util.{Failure, Success, Try}
 import models.SheetErrors.format
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 import uk.gov.hmrc.validator.ods.OdsValidator
+import uk.gov.hmrc.validator.allTemplates
 
 @Singleton
 class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
@@ -42,7 +43,7 @@ class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
                                   ersUtil: ERSUtil
                                  )(implicit ec: ExecutionContext) extends Logging {
 
-  def performODSUpload(csopV5Enabled: Boolean, errorCount: Int, fileName: String, processor: InputStream, scheme: String)
+  def performODSUpload(errorCount: Int, fileName: String, processor: InputStream, scheme: String)
                       (implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], messages: Messages): Future[Try[Boolean]] = {
     try {
       checkFileType(fileName)
@@ -51,7 +52,7 @@ class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
           logger.error("[ProcessODSService][performODSUpload] Unable to save File Name. Error: " + e.getMessage)
           throw e
       }
-      val sheetErrors: ListBuffer[SheetErrors] = validateOdsFile(csopV5Enabled, fileName, processor, scheme)
+      val sheetErrors: ListBuffer[SheetErrors] = validateOdsFile(fileName, processor, scheme)
       val cacheSheetErrors: Future[Try[Boolean]] = processSheetErrors(sheetErrors, None, errorCount)
       val result = for {
         _ <- cacheFileName
@@ -75,9 +76,8 @@ class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
         Future.successful(Failure(e))
     }
   }
-
-  def validateOdsFile(csopV5Enabled: Boolean, fileName: String, processor: InputStream, scheme: String): ListBuffer[SheetErrors] =
-    OdsValidator.validateOdsFile(csopV5Enabled, processor, scheme, fileName)
+  def validateOdsFile(fileName: String, processor: InputStream, scheme: String): ListBuffer[SheetErrors] =
+    OdsValidator.validateOdsFile(allTemplates, processor, scheme, fileName)
 
   // TODO: Can we remove the file argument?
   def processSheetErrors(sheetErrors: ListBuffer[SheetErrors], file: Option[UpscanCsvFilesCallback] = None, errorCount: Int)
