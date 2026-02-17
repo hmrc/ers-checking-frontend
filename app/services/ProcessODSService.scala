@@ -35,7 +35,7 @@ import scala.util.{Failure, Success, Try}
 import models.SheetErrors.format
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 import uk.gov.hmrc.validator.ods.OdsValidator
-import uk.gov.hmrc.validator.allTemplates
+import uk.gov.hmrc.validator.validation.allTemplates
 
 @Singleton
 class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
@@ -77,7 +77,7 @@ class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
     }
   }
   def validateOdsFile(fileName: String, processor: InputStream, scheme: String): ListBuffer[SheetErrors] =
-    OdsValidator.validateOdsFile(allTemplates, processor, scheme, fileName)
+    OdsValidator.validateOdsFile(allTemplates.validTemplateMap, processor, scheme, fileName)
 
   // TODO: Can we remove the file argument?
   def processSheetErrors(sheetErrors: ListBuffer[SheetErrors], file: Option[UpscanCsvFilesCallback] = None, errorCount: Int)

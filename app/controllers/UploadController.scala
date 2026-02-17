@@ -34,7 +34,7 @@ import repository.ErsCheckingFrontendSessionCacheRepository
 import services.{ProcessCsvService, ProcessODSService}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import utils.ERSUtil
+import utils.{ContentUtil, ERSUtil}
 import uk.gov.hmrc.validator.models.{IncorrectSchemeException, ValidationException}
 
 import java.io.InputStream
@@ -57,7 +57,7 @@ class UploadController @Inject()(authAction: AuthAction,
                                  override val global_error: views.html.global_error
                                 )(implicit executionContext: ExecutionContext,
                                   actorSystem: ActorSystem, val ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with I18nSupport with ErsBaseController with Logging {
+  extends FrontendController(mcc) with I18nSupport with ErsBaseController with Logging with ContentUtil {
 
   def downloadAsInputStream(downloadUrl: String): InputStream = new URL(downloadUrl).openStream()
 
@@ -181,8 +181,8 @@ class UploadController @Inject()(authAction: AuthAction,
     }
   }
 
+
   def handleException(t: Throwable)(implicit request: Request[AnyContent]): Future[Result] = {
-    println(s"t: ${t}")
     t match {
       case e: ERSFileProcessingException =>
         for {
@@ -198,21 +198,27 @@ class UploadController @Inject()(authAction: AuthAction,
             s"Encountered an upstream error response when processing a CSV file: " +
             s"status ${upstreamError.statusCode} with message ${upstreamError.getMessage()}")
         Future(getGlobalErrorPage)
-      case notERSProcessingException =>
-        logger.error(s"[UploadController][handleException] " +
-          s"Encountered unexpected exception: ${notERSProcessingException.getClass}. Redirecting to global error page.")
-        Future(getGlobalErrorPage)
       case e: javax.xml.stream.XMLStreamException =>
         logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
         Future(getGlobalErrorPage)
       case e: IncorrectSchemeException =>
-        logger.error(s"[UploadController][handleException] " +
-          s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
-        Future(getGlobalErrorPage)
+        val optionalParams = Seq(withArticle(e.sheetInfoSchemeType), withArticle(e.selectedSchemeName), e.schemeName)
+        val message = Messages("ers.exceptions.dataParser.incorrectSchemeType", withArticle(e.sheetInfoSchemeType), withArticle(e.selectedSchemeName), e.schemeName)
+        for {
+          _ <- sessionCacheService.cache[String](ersUtil.FORMAT_ERROR_CACHE, message)
+          _ <- sessionCacheService.cache[Seq[String]](ersUtil.FORMAT_ERROR_CACHE_PARAMS, optionalParams)
+          _ <- sessionCacheService.cache[Boolean](ersUtil.FORMAT_ERROR_EXTENDED_CACHE, false)
+        } yield {
+          Redirect(routes.CheckingServiceController.formatErrorsPage())
+        }
       case e: ValidationException =>
         logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
+        Future(getGlobalErrorPage)
+      case notERSProcessingException: Throwable => // Catch all case
+        logger.error(s"[UploadController][handleException] " +
+          s"Encountered unexpected exception: ${notERSProcessingException.getClass}. Redirecting to global error page.")
         Future(getGlobalErrorPage)
     }
   }

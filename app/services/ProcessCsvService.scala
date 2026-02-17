@@ -32,11 +32,11 @@ import play.api.i18n.Messages
 import play.api.mvc.Request
 import repository.ErsCheckingFrontendSessionCacheRepository
 import services.FlowOps.eitherFromFunction
-import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.validator.csv.CsvValidator
 import uk.gov.hmrc.validator.models.csv.RowValidationResults
 import uk.gov.hmrc.validator.models.ods.SheetErrors
-import uk.gov.hmrc.validator.models.{Cell, ValidationError, ValidationException}
+import uk.gov.hmrc.validator.models.{Cell, ValidationError}
 import utils.ERSUtil
 
 import javax.inject.{Inject, Singleton}
@@ -44,7 +44,7 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import cats.syntax.all._
 import services.audit.AuditEvents
-import uk.gov.hmrc.validator.{SheetInfo, allTemplates}
+import uk.gov.hmrc.validator.validation.allTemplates
 
 @Singleton
 class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
@@ -101,14 +101,10 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
                     .setValidatorAndValidateCsvRow(
                       allTemplates,
                       _,
-                      successfulUploadName
+                      successfulUploadName,
+                      scheme.toUpperCase
                     )
                 )
-//                  .recover{
-//                    case e: ValidationException =>
-//                      logger.info(s"[ProcessCsvService][processFiles] Encountered validation exception: ${e.getMessage}")
-//                      throw e // TODO: COME BACK TO!
-//                  }
               )
               .runWith(Sink.seq[Either[Throwable, RowValidationResults]])
           futureListOfErrors.map {
@@ -146,7 +142,6 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
             }
             )
           )
-        println(s"validationErrors: $validationErrors")
         Right(validationErrors.take(appConfig.errorCount))
       }
     }
@@ -154,7 +149,6 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
 
   def checkValidityOfRows(listOfErrors: Seq[ValidationError], name: String, file: UpscanCsvFilesCallback)(
     implicit request: Request[_]): Future[Either[Throwable, Boolean]] = {
-    println(s"listOfErrors: ${listOfErrors}")
     if (listOfErrors.isEmpty){
       Future.successful(Right(true))
     } else {
