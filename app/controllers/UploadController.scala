@@ -35,16 +35,17 @@ import services.{ProcessCsvService, ProcessODSService}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
-import uk.gov.hmrc.validator.models.ValidationException
+import uk.gov.hmrc.validator.models.{IncorrectSchemeException, ValidationException}
 
 import java.io.InputStream
 import java.net.URL
 import java.util.zip.ZipInputStream
 import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 
+import scala.concurrent.duration.Duration
 import scala.util.{Failure, Success}
 
 @Singleton
@@ -132,7 +133,7 @@ class UploadController @Inject()(authAction: AuthAction,
   }
 
   def finaliseRequestAndRedirect(validationResults: List[Future[Either[Throwable, Boolean]]])(
-    implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Result] =
+    implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Result] = {
     Future.sequence(validationResults).flatMap {
       case noFailures if noFailures.forall(_.contains(true)) =>
         Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
@@ -144,6 +145,7 @@ class UploadController @Inject()(authAction: AuthAction,
         }
 
     }
+  }
 
   def uploadODSFile(scheme: String): Action[AnyContent] = authAction.async {
     implicit request =>
@@ -180,6 +182,7 @@ class UploadController @Inject()(authAction: AuthAction,
   }
 
   def handleException(t: Throwable)(implicit request: Request[AnyContent]): Future[Result] = {
+    println(s"t: ${t}")
     t match {
       case e: ERSFileProcessingException =>
         for {
@@ -200,6 +203,10 @@ class UploadController @Inject()(authAction: AuthAction,
           s"Encountered unexpected exception: ${notERSProcessingException.getClass}. Redirecting to global error page.")
         Future(getGlobalErrorPage)
       case e: javax.xml.stream.XMLStreamException =>
+        logger.error(s"[UploadController][handleException] " +
+          s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
+        Future(getGlobalErrorPage)
+      case e: IncorrectSchemeException =>
         logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
         Future(getGlobalErrorPage)

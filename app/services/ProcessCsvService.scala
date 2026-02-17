@@ -32,7 +32,7 @@ import play.api.i18n.Messages
 import play.api.mvc.Request
 import repository.ErsCheckingFrontendSessionCacheRepository
 import services.FlowOps.eitherFromFunction
-import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.validator.csv.CsvValidator
 import uk.gov.hmrc.validator.models.csv.RowValidationResults
 import uk.gov.hmrc.validator.models.ods.SheetErrors
@@ -43,12 +43,14 @@ import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import cats.syntax.all._
-import uk.gov.hmrc.validator.allTemplates
+import services.audit.AuditEvents
+import uk.gov.hmrc.validator.{SheetInfo, allTemplates}
 
 @Singleton
 class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
                                   sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
-                                  ersUtil: ERSUtil
+                                  ersUtil: ERSUtil,
+                                  auditEvents: AuditEvents
                                  )(implicit executionContext: ExecutionContext,
                                    actorSystem: ActorSystem) extends Logging {
 
@@ -95,17 +97,18 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
             )
               .via(
                 eitherFromFunction(
-                  CsvValidator.setValidatorAndValidateCsvRow(
-                    allTemplates,
-                    _,
-                    successfulUploadName
-                  )
+                  CsvValidator
+                    .setValidatorAndValidateCsvRow(
+                      allTemplates,
+                      _,
+                      successfulUploadName
+                    )
                 )
-                  .recover{
-                    case e: ValidationException =>
-                      logger.info(s"[ProcessCsvService][processFiles] Encountered validation exception: ${e.getMessage}")
-                      throw e // TODO: COME BACK TO!
-                  }
+//                  .recover{
+//                    case e: ValidationException =>
+//                      logger.info(s"[ProcessCsvService][processFiles] Encountered validation exception: ${e.getMessage}")
+//                      throw e // TODO: COME BACK TO!
+//                  }
               )
               .runWith(Sink.seq[Either[Throwable, RowValidationResults]])
           futureListOfErrors.map {
@@ -120,33 +123,32 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
 
   def getRowsWithNumbers(listOfErrors: Seq[Either[Throwable, RowValidationResults]], name: String)(
     implicit messages: Messages): Either[Throwable, Seq[ValidationError]] = {
-    listOfErrors.traverse(identity) match {
-      case Left(e: Throwable) =>
-        throw e // TODO: COME BACK TO - Validator was not set correctly!
-      case Right(validationResults: Seq[RowValidationResults]) =>
-        val allRowsEmpty: Boolean = validationResults.forall(_.rowWasEmpty)
-        if (validationResults.isEmpty || allRowsEmpty){
-          Left(ERSFileProcessingException(
+    listOfErrors.traverse(identity).flatMap { validationResults: Seq[RowValidationResults] =>
+      val allRowsEmpty: Boolean = validationResults.forall(_.rowWasEmpty)
+      if (validationResults.isEmpty || allRowsEmpty){
+        Left(
+          ERSFileProcessingException(
             "ers_check_csv_file.noData",
             messages("ers_check_csv_file.noData", name),
             needsExtendedInstructions = true,
-            optionalParams = Seq(name))
+            optionalParams = Seq(name)
           )
-        } else {
-          val validationErrors: Seq[ValidationError] = validationResults
-            .flatMap(
-              _.validationErrors.map((error: ValidationError) => {
-                // TODO: Should the conf lib just return this with the correct row?
-                val updatedCell: Cell = error.cell.copy(
-                  row = error.cell.row + 1
-                )
-                error.copy(cell = updatedCell)
-              }
+        )
+      } else {
+        val validationErrors: Seq[ValidationError] = validationResults
+          .flatMap(
+            _.validationErrors.map((error: ValidationError) => {
+              // TODO: Should the conf lib just return this with the correct row?
+              val updatedCell: Cell = error.cell.copy(
+                row = error.cell.row + 1
               )
+              error.copy(cell = updatedCell)
+            }
             )
-          println(s"validationErrors: $validationErrors")
-          Right(validationErrors.take(appConfig.errorCount))
-        }
+          )
+        println(s"validationErrors: $validationErrors")
+        Right(validationErrors.take(appConfig.errorCount))
+      }
     }
   }
 
