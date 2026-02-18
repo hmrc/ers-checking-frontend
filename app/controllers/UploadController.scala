@@ -35,17 +35,16 @@ import services.{ProcessCsvService, ProcessODSService}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{ContentUtil, ERSUtil}
-import uk.gov.hmrc.validator.models.{IncorrectSchemeException, ValidationException}
+import uk.gov.hmrc.validator.models._
 
 import java.io.InputStream
 import java.net.URL
 import java.util.zip.ZipInputStream
 import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 
-import scala.concurrent.duration.Duration
 import scala.util.{Failure, Success}
 
 @Singleton
@@ -181,17 +180,21 @@ class UploadController @Inject()(authAction: AuthAction,
     }
   }
 
+  def redirectToFormatErrorsPage(message: String, params: Seq[String], needsExtendedInstructions: Boolean)(implicit request: Request[AnyContent]): Future[Result] = {
+    for {
+      _ <- sessionCacheService.cache[String](ersUtil.FORMAT_ERROR_CACHE, message)
+      _ <- sessionCacheService.cache[Seq[String]](ersUtil.FORMAT_ERROR_CACHE_PARAMS, params)
+      _ <- sessionCacheService.cache[Boolean](ersUtil.FORMAT_ERROR_EXTENDED_CACHE, needsExtendedInstructions)
+    } yield {
+      Redirect(routes.CheckingServiceController.formatErrorsPage())
+    }
+  }
+
 
   def handleException(t: Throwable)(implicit request: Request[AnyContent]): Future[Result] = {
     t match {
       case e: ERSFileProcessingException =>
-        for {
-          _ <- sessionCacheService.cache[String](ersUtil.FORMAT_ERROR_CACHE, e.message)
-          _ <- sessionCacheService.cache[Seq[String]](ersUtil.FORMAT_ERROR_CACHE_PARAMS, e.optionalParams)
-          _ <- sessionCacheService.cache[Boolean](ersUtil.FORMAT_ERROR_EXTENDED_CACHE, e.needsExtendedInstructions)
-        } yield {
-          Redirect(routes.CheckingServiceController.formatErrorsPage())
-        }
+        redirectToFormatErrorsPage(e.message, e.optionalParams, e.needsExtendedInstructions)
       case upstreamError: UpstreamErrorResponse =>
         logger.error(
           s"[UploadController][handleException] " +
@@ -203,15 +206,29 @@ class UploadController @Inject()(authAction: AuthAction,
           s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
         Future(getGlobalErrorPage)
       case e: IncorrectSchemeException =>
-        val optionalParams = Seq(withArticle(e.sheetInfoSchemeType), withArticle(e.selectedSchemeName), e.schemeName)
-        val message = Messages("ers.exceptions.dataParser.incorrectSchemeType", withArticle(e.sheetInfoSchemeType), withArticle(e.selectedSchemeName), e.schemeName)
-        for {
-          _ <- sessionCacheService.cache[String](ersUtil.FORMAT_ERROR_CACHE, message)
-          _ <- sessionCacheService.cache[Seq[String]](ersUtil.FORMAT_ERROR_CACHE_PARAMS, optionalParams)
-          _ <- sessionCacheService.cache[Boolean](ersUtil.FORMAT_ERROR_EXTENDED_CACHE, false)
-        } yield {
-          Redirect(routes.CheckingServiceController.formatErrorsPage())
-        }
+        val message = Messages("ers.exceptions.dataParser.incorrectSchemeType", withArticle(e.selectedSchemeType), withArticle(e.uploadedFileSchemeType), e.fileName)
+        val optionalParams = Seq(withArticle(e.selectedSchemeType), withArticle(e.uploadedFileSchemeType), e.fileName)
+        redirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = false)
+      case _: NoData =>
+        redirectToFormatErrorsPage(
+          Messages("ers.exceptions.dataParser.noData"),
+          Seq.empty[String],
+          needsExtendedInstructions = true
+        )
+      case _: DataContainsAmpersand =>
+        redirectToFormatErrorsPage(
+          Messages("ers.exceptions.dataParser.ampersand"),
+          Seq.empty[String],
+          needsExtendedInstructions = true
+        )
+      case e: IncorrectHeader =>
+        val message = Messages("ers.exceptions.dataParser.incorrectHeader", e.sheetName, e.fileName)
+        val optionalParams = Seq(e.sheetName, e.fileName)
+        redirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
+      case e: IncorrectSheetName =>
+        val message = Messages("ers.exceptions.dataParser.incorrectSheetName", e.sheetName, e.schemeName)
+        val optionalParams = Seq(e.sheetName, e.schemeName)
+        redirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
       case e: ValidationException =>
         logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
