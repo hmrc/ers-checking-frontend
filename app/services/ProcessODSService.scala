@@ -77,7 +77,7 @@ class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
     }
   }
   def validateOdsFile(fileName: String, processor: InputStream, scheme: String): ListBuffer[SheetErrors] =
-    OdsValidator.validateOdsFile(allTemplates.validTemplateMap, processor, scheme, fileName)
+    OdsValidator.validateOdsFile(allTemplates, processor, scheme, fileName)
 
   // TODO: Can we remove the file argument?
   def processSheetErrors(sheetErrors: ListBuffer[SheetErrors], file: Option[UpscanCsvFilesCallback] = None, errorCount: Int)
