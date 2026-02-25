@@ -32,7 +32,7 @@ import uk.gov.hmrc.http.InternalServerException
 import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.validator.models.ods.SheetErrors
-import utils.{ERSUtil, JsonParser}
+import utils.ERSUtil
 import uk.gov.hmrc.validator.models.ValidationError
 
 import scala.collection.mutable.ListBuffer
@@ -46,7 +46,7 @@ class HtmlReportController @Inject()(authAction: AuthAction,
                                      auditEvents: AuditEvents,
                                      override val global_error: views.html.global_error
                                     )(implicit executionContext: ExecutionContext, ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with JsonParser with I18nSupport with ErsBaseController with Logging {
+  extends FrontendController(mcc) with I18nSupport with ErsBaseController with Logging {
 
   def htmlErrorReportPage(isCsv: Boolean): Action[AnyContent] = authAction.async {
     implicit request =>
