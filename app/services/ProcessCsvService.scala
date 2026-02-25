@@ -31,7 +31,6 @@ import play.api.Logging
 import play.api.i18n.Messages
 import play.api.mvc.Request
 import repository.ErsCheckingFrontendSessionCacheRepository
-import services.FlowOps.eitherFromFunction
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.validator.csv.CsvValidator
 import uk.gov.hmrc.validator.models.csv.RowValidationResults
@@ -43,7 +42,6 @@ import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import cats.syntax.all._
-import services.audit.AuditEvents
 import uk.gov.hmrc.validator.validation.allTemplates
 
 @Singleton
@@ -95,7 +93,7 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
               source(successUpload.downloadUrl)
             )
               .via(
-                eitherFromFunction(
+                FlowOps.eitherFromFunction(
                   CsvValidator
                     .setValidatorAndValidateCsvRow(
                       allTemplates,
@@ -170,5 +168,12 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
     Left(ERSFileProcessingException(
       Messages("ers_check_csv_file.file_type_error", name)(messages),
       Messages("ers_check_csv_file.file_type_error", name)(messages)))
+  }
+
+  private object FlowOps {
+
+    def eitherFromFunction[A, B](input: A => Either[Throwable, B]): Flow[Either[Throwable, A], Either[Throwable, B], NotUsed] =
+      Flow.fromFunction(_.flatMap(input))
+
   }
 }
