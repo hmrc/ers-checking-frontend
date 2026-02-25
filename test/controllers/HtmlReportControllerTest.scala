@@ -85,7 +85,6 @@ class HtmlReportControllerTest
       mockAnyContentAction
 
       when(mockSessionCacheRepo.fetchAll()(any())).thenReturn(Future.successful(cacheItem))
-      when(mockErsUtil.getSchemeName(any())).thenReturn(("ers_pdf_error_report.csop", "CSOP"))
 
       lazy val result = controllerUnderTest.htmlErrorReportPage(true).apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
@@ -187,7 +186,6 @@ class HtmlReportControllerTest
         ))
 
       when(mockSessionCacheRepo.fetchAll()(any())).thenReturn(Future.successful(cacheItemWithErrors))
-      when(mockErsUtil.getSchemeName(any())).thenReturn(("ers_pdf_error_report.csop", "CSOP"))
       val res = controllerUnderTest
         .showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"), testMessages)
       res.map { result =>

@@ -25,7 +25,6 @@ import controllers.auth.{AuthAction, RequestWithOptionalEmpRefAndPAYE}
 import models.ERSFileProcessingException
 import models.SheetErrors.format
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallbackList}
-import org.apache.pekko.NotUsed
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
@@ -34,7 +33,7 @@ import repository.ErsCheckingFrontendSessionCacheRepository
 import services.{ProcessCsvService, ProcessODSService}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import utils.{ContentUtil, ERSUtil}
+import utils.ERSUtil
 import uk.gov.hmrc.validator.models._
 
 import java.io.InputStream
@@ -44,6 +43,7 @@ import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.validator.models.ods.SheetErrors
+import utils.ContentUtil.withArticle
 
 import scala.util.{Failure, Success}
 
@@ -56,7 +56,7 @@ class UploadController @Inject()(authAction: AuthAction,
                                  override val global_error: views.html.global_error
                                 )(implicit executionContext: ExecutionContext,
                                   actorSystem: ActorSystem, val ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with I18nSupport with ErsBaseController with Logging with ContentUtil {
+  extends FrontendController(mcc) with I18nSupport with ErsBaseController with Logging {
 
   def downloadAsInputStream(downloadUrl: String): InputStream = new URL(downloadUrl).openStream()
 
@@ -75,7 +75,7 @@ class UploadController @Inject()(authAction: AuthAction,
     }
   }
 
-  private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, NotUsed] =
+  private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, _] =
     Source
       .single(HttpRequest(uri = downloadUrl))
       .mapAsync(parallelism = 1)(makeRequest)

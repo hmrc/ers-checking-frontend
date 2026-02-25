@@ -16,9 +16,9 @@
 
 package utils
 
-trait ContentUtil {
+object ContentUtil {
 
-  def getSchemeName(schemeType: String) : (String,String) = {
+  def getErrorReportAndSchemeName(schemeType: String) : (String,String) = {
     schemeType.toLowerCase match {
       case "csop" | "1" => ("ers_pdf_error_report.csop", "CSOP")
       case "emi" | "2" => ("ers_pdf_error_report.emi", "EMI")

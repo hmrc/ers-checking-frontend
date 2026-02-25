@@ -386,7 +386,6 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
 
         when(mockSessionCacheRepo.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any()))
           .thenReturn(if (schemeRes) Future.successful(("", "")) else Future.failed(new Exception))
-        when(mockErsUtil.getSchemeName(any())).thenReturn(("a", "b"))
 
         when(mockSessionCacheRepo.fetchAndGetEntry[String](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(), any()))
           .thenReturn(if (schemeRes) Future.successful(fileTypeRes) else Future.failed(new Exception))

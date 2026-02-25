@@ -31,6 +31,7 @@ import services.UpscanService
 import services.audit.AuditEvents
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import utils.ContentUtil.getErrorReportAndSchemeName
 import utils._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -205,8 +206,8 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
       auditEvents.fileProcessingErrorAudit(fileType, schemeName, errorMsg)
       Ok(format_errors(
         fileType,
-        ersUtil.getSchemeName(schemeName)._1,
-        ersUtil.getSchemeName(schemeName)._2,
+        getErrorReportAndSchemeName(schemeName)._1,
+        getErrorReportAndSchemeName(schemeName)._2,
         errorMsg,
         errorParams,
         extendedInstructions))

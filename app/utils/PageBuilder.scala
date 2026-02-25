@@ -32,14 +32,7 @@ trait PageBuilder {
   val schemeList: Seq[String] = Seq(SCHEME_CSOP, SCHEME_EMI, SCHEME_SAYE, SCHEME_SIP, SCHEME_OTHER)
 
   // pageId's
-  val PAGE_START = "ers_start"
-  val PAGE_CHOOSE = "ers_choose"
-  val PAGE_CHECK_FILE = "ers_check_file"
   val PAGE_CHECK_CSV_FILE = "ers_check_csv_file"
-  val PAGE_ALT_ACTIVITY = "ers_alt_activity"
-  val PAGE_ALT_AMENDS = "ers_alt_amends"
-  val PAGE_GROUP_ACTIVITY = "ers_group_activity"
-  val PAGE_SUMMARY_DECLARATION = "ers_summary_declaration"
 
   // Options
   val OPTION_YES = "1"
@@ -50,18 +43,11 @@ trait PageBuilder {
   val OPTION_CSV = "csv"
 
   // message file entry prefix
-  val MSG_ERS: String = "ers"
   val MSG_CSOP: String = ".csop."
   val MSG_EMI: String = ".emi."
   val MSG_SAYE: String = ".saye."
   val MSG_SIP: String = ".sip."
   val MSG_OTHER: String = ".other."
-
-  val CSOP_CSV_FILES: Int = 3
-  val EMI_CSV_FILES: Int = 5
-  val SAYE_CSV_FILES: Int = 3
-  val SIP_CSV_FILES: Int = 2
-  val OTHER_CSV_FILES: Int = 9
 
   val CSVFilesList: Map[String, List[CsvFiles]] = Map(
     (

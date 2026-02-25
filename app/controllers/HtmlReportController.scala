@@ -32,7 +32,7 @@ import uk.gov.hmrc.http.InternalServerException
 import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.validator.models.ods.SheetErrors
-import utils.ERSUtil
+import utils.{ContentUtil, ERSUtil}
 import uk.gov.hmrc.validator.models.ValidationError
 
 import scala.collection.mutable.ListBuffer
@@ -78,7 +78,7 @@ class HtmlReportController @Inject()(authAction: AuthAction,
   def showHtmlErrorReportPage(isCsv: Boolean)(implicit request: Request[AnyRef], messages: Messages): Future[Result] = {
     sessionCacheService.fetchAll().map { all =>
       val scheme: (String, String) = getEntry[String](all, ersUtil.SCHEME_CACHE) match {
-        case Some(name) => ersUtil.getSchemeName(name)
+        case Some(name) => ContentUtil.getErrorReportAndSchemeName(name)
         case _ => ("", "")
       }
       lazy val (errorsList, errorCountLong, totalErrorsCount) = if (isCsv) {

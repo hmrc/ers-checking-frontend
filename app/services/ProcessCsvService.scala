@@ -23,7 +23,6 @@ import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFil
 import models.ERSFileProcessingException
 import models.SheetErrors.format
 import org.apache.commons.io.FilenameUtils
-import org.apache.pekko.NotUsed
 import org.apache.pekko.http.scaladsl.model.HttpResponse
 import org.apache.pekko.stream.connectors.csv.scaladsl.CsvParsing
 import org.apache.pekko.util.ByteString
@@ -74,7 +73,7 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
 
   def processFiles(callback: Option[UpscanCsvFilesCallbackList],
                    scheme: String,
-                   source: String => Source[HttpResponse, NotUsed])
+                   source: String => Source[HttpResponse, _])
                   (implicit request: Request[_], messages: Messages): List[Future[Either[Throwable, Boolean]]] = {
     logger.info(s"[ProcessCsvService][processFiles] callback $callback scheme: $scheme")
 
@@ -172,7 +171,7 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
 
   private object FlowOps {
 
-    def eitherFromFunction[A, B](input: A => Either[Throwable, B]): Flow[Either[Throwable, A], Either[Throwable, B], NotUsed] =
+    def eitherFromFunction[A, B](input: A => Either[Throwable, B]): Flow[Either[Throwable, A], Either[Throwable, B], _] =
       Flow.fromFunction(_.flatMap(input))
 
   }

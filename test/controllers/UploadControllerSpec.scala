@@ -83,10 +83,10 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
         InternalServerError("Test body")
       }
 
-      val mockSource: Source[HttpResponse, NotUsed] =
+      val mockSource: Source[HttpResponse, _] =
         Source.fromIterator(() => List(HttpResponse(StatusCodes.OK)).iterator)
 
-      override private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, NotUsed] = if(mockReadFileCsv) {
+      override private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, _] = if (mockReadFileCsv) {
         mockSource
       } else {
         super.readFileCsv(downloadUrl)
