@@ -125,7 +125,7 @@ class UploadController @Inject()(authAction: AuthAction,
             finaliseRequestAndRedirect(validationResults)
           }
       } recover {
-        case e: ValidationException =>
+        case e: ValidatorException =>
           logger.info(s"[UploadController][uploadCSVFile] Encountered validation exception: ${e.getMessage}")
           getGlobalErrorPage
       }
@@ -209,27 +209,27 @@ class UploadController @Inject()(authAction: AuthAction,
         val message = Messages("ers.exceptions.dataParser.incorrectSchemeType", withArticle(e.selectedSchemeType), withArticle(e.uploadedFileSchemeType), e.fileName)
         val optionalParams = Seq(withArticle(e.selectedSchemeType), withArticle(e.uploadedFileSchemeType), e.fileName)
         redirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = false)
-      case _: NoData =>
+      case _: NoDataException =>
         redirectToFormatErrorsPage(
           Messages("ers.exceptions.dataParser.noData"),
           Seq.empty[String],
           needsExtendedInstructions = true
         )
-      case _: DataContainsAmpersand =>
+      case _: DataContainsAmpersandException =>
         redirectToFormatErrorsPage(
           Messages("ers.exceptions.dataParser.ampersand"),
           Seq.empty[String],
           needsExtendedInstructions = true
         )
-      case e: IncorrectHeader =>
+      case e: IncorrectHeaderException =>
         val message = Messages("ers.exceptions.dataParser.incorrectHeader", e.sheetName, e.fileName)
         val optionalParams = Seq(e.sheetName, e.fileName)
         redirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
-      case e: IncorrectSheetName =>
+      case e: IncorrectSheetNameException =>
         val message = Messages("ers.exceptions.dataParser.incorrectSheetName", e.sheetName, e.schemeName)
         val optionalParams = Seq(e.sheetName, e.schemeName)
         redirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
-      case e: ValidationException =>
+      case e: ValidatorException =>
         logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
         Future(getGlobalErrorPage)

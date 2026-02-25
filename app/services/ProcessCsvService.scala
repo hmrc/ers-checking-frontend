@@ -49,8 +49,7 @@ import uk.gov.hmrc.validator.validation.allTemplates
 @Singleton
 class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
                                   sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
-                                  ersUtil: ERSUtil,
-                                  auditEvents: AuditEvents
+                                  ersUtil: ERSUtil
                                  )(implicit executionContext: ExecutionContext,
                                    actorSystem: ActorSystem) extends Logging {
 

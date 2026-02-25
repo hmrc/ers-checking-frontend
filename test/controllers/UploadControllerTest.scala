@@ -83,7 +83,7 @@ class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) 
                                                    )(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Either[Result, InputStream] =
         if (readFileOdsError) Left(InternalServerError("failed")) else mockStaxProcessor
 
-      when(mockProcessODSService.performODSUpload(any(), any(), any(), any(), any())(any(), any()))
+      when(mockProcessODSService.performODSUpload(any(), any(), any(), any())(any(), any()))
         .thenReturn(if (processFile) Future.successful(Success(uploadRes)) else Future.successful(Failure(ERSFileProcessingException("", ""))))
 
       when(mockSessionCacheRepo.cache(refEq(mockErsUtil.FORMAT_ERROR_CACHE), anyString())(any(), any()))

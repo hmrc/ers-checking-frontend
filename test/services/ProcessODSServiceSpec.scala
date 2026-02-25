@@ -81,7 +81,7 @@ class ProcessODSServiceSpec
   def buildProcessODSService(checkODSFileTypeResult: Boolean = true, sheetErrors: ListBuffer[SheetErrors]): ProcessODSService = {
     new ProcessODSService(mockUploadedFileUtil, mockSessionCacheRepo, mockErsUtil){
       when(mockUploadedFileUtil.checkODSFileType(anyString())).thenReturn(checkODSFileTypeResult)
-      override def validateOdsFile(csopV5Enabled: Boolean, fileName: String, processor: InputStream, scheme: String): ListBuffer[SheetErrors] = sheetErrors
+      override def validateOdsFile(fileName: String, processor: InputStream, scheme: String): ListBuffer[SheetErrors] = sheetErrors
     }
   }
 
@@ -99,7 +99,7 @@ class ProcessODSServiceSpec
         .thenReturn(Future.successful(("", "")))
 
       val output: Future[Try[Boolean]] = buildProcessODSService(checkODSFileTypeResult = true, sheetErrors)
-        .performODSUpload(csopV5Enabled = true, 10, "testFileName", mockInputStream, "csop")
+        .performODSUpload(10, "testFileName", mockInputStream, "csop")
       output.futureValue shouldBe Success(false)
     }
 
@@ -109,7 +109,7 @@ class ProcessODSServiceSpec
 
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
       val output: Future[Try[Boolean]] = buildProcessODSService(checkODSFileTypeResult = true, emptyErrors)
-        .performODSUpload(csopV5Enabled = true, 10, "testFileName", mockInputStream, "csop")
+        .performODSUpload(10, "testFileName", mockInputStream, "csop")
 
       output.futureValue shouldBe Success(true)
     }
@@ -120,7 +120,7 @@ class ProcessODSServiceSpec
 
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
       val result: Try[Boolean] = buildProcessODSService(checkODSFileTypeResult = true, emptyErrors)
-        .performODSUpload(csopV5Enabled = true, 10, "testFileName", mockInputStream, "csop")
+        .performODSUpload(10, "testFileName", mockInputStream, "csop")
         .futureValue
 
       assert(result.isFailure)
@@ -134,7 +134,7 @@ class ProcessODSServiceSpec
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
 
       buildProcessODSService(checkODSFileTypeResult = false, emptyErrors)
-        .performODSUpload(csopV5Enabled = true, 10, "testFileName", mockInputStream, "csop").futureValue shouldBe Failure(exception)
+        .performODSUpload(10, "testFileName", mockInputStream, "csop").futureValue shouldBe Failure(exception)
     }
   }
 

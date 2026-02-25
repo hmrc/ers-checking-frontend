@@ -25,15 +25,21 @@ import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Application
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.test.MongoSupport
 
 import scala.concurrent.Future
 
 class UpscanCallbackControllerSpec extends AnyWordSpecLike with Matchers with OptionValues with ErsTestHelper
                                                     with GuiceOneAppPerSuite
-                                                    with BeforeAndAfterEach {
+                                                    with BeforeAndAfterEach
+                                                    with MongoSupport {
 
   import models.upscan._
   import models.upscan.UpscanCallback._
