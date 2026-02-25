@@ -36,9 +36,8 @@ import play.api.test.FakeRequest
 import play.api.{Application, i18n}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.test.MongoSupport
-import uk.gov.hmrc.validator.models.{Cell, ValidationError}
+import uk.gov.hmrc.validator.models.ValidationError
 import uk.gov.hmrc.validator.models.ods.SheetErrors
-import utils.UploadedFileUtil
 
 import java.io.InputStream
 import scala.collection.mutable.ListBuffer
@@ -65,8 +64,6 @@ class ProcessODSServiceSpec
       bind(classOf[MongoComponent]).toInstance(mongoComponent)
     ).build()
 
-  val mockUploadedFileUtil: UploadedFileUtil = mock[UploadedFileUtil]
-
   val config: Map[String, String] = Map(
     "microservice.services.cachable.short-lived-cache-frontend.host" -> "test",
     "cachable.short-lived-cache-frontend.port" -> "test",
@@ -78,9 +75,8 @@ class ProcessODSServiceSpec
   implicit val scheme: String = "testScheme"
   implicit val fakeRequest: RequestWithOptionalEmpRefAndPAYE[AnyContent] = RequestWithOptionalEmpRefAndPAYE(FakeRequest(), None, PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, None, mockAppConfig))
 
-  def buildProcessODSService(checkODSFileTypeResult: Boolean = true, sheetErrors: ListBuffer[SheetErrors]): ProcessODSService = {
-    new ProcessODSService(mockUploadedFileUtil, mockSessionCacheRepo, mockErsUtil){
-      when(mockUploadedFileUtil.checkODSFileType(anyString())).thenReturn(checkODSFileTypeResult)
+  def buildProcessODSService(sheetErrors: ListBuffer[SheetErrors]): ProcessODSService = {
+    new ProcessODSService(mockSessionCacheRepo, mockErsUtil){
       override def validateOdsFile(fileName: String, processor: InputStream, scheme: String): ListBuffer[SheetErrors] = sheetErrors
     }
   }
@@ -98,8 +94,8 @@ class ProcessODSServiceSpec
       when(mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.ERROR_LIST_CACHE), any())(any(), any()))
         .thenReturn(Future.successful(("", "")))
 
-      val output: Future[Try[Boolean]] = buildProcessODSService(checkODSFileTypeResult = true, sheetErrors)
-        .performODSUpload(10, "testFileName", mockInputStream, "csop")
+      val output: Future[Try[Boolean]] = buildProcessODSService(sheetErrors)
+        .performODSUpload(10, "testFileName.ods", mockInputStream, "csop")
       output.futureValue shouldBe Success(false)
     }
 
@@ -108,8 +104,8 @@ class ProcessODSServiceSpec
         .thenReturn(Future.successful(("", "")))
 
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
-      val output: Future[Try[Boolean]] = buildProcessODSService(checkODSFileTypeResult = true, emptyErrors)
-        .performODSUpload(10, "testFileName", mockInputStream, "csop")
+      val output: Future[Try[Boolean]] = buildProcessODSService(emptyErrors)
+        .performODSUpload(10, "testFileName.ods", mockInputStream, "csop")
 
       output.futureValue shouldBe Success(true)
     }
@@ -119,8 +115,8 @@ class ProcessODSServiceSpec
         .thenReturn(Future.failed(new NoSuchElementException))
 
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
-      val result: Try[Boolean] = buildProcessODSService(checkODSFileTypeResult = true, emptyErrors)
-        .performODSUpload(10, "testFileName", mockInputStream, "csop")
+      val result: Try[Boolean] = buildProcessODSService(emptyErrors)
+        .performODSUpload(10, "testFileName.ods", mockInputStream, "csop")
         .futureValue
 
       assert(result.isFailure)
@@ -133,7 +129,7 @@ class ProcessODSServiceSpec
         "You chose to check an ODS file, but testFileName isn’t an ODS file.")
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
 
-      buildProcessODSService(checkODSFileTypeResult = false, emptyErrors)
+      buildProcessODSService(emptyErrors)
         .performODSUpload(10, "testFileName", mockInputStream, "csop").futureValue shouldBe Failure(exception)
     }
   }
@@ -142,43 +138,14 @@ class ProcessODSServiceSpec
 
     "return an exception when the file has the incorrect type" in {
 
-      val processODSService: ProcessODSService = new ProcessODSService(mockUploadedFileUtil, mockSessionCacheRepo, mockErsUtil)
+      val processODSService: ProcessODSService = new ProcessODSService(mockSessionCacheRepo, mockErsUtil)
       val exceptionResult: ERSFileProcessingException = intercept[ERSFileProcessingException](processODSService.checkFileType("testFileName"))
       exceptionResult.message shouldBe "You chose to check an ODS file, but testFileName isn’t an ODS file."
     }
 
     "return Unit if the file is an ODS file" in {
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
-      buildProcessODSService(checkODSFileTypeResult = true, emptyErrors).checkFileType("testFileName.ods") shouldBe () // Should not throw exception if file is an ODS file
-    }
-  }
-
-  "calling getSheetErrors" should {
-    val schemeErrors = new ListBuffer[SheetErrors]()
-
-    val list1 = ValidationError(Cell("A", 1, "abc"), "001", "error.1", "This entry must be 'yes' or 'no'.")
-    val list2 = ValidationError(Cell("B", 1, "abc"), "001", "error.1", "This entry must be 'yes' or 'no'.")
-    val list3 = ValidationError(Cell("C", 1, "abc"), "001", "error.1", "This entry must be 'yes' or 'no'.")
-
-    val sheetErrors3 = new ListBuffer[ValidationError]()
-    sheetErrors3 += list1
-    sheetErrors3 += list2
-    sheetErrors3 += list3
-    schemeErrors += SheetErrors("sheet_tab_1", sheetErrors3)
-    schemeErrors += SheetErrors("sheet_tab_2", sheetErrors3)
-
-    val sheetErrors1 = new ListBuffer[ValidationError]()
-    sheetErrors1 += list1
-    schemeErrors += SheetErrors("sheet_tab_3", sheetErrors1)
-
-    "return up to the first 100 errors of each sheet" in {
-
-      val processODSService: ProcessODSService = buildProcessODSService(checkODSFileTypeResult = true, schemeErrors)
-      val result = processODSService.getSheetErrors(schemeErrors, 100)
-
-      result.head.errors.size shouldBe 3
-      result(1).errors.size shouldBe 3
-      result(2).errors.size shouldBe 1
+      buildProcessODSService(emptyErrors).checkFileType("testFileName.ods") shouldBe () // Should not throw exception if file is an ODS file
     }
   }
 

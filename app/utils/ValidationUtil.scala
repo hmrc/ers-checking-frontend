@@ -16,14 +16,19 @@
 
 package utils
 
-object UploadedFileUtil {
+import uk.gov.hmrc.validator.models.ods.SheetErrors
 
-  def checkODSFileType(fileName: String): Boolean = {
-    val delimiter: Char = '.'
-    val stringTokens: Array[String] = fileName.split(delimiter)
-    stringTokens(stringTokens.length - 1).toLowerCase match {
-      case "ods" => true
-      case _ => false
+import scala.collection.mutable.ListBuffer
+
+object ValidationUtil {
+
+  def isValid(schemeErrors: ListBuffer[SheetErrors]): Boolean = {
+    schemeErrors.map(_.errors.isEmpty).forall(identity)
+  }
+
+  def getSheetErrors(schemeErrors: ListBuffer[SheetErrors], errorCount: Int): ListBuffer[SheetErrors] = {
+    schemeErrors.map { schemeError =>
+      SheetErrors(schemeError.sheetName, schemeError.errors.take(errorCount))
     }
   }
 

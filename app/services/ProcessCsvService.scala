@@ -50,7 +50,7 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
                                  )(implicit executionContext: ExecutionContext,
                                    actorSystem: ActorSystem) extends Logging {
 
-  val uploadCsvSizeLimit: Int = appConfig.upscanFileSizeLimit
+  private val uploadCsvSizeLimit: Int = appConfig.upscanFileSizeLimit
 
   def extractEntityData(response: HttpResponse): Source[ByteString, _] =
     response match {
@@ -82,10 +82,9 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
       val successUpload: UploadedSuccessfully = file.uploadStatus.asInstanceOf[UploadedSuccessfully]
       val eitherFileNameOrError: Either[Throwable, String] = checkFileType(successUpload.name)
       eitherFileNameOrError match {
-        case Left(value: Throwable) => {
+        case Left(fileProcessingException: ERSFileProcessingException) =>
           logger.info("[ProcessCsvService][processFiles] Failed to remove extension from file correctly")
-          throw value
-        } // TODO: COME BACK TO
+          throw fileProcessingException
         case Right(successfulUploadName: String) =>
           val futureListOfErrors: Future[Seq[Either[Throwable, RowValidationResults]]] =
             extractBodyOfRequest(
@@ -115,31 +114,36 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
 
   def getRowsWithNumbers(listOfErrors: Seq[Either[Throwable, RowValidationResults]], name: String)(
     implicit messages: Messages): Either[Throwable, Seq[ValidationError]] = {
-    listOfErrors.traverse(identity).flatMap { validationResults: Seq[RowValidationResults] =>
-      val allRowsEmpty: Boolean = validationResults.forall(_.rowWasEmpty)
-      if (validationResults.isEmpty || allRowsEmpty){
-        Left(
-          ERSFileProcessingException(
-            "ers_check_csv_file.noData",
-            messages("ers_check_csv_file.noData", name),
-            needsExtendedInstructions = true,
-            optionalParams = Seq(name)
-          )
-        )
-      } else {
-        val validationErrors: Seq[ValidationError] = validationResults
-          .flatMap(
-            _.validationErrors.map((error: ValidationError) => {
-              // TODO: Should the conf lib just return this with the correct row?
-              val updatedCell: Cell = error.cell.copy(
-                row = error.cell.row + 1
-              )
-              error.copy(cell = updatedCell)
-            }
+    // NOTE: This traverse lets us go from a Seq[Either[Throwable, RowValidationResults]] to an Either[Throwable, Seq[RowValidationResults]]
+    listOfErrors
+      .traverse(identity)
+      .flatMap { validationResults: Seq[RowValidationResults] =>
+        val allRowsEmpty: Boolean = validationResults.forall(_.rowWasEmpty)
+        // The file is empty if:
+        // validationResults.isEmpty -> there was no data to validate
+        // allRowsEmpty -> there were rows in the csv but they contain no data to validate
+        if (validationResults.isEmpty || allRowsEmpty){
+          Left(
+            ERSFileProcessingException(
+              "ers_check_csv_file.noData",
+              messages("ers_check_csv_file.noData", name),
+              needsExtendedInstructions = true,
+              optionalParams = Seq(name)
             )
           )
-        Right(validationErrors.take(appConfig.errorCount))
-      }
+        } else {
+          val validationErrors: Seq[ValidationError] = validationResults
+            .flatMap(
+              _.validationErrors.map((error: ValidationError) => {
+                val updatedCell: Cell = error.cell.copy(
+                  row = error.cell.row + 1 // The original row number starts at 0, to map to the row in the csv we need to add 1
+                )
+                error.copy(cell = updatedCell)
+              }
+              )
+            )
+          Right(validationErrors.take(appConfig.errorCount))
+        }
     }
   }
 

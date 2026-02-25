@@ -75,11 +75,11 @@ class UploadController @Inject()(authAction: AuthAction,
     }
   }
 
-  private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, _] =
+  private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, _] = {
     Source
       .single(HttpRequest(uri = downloadUrl))
       .mapAsync(parallelism = 1)(makeRequest)
-
+  }
 
   private[controllers] def makeRequest(request: HttpRequest): Future[HttpResponse] = Http()(actorSystem).singleRequest(request)
 
@@ -124,15 +124,11 @@ class UploadController @Inject()(authAction: AuthAction,
             val validationResults = processCsvService.processFiles(callback, scheme, readFileCsv)
             finaliseRequestAndRedirect(validationResults)
           }
-      } recover {
-        case e: ValidatorException =>
-          logger.info(s"[UploadController][uploadCSVFile] Encountered validation exception: ${e.getMessage}")
-          getGlobalErrorPage
       }
   }
 
   def finaliseRequestAndRedirect(validationResults: List[Future[Either[Throwable, Boolean]]])(
-    implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Result] = {
+    implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Result] =
     Future.sequence(validationResults).flatMap {
       case noFailures if noFailures.forall(_.contains(true)) =>
         Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
@@ -144,7 +140,6 @@ class UploadController @Inject()(authAction: AuthAction,
         }
 
     }
-  }
 
   def uploadODSFile(scheme: String): Action[AnyContent] = authAction.async {
     implicit request =>
@@ -163,7 +158,7 @@ class UploadController @Inject()(authAction: AuthAction,
               logger.error(s"[UploadController][showuploadODSFile] failed in readFileOds for scheme : $scheme")
               Future.successful(err)
             },
-            (processor: InputStream) => {
+            processor => {
               val result = processODSService.performODSUpload(appConfig.errorCount, file.get.name, processor, scheme)(request, messages)
               result.flatMap[Result] {
                 case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))

@@ -16,28 +16,24 @@
 
 package utils
 
-import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import org.scalatestplus.mockito.MockitoSugar
+import utils.UploadedFileUtil.checkODSFileType
 
-class UploadedFileUtilSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar {
-
-  class TestUtil extends UploadedFileUtil
-  val uploadedFileUtil = new TestUtil
+class UploadedFileUtilSpec extends AnyWordSpecLike with Matchers {
 
   "UploadedFileUtil ODS" should {
 
     "return positively for an ods file" in {
-      uploadedFileUtil.checkODSFileType("abc.ods") shouldBe true
+      checkODSFileType("abc.ods") shouldBe true
     }
 
     "return positively for an ods file with extension in upper case" in {
-      uploadedFileUtil.checkODSFileType("abc.ODS") shouldBe true
+      checkODSFileType("abc.ODS") shouldBe true
     }
 
     "return negatively for other files" in {
-      uploadedFileUtil.checkODSFileType("abc.doc") shouldBe false
+      checkODSFileType("abc.doc") shouldBe false
     }
 
   }

@@ -17,7 +17,6 @@
 package services
 
 import controllers.auth.RequestWithOptionalEmpRefAndPAYE
-import models.upscan.UpscanCsvFilesCallback
 
 import javax.inject.{Inject, Singleton}
 import models.ERSFileProcessingException
@@ -26,7 +25,7 @@ import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Request}
 import repository.ErsCheckingFrontendSessionCacheRepository
 import uk.gov.hmrc.validator.models.ValidatorException
-import utils.{ERSUtil, UploadedFileUtil}
+import utils.{ERSUtil, ValidationUtil}
 
 import java.io.InputStream
 import scala.collection.mutable.ListBuffer
@@ -36,10 +35,10 @@ import models.SheetErrors.format
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 import uk.gov.hmrc.validator.ods.OdsValidator
 import uk.gov.hmrc.validator.validation.allTemplates
+import utils.UploadedFileUtil.checkODSFileType
 
 @Singleton
-class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
-                                  sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
+class ProcessODSService @Inject()(sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
                                   ersUtil: ERSUtil
                                  )(implicit ec: ExecutionContext) extends Logging {
 
@@ -53,7 +52,7 @@ class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
           throw e
       }
       val sheetErrors: ListBuffer[SheetErrors] = validateOdsFile(fileName, processor, scheme)
-      val cacheSheetErrors: Future[Try[Boolean]] = processSheetErrors(sheetErrors, None, errorCount)
+      val cacheSheetErrors: Future[Try[Boolean]] = processSheetErrors(sheetErrors, errorCount)
       val result = for {
         _ <- cacheFileName
         v <- cacheSheetErrors
@@ -79,20 +78,18 @@ class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
   def validateOdsFile(fileName: String, processor: InputStream, scheme: String): ListBuffer[SheetErrors] =
     OdsValidator.validateOdsFile(allTemplates, processor, scheme, fileName)
 
-  // TODO: Can we remove the file argument?
-  def processSheetErrors(sheetErrors: ListBuffer[SheetErrors], file: Option[UpscanCsvFilesCallback] = None, errorCount: Int)
+  def processSheetErrors(sheetErrors: ListBuffer[SheetErrors], errorCount: Int)
                  (implicit request: Request[_]): Future[Try[Boolean]] = {
-    if (isValid(sheetErrors)) {
+    if (ValidationUtil.isValid(sheetErrors)) {
       Future.successful(Success(true))
     }
     else {
       val updatedErrorCount: Int = sheetErrors.map(_.errors.length).sum
-      val updatedErrorList = getSheetErrors(sheetErrors, errorCount)
-      val id = if (file.isDefined) file.get.uploadId else ""
+      val updatedErrorList = ValidationUtil.getSheetErrors(sheetErrors, errorCount)
 
       val result = for {
-        _ <- sessionCacheService.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}$id", updatedErrorCount)
-        _ <- sessionCacheService.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}$id", updatedErrorList)
+        _ <- sessionCacheService.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}", updatedErrorCount)
+        _ <- sessionCacheService.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}", updatedErrorList)
       } yield Success(false)
 
       result recover {
@@ -102,20 +99,11 @@ class ProcessODSService @Inject()(uploadedFileUtil: UploadedFileUtil,
   }
 
   def checkFileType(fileName: String)(implicit messages: Messages): Unit = {
-    if (!uploadedFileUtil.checkODSFileType(fileName)) {
+    if (!checkODSFileType(fileName)) {
       throw ERSFileProcessingException(
         messages("ers_check_file.file_type_error", fileName),
         messages("ers_check_file.file_type_error", fileName))
     }
   }
 
-  def isValid(schemeErrors: ListBuffer[SheetErrors]): Boolean = {
-    schemeErrors.map(_.errors.isEmpty).forall(identity)
-  }
-
-  def getSheetErrors(schemeErrors: ListBuffer[SheetErrors], errorCount: Int): ListBuffer[SheetErrors] = {
-    schemeErrors.map { schemeError =>
-      SheetErrors(schemeError.sheetName, schemeError.errors.take(errorCount))
-    }
-  }
 }
