@@ -22,7 +22,7 @@ import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse}
 import org.apache.pekko.stream.scaladsl.Source
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRefAndPAYE}
-import models.ERSFileProcessingException
+import models.{ERSFileProcessingException, CsvIncorrectSchemeException}
 import models.SheetErrors.format
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallbackList}
 import play.api.Logging
@@ -34,7 +34,7 @@ import services.{ProcessCsvService, ProcessODSService}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
-import uk.gov.hmrc.validator.models._
+import uk.gov.hmrc.validator.{models => validatorException}
 
 import java.io.InputStream
 import java.net.URL
@@ -200,31 +200,31 @@ class UploadController @Inject()(authAction: AuthAction,
         logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
         Future(getGlobalErrorPage)
-      case e: IncorrectSchemeException =>
+      case e: CsvIncorrectSchemeException =>
         val message = Messages("ers.exceptions.dataParser.incorrectSchemeType", withArticle(e.selectedSchemeType), withArticle(e.uploadedFileSchemeType), e.fileName)
         val optionalParams = Seq(withArticle(e.selectedSchemeType), withArticle(e.uploadedFileSchemeType), e.fileName)
         redirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = false)
-      case _: NoDataException =>
+      case _: validatorException.NoDataException =>
         redirectToFormatErrorsPage(
           Messages("ers.exceptions.dataParser.noData"),
           Seq.empty[String],
           needsExtendedInstructions = true
         )
-      case _: DataContainsAmpersandException =>
+      case _: validatorException.DataContainsAmpersandException =>
         redirectToFormatErrorsPage(
           Messages("ers.exceptions.dataParser.ampersand"),
           Seq.empty[String],
           needsExtendedInstructions = true
         )
-      case e: IncorrectHeaderException =>
+      case e: validatorException.IncorrectHeaderException =>
         val message = Messages("ers.exceptions.dataParser.incorrectHeader", e.sheetName, e.fileName)
         val optionalParams = Seq(e.sheetName, e.fileName)
         redirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
-      case e: IncorrectSheetNameException =>
+      case e: validatorException.IncorrectSheetNameException =>
         val message = Messages("ers.exceptions.dataParser.incorrectSheetName", e.sheetName, e.schemeName)
         val optionalParams = Seq(e.sheetName, e.schemeName)
         redirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
-      case e: ValidatorException =>
+      case e: validatorException.OdsValidatorException =>
         logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
         Future(getGlobalErrorPage)

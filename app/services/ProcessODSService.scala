@@ -24,7 +24,7 @@ import play.api.Logging
 import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Request}
 import repository.ErsCheckingFrontendSessionCacheRepository
-import uk.gov.hmrc.validator.models.ValidatorException
+import uk.gov.hmrc.validator.models.OdsValidatorException
 import utils.{ERSUtil, ValidationUtil}
 
 import java.io.InputStream
@@ -64,7 +64,7 @@ class ProcessODSService @Inject()(sessionCacheService: ErsCheckingFrontendSessio
       }
     }
     catch {
-      case validatorException: ValidatorException =>
+      case validatorException: OdsValidatorException =>
         logger.warn(s"[ProcessODSService][performODSUpload] ValidationException thrown trying to upload file - $validatorException")
         Future.successful(Failure(validatorException))
       case e: ERSFileProcessingException =>

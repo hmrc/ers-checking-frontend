@@ -20,7 +20,7 @@ import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.scaladsl.{Flow, Sink, Source}
 import config.ApplicationConfig
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
-import models.ERSFileProcessingException
+import models.{ERSFileProcessingException, CsvFailedToSetValidatorException, CsvIncorrectSchemeException}
 import models.SheetErrors.format
 import org.apache.commons.io.FilenameUtils
 import org.apache.pekko.http.scaladsl.model.HttpResponse
@@ -41,7 +41,8 @@ import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import cats.syntax.all._
-import uk.gov.hmrc.validator.validation.allTemplates
+import uk.gov.hmrc.validator.SheetInfo
+import uk.gov.hmrc.validator.validation.{ValidTemplateMap, allTemplates}
 
 @Singleton
 class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
@@ -62,6 +63,21 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
             notOkResponse.status.intValue))
     }
 
+    def getSheetInfo(
+      sheetName: String,
+      selectedSchemeName: String
+    ): Either[Throwable, SheetInfo] =
+      allTemplates.templateMap.get(sheetName) match {
+        case Some(sheetInfo: SheetInfo) =>
+          if (sheetInfo.schemeType.toLowerCase == selectedSchemeName.toLowerCase) {
+            Right(sheetInfo)
+          } else {
+            Left(CsvIncorrectSchemeException(selectedSchemeName.toUpperCase, sheetInfo.schemeType, sheetName))
+          }
+        case None                       =>
+          Left(CsvFailedToSetValidatorException(s"SheetName: $sheetName was not in template map"))
+      }
+
   def extractBodyOfRequest: Source[HttpResponse, _] => Source[Either[Throwable, List[ByteString]], _] =
     _.flatMapConcat(extractEntityData)
       .via(CsvParsing.lineScanner())
@@ -70,43 +86,40 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
         case e => Left(e)
       }
 
+  def validateCsv(
+                   source: Source[HttpResponse, _],
+                   sheetInfo: SheetInfo,
+                 ): Future[Seq[Either[Throwable, RowValidationResults]]] = {
+    extractBodyOfRequest(source)
+      .via(FlowOps.eitherFromFunction(CsvValidator.validateCsvRow(sheetInfo, _)))
+      .runWith(Sink.seq[Either[Throwable, RowValidationResults]])
+  }
 
   def processFiles(callback: Option[UpscanCsvFilesCallbackList],
                    scheme: String,
-                   source: String => Source[HttpResponse, _])
+                   downloadSourceFile: String => Source[HttpResponse, _])
                   (implicit request: Request[_], messages: Messages): List[Future[Either[Throwable, Boolean]]] = {
     logger.info(s"[ProcessCsvService][processFiles] callback $callback scheme: $scheme")
 
     callback.get.files map { file =>
-
       val successUpload: UploadedSuccessfully = file.uploadStatus.asInstanceOf[UploadedSuccessfully]
-      val eitherFileNameOrError: Either[Throwable, String] = checkFileType(successUpload.name)
-      eitherFileNameOrError match {
+      checkFileType(successUpload.name) match {
         case Left(fileProcessingException: ERSFileProcessingException) =>
           logger.info("[ProcessCsvService][processFiles] Failed to remove extension from file correctly")
           throw fileProcessingException
         case Right(successfulUploadName: String) =>
-          val futureListOfErrors: Future[Seq[Either[Throwable, RowValidationResults]]] =
-            extractBodyOfRequest(
-              source(successUpload.downloadUrl)
-            )
-              .via(
-                FlowOps.eitherFromFunction(
-                  CsvValidator
-                    .setValidatorAndValidateCsvRow(
-                      allTemplates,
-                      _,
-                      successfulUploadName,
-                      scheme.toUpperCase
-                    )
-                )
-              )
-              .runWith(Sink.seq[Either[Throwable, RowValidationResults]])
-          futureListOfErrors.map {
-            getRowsWithNumbers(_, successfulUploadName)(messages)
-          }.flatMap {
-            case Right(errorsFromRow: Seq[ValidationError]) => checkValidityOfRows(errorsFromRow, successfulUploadName, file)
-            case Left(exception: Throwable) => Future(Left(exception))
+          val maybeSheetInfo: Either[Throwable, SheetInfo] = getSheetInfo(successfulUploadName, scheme)
+          maybeSheetInfo match {
+            case Left(e: Throwable) => Future.successful(Left(e))
+            case Right(sheetInfo: SheetInfo) =>
+              val source: Source[HttpResponse, _] = downloadSourceFile(successUpload.downloadUrl)
+              validateCsv(source, sheetInfo)
+                .map {
+                  getRowsWithNumbers(_, successfulUploadName)(messages)
+                }.flatMap {
+                  case Right(errorsFromRow: Seq[ValidationError]) => checkValidityOfRows(errorsFromRow, successfulUploadName, file)
+                  case Left(exception: Throwable) => Future(Left(exception))
+                }
           }
       }
     }
