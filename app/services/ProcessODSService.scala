@@ -24,7 +24,6 @@ import play.api.Logging
 import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Request}
 import repository.ErsCheckingFrontendSessionCacheRepository
-import uk.gov.hmrc.validator.models.OdsValidatorException
 import utils.{ERSUtil, ValidationUtil}
 
 import java.io.InputStream
@@ -32,9 +31,9 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 import models.SheetErrors.format
+import uk.gov.hmrc.validator.allTemplates
 import uk.gov.hmrc.validator.models.ods.SheetErrors
-import uk.gov.hmrc.validator.ods.OdsValidator
-import uk.gov.hmrc.validator.validation.allTemplates
+import uk.gov.hmrc.validator.ods.{OdsValidator, OdsValidatorException}
 import utils.UploadedFileUtil.checkODSFileType
 
 @Singleton

@@ -34,7 +34,7 @@ import services.{ProcessCsvService, ProcessODSService}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
-import uk.gov.hmrc.validator.{models => validatorException}
+import uk.gov.hmrc.validator.ods._
 
 import java.io.InputStream
 import java.net.URL
@@ -204,27 +204,27 @@ class UploadController @Inject()(authAction: AuthAction,
         val message = Messages("ers.exceptions.dataParser.incorrectSchemeType", withArticle(e.selectedSchemeType), withArticle(e.uploadedFileSchemeType), e.fileName)
         val optionalParams = Seq(withArticle(e.selectedSchemeType), withArticle(e.uploadedFileSchemeType), e.fileName)
         redirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = false)
-      case _: validatorException.NoDataException =>
+      case _: NoDataException =>
         redirectToFormatErrorsPage(
           Messages("ers.exceptions.dataParser.noData"),
           Seq.empty[String],
           needsExtendedInstructions = true
         )
-      case _: validatorException.DataContainsAmpersandException =>
+      case _: DataContainsAmpersandException =>
         redirectToFormatErrorsPage(
           Messages("ers.exceptions.dataParser.ampersand"),
           Seq.empty[String],
           needsExtendedInstructions = true
         )
-      case e: validatorException.IncorrectHeaderException =>
+      case e: IncorrectHeaderException =>
         val message = Messages("ers.exceptions.dataParser.incorrectHeader", e.sheetName, e.fileName)
         val optionalParams = Seq(e.sheetName, e.fileName)
         redirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
-      case e: validatorException.IncorrectSheetNameException =>
+      case e: IncorrectSheetNameException =>
         val message = Messages("ers.exceptions.dataParser.incorrectSheetName", e.sheetName, e.schemeName)
         val optionalParams = Seq(e.sheetName, e.schemeName)
         redirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
-      case e: validatorException.OdsValidatorException =>
+      case e: OdsValidatorException =>
         logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
         Future(getGlobalErrorPage)
