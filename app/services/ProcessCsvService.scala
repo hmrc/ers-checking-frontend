@@ -20,7 +20,7 @@ import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.scaladsl.{Flow, Sink, Source}
 import config.ApplicationConfig
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
-import models.{ERSFileProcessingException, CsvFailedToSetValidatorException, CsvIncorrectSchemeException}
+import models.{CsvFailedToSetValidatorException, CsvIncorrectSchemeException, ERSFileProcessingException}
 import models.SheetErrors.format
 import org.apache.commons.io.FilenameUtils
 import org.apache.pekko.http.scaladsl.model.HttpResponse
@@ -41,8 +41,8 @@ import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import cats.syntax.all._
-import uk.gov.hmrc.validator.SheetInfo
-import uk.gov.hmrc.validator.validation.{ValidTemplateMap, allTemplates}
+import uk.gov.hmrc.validator.{DataEngine, SheetInfo}
+import uk.gov.hmrc.validator.allTemplates
 
 @Singleton
 class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
@@ -90,10 +90,20 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
                    source: Source[HttpResponse, _],
                    sheetInfo: SheetInfo,
                  ): Future[Seq[Either[Throwable, RowValidationResults]]] = {
+    val dataEngine: DataEngine = DataEngine(sheetInfo)
     extractBodyOfRequest(source)
-      .via(FlowOps.eitherFromFunction(CsvValidator.validateCsvRow(sheetInfo, _)))
+      .via(FlowOps.eitherFromFunction((rowData: Seq[ByteString]) => {
+        val dataForValidation: Seq[String] = formatDataToValidate(rowData, sheetInfo.headerRow.length)
+        CsvValidator.validateCsvRow(dataEngine, dataForValidation)
+      }))
       .runWith(Sink.seq[Either[Throwable, RowValidationResults]])
   }
+
+  def formatDataToValidate(rowData: Seq[ByteString], sheetColSize: Int): List[String] =
+    rowData
+      .take(sheetColSize)
+      .map(byteString => byteString.utf8String.trim)
+      .toList
 
   def processFiles(callback: Option[UpscanCsvFilesCallbackList],
                    scheme: String,

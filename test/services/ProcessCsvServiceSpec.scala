@@ -39,6 +39,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.DefaultMessagesControllerComponents
 import play.api.{Application, i18n}
 import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.validator.ERSTemplatesInfo
 import uk.gov.hmrc.validator.models.{Cell, ValidationError}
 import uk.gov.hmrc.validator.models.csv.RowValidationResults
 import uk.gov.hmrc.validator.models.ods.SheetErrors
@@ -254,4 +255,21 @@ class ProcessCsvServiceSpec
       result.value shouldBe false
     }
   }
+
+  "formatDataToValidate" must {
+    "truncate array depending on number of columns in given sheet" in {
+      val rowData: Seq[ByteString] = Seq.fill(50)("").map(ByteString(_))
+      val sheetColSize: Int    = 4
+      val result               = processCsvService.formatDataToValidate(rowData, sheetColSize)
+      result.length shouldBe 4
+    }
+
+    "pass the columns on if there's fewer than in given sheet" in {
+      val rowData: Seq[ByteString] = Seq(ByteString(""))
+      val sheetColSize: Int    = 4
+      val result               = processCsvService.formatDataToValidate(rowData, sheetColSize)
+      result.length shouldBe 1
+    }
+  }
+
 }
