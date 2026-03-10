@@ -18,7 +18,7 @@ package utils
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import utils.ContentUtil.{getErrorReportAndSchemeName, withArticle}
+import utils.ContentUtil.{ScheneNameWithShortenedVersion, getScheneNameWithShortenedVersion, withArticle}
 
 class ContentUtilSpec extends AnyWordSpecLike with Matchers {
 
@@ -40,7 +40,7 @@ class ContentUtilSpec extends AnyWordSpecLike with Matchers {
         TestCase("sIp", "ers_pdf_error_report.sip", "SIP")
       ).foreach((testCase: TestCase) =>
         s"passed a valid scheme type of any case: ${testCase.inputSchemeType}" in {
-          getErrorReportAndSchemeName(testCase.inputSchemeType) shouldBe (
+          getScheneNameWithShortenedVersion(testCase.inputSchemeType) shouldBe ScheneNameWithShortenedVersion(
             testCase.expectedOutputErrorReport,
             testCase.expectedOutputSchemeType
           )
@@ -55,7 +55,7 @@ class ContentUtilSpec extends AnyWordSpecLike with Matchers {
         TestCase("4", "ers_pdf_error_report.saye", "SAYE")
       ).foreach((testCase: TestCase) =>
         s"passed a number linked to the scheme type ${testCase.inputSchemeType}" in {
-          getErrorReportAndSchemeName(testCase.inputSchemeType) shouldBe (
+          getScheneNameWithShortenedVersion(testCase.inputSchemeType) shouldBe ScheneNameWithShortenedVersion(
             testCase.expectedOutputErrorReport,
             testCase.expectedOutputSchemeType
           )
@@ -69,7 +69,7 @@ class ContentUtilSpec extends AnyWordSpecLike with Matchers {
         TestCase("not a valid scheme", "", "")
       ).foreach((testCase: TestCase) =>
         s"passed a scheme type or number that isn't linked to a scheme type ${testCase.inputSchemeType}" in {
-          getErrorReportAndSchemeName(testCase.inputSchemeType) shouldBe (
+          getScheneNameWithShortenedVersion(testCase.inputSchemeType) shouldBe ScheneNameWithShortenedVersion(
             testCase.expectedOutputErrorReport,
             testCase.expectedOutputSchemeType
           )

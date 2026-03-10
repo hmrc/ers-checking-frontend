@@ -34,6 +34,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 import utils.{ContentUtil, ERSUtil}
 import uk.gov.hmrc.validator.models.ValidationError
+import utils.ContentUtil.ScheneNameWithShortenedVersion
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
@@ -77,9 +78,9 @@ class HtmlReportController @Inject()(authAction: AuthAction,
 
   def showHtmlErrorReportPage(isCsv: Boolean)(implicit request: Request[AnyRef], messages: Messages): Future[Result] = {
     sessionCacheService.fetchAll().map { all =>
-      val scheme: (String, String) = getEntry[String](all, ersUtil.SCHEME_CACHE) match {
-        case Some(name) => ContentUtil.getErrorReportAndSchemeName(name)
-        case _ => ("", "")
+      val errorReportAndSchemeName: ScheneNameWithShortenedVersion = getEntry[String](all, ersUtil.SCHEME_CACHE) match {
+        case Some(name) => ContentUtil.getScheneNameWithShortenedVersion(name)
+        case None => ScheneNameWithShortenedVersion("", "")
       }
       lazy val (errorsList, errorCountLong, totalErrorsCount) = if (isCsv) {
         val uploadIds: Seq[UploadId] = getEntry[UpscanCsvFilesCallbackList](all, ersUtil.CALLBACK_DATA_KEY_CSV)
@@ -92,8 +93,6 @@ class HtmlReportController @Inject()(authAction: AuthAction,
         val odsErrors = schemeErrors.flatMap(sheet => sheet.errors).length
         (schemeErrors, schemeErrorCount, odsErrors)
       }
-
-      val (schemeName, schemeNameShort) = scheme
 
       val sheetNameList = errorsList.map(ele => ele.sheetName)
       val sheetName = sheetNameList.headOption.getOrElse("SheetName Not Found")
@@ -110,8 +109,16 @@ class HtmlReportController @Inject()(authAction: AuthAction,
         .distinct
         .mkString(",")
 
-      auditEvents.fileProcessingErrorAudit(schemeName, sheetName, errorMsg)
-      Ok(html_error_report(schemeName, schemeNameShort, totalErrorsCount, errorCountLong, errorsList.toSeq)(request, messages, appConfig))
+      auditEvents.fileProcessingErrorAudit(errorReportAndSchemeName.schemeName, sheetName, errorMsg)
+      Ok(
+        html_error_report(
+          errorReportAndSchemeName.schemeName,
+          errorReportAndSchemeName.shortenedSchemeName,
+          totalErrorsCount,
+          errorCountLong,
+          errorsList.toSeq
+        )(request, messages, appConfig)
+      )
     } recover {
       case e: NoSuchElementException =>
         auditEvents.auditRunTimeError(e, "Failed to get values ", "")

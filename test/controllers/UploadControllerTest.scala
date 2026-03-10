@@ -41,7 +41,6 @@ import views.html.global_error
 
 import java.io.{ByteArrayInputStream, InputStream}
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) with AnyWordSpecLike with Matchers
   with OptionValues with ErsTestHelper with GuiceOneAppPerSuite with Injecting with ScalaFutures {
@@ -57,7 +56,7 @@ class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
   val mockProcessODSService: ProcessODSService = mock[ProcessODSService]
   val mockProcessCsvService: ProcessCsvService = mock[ProcessCsvService]
-  val uploadedSuccessfully: Option[UploadedSuccessfully] = Some(UploadedSuccessfully("testName", "testDownloadUrl", noOfRows = Some(1)))
+  val uploadedSuccessfully: Option[UploadedSuccessfully] = Some(UploadedSuccessfully("testName.ods", "testDownloadUrl", noOfRows = Some(1)))
   val callbackList: Option[UpscanCsvFilesCallbackList] = {
     Some(UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId.generate, uploadedSuccessfully.get))))
   }
@@ -83,8 +82,8 @@ class UploadControllerTest extends TestKit(ActorSystem("UploadControllerTest")) 
                                                    )(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Either[Result, InputStream] =
         if (readFileOdsError) Left(InternalServerError("failed")) else mockStaxProcessor
 
-      when(mockProcessODSService.performODSUpload(any(), any(), any(), any())(any(), any()))
-        .thenReturn(if (processFile) Future.successful(Success(uploadRes)) else Future.successful(Failure(ERSFileProcessingException("", ""))))
+      when(mockProcessODSService.performODSUpload(any(), any(), any(), any())(any()))
+        .thenReturn(if (processFile) Future.successful(Right(uploadRes)) else Future.successful(Left(ERSFileProcessingException("", ""))))
 
       when(mockSessionCacheRepo.cache(refEq(mockErsUtil.FORMAT_ERROR_CACHE), anyString())(any(), any()))
         .thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))

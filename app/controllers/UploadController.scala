@@ -44,7 +44,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 import utils.ContentUtil.withArticle
 import utils.ERSUtil
+import utils.UploadedFileUtil.checkODSFileType
 
+import scala.concurrent.impl.Promise
 import scala.util.{Failure, Success}
 
 @Singleton
@@ -153,20 +155,36 @@ class UploadController @Inject()(authAction: AuthAction,
       if (clearedSuccessfully) {
         //These .get's are safe because the UploadedSuccessfully model is already validated as existing in the UpscanController
         sessionCacheService.fetch[UploadedSuccessfully](ersUtil.CALLBACK_DATA_KEY).flatMap { file =>
-          readFileOds(file.get.downloadUrl).fold(
-            err => {
-              logger.error(s"[UploadController][showuploadODSFile] failed in readFileOds for scheme : $scheme")
-              Future.successful(err)
-            },
-            processor => {
-              val result = processODSService.performODSUpload(appConfig.errorCount, file.get.name, processor, scheme)(request, messages)
-              result.flatMap[Result] {
-                case Success(true) => Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
-                case Success(false) => Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(false)))
-                case Failure(t) => handleException(t)
-              }
-            }
-          )
+          val fileName: String = file.get.name
+          if (checkODSFileType(fileName)) {
+            readFileOds(file.get.downloadUrl).fold(
+              err => {
+                logger.error(s"[UploadController][showuploadODSFile] failed in readFileOds for scheme : $scheme")
+                Future.successful(err)
+              },
+              processor => {
+                val fileName: String = file.get.name
+                  processODSService
+                    .performODSUpload(appConfig.errorCount, fileName, processor, scheme)(request)
+                    .flatMap {
+                      case Right(fileIsValid: Boolean) =>
+                        if (fileIsValid) {
+                          Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
+                        } else {
+                          Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(false)))
+                        }
+                      case Left(e: Exception) => handleException(e)
+                    }
+                }
+            )
+          } else {
+            val exception: ERSFileProcessingException = ERSFileProcessingException(
+              messages("ers_check_file.file_type_error", fileName),
+              messages("ers_check_file.file_type_error", fileName)
+            )
+            logger.error(s"[showuploadODSFile]] Unable to save File Name. Error: ${exception.getMessage}")
+            handleException(exception)
+          }
         }
       } else {
         logger.error(s"[UploadController][showuploadODSFile] failed for clearErrorCache scheme : $scheme")

@@ -31,7 +31,7 @@ import services.UpscanService
 import services.audit.AuditEvents
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import utils.ContentUtil.getErrorReportAndSchemeName
+import utils.ContentUtil.getScheneNameWithShortenedVersion
 import utils._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -204,10 +204,11 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
       errorParams <- sessionCacheService.fetchAndGetEntry[Seq[String]](ersUtil.FORMAT_ERROR_CACHE_PARAMS)
     } yield {
       auditEvents.fileProcessingErrorAudit(fileType, schemeName, errorMsg)
+      val scheneNameWithShortenedVersion = getScheneNameWithShortenedVersion(schemeName)
       Ok(format_errors(
         fileType,
-        getErrorReportAndSchemeName(schemeName)._1,
-        getErrorReportAndSchemeName(schemeName)._2,
+        scheneNameWithShortenedVersion.schemeName,
+        scheneNameWithShortenedVersion.shortenedSchemeName,
         errorMsg,
         errorParams,
         extendedInstructions))

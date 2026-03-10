@@ -21,88 +21,80 @@ import controllers.auth.RequestWithOptionalEmpRefAndPAYE
 import javax.inject.{Inject, Singleton}
 import models.ERSFileProcessingException
 import play.api.Logging
-import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Request}
 import repository.ErsCheckingFrontendSessionCacheRepository
-import utils.{ERSUtil, ValidationUtil}
+import utils.ERSUtil
 
 import java.io.InputStream
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
 import models.SheetErrors.format
 import uk.gov.hmrc.validator.SchemeVersion.All
 import uk.gov.hmrc.validator.ValidatorException
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 import uk.gov.hmrc.validator.ods.OdsValidator
-import utils.UploadedFileUtil.checkODSFileType
 
 @Singleton
 class ProcessODSService @Inject()(sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
                                   ersUtil: ERSUtil
                                  )(implicit ec: ExecutionContext) extends Logging {
 
-  def performODSUpload(errorCount: Int, fileName: String, processor: InputStream, scheme: String)
-                      (implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], messages: Messages): Future[Try[Boolean]] = {
-    try {
-      checkFileType(fileName)
-      val cacheFileName = sessionCacheService.cache[String](ersUtil.FILE_NAME_CACHE, fileName).recover {
-        case e: Exception =>
-          logger.error("[ProcessODSService][performODSUpload] Unable to save File Name. Error: " + e.getMessage)
-          throw e
-      }
-      val sheetErrors: ListBuffer[SheetErrors] = validateOdsFile(fileName, processor, scheme)
-      val cacheSheetErrors: Future[Try[Boolean]] = processSheetErrors(sheetErrors, errorCount)
-      val result = for {
-        _ <- cacheFileName
-        v <- cacheSheetErrors
-      } yield {
-        v
-      }
-      result recover {
-        case ex: Exception => Failure(ex)
-      }
-    }
-    catch {
-      case validatorException: ValidatorException =>
-        logger.warn(s"[ProcessODSService][performODSUpload] ValidationException thrown trying to upload file - $validatorException")
-        Future.successful(Failure(validatorException))
-      case e: ERSFileProcessingException =>
-        logger.warn(s"[ProcessODSService][performODSUpload] ERSFileProcessingException thrown trying to upload file - $e")
-        Future.successful(Failure(e))
-      case e: javax.xml.stream.XMLStreamException =>
-        logger.warn(s"[ProcessODSService][performODSUpload] XMLStreamException - $e")
-        Future.successful(Failure(e))
-    }
-  }
   def validateOdsFile(fileName: String, processor: InputStream, scheme: String): ListBuffer[SheetErrors] =
     OdsValidator.validateOdsFile(All, processor, scheme, fileName)
 
+  def performODSUpload(errorCount: Int, fileName: String, processor: InputStream, scheme: String)
+                      (implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Either[Exception, Boolean]] = {
+    for {
+      _ <- sessionCacheService.cache[String](ersUtil.FILE_NAME_CACHE, fileName)
+      sheetErrors: ListBuffer[SheetErrors] = validateOdsFile(fileName, processor, scheme)
+      result: Either[Exception, Boolean] <- processSheetErrors(sheetErrors, errorCount)
+    } yield result
+  }.recover{
+    case noSuchElementException: NoSuchElementException =>
+      logger.warn(s"[ProcessODSService][performODSUpload] Encountered NoSuchElementException - $noSuchElementException")
+      Left(noSuchElementException)
+    case validatorException: ValidatorException =>
+      logger.warn(s"[ProcessODSService][performODSUpload] ValidationException thrown trying to upload file - $validatorException")
+      Left(validatorException)
+    case e: ERSFileProcessingException =>
+      logger.warn(s"[ProcessODSService][performODSUpload] ERSFileProcessingException thrown trying to upload file - $e")
+      Left(e)
+    case e: javax.xml.stream.XMLStreamException =>
+      logger.warn(s"[ProcessODSService][performODSUpload] XMLStreamException - $e")
+      Left(e)
+  }
+
   def processSheetErrors(sheetErrors: ListBuffer[SheetErrors], errorCount: Int)
-                 (implicit request: Request[_]): Future[Try[Boolean]] = {
-    if (ValidationUtil.isValid(sheetErrors)) {
-      Future.successful(Success(true))
+                 (implicit request: Request[_]): Future[Either[Exception, Boolean]] = {
+    if (ProcessODSService.isValid(sheetErrors)) {
+      Future.successful(Right(true))
     }
     else {
       val updatedErrorCount: Int = sheetErrors.map(_.errors.length).sum
-      val updatedErrorList = ValidationUtil.getSheetErrors(sheetErrors, errorCount)
+      val updatedErrorList = ProcessODSService.getSheetErrors(sheetErrors, errorCount)
 
       val result = for {
         _ <- sessionCacheService.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}", updatedErrorCount)
         _ <- sessionCacheService.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}", updatedErrorList)
-      } yield Success(false)
+      } yield Right(false)
 
       result recover {
-        case ex: Exception => Failure(ex)
+        case ex: Exception => Left(ex)
       }
     }
   }
 
-  def checkFileType(fileName: String)(implicit messages: Messages): Unit = {
-    if (!checkODSFileType(fileName)) {
-      throw ERSFileProcessingException(
-        messages("ers_check_file.file_type_error", fileName),
-        messages("ers_check_file.file_type_error", fileName))
+}
+
+object ProcessODSService {
+
+  def isValid(schemeErrors: ListBuffer[SheetErrors]): Boolean = {
+    schemeErrors.map(_.errors.isEmpty).forall(identity)
+  }
+
+  def getSheetErrors(schemeErrors: ListBuffer[SheetErrors], errorCount: Int): ListBuffer[SheetErrors] = {
+    schemeErrors.map { schemeError =>
+      SheetErrors(schemeError.sheetName, schemeError.errors.take(errorCount))
     }
   }
 

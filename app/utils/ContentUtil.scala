@@ -18,14 +18,16 @@ package utils
 
 object ContentUtil {
 
-  def getErrorReportAndSchemeName(schemeType: String) : (String,String) = {
+  case class ScheneNameWithShortenedVersion(schemeName: String, shortenedSchemeName: String)
+
+  def getScheneNameWithShortenedVersion(schemeType: String): ScheneNameWithShortenedVersion = {
     schemeType.toLowerCase match {
-      case "csop" | "1" => ("ers_pdf_error_report.csop", "CSOP")
-      case "emi" | "2" => ("ers_pdf_error_report.emi", "EMI")
-      case "saye" | "4" => ("ers_pdf_error_report.saye", "SAYE")
-      case "sip" | "5" => ("ers_pdf_error_report.sip", "SIP")
-      case "other" | "3" => ("ers_pdf_error_report.other", "OTHER")
-      case _ => ("","")
+      case "csop" | "1" => ScheneNameWithShortenedVersion("ers_pdf_error_report.csop", "CSOP")
+      case "emi" | "2" => ScheneNameWithShortenedVersion("ers_pdf_error_report.emi", "EMI")
+      case "saye" | "4" => ScheneNameWithShortenedVersion("ers_pdf_error_report.saye", "SAYE")
+      case "sip" | "5" => ScheneNameWithShortenedVersion("ers_pdf_error_report.sip", "SIP")
+      case "other" | "3" => ScheneNameWithShortenedVersion("ers_pdf_error_report.other", "OTHER")
+      case _ => ScheneNameWithShortenedVersion("","")
     }
   }
 

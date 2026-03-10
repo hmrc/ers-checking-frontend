@@ -16,7 +16,6 @@
 
 package controllers
 
-import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes}
 import org.apache.pekko.stream.scaladsl.{Sink, Source}
