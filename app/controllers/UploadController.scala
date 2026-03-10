@@ -22,7 +22,7 @@ import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse}
 import org.apache.pekko.stream.scaladsl.Source
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRefAndPAYE}
-import models.{ERSFileProcessingException, CsvIncorrectSchemeException}
+import models.ERSFileProcessingException
 import models.SheetErrors.format
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallbackList}
 import play.api.Logging
@@ -33,8 +33,7 @@ import repository.ErsCheckingFrontendSessionCacheRepository
 import services.{ProcessCsvService, ProcessODSService}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import utils.ERSUtil
-import uk.gov.hmrc.validator.ods._
+import uk.gov.hmrc.validator.{DataContainsAmpersandException, IncorrectHeaderException, IncorrectSchemeException, IncorrectSheetNameException, NoDataException, ValidatorException}
 
 import java.io.InputStream
 import java.net.URL
@@ -44,6 +43,7 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 import utils.ContentUtil.withArticle
+import utils.ERSUtil
 
 import scala.util.{Failure, Success}
 
@@ -200,9 +200,11 @@ class UploadController @Inject()(authAction: AuthAction,
         logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
         Future(getGlobalErrorPage)
-      case e: CsvIncorrectSchemeException =>
-        val message = Messages("ers.exceptions.dataParser.incorrectSchemeType", withArticle(e.selectedSchemeType), withArticle(e.uploadedFileSchemeType), e.fileName)
-        val optionalParams = Seq(withArticle(e.selectedSchemeType), withArticle(e.uploadedFileSchemeType), e.fileName)
+      case e: IncorrectSchemeException =>
+        val selectedSchemeTypeWithArticle: String = withArticle(e.selectedSchemeType.toUpperCase())
+        val uploadedFileSchemeTypeWithArticle: String = withArticle(e.uploadedFileSchemeType.toUpperCase())
+        val message = Messages("ers.exceptions.dataParser.incorrectSchemeType", selectedSchemeTypeWithArticle, uploadedFileSchemeTypeWithArticle, e.fileName)
+        val optionalParams = Seq(selectedSchemeTypeWithArticle, uploadedFileSchemeTypeWithArticle, e.fileName)
         redirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = false)
       case _: NoDataException =>
         redirectToFormatErrorsPage(
@@ -224,7 +226,7 @@ class UploadController @Inject()(authAction: AuthAction,
         val message = Messages("ers.exceptions.dataParser.incorrectSheetName", e.sheetName, e.schemeName)
         val optionalParams = Seq(e.sheetName, e.schemeName)
         redirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
-      case e: OdsValidatorException =>
+      case e: ValidatorException =>
         logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
         Future(getGlobalErrorPage)

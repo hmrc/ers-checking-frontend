@@ -31,9 +31,10 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 import models.SheetErrors.format
-import uk.gov.hmrc.validator.allTemplates
+import uk.gov.hmrc.validator.SchemeVersion.All
+import uk.gov.hmrc.validator.ValidatorException
 import uk.gov.hmrc.validator.models.ods.SheetErrors
-import uk.gov.hmrc.validator.ods.{OdsValidator, OdsValidatorException}
+import uk.gov.hmrc.validator.ods.OdsValidator
 import utils.UploadedFileUtil.checkODSFileType
 
 @Singleton
@@ -63,7 +64,7 @@ class ProcessODSService @Inject()(sessionCacheService: ErsCheckingFrontendSessio
       }
     }
     catch {
-      case validatorException: OdsValidatorException =>
+      case validatorException: ValidatorException =>
         logger.warn(s"[ProcessODSService][performODSUpload] ValidationException thrown trying to upload file - $validatorException")
         Future.successful(Failure(validatorException))
       case e: ERSFileProcessingException =>
@@ -75,7 +76,7 @@ class ProcessODSService @Inject()(sessionCacheService: ErsCheckingFrontendSessio
     }
   }
   def validateOdsFile(fileName: String, processor: InputStream, scheme: String): ListBuffer[SheetErrors] =
-    OdsValidator.validateOdsFile(allTemplates, processor, scheme, fileName)
+    OdsValidator.validateOdsFile(All, processor, scheme, fileName)
 
   def processSheetErrors(sheetErrors: ListBuffer[SheetErrors], errorCount: Int)
                  (implicit request: Request[_]): Future[Try[Boolean]] = {

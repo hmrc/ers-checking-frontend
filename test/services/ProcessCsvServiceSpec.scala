@@ -39,7 +39,6 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.DefaultMessagesControllerComponents
 import play.api.{Application, i18n}
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.validator.ERSTemplatesInfo
 import uk.gov.hmrc.validator.models.{Cell, ValidationError}
 import uk.gov.hmrc.validator.models.csv.RowValidationResults
 import uk.gov.hmrc.validator.models.ods.SheetErrors
@@ -133,7 +132,7 @@ class ProcessCsvServiceSpec
       val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))))
       val data =
         "2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,test,123.12,12.1234,12.1234,no,yes,AB12345678,no\n"
-        
+
       val resultFuture = processCsvService.processFiles(Some(callback), "csop", returnStubSource(_, data))
 
       val result = resultFuture.map(_.futureValue)
@@ -156,10 +155,7 @@ class ProcessCsvServiceSpec
     "return a throwable when an error occurs during the file processing" in {
       val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("NOT A VALID SHEET NAME", "no", Some(1)))))
       val data = "2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no"
-
-      val exception: ERSFileProcessingException = intercept[ERSFileProcessingException] (
-        processCsvService.processFiles(Some(callback), "csop", returnStubSource(_, data)).head
-      )
+      val exception: Throwable = processCsvService.processFiles(Some(callback), "csop", returnStubSource(_, data)).head.futureValue.swap.value
       exception.getMessage shouldBe "You chose to check a CSV file, but NOT A VALID SHEET NAME isn’t a CSV file."
     }
   }
@@ -185,11 +181,11 @@ class ProcessCsvServiceSpec
   "getRowsWithNumbers" should {
 
     "return validation errors if there are no exceptions" in {
-      val errors = Seq(Right(RowValidationResults(List(
+      val errors = Seq(RowValidationResults(List(
         ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
         ValidationError(Cell("B", 0, "test"), "001", "error.1", "ers.upload.error.date"),
         ValidationError(Cell("C", 1, "test"), "001", "error.1", "ers.upload.error.date")
-      ))))
+      )))
       val result = processCsvService.getRowsWithNumbers(errors, "test.csv")
 
       result.isRight shouldBe true
@@ -203,24 +199,12 @@ class ProcessCsvServiceSpec
     }
 
     "return an exception if the file is empty" in {
-      val errors = Seq.empty[Either[Throwable, RowValidationResults]]
+      val errors = Seq.empty[RowValidationResults]
       val result = processCsvService.getRowsWithNumbers(errors, "test.csv")
       val value = result.left.toOption.get.asInstanceOf[ERSFileProcessingException]
 
       result.isLeft shouldBe true
       value.context shouldBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload test.csv as part of your annual return."
-    }
-
-    "return the earliest previous exception if one exists" in {
-      val errors = Seq(
-        Left(ERSFileProcessingException("test error", "b")),
-        Right(RowValidationResults(List(ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date")))),
-        Left(ERSFileProcessingException("a", "b"))
-      )
-      val result = processCsvService.getRowsWithNumbers(errors, "test.csv")
-
-      result.isLeft shouldBe true
-      result.left.value.getMessage shouldBe "test error"
     }
   }
 
@@ -253,22 +237,6 @@ class ProcessCsvServiceSpec
 
       result.isRight shouldBe true
       result.value shouldBe false
-    }
-  }
-
-  "formatDataToValidate" must {
-    "truncate array depending on number of columns in given sheet" in {
-      val rowData: Seq[ByteString] = Seq.fill(50)("").map(ByteString(_))
-      val sheetColSize: Int    = 4
-      val result               = processCsvService.formatDataToValidate(rowData, sheetColSize)
-      result.length shouldBe 4
-    }
-
-    "pass the columns on if there's fewer than in given sheet" in {
-      val rowData: Seq[ByteString] = Seq(ByteString(""))
-      val sheetColSize: Int    = 4
-      val result               = processCsvService.formatDataToValidate(rowData, sheetColSize)
-      result.length shouldBe 1
     }
   }
 

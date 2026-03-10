@@ -16,11 +16,12 @@
 
 package services
 
+import cats.implicits.toTraverseOps
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.scaladsl.{Flow, Sink, Source}
 import config.ApplicationConfig
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
-import models.{CsvFailedToSetValidatorException, CsvIncorrectSchemeException, ERSFileProcessingException}
+import models.ERSFileProcessingException
 import models.SheetErrors.format
 import org.apache.commons.io.FilenameUtils
 import org.apache.pekko.http.scaladsl.model.HttpResponse
@@ -40,9 +41,10 @@ import utils.ERSUtil
 import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
-import cats.syntax.all._
-import uk.gov.hmrc.validator.{DataEngine, SheetInfo}
-import uk.gov.hmrc.validator.allTemplates
+import uk.gov.hmrc.validator._
+import cats.data.EitherT
+
+import scala.util.{Failure, Success}
 
 @Singleton
 class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
@@ -52,6 +54,8 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
                                    actorSystem: ActorSystem) extends Logging {
 
   private val uploadCsvSizeLimit: Int = appConfig.upscanFileSizeLimit
+
+  implicit val futureMonad = cats.instances.future.catsStdInstancesForFuture(executionContext) // TODO: TIDY
 
   def extractEntityData(response: HttpResponse): Source[ByteString, _] =
     response match {
@@ -63,21 +67,6 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
             notOkResponse.status.intValue))
     }
 
-    def getSheetInfo(
-      sheetName: String,
-      selectedSchemeName: String
-    ): Either[Throwable, SheetInfo] =
-      allTemplates.templateMap.get(sheetName) match {
-        case Some(sheetInfo: SheetInfo) =>
-          if (sheetInfo.schemeType.toLowerCase == selectedSchemeName.toLowerCase) {
-            Right(sheetInfo)
-          } else {
-            Left(CsvIncorrectSchemeException(selectedSchemeName.toUpperCase, sheetInfo.schemeType, sheetName))
-          }
-        case None                       =>
-          Left(CsvFailedToSetValidatorException(s"SheetName: $sheetName was not in template map"))
-      }
-
   def extractBodyOfRequest: Source[HttpResponse, _] => Source[Either[Throwable, List[ByteString]], _] =
     _.flatMapConcat(extractEntityData)
       .via(CsvParsing.lineScanner())
@@ -88,87 +77,72 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
 
   def validateCsv(
                    source: Source[HttpResponse, _],
-                   sheetInfo: SheetInfo,
-                 ): Future[Seq[Either[Throwable, RowValidationResults]]] = {
-    val dataEngine: DataEngine = DataEngine(sheetInfo)
+                   dataEngine: DataEngine
+                 ): Future[Either[Throwable, Seq[RowValidationResults]]] =
     extractBodyOfRequest(source)
-      .via(FlowOps.eitherFromFunction((rowData: Seq[ByteString]) => {
-        val dataForValidation: Seq[String] = formatDataToValidate(rowData, sheetInfo.headerRow.length)
-        CsvValidator.validateCsvRow(dataEngine, dataForValidation)
-      }))
+      .via(FlowOps.eitherFromFunction(CsvValidator.validateCsvRow(dataEngine, _)))
       .runWith(Sink.seq[Either[Throwable, RowValidationResults]])
-  }
+      .map(_.traverse(identity))
 
-  def formatDataToValidate(rowData: Seq[ByteString], sheetColSize: Int): List[String] =
-    rowData
-      .take(sheetColSize)
-      .map(byteString => byteString.utf8String.trim)
-      .toList
+
+  def processFile(scheme: String, downloadSourceFile: String => Source[HttpResponse, _], file: UpscanCsvFilesCallback)
+                 (implicit request: Request[_], messages: Messages): Future[Either[Throwable, Boolean]] = {
+
+    val successUpload: UploadedSuccessfully = file.uploadStatus.asInstanceOf[UploadedSuccessfully]
+    val source: Source[HttpResponse, _] = downloadSourceFile(successUpload.downloadUrl)
+
+    (for {
+      sheetName           <- EitherT.fromEither[Future](checkFileType(successUpload.name))
+      _                   <- EitherT.fromEither[Future](ERSTemplatesInfo.findSheetWithinSchemeType(sheetName, scheme))
+      dataEngine          <- EitherT.fromEither(DataEngine(sheetName, SchemeVersion.All))
+      csvValidationResult <- EitherT(validateCsv(source, dataEngine))
+      rowsWithNumbers     <- EitherT.fromEither(getRowsWithNumbers(csvValidationResult, sheetName)(messages))
+      result              <- EitherT(checkValidityOfRows(rowsWithNumbers, sheetName, file))
+    } yield result).value
+  }
 
   def processFiles(callback: Option[UpscanCsvFilesCallbackList],
                    scheme: String,
                    downloadSourceFile: String => Source[HttpResponse, _])
                   (implicit request: Request[_], messages: Messages): List[Future[Either[Throwable, Boolean]]] = {
     logger.info(s"[ProcessCsvService][processFiles] callback $callback scheme: $scheme")
-
-    callback.get.files map { file =>
-      val successUpload: UploadedSuccessfully = file.uploadStatus.asInstanceOf[UploadedSuccessfully]
-      checkFileType(successUpload.name) match {
-        case Left(fileProcessingException: ERSFileProcessingException) =>
-          logger.info("[ProcessCsvService][processFiles] Failed to remove extension from file correctly")
-          throw fileProcessingException
-        case Right(successfulUploadName: String) =>
-          val maybeSheetInfo: Either[Throwable, SheetInfo] = getSheetInfo(successfulUploadName, scheme)
-          maybeSheetInfo match {
-            case Left(e: Throwable) => Future.successful(Left(e))
-            case Right(sheetInfo: SheetInfo) =>
-              val source: Source[HttpResponse, _] = downloadSourceFile(successUpload.downloadUrl)
-              validateCsv(source, sheetInfo)
-                .map {
-                  getRowsWithNumbers(_, successfulUploadName)(messages)
-                }.flatMap {
-                  case Right(errorsFromRow: Seq[ValidationError]) => checkValidityOfRows(errorsFromRow, successfulUploadName, file)
-                  case Left(exception: Throwable) => Future(Left(exception))
-                }
-          }
-      }
+    callback.get.files map { file: UpscanCsvFilesCallback =>
+      processFile(scheme = scheme, downloadSourceFile = downloadSourceFile, file = file)
     }
   }
 
-  def getRowsWithNumbers(listOfErrors: Seq[Either[Throwable, RowValidationResults]], name: String)(
+  def getRowsWithNumbers(validationResults: Seq[RowValidationResults], name: String)(
     implicit messages: Messages): Either[Throwable, Seq[ValidationError]] = {
-    // NOTE: This traverse lets us go from a Seq[Either[Throwable, RowValidationResults]] to an Either[Throwable, Seq[RowValidationResults]]
-    listOfErrors
-      .traverse(identity)
-      .flatMap { validationResults: Seq[RowValidationResults] =>
-        val allRowsEmpty: Boolean = validationResults.forall(_.rowWasEmpty)
-        // The file is empty if:
-        // validationResults.isEmpty -> there was no data to validate
-        // allRowsEmpty -> there were rows in the csv but they contain no data to validate
-        if (validationResults.isEmpty || allRowsEmpty){
-          Left(
-            ERSFileProcessingException(
-              "ers_check_csv_file.noData",
-              messages("ers_check_csv_file.noData", name),
-              needsExtendedInstructions = true,
-              optionalParams = Seq(name)
-            )
-          )
-        } else {
-          val validationErrors: Seq[ValidationError] = validationResults
-            .flatMap(
-              _.validationErrors.map((error: ValidationError) => {
-                val updatedCell: Cell = error.cell.copy(
-                  row = error.cell.row + 1 // The original row number starts at 0, to map to the row in the csv we need to add 1
-                )
-                error.copy(cell = updatedCell)
-              }
-              )
-            )
-          Right(validationErrors.take(appConfig.errorCount))
-        }
+    val allRowsEmpty: Boolean = validationResults.forall(_.rowWasEmpty)
+    if (validationResults.isEmpty || allRowsEmpty){
+      // TODO: CAN THIS BE HANDLED BY HANDLE EXCEPTION?
+      Left(
+        ERSFileProcessingException(
+          "ers_check_csv_file.noData",
+          messages("ers_check_csv_file.noData", name),
+          needsExtendedInstructions = true,
+          optionalParams = Seq(name)
+        )
+      )
+    } else {
+      Right(
+        updateValidationResultRowNumbers(validationResults)
+          .take(appConfig.errorCount)
+      )
     }
   }
+
+  def updateValidationResultRowNumbers(validationResults: Seq[RowValidationResults]): Seq[ValidationError] =
+    validationResults
+      .flatMap(
+        _.validationErrors.map((error: ValidationError) => {
+          val updatedCell: Cell = error.cell.copy(
+            row = error.cell.row + 1 // The original row number starts at 0, to map to the row in the csv we need to add 1
+          )
+          error.copy(cell = updatedCell)
+        }
+        )
+      )
 
   def checkValidityOfRows(listOfErrors: Seq[ValidationError], name: String, file: UpscanCsvFilesCallback)(
     implicit request: Request[_]): Future[Either[Throwable, Boolean]] = {
@@ -188,13 +162,14 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
     schemeErrors.copy(errors = schemeErrors.errors.take(appConfig.errorCount))
   }
 
-  def checkFileType(name: String)(implicit messages: Messages): Either[Throwable, String] = if (name.endsWith(".csv")) {
-    Right(FilenameUtils.removeExtension(name))
-  } else {
-    Left(ERSFileProcessingException(
-      Messages("ers_check_csv_file.file_type_error", name)(messages),
-      Messages("ers_check_csv_file.file_type_error", name)(messages)))
-  }
+  def checkFileType(name: String)(implicit messages: Messages): Either[Throwable, String] =
+    if (name.endsWith(".csv")) {
+      Right(FilenameUtils.removeExtension(name))
+    } else {
+      Left(ERSFileProcessingException(
+        Messages("ers_check_csv_file.file_type_error", name)(messages),
+        Messages("ers_check_csv_file.file_type_error", name)(messages)))
+    }
 
   private object FlowOps {
 
