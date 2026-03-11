@@ -78,7 +78,7 @@ class HtmlReportController @Inject()(authAction: AuthAction,
 
   def showHtmlErrorReportPage(isCsv: Boolean)(implicit request: Request[AnyRef], messages: Messages): Future[Result] = {
     sessionCacheService.fetchAll().map { all =>
-      val errorReportAndSchemeName: ScheneNameWithShortenedVersion = getEntry[String](all, ersUtil.SCHEME_CACHE) match {
+      val scheneNameWithShortenedVersion: ScheneNameWithShortenedVersion = getEntry[String](all, ersUtil.SCHEME_CACHE) match {
         case Some(name) => ContentUtil.getScheneNameWithShortenedVersion(name)
         case None => ScheneNameWithShortenedVersion("", "")
       }
@@ -109,11 +109,11 @@ class HtmlReportController @Inject()(authAction: AuthAction,
         .distinct
         .mkString(",")
 
-      auditEvents.fileProcessingErrorAudit(errorReportAndSchemeName.schemeName, sheetName, errorMsg)
+      auditEvents.fileProcessingErrorAudit(scheneNameWithShortenedVersion.schemeName, sheetName, errorMsg)
       Ok(
         html_error_report(
-          errorReportAndSchemeName.schemeName,
-          errorReportAndSchemeName.shortenedSchemeName,
+          scheneNameWithShortenedVersion.schemeName,
+          scheneNameWithShortenedVersion.shortenedSchemeName,
           totalErrorsCount,
           errorCountLong,
           errorsList.toSeq

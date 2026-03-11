@@ -19,7 +19,6 @@ package services
 import controllers.Fixtures
 import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import helpers.ErsTestHelper
-import models.ERSFileProcessingException
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -43,7 +42,6 @@ import uk.gov.hmrc.validator.models.ods.SheetErrors
 import java.io.InputStream
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
-import scala.util.Failure
 
 class ProcessODSServiceSpec
   extends AnyWordSpecLike

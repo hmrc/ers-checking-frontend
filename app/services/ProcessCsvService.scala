@@ -16,6 +16,7 @@
 
 package services
 
+import cats.{CoflatMap, Monad, MonadThrow}
 import cats.implicits.toTraverseOps
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.scaladsl.{Flow, Sink, Source}
@@ -44,8 +45,6 @@ import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.validator._
 import cats.data.EitherT
 
-import scala.util.{Failure, Success}
-
 @Singleton
 class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
                                   sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
@@ -55,7 +54,7 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
 
   private val uploadCsvSizeLimit: Int = appConfig.upscanFileSizeLimit
 
-  implicit val futureMonad = cats.instances.future.catsStdInstancesForFuture(executionContext) // TODO: TIDY
+  implicit val futureMonad: MonadThrow[Future] with CoflatMap[Future] with Monad[Future] = cats.instances.future.catsStdInstancesForFuture(executionContext)
 
   def extractEntityData(response: HttpResponse): Source[ByteString, _] =
     response match {

@@ -33,7 +33,7 @@ import repository.ErsCheckingFrontendSessionCacheRepository
 import services.{ProcessCsvService, ProcessODSService}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import uk.gov.hmrc.validator.{DataContainsAmpersandException, IncorrectHeaderException, IncorrectSchemeException, IncorrectSheetNameException, NoDataException, ValidatorException}
+import uk.gov.hmrc.validator
 
 import java.io.InputStream
 import java.net.URL
@@ -45,9 +45,6 @@ import uk.gov.hmrc.validator.models.ods.SheetErrors
 import utils.ContentUtil.withArticle
 import utils.ERSUtil
 import utils.UploadedFileUtil.checkODSFileType
-
-import scala.concurrent.impl.Promise
-import scala.util.{Failure, Success}
 
 @Singleton
 class UploadController @Inject()(authAction: AuthAction,
@@ -218,33 +215,33 @@ class UploadController @Inject()(authAction: AuthAction,
         logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
         Future(getGlobalErrorPage)
-      case e: IncorrectSchemeException =>
+      case e: validator.IncorrectSchemeException =>
         val selectedSchemeTypeWithArticle: String = withArticle(e.selectedSchemeType.toUpperCase())
         val uploadedFileSchemeTypeWithArticle: String = withArticle(e.uploadedFileSchemeType.toUpperCase())
         val message = Messages("ers.exceptions.dataParser.incorrectSchemeType", selectedSchemeTypeWithArticle, uploadedFileSchemeTypeWithArticle, e.fileName)
         val optionalParams = Seq(selectedSchemeTypeWithArticle, uploadedFileSchemeTypeWithArticle, e.fileName)
         updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = false)
-      case _: NoDataException =>
+      case _: validator.NoDataException =>
         updateCacheThenRedirectToFormatErrorsPage(
           Messages("ers.exceptions.dataParser.noData"),
           Seq.empty[String],
           needsExtendedInstructions = true
         )
-      case _: DataContainsAmpersandException =>
+      case _: validator.DataContainsAmpersandException =>
         updateCacheThenRedirectToFormatErrorsPage(
           Messages("ers.exceptions.dataParser.ampersand"),
           Seq.empty[String],
           needsExtendedInstructions = true
         )
-      case e: IncorrectHeaderException =>
+      case e: validator.IncorrectHeaderException =>
         val message = Messages("ers.exceptions.dataParser.incorrectHeader", e.sheetName, e.fileName)
         val optionalParams = Seq(e.sheetName, e.fileName)
         updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
-      case e: IncorrectSheetNameException =>
+      case e: validator.IncorrectSheetNameException =>
         val message = Messages("ers.exceptions.dataParser.incorrectSheetName", e.sheetName, e.schemeName)
         val optionalParams = Seq(e.sheetName, e.schemeName)
         updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
-      case e: ValidatorException =>
+      case e: validator.ValidatorException =>
         logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
         Future(getGlobalErrorPage)
