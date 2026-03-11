@@ -178,6 +178,36 @@ class ProcessCsvServiceSpec
     }
   }
 
+  "checkIfValidationResultsEmpty" should {
+
+    "return true if there is one RowValidationResults record which is empty" in {
+      val emptyValidationResults = Seq(
+        RowValidationResults(List.empty[ValidationError], rowWasEmpty = true)
+      )
+      assert(processCsvService.checkIfValidationResultsEmpty(emptyValidationResults))
+    }
+
+    "return true if there are multiple RowValidationResults record which are all empty" in {
+      val emptyValidationResults = Seq(
+        RowValidationResults(List.empty[ValidationError], rowWasEmpty = true),
+        RowValidationResults(List.empty[ValidationError], rowWasEmpty = true),
+        RowValidationResults(List.empty[ValidationError], rowWasEmpty = true),
+        RowValidationResults(List.empty[ValidationError], rowWasEmpty = true)
+      )
+      assert(processCsvService.checkIfValidationResultsEmpty(emptyValidationResults))
+    }
+
+    "return false if there are multiple RowValidationResults record with any which are not empty" in {
+      val emptyValidationResults = Seq(
+        RowValidationResults(List.empty[ValidationError], rowWasEmpty = true),
+        RowValidationResults(List(ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date")), rowWasEmpty = false),
+        RowValidationResults(List.empty[ValidationError], rowWasEmpty = true)
+      )
+      assert(!processCsvService.checkIfValidationResultsEmpty(emptyValidationResults))
+    }
+
+  }
+
   "getRowsWithNumbers" should {
 
     "return validation errors if there are no exceptions" in {
@@ -186,7 +216,7 @@ class ProcessCsvServiceSpec
         ValidationError(Cell("B", 0, "test"), "001", "error.1", "ers.upload.error.date"),
         ValidationError(Cell("C", 1, "test"), "001", "error.1", "ers.upload.error.date")
       )))
-      val result = processCsvService.getRowsWithNumbers(errors, "test.csv")
+      val result = processCsvService.getValidationResultsWithCorrectRowNumber(errors, "test.csv")
 
       result.isRight shouldBe true
       result.map { value: Seq[ValidationError] =>
@@ -200,7 +230,7 @@ class ProcessCsvServiceSpec
 
     "return an exception if the file is empty" in {
       val errors = Seq.empty[RowValidationResults]
-      val result = processCsvService.getRowsWithNumbers(errors, "test.csv")
+      val result = processCsvService.getValidationResultsWithCorrectRowNumber(errors, "test.csv")
       val value = result.left.toOption.get.asInstanceOf[ERSFileProcessingException]
 
       result.isLeft shouldBe true

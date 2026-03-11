@@ -80,7 +80,9 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
                    dataEngine: DataEngine
                  ): Future[Either[Throwable, Seq[RowValidationResults]]] =
     extractBodyOfRequest(source)
-      .via(FlowOps.eitherFromFunction(CsvValidator.validateCsvRow(dataEngine, _)))
+      .via(FlowOps.eitherFromFunction(
+        (rowBytes: Seq[ByteString]) => CsvValidator.validateCsvRow(dataEngine, rowBytes))
+      )
       .runWith(Sink.seq[Either[Throwable, RowValidationResults]])
       .map(_.traverse(identity))
 
@@ -96,7 +98,7 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
       _                   <- EitherT.fromEither[Future](ERSTemplatesInfo.findSheetWithinSchemeType(sheetName, scheme))
       dataEngine          <- EitherT.fromEither(DataEngine(sheetName, SchemeVersion.All))
       csvValidationResult <- EitherT(validateCsv(source, dataEngine))
-      rowsWithNumbers     <- EitherT.fromEither(getRowsWithNumbers(csvValidationResult, sheetName)(messages))
+      rowsWithNumbers     <- EitherT.fromEither(getValidationResultsWithCorrectRowNumber(csvValidationResult, sheetName)(messages))
       result              <- EitherT(checkValidityOfRows(rowsWithNumbers, sheetName, file))
     } yield result).value
   }
@@ -111,19 +113,23 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
     }
   }
 
-  def getRowsWithNumbers(validationResults: Seq[RowValidationResults], name: String)(
-    implicit messages: Messages): Either[Throwable, Seq[ValidationError]] = {
+  def generateNoDataException(name: String)(implicit messages: Messages): ERSFileProcessingException =
+    ERSFileProcessingException(
+      "ers_check_csv_file.noData",
+      messages("ers_check_csv_file.noData", name),
+      needsExtendedInstructions = true,
+      optionalParams = Seq(name)
+    )
+
+  def checkIfValidationResultsEmpty(validationResults: Seq[RowValidationResults]): Boolean = {
     val allRowsEmpty: Boolean = validationResults.forall(_.rowWasEmpty)
-    if (validationResults.isEmpty || allRowsEmpty){
-      // TODO: CAN THIS BE HANDLED BY HANDLE EXCEPTION?
-      Left(
-        ERSFileProcessingException(
-          "ers_check_csv_file.noData",
-          messages("ers_check_csv_file.noData", name),
-          needsExtendedInstructions = true,
-          optionalParams = Seq(name)
-        )
-      )
+    validationResults.isEmpty || allRowsEmpty
+  }
+
+  def getValidationResultsWithCorrectRowNumber(validationResults: Seq[RowValidationResults], name: String)(
+    implicit messages: Messages): Either[Throwable, Seq[ValidationError]] = {
+    if (checkIfValidationResultsEmpty(validationResults)){
+      Left(generateNoDataException(name))
     } else {
       Right(
         updateValidationResultRowNumbers(validationResults)

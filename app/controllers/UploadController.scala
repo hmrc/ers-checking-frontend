@@ -193,7 +193,7 @@ class UploadController @Inject()(authAction: AuthAction,
     }
   }
 
-  def redirectToFormatErrorsPage(message: String, params: Seq[String], needsExtendedInstructions: Boolean)(implicit request: Request[AnyContent]): Future[Result] = {
+  def updateCacheThenRedirectToFormatErrorsPage(message: String, params: Seq[String], needsExtendedInstructions: Boolean)(implicit request: Request[AnyContent]): Future[Result] = {
     for {
       _ <- sessionCacheService.cache[String](ersUtil.FORMAT_ERROR_CACHE, message)
       _ <- sessionCacheService.cache[Seq[String]](ersUtil.FORMAT_ERROR_CACHE_PARAMS, params)
@@ -207,7 +207,7 @@ class UploadController @Inject()(authAction: AuthAction,
   def handleException(t: Throwable)(implicit request: Request[AnyContent]): Future[Result] = {
     t match {
       case e: ERSFileProcessingException =>
-        redirectToFormatErrorsPage(e.message, e.optionalParams, e.needsExtendedInstructions)
+        updateCacheThenRedirectToFormatErrorsPage(e.message, e.optionalParams, e.needsExtendedInstructions)
       case upstreamError: UpstreamErrorResponse =>
         logger.error(
           s"[UploadController][handleException] " +
@@ -223,15 +223,15 @@ class UploadController @Inject()(authAction: AuthAction,
         val uploadedFileSchemeTypeWithArticle: String = withArticle(e.uploadedFileSchemeType.toUpperCase())
         val message = Messages("ers.exceptions.dataParser.incorrectSchemeType", selectedSchemeTypeWithArticle, uploadedFileSchemeTypeWithArticle, e.fileName)
         val optionalParams = Seq(selectedSchemeTypeWithArticle, uploadedFileSchemeTypeWithArticle, e.fileName)
-        redirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = false)
+        updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = false)
       case _: NoDataException =>
-        redirectToFormatErrorsPage(
+        updateCacheThenRedirectToFormatErrorsPage(
           Messages("ers.exceptions.dataParser.noData"),
           Seq.empty[String],
           needsExtendedInstructions = true
         )
       case _: DataContainsAmpersandException =>
-        redirectToFormatErrorsPage(
+        updateCacheThenRedirectToFormatErrorsPage(
           Messages("ers.exceptions.dataParser.ampersand"),
           Seq.empty[String],
           needsExtendedInstructions = true
@@ -239,11 +239,11 @@ class UploadController @Inject()(authAction: AuthAction,
       case e: IncorrectHeaderException =>
         val message = Messages("ers.exceptions.dataParser.incorrectHeader", e.sheetName, e.fileName)
         val optionalParams = Seq(e.sheetName, e.fileName)
-        redirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
+        updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
       case e: IncorrectSheetNameException =>
         val message = Messages("ers.exceptions.dataParser.incorrectSheetName", e.sheetName, e.schemeName)
         val optionalParams = Seq(e.sheetName, e.schemeName)
-        redirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
+        updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
       case e: ValidatorException =>
         logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
