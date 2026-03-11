@@ -121,11 +121,10 @@ class ProcessCsvServiceSpec
       val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))))
       val data: String = "2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no"
 
-      processCsvService.processFiles(Some(callback), "csop", returnStubSource(_ , data)).foreach {
-        (futureResult: Future[Either[Throwable, Boolean]]) =>
-          val result: Either[Throwable, Boolean] = futureResult.futureValue
-          assert(result.isRight)
-          result.map(validFile => assert(validFile))
+      processCsvService.processFiles(Some(callback), "csop", returnStubSource(_ , data)).foreach{ futureResult =>
+        val result: Either[Throwable, Boolean] = Await.result(futureResult, Duration.Inf)
+        assert(result.isRight)
+        result.map(validFile => assert(validFile))
       }
     }
 
@@ -134,9 +133,8 @@ class ProcessCsvServiceSpec
       val data =
         "2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,test,123.12,12.1234,12.1234,no,yes,AB12345678,no\n"
 
-      processCsvService.processFiles(Some(callback), "csop", returnStubSource(_, data)).foreach {
-        (futureResult: Future[Either[Throwable, Boolean]]) =>
-          val result: Either[Throwable, Boolean] = futureResult.futureValue
+      processCsvService.processFiles(Some(callback), "csop", returnStubSource(_ , data)).foreach{ futureResult =>
+        val result: Either[Throwable, Boolean] = Await.result(futureResult, Duration.Inf)
           assert(result.isRight)
           result.map(validFile => assert(!validFile))
       }
