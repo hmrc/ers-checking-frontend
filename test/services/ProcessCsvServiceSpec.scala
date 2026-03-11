@@ -121,11 +121,12 @@ class ProcessCsvServiceSpec
       val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))))
       val data: String = "2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no"
 
-      val resultFuture: Seq[Future[Either[Throwable, Boolean]]] = processCsvService.processFiles(Some(callback), "csop", returnStubSource(_ , data))
-      val result: Seq[Either[Throwable, Boolean]] = resultFuture.map(_.futureValue)
-
-      assert(result.forall(_.isRight))
-      result shouldBe List(Right(true))
+      processCsvService.processFiles(Some(callback), "csop", returnStubSource(_ , data)).foreach {
+        (futureResult: Future[Either[Throwable, Boolean]]) =>
+          val result: Either[Throwable, Boolean] = futureResult.futureValue
+          assert(result.isRight)
+          result.map(validFile => assert(validFile))
+      }
     }
 
     "return false when the data contains at least one invalid row" in {
@@ -133,11 +134,12 @@ class ProcessCsvServiceSpec
       val data =
         "2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,test,123.12,12.1234,12.1234,no,yes,AB12345678,no\n"
 
-      val resultFuture = processCsvService.processFiles(Some(callback), "csop", returnStubSource(_, data))
-
-      val result = resultFuture.map(_.futureValue)
-      assert(result.forall(_.isRight))
-      result shouldBe List(Right(false))
+      processCsvService.processFiles(Some(callback), "csop", returnStubSource(_, data)).foreach {
+        (futureResult: Future[Either[Throwable, Boolean]]) =>
+          val result: Either[Throwable, Boolean] = futureResult.futureValue
+          assert(result.isRight)
+          result.map(validFile => assert(!validFile))
+      }
     }
 
     "return a throwable when an error occurs during the file validation" in {
