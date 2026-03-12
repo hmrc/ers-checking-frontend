@@ -210,11 +210,11 @@ class UploadController @Inject()(authAction: AuthAction,
           s"[UploadController][handleException] " +
             s"Encountered an upstream error response when processing a CSV file: " +
             s"status ${upstreamError.statusCode} with message ${upstreamError.getMessage()}")
-        Future(getGlobalErrorPage)
+        Future.successful(getGlobalErrorPage)
       case e: javax.xml.stream.XMLStreamException =>
         logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
-        Future(getGlobalErrorPage)
+        Future.successful(getGlobalErrorPage)
       case e: validator.IncorrectSchemeException =>
         val selectedSchemeTypeWithArticle: String = withArticle(e.selectedSchemeType.toUpperCase())
         val uploadedFileSchemeTypeWithArticle: String = withArticle(e.uploadedFileSchemeType.toUpperCase())
@@ -244,11 +244,11 @@ class UploadController @Inject()(authAction: AuthAction,
       case e: validator.ValidatorException =>
         logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
-        Future(getGlobalErrorPage)
+        Future.successful(getGlobalErrorPage)
       case notERSProcessingException: Throwable => // Catch all case
         logger.error(s"[UploadController][handleException] " +
           s"Encountered unexpected exception: ${notERSProcessingException.getClass}. Redirecting to global error page.")
-        Future(getGlobalErrorPage)
+        Future.successful(getGlobalErrorPage)
     }
   }
 }
