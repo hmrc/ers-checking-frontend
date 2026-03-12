@@ -161,18 +161,19 @@ class UploadController @Inject()(authAction: AuthAction,
               },
               processor => {
                 val fileName: String = file.get.name
-                  processODSService
-                    .performODSUpload(appConfig.errorCount, fileName, processor, scheme)(request)
-                    .flatMap {
-                      case Right(fileIsValid: Boolean) =>
-                        if (fileIsValid) {
-                          Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
-                        } else {
-                          Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(false)))
-                        }
-                      case Left(e: Exception) => handleException(e)
+
+                processODSService
+                  .performODSUpload(appConfig.errorCount, fileName, processor, scheme)(request)
+                  .map(fileIsValid =>
+                    if (fileIsValid) {
+                      Redirect(routes.CheckingServiceController.checkingSuccessPage())
+                    } else {
+                      Redirect(routes.HtmlReportController.htmlErrorReportPage(false))
                     }
-                }
+                  ).recoverWith {
+                    case e => handleException(e)
+                  }
+              }
             )
           } else {
             val exception: ERSFileProcessingException = ERSFileProcessingException(
@@ -199,7 +200,6 @@ class UploadController @Inject()(authAction: AuthAction,
       Redirect(routes.CheckingServiceController.formatErrorsPage())
     }
   }
-
 
   def handleException(t: Throwable)(implicit request: Request[AnyContent]): Future[Result] = {
     t match {

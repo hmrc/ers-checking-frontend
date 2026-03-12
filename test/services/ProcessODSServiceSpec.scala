@@ -41,7 +41,8 @@ import uk.gov.hmrc.validator.models.ods.SheetErrors
 
 import java.io.InputStream
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 class ProcessODSServiceSpec
   extends AnyWordSpecLike
@@ -93,10 +94,10 @@ class ProcessODSServiceSpec
       when(mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.ERROR_LIST_CACHE), any())(any(), any()))
         .thenReturn(Future.successful(("", "")))
 
-      val output = buildProcessODSService(sheetErrors)
+      val output: Boolean = buildProcessODSService(sheetErrors)
         .performODSUpload(10, "testFileName.ods", mockInputStream, "csop")
         .futureValue
-      output.map(_ shouldBe false)
+      output shouldBe false
     }
 
     "return true if the file doesn't have any errors" in {
@@ -104,22 +105,21 @@ class ProcessODSServiceSpec
         .thenReturn(Future.successful(("", "")))
 
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
-      val output = buildProcessODSService(emptyErrors)
+      val output: Boolean = buildProcessODSService(emptyErrors)
         .performODSUpload(10, "testFileName.ods", mockInputStream, "csop")
         .futureValue
 
-      output.map(_ shouldBe true)
+      output shouldBe true
     }
 
-    "return a failure if nothing was found in the cache" in {
+    "return a NoSuchElementException if nothing was found in the cache" in {
       when(mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any()))
         .thenReturn(Future.failed(new NoSuchElementException))
 
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
 
-      val result = buildProcessODSService(emptyErrors).performODSUpload(10, "testFileName.ods", mockInputStream, "csop")
-      result.futureValue.swap.map(_ shouldBe a[NoSuchElementException])
-
+      val result: Future[Boolean] = buildProcessODSService(emptyErrors).performODSUpload(10, "testFileName.ods", mockInputStream, "csop")
+      intercept[NoSuchElementException](Await.result(result, Duration.Inf))
     }
   }
 
