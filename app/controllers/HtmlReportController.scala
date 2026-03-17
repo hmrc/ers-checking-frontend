@@ -34,7 +34,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 import utils.{ContentUtil, ERSUtil}
 import uk.gov.hmrc.validator.models.ValidationError
-import utils.ContentUtil.ScheneNameWithShortenedVersion
+import utils.ContentUtil.ErrorMessageKeyPrefixAndScheme
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
@@ -78,9 +78,9 @@ class HtmlReportController @Inject()(authAction: AuthAction,
 
   def showHtmlErrorReportPage(isCsv: Boolean)(implicit request: Request[AnyRef], messages: Messages): Future[Result] = {
     sessionCacheService.fetchAll().map { all =>
-      val scheneNameWithShortenedVersion: ScheneNameWithShortenedVersion = getEntry[String](all, ersUtil.SCHEME_CACHE) match {
+      val scheneNameWithShortenedVersion: ErrorMessageKeyPrefixAndScheme = getEntry[String](all, ersUtil.SCHEME_CACHE) match {
         case Some(name) => ContentUtil.getScheneNameWithShortenedVersion(name)
-        case None => ScheneNameWithShortenedVersion("", "")
+        case None => ErrorMessageKeyPrefixAndScheme("", "")
       }
       lazy val (errorsList, errorCountLong, totalErrorsCount) = if (isCsv) {
         val uploadIds: Seq[UploadId] = getEntry[UpscanCsvFilesCallbackList](all, ersUtil.CALLBACK_DATA_KEY_CSV)
@@ -109,11 +109,11 @@ class HtmlReportController @Inject()(authAction: AuthAction,
         .distinct
         .mkString(",")
 
-      auditEvents.fileProcessingErrorAudit(scheneNameWithShortenedVersion.schemeName, sheetName, errorMsg)
+      auditEvents.fileProcessingErrorAudit(scheneNameWithShortenedVersion.errorMessageKeyPrefix, sheetName, errorMsg)
       Ok(
         html_error_report(
-          scheneNameWithShortenedVersion.schemeName,
-          scheneNameWithShortenedVersion.shortenedSchemeName,
+          scheneNameWithShortenedVersion.errorMessageKeyPrefix,
+          scheneNameWithShortenedVersion.scheme,
           totalErrorsCount,
           errorCountLong,
           errorsList.toSeq

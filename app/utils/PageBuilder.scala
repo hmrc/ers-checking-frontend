@@ -107,9 +107,9 @@ trait PageBuilder {
 
   def getPageBackLink(fileType: String): String = {
     if (fileType == OPTION_ODS) {
-      routes.CheckingServiceController.checkODSFilePage().toString
+      routes.CheckingServiceController.checkOdsFilePage().toString
     } else {
-      routes.CheckingServiceController.checkCSVFilePage().toString
+      routes.CheckingServiceController.checkCsvFilePage().toString
     }
   }
 }

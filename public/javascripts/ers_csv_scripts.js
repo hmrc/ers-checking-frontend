@@ -1,5 +1,5 @@
 /***********************/
-/* Check CSV file page */
+/* Check csv file page */
 /***********************/
 
 const MAX_CSV_FILESIZE = 209715200// 200 MB

@@ -16,7 +16,6 @@
 
 package services
 
-import cats.{CoflatMap, Monad, MonadThrow}
 import cats.implicits.toTraverseOps
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.scaladsl.{Flow, Sink, Source}
@@ -44,6 +43,7 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.validator._
 import cats.data.EitherT
+import cats.instances.future.catsStdInstancesForFuture
 
 @Singleton
 class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
@@ -53,8 +53,6 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
                                    actorSystem: ActorSystem) extends Logging {
 
   private val uploadCsvSizeLimit: Int = appConfig.upscanFileSizeLimit
-
-  implicit val futureMonad: MonadThrow[Future] with CoflatMap[Future] with Monad[Future] = cats.instances.future.catsStdInstancesForFuture(executionContext)
 
   def extractEntityData(response: HttpResponse): Source[ByteString, _] =
     response match {
@@ -155,11 +153,10 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
       Future.successful(Right(true))
     } else {
       val errorsToCache = ListBuffer(getSheetErrors(SheetErrors(FilenameUtils.removeExtension(name), listOfErrors.to(ListBuffer))))
-          for {
-            _ <- sessionCacheService.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${file.uploadId.value}", listOfErrors.length)
-            _ <- sessionCacheService.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${file.uploadId.value}",
-              errorsToCache)
-          } yield Right(false)
+      for {
+        _ <- sessionCacheService.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${file.uploadId.value}", listOfErrors.length)
+        _ <- sessionCacheService.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${file.uploadId.value}", errorsToCache)
+      } yield Right(false)
       }
     }
 

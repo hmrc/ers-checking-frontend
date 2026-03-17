@@ -18,22 +18,22 @@ package utils
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import utils.UploadedFileUtil.checkODSFileType
+import utils.UploadedFileUtil.checkOdsFileType
 
 class UploadedFileUtilSpec extends AnyWordSpecLike with Matchers {
 
-  "UploadedFileUtil ODS" should {
+  "UploadedFileUtil ods" should {
 
     "return positively for an ods file" in {
-      checkODSFileType("abc.ods") shouldBe true
+      checkOdsFileType("abc.ods") shouldBe true
     }
 
     "return positively for an ods file with extension in upper case" in {
-      checkODSFileType("abc.ODS") shouldBe true
+      checkOdsFileType("abc.ODS") shouldBe true
     }
 
     "return negatively for other files" in {
-      checkODSFileType("abc.doc") shouldBe false
+      checkOdsFileType("abc.doc") shouldBe false
     }
 
   }

@@ -18,16 +18,16 @@ package utils
 
 object ContentUtil {
 
-  case class ScheneNameWithShortenedVersion(schemeName: String, shortenedSchemeName: String)
+  case class ErrorMessageKeyPrefixAndScheme(errorMessageKeyPrefix: String, scheme: String)
 
-  def getScheneNameWithShortenedVersion(schemeType: String): ScheneNameWithShortenedVersion = {
+  def getScheneNameWithShortenedVersion(schemeType: String): ErrorMessageKeyPrefixAndScheme = {
     schemeType.toLowerCase match {
-      case "csop" | "1" => ScheneNameWithShortenedVersion("ers_pdf_error_report.csop", "CSOP")
-      case "emi" | "2" => ScheneNameWithShortenedVersion("ers_pdf_error_report.emi", "EMI")
-      case "saye" | "4" => ScheneNameWithShortenedVersion("ers_pdf_error_report.saye", "SAYE")
-      case "sip" | "5" => ScheneNameWithShortenedVersion("ers_pdf_error_report.sip", "SIP")
-      case "other" | "3" => ScheneNameWithShortenedVersion("ers_pdf_error_report.other", "OTHER")
-      case _ => ScheneNameWithShortenedVersion("","")
+      case "csop" | "1" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.csop", "CSOP")
+      case "emi" | "2" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.emi", "EMI")
+      case "saye" | "4" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.saye", "SAYE")
+      case "sip" | "5" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.sip", "SIP")
+      case "other" | "3" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.other", "OTHER")
+      case _ => ErrorMessageKeyPrefixAndScheme("","")
     }
   }
 

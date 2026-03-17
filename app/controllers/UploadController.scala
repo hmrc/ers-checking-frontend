@@ -30,7 +30,7 @@ import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
 import play.api.mvc._
 import repository.ErsCheckingFrontendSessionCacheRepository
-import services.{ProcessCsvService, ProcessODSService}
+import services.{ProcessCsvService, ProcessOdsService}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.validator
@@ -44,11 +44,11 @@ import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 import utils.ContentUtil.withArticle
 import utils.ERSUtil
-import utils.UploadedFileUtil.checkODSFileType
+import utils.UploadedFileUtil.checkOdsFileType
 
 @Singleton
 class UploadController @Inject()(authAction: AuthAction,
-                                 processODSService: ProcessODSService,
+                                 processOdsService: ProcessOdsService,
                                  processCsvService: ProcessCsvService,
                                  sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
                                  mcc: MessagesControllerComponents,
@@ -105,16 +105,16 @@ class UploadController @Inject()(authAction: AuthAction,
       Right(contentInputStream)
     } catch {
       case e: ERSFileProcessingException =>
-        logger.error(s"[UploadController][readFileOds] Error processing ODS file: ${e.getMessage}", e)
+        logger.error(s"[UploadController][readFileOds] Error processing ods file: ${e.getMessage}", e)
         Left(getGlobalErrorPage)
 
       case e: Exception =>
-        logger.error(s"[UploadController][readFileOds] Unexpected error while reading ODS file: ${e.getMessage}", e)
+        logger.error(s"[UploadController][readFileOds] Unexpected error while reading ods file: ${e.getMessage}", e)
         Left(getGlobalErrorPage)
     }
   }
 
-  def uploadCSVFile(scheme: String): Action[AnyContent] = authAction.async {
+  def uploadCsvFile(scheme: String): Action[AnyContent] = authAction.async {
     implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent] =>
       clearErrorCache() flatMap {
         case false => Future(getGlobalErrorPage)
@@ -140,12 +140,12 @@ class UploadController @Inject()(authAction: AuthAction,
 
     }
 
-  def uploadODSFile(scheme: String): Action[AnyContent] = authAction.async {
+  def uploadOdsFile(scheme: String): Action[AnyContent] = authAction.async {
     implicit request =>
-      showuploadODSFile(scheme)
+      showuploadOdsFile(scheme)
   }
 
-  def showuploadODSFile(scheme: String)
+  def showuploadOdsFile(scheme: String)
                        (implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], messages: Messages): Future[Result] = {
 
     clearErrorCache().flatMap { clearedSuccessfully =>
@@ -153,17 +153,15 @@ class UploadController @Inject()(authAction: AuthAction,
         //These .get's are safe because the UploadedSuccessfully model is already validated as existing in the UpscanController
         sessionCacheService.fetch[UploadedSuccessfully](ersUtil.CALLBACK_DATA_KEY).flatMap { file =>
           val fileName: String = file.get.name
-          if (checkODSFileType(fileName)) {
+          if (checkOdsFileType(fileName)) {
             readFileOds(file.get.downloadUrl).fold(
               err => {
-                logger.error(s"[UploadController][showuploadODSFile] failed in readFileOds for scheme : $scheme")
+                logger.error(s"[UploadController][showuploadOdsFile] failed in readFileOds for scheme : $scheme")
                 Future.successful(err)
               },
               processor => {
-                val fileName: String = file.get.name
-
-                processODSService
-                  .performODSUpload(appConfig.errorCount, fileName, processor, scheme)(request)
+                processOdsService
+                  .performOdsUpload(appConfig.errorCount, fileName, processor, scheme)(request)
                   .map(fileIsValid =>
                     if (fileIsValid) {
                       Redirect(routes.CheckingServiceController.checkingSuccessPage())
@@ -180,12 +178,12 @@ class UploadController @Inject()(authAction: AuthAction,
               messages("ers_check_file.file_type_error", fileName),
               messages("ers_check_file.file_type_error", fileName)
             )
-            logger.error(s"[showuploadODSFile]] Unable to save File Name. Error: ${exception.getMessage}")
+            logger.error(s"[showuploadOdsFile]] Unable to save File Name. Error: ${exception.getMessage}")
             handleException(exception)
           }
         }
       } else {
-        logger.error(s"[UploadController][showuploadODSFile] failed for clearErrorCache scheme : $scheme")
+        logger.error(s"[UploadController][showuploadOdsFile] failed for clearErrorCache scheme : $scheme")
         Future.successful(getGlobalErrorPage(request, messages))
       }
     }
@@ -208,7 +206,7 @@ class UploadController @Inject()(authAction: AuthAction,
       case upstreamError: UpstreamErrorResponse =>
         logger.error(
           s"[UploadController][handleException] " +
-            s"Encountered an upstream error response when processing a CSV file: " +
+            s"Encountered an upstream error response when processing a csv file: " +
             s"status ${upstreamError.statusCode} with message ${upstreamError.getMessage()}")
         Future.successful(getGlobalErrorPage)
       case e: javax.xml.stream.XMLStreamException =>
@@ -218,8 +216,8 @@ class UploadController @Inject()(authAction: AuthAction,
       case e: validator.IncorrectSchemeException =>
         val selectedSchemeTypeWithArticle: String = withArticle(e.selectedSchemeType.toUpperCase())
         val uploadedFileSchemeTypeWithArticle: String = withArticle(e.uploadedFileSchemeType.toUpperCase())
-        val message = Messages("ers.exceptions.dataParser.incorrectSchemeType", selectedSchemeTypeWithArticle, uploadedFileSchemeTypeWithArticle, e.fileName)
-        val optionalParams = Seq(selectedSchemeTypeWithArticle, uploadedFileSchemeTypeWithArticle, e.fileName)
+        val message = Messages("ers.exceptions.dataParser.incorrectSchemeType", uploadedFileSchemeTypeWithArticle, selectedSchemeTypeWithArticle, e.fileName)
+        val optionalParams = Seq(uploadedFileSchemeTypeWithArticle, selectedSchemeTypeWithArticle, e.fileName)
         updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = false)
       case _: validator.NoDataException =>
         updateCacheThenRedirectToFormatErrorsPage(

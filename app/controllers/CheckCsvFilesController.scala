@@ -83,7 +83,7 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
         _   <- Future.sequence(cacheUpscanIds(csvFilesCallbackList.ids))
         _   <- sessionCacheService.cache(ersUtil.CSV_FILES_UPLOAD, csvFilesCallbackList)
       } yield {
-        Redirect(routes.CheckingServiceController.checkCSVFilePage())
+        Redirect(routes.CheckingServiceController.checkCsvFilePage())
       }).recover {
         case e: Throwable =>
           logger.error(s"[CheckCsvFilesController][performCsvFilesPageSelected]: Save data to cache failed with exception ${e.getMessage}.", e)

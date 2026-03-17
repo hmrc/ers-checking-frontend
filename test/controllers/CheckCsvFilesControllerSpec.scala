@@ -189,7 +189,7 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
 
     }
 
-    "redirect to checkCSVFilePage if everything is good" in {
+    "redirect to checkCsvFilePage if everything is good" in {
       val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, mockSessionCacheRepo, selectFileTypeView, globalErrorView) {
         override def reloadWithError(form: Option[Form[List[CsvFiles]]])(implicit messages: Messages): Future[Result] =
           Future.successful(Ok("this is a reload"))

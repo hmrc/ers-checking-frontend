@@ -116,7 +116,7 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
       formData => {
         sessionCacheService.cache[String](ersUtil.FILE_TYPE_CACHE, formData.getFileType).map { _ =>
           if (formData.getFileType == ersUtil.OPTION_ODS) {
-            Redirect(routes.CheckingServiceController.checkODSFilePage())
+            Redirect(routes.CheckingServiceController.checkOdsFilePage())
           } else {
             Redirect(routes.CheckCsvFilesController.selectCsvFilesPage())
           }
@@ -129,45 +129,45 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
     )
   }
 
-  def checkCSVFilePage(): Action[AnyContent] = authAction.async {
+  def checkCsvFilePage(): Action[AnyContent] = authAction.async {
     implicit request =>
-      showCheckCSVFilePage()
+      showCheckCsvFilePage()
   }
 
-  def showCheckCSVFilePage()(implicit request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
+  def showCheckCsvFilePage()(implicit request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
     (for {
       scheme <- sessionCacheService.fetchAndGetEntry[String](ersUtil.SCHEME_CACHE)
       csvFilesList <- sessionCacheService.fetchAndGetEntry[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
       currentCsvFile = csvFilesList.ids.find(ids => ids.uploadStatus == NotStarted)
       if currentCsvFile.isDefined
-        upscanResponse <- upscanService.getUpscanFormData(isCSV = true, scheme, currentCsvFile)
+        upscanResponse <- upscanService.getUpscanFormData(isCsv = true, scheme, currentCsvFile)
     } yield {
       Ok(check_csv_file(scheme, currentCsvFile.get.fileId)(request, messages, upscanResponse, appConfig, ersUtil))
     }) recover {
       case _: NoSuchElementException =>
-        logger.warn("[CheckingServiceController][showCheckCSVFilePage]: No files match status NotStarted")
+        logger.warn("[CheckingServiceController][showCheckCsvFilePage]: No files match status NotStarted")
         Redirect(routes.CheckingServiceController.fileUploadError())
       case e: Exception =>
-        logger.error("[CheckingServiceController][showCheckCSVFilePage]: Unable to fetch scheme. Error: " + e.getMessage)
+        logger.error(s"[CheckingServiceController][showCheckCsvFilePage]: Unable to fetch scheme. Error: ${e.getMessage}")
         getGlobalErrorPage(request, messages)
     }
   }
 
-  def checkODSFilePage(): Action[AnyContent] = authAction.async {
+  def checkOdsFilePage(): Action[AnyContent] = authAction.async {
     implicit request =>
-      showCheckODSFilePage()
+      showCheckOdsFilePage()
   }
 
-  def showCheckODSFilePage()(implicit request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
+  def showCheckOdsFilePage()(implicit request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] = {
     (for {
       scheme <- sessionCacheService.fetchAndGetEntry[String](ersUtil.SCHEME_CACHE)
-      upscanResponse <- upscanService.getUpscanFormData(isCSV = false, scheme)
+      upscanResponse <- upscanService.getUpscanFormData(isCsv = false, scheme)
       _ <- sessionCacheService.cache[UploadStatus](ersUtil.CALLBACK_DATA_KEY, NotStarted)
     } yield {
       Ok(check_file(scheme)(request, messages, upscanResponse, appConfig))
     }) recover {
       case e: Exception =>
-        logger.error("[CheckingServiceController][showCheckODSFilePage] Unable to fetch scheme. Error: " + e.getMessage)
+        logger.error("[CheckingServiceController][showCheckOdsFilePage] Unable to fetch scheme. Error: " + e.getMessage)
         getGlobalErrorPage(request, messages)
     }
   }
@@ -207,8 +207,8 @@ class CheckingServiceController @Inject()(authAction: AuthAction,
       val scheneNameWithShortenedVersion = getScheneNameWithShortenedVersion(schemeName)
       Ok(format_errors(
         fileType,
-        scheneNameWithShortenedVersion.schemeName,
-        scheneNameWithShortenedVersion.shortenedSchemeName,
+        scheneNameWithShortenedVersion.errorMessageKeyPrefix,
+        scheneNameWithShortenedVersion.scheme,
         errorMsg,
         errorParams,
         extendedInstructions))

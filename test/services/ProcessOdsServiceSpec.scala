@@ -27,14 +27,9 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.i18n.MessagesImpl
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents}
+import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
-import play.api.{Application, i18n}
-import services.ProcessODSService._
-import uk.gov.hmrc.mongo.MongoComponent
+import services.ProcessOdsService._
 import uk.gov.hmrc.mongo.test.MongoSupport
 import uk.gov.hmrc.validator.models.{Cell, ValidationError}
 import uk.gov.hmrc.validator.models.ods.SheetErrors
@@ -44,7 +39,7 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-class ProcessODSServiceSpec
+class ProcessOdsServiceSpec
   extends AnyWordSpecLike
     with Matchers
     with OptionValues
@@ -53,35 +48,15 @@ class ProcessODSServiceSpec
     with ScalaFutures
     with MongoSupport {
 
-  override lazy val fakeApplication: Application = new GuiceApplicationBuilder()
-    .configure(
-      Map(
-        "play.i18n.langs" -> List("en", "cy"),
-        "metrics.enabled" -> "false"
-      )
-    )
-    .overrides(
-      bind(classOf[MongoComponent]).toInstance(mongoComponent)
-    ).build()
-
-  val config: Map[String, String] = Map(
-    "microservice.services.cachable.short-lived-cache-frontend.host" -> "test",
-    "cachable.short-lived-cache-frontend.port" -> "test",
-    "short-lived-cache-frontend.domain" -> "test"
-  )
-
-  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication)
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
-  implicit val scheme: String = "testScheme"
   implicit val fakeRequest: RequestWithOptionalEmpRefAndPAYE[AnyContent] = RequestWithOptionalEmpRefAndPAYE(FakeRequest(), None, PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, None, mockAppConfig))
 
-  def buildProcessODSService(sheetErrors: ListBuffer[SheetErrors]): ProcessODSService = {
-    new ProcessODSService(mockSessionCacheRepo, mockErsUtil){
+  def buildProcessOdsService(sheetErrors: ListBuffer[SheetErrors]): ProcessOdsService = {
+    new ProcessOdsService(mockSessionCacheRepo, mockErsUtil){
       override def validateOdsFile(fileName: String, processor: InputStream, scheme: String): ListBuffer[SheetErrors] = sheetErrors
     }
   }
 
-  "calling performODSUpload" should {
+  "calling performOdsUpload" should {
 
     val sheetErrors: ListBuffer[SheetErrors] = Fixtures.buildSheetErrors
 
@@ -94,8 +69,8 @@ class ProcessODSServiceSpec
       when(mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.ERROR_LIST_CACHE), any())(any(), any()))
         .thenReturn(Future.successful(("", "")))
 
-      val output: Boolean = buildProcessODSService(sheetErrors)
-        .performODSUpload(10, "testFileName.ods", mockInputStream, "csop")
+      val output: Boolean = buildProcessOdsService(sheetErrors)
+        .performOdsUpload(10, "testFileName.ods", mockInputStream, "csop")
         .futureValue
       output shouldBe false
     }
@@ -105,8 +80,8 @@ class ProcessODSServiceSpec
         .thenReturn(Future.successful(("", "")))
 
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
-      val output: Boolean = buildProcessODSService(emptyErrors)
-        .performODSUpload(10, "testFileName.ods", mockInputStream, "csop")
+      val output: Boolean = buildProcessOdsService(emptyErrors)
+        .performOdsUpload(10, "testFileName.ods", mockInputStream, "csop")
         .futureValue
 
       output shouldBe true
@@ -118,7 +93,7 @@ class ProcessODSServiceSpec
 
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
 
-      val result: Future[Boolean] = buildProcessODSService(emptyErrors).performODSUpload(10, "testFileName.ods", mockInputStream, "csop")
+      val result: Future[Boolean] = buildProcessOdsService(emptyErrors).performOdsUpload(10, "testFileName.ods", mockInputStream, "csop")
       intercept[NoSuchElementException](Await.result(result, Duration.Inf))
     }
   }
@@ -160,11 +135,11 @@ class ProcessODSServiceSpec
 
   "calling isValid" should {
 
-    "return false if there are no errors in any of the sheetErrors parsed in" in {
+    "return false if there are no errors in any of the sheetErrors passed in" in {
       assert(!isValid(sheetWithMultipleSchemeError))
     }
 
-    "return true if there are no errors in any of the sheetErrors parsed in" in {
+    "return true if there are no errors in any of the sheetErrors passed in" in {
       assert(isValid(sheetWithNoSchemeError))
     }
 

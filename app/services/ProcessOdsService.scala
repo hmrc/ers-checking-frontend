@@ -35,14 +35,14 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 @Singleton
-class ProcessODSService @Inject()(sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
+class ProcessOdsService @Inject()(sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
                                   ersUtil: ERSUtil
                                  )(implicit ec: ExecutionContext) extends Logging {
 
   def validateOdsFile(fileName: String, processor: InputStream, scheme: String): ListBuffer[SheetErrors] =
     OdsValidator.validateOdsFile(All, processor, scheme, fileName)
 
-  def performODSUpload(errorCount: Int, fileName: String, processor: InputStream, scheme: String)
+  def performOdsUpload(errorCount: Int, fileName: String, processor: InputStream, scheme: String)
                       (implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Boolean] = {
     for {
       _ <- sessionCacheService.cache[String](ersUtil.FILE_NAME_CACHE, fileName)
@@ -50,20 +50,20 @@ class ProcessODSService @Inject()(sessionCacheService: ErsCheckingFrontendSessio
       result: Boolean <- processSheetErrors(sheetErrors, errorCount)
     } yield result
   }.andThen {
-    case Success(validFile: Boolean) => logger.info(s"[ProcessODSService][performODSUpload] Performed ODS upload, file valid: $validFile")
-    case Failure(e: NoSuchElementException) => logger.warn(s"[ProcessODSService][performODSUpload] Encountered NoSuchElementException - $e")
-    case Failure(e: ValidatorException) => logger.warn(s"[ProcessODSService][performODSUpload] ValidationException thrown trying to upload file - $e")
-    case Failure(e: ERSFileProcessingException) => logger.warn(s"[ProcessODSService][performODSUpload] ERSFileProcessingException thrown trying to upload file - $e")
-    case Failure(e: javax.xml.stream.XMLStreamException) => logger.warn(s"[ProcessODSService][performODSUpload] XMLStreamException - $e")
+    case Success(validFile: Boolean) => logger.info(s"[ProcessOdsService][performOdsUpload] Performed ods upload, file valid: $validFile")
+    case Failure(e: NoSuchElementException) => logger.warn(s"[ProcessOdsService][performOdsUpload] Encountered NoSuchElementException - $e")
+    case Failure(e: ValidatorException) => logger.warn(s"[ProcessOdsService][performOdsUpload] ValidationException thrown trying to upload file - $e")
+    case Failure(e: ERSFileProcessingException) => logger.warn(s"[ProcessOsdService][performOdsUpload] ERSFileProcessingException thrown trying to upload file - $e")
+    case Failure(e: javax.xml.stream.XMLStreamException) => logger.warn(s"[ProcessOdsService][performOdsUpload] XMLStreamException - $e")
   }
 
   def processSheetErrors(sheetErrors: ListBuffer[SheetErrors], errorCount: Int)
                         (implicit request: Request[_]): Future[Boolean] = {
-    if (ProcessODSService.isValid(sheetErrors)) {
+    if (ProcessOdsService.isValid(sheetErrors)) {
       Future.successful(true)
     } else {
       val updatedErrorCount: Int = sheetErrors.map(_.errors.length).sum
-      val updatedErrorList = ProcessODSService.getSheetErrors(sheetErrors, errorCount)
+      val updatedErrorList = ProcessOdsService.getSheetErrors(sheetErrors, errorCount)
 
       for {
         _ <- sessionCacheService.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}", updatedErrorCount)
@@ -73,7 +73,7 @@ class ProcessODSService @Inject()(sessionCacheService: ErsCheckingFrontendSessio
   }
 }
 
-object ProcessODSService {
+object ProcessOdsService {
 
   def isValid(schemeErrors: ListBuffer[SheetErrors]): Boolean = {
     schemeErrors.map(_.errors.isEmpty).forall(identity)

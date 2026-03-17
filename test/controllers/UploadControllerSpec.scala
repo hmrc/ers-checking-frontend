@@ -38,7 +38,7 @@ import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents, Request, R
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, i18n}
-import services.{ProcessCsvService, ProcessODSService}
+import services.{ProcessCsvService, ProcessOdsService}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import views.html.global_error
 
@@ -58,7 +58,7 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
   override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(app)
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
-  val mockProcessODSService: ProcessODSService = mock[ProcessODSService]
+  val mockProcessOdsService: ProcessOdsService = mock[ProcessOdsService]
   val mockProcessCsvService: ProcessCsvService = mock[ProcessCsvService]
   val uploadedSuccessfully: Option[UploadedSuccessfully] = Some(UploadedSuccessfully("testName", "testDownloadUrl", noOfRows = Some(1)))
   val callbackList: Option[UpscanCsvFilesCallbackList] = {
@@ -73,7 +73,8 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
                                    clearCacheResponse: Boolean = true,
                                    mockReadFileCsv: Boolean = true
                                   ): UploadController =
-    new UploadController(mockAuthAction, mockProcessODSService, mockProcessCsvService, mockSessionCacheRepo, mcc, globalErrorView) {
+    new UploadController(mockAuthAction, mockProcessOdsService, mockProcessCsvService, mockSessionCacheRepo, mcc,
+      globalErrorView) {
 
       override def clearErrorCache()(implicit request: Request[_]): Future[Boolean] =
         Future.successful(clearCacheResponse)
@@ -116,19 +117,19 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
       mockAnyContentAction
     }
 
-  "Calling UploadController.uploadCSVFile" should {
+  "Calling UploadController.uploadCsvFile" should {
     implicit val fakeRequest: RequestWithOptionalEmpRefAndPAYE[AnyContent] = RequestWithOptionalEmpRefAndPAYE(Fixtures.buildFakeRequestWithSessionId("GET"), None, PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig))
 
     "give a redirect status and show checkingSuccessPage if authenticated and no validation errors" in {
       val controllerUnderTest = buildFakeUploadControllerCsv()
-      val result = controllerUnderTest.uploadCSVFile(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
+      val result = controllerUnderTest.uploadCsvFile(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
     }
 
     "give a redirect status to checkingSuccessPage if no formatting or structural errors" in {
       val controllerUnderTest = buildFakeUploadControllerCsv()
       val result = controllerUnderTest
-        .uploadCSVFile(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
+        .uploadCsvFile(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.CheckingServiceController.checkingSuccessPage().toString
     }
@@ -136,7 +137,7 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
     "give a redirect status to checkingSuccessPage if formatting errors" in {
       val controllerUnderTest = buildFakeUploadControllerCsv(uploadRes = false)
       val result = controllerUnderTest
-        .uploadCSVFile(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
+        .uploadCsvFile(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.HtmlReportController.htmlErrorReportPage(true).toString
     }
@@ -144,7 +145,7 @@ class UploadControllerSpec extends TestKit(ActorSystem("UploadControllerTest")) 
     "give a redirect status to globalErrorPage if clearErrorCache returns false" in {
       val controllerUnderTest = buildFakeUploadControllerCsv(clearCacheResponse = false)
       val result = controllerUnderTest
-        .uploadCSVFile(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
+        .uploadCsvFile(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
       contentAsString(result) shouldBe "Test body"
 

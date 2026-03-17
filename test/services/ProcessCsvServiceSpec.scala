@@ -22,9 +22,7 @@ import models.ERSFileProcessingException
 import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.http.scaladsl.model.{HttpResponse, StatusCodes}
-import org.apache.pekko.stream.IOResult
-import org.apache.pekko.stream.connectors.csv.scaladsl.CsvParsing
-import org.apache.pekko.stream.scaladsl.{FileIO, Sink, Source}
+import org.apache.pekko.stream.scaladsl.{Sink, Source}
 import org.apache.pekko.testkit.TestKit
 import org.apache.pekko.util.ByteString
 import org.mockito.ArgumentMatchers._
@@ -43,7 +41,6 @@ import uk.gov.hmrc.validator.models.{Cell, ValidationError}
 import uk.gov.hmrc.validator.models.csv.RowValidationResults
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 
-import java.io.File
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -66,11 +63,6 @@ class ProcessCsvServiceSpec
       )
     )
   .build()
-
-  def convertToPekkoSource(file: File): Source[List[ByteString], Future[IOResult]] = {
-    FileIO.fromPath(file.toPath)
-      .via(CsvParsing.lineScanner())
-  }
 
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication)
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)

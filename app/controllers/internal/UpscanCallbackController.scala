@@ -51,7 +51,8 @@ class UpscanCallbackController @Inject()(sessionCacheService: ErsCheckingFronten
               logger.warn(s"[UpscanController][callbackCsv] Upload id: ${uploadId.value} failed. Reason: ${details.failureReason}. Message: ${details.message}")
               if (details.message.contains("MIME type")) FailedMimeType else Failed
           }
-          logger.info(s"[UpscanController][callbackCsv] Updating CSV callback for upload id: ${uploadId.value} to ${uploadStatus.getClass.getSimpleName}")
+          logger.info(s"[UpscanController][callbackCsv] Updating csv callback for upload id: ${uploadId.value} to " +
+            s"${uploadStatus.getClass.getSimpleName}")
           implicit val updatedRequest: Request[JsValue] = RequestWithUpdatedSession(request, sessionId)
           (for {
             upscanId <- sessionCacheService.fetch[UpscanIds](uploadId.value)
