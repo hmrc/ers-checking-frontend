@@ -91,12 +91,12 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
     val source: Source[HttpResponse, _] = downloadSourceFile(successUpload.downloadUrl)
 
     (for {
-      sheetName           <- EitherT.fromEither[Future](checkFileType(successUpload.name))
-      _                   <- EitherT.fromEither[Future](ERSTemplatesInfo.findSheetWithinSchemeType(sheetName, scheme))
-      dataEngine          <- EitherT.fromEither(DataEngine(sheetName, SchemeVersion.All))
-      csvValidationResult <- EitherT(validateCsv(source, dataEngine))
-      rowsWithNumbers     <- EitherT.fromEither(getValidationResultsWithCorrectRowNumber(csvValidationResult, sheetName)(messages))
-      result              <- EitherT(checkValidityOfRows(rowsWithNumbers, sheetName, file))
+      sheetName                       <- EitherT.fromEither[Future](checkFileType(successUpload.name))
+      _                               <- EitherT.fromEither[Future](ERSTemplatesInfo.findSheetWithinSchemeType(sheetName, scheme))
+      dataEngine                      <- EitherT.fromEither(DataEngine(sheetName, SchemeVersion.All))
+      csvValidationResult             <- EitherT(validateCsv(source, dataEngine))
+      rowsWithCorrectedRowNumbers     <- EitherT.fromEither(getValidationResultsWithCorrectRowNumber(csvValidationResult, sheetName)(messages))
+      result                          <- EitherT(checkValidityOfRows(rowsWithCorrectedRowNumbers, sheetName, file))
     } yield result).value
   }
 
@@ -130,22 +130,23 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
     } else {
       Right(
         updateValidationResultRowNumbers(validationResults)
-          .take(appConfig.errorCount)
       )
     }
   }
 
   def updateValidationResultRowNumbers(validationResults: Seq[RowValidationResults]): Seq[ValidationError] =
     validationResults
-      .flatMap(
-        _.validationErrors.map((error: ValidationError) => {
-          val updatedCell: Cell = error.cell.copy(
-            row = error.cell.row + 1 // The original row number starts at 0, to map to the row in the csv we need to add 1
-          )
-          error.copy(cell = updatedCell)
-        }
-        )
-      )
+      .zipWithIndex
+      .flatMap{
+        case (rowValidationResults: RowValidationResults, rowNum: Int) =>
+          // The zipped index starts at 0 the row number starts at 1, to account for this we need to add 1
+          val rowNumberInCsv = rowNum + 1
+          rowValidationResults.validationErrors.map((error: ValidationError) => {
+            val updatedCell: Cell = error.cell.copy(row = rowNumberInCsv)
+            error.copy(cell = updatedCell)
+          })
+      }
+
 
   def checkValidityOfRows(listOfErrors: Seq[ValidationError], name: String, file: UpscanCsvFilesCallback)(
     implicit request: Request[_]): Future[Either[Throwable, Boolean]] = {
@@ -160,9 +161,8 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
       }
     }
 
-  def getSheetErrors(schemeErrors: SheetErrors): SheetErrors = {
+  def getSheetErrors(schemeErrors: SheetErrors): SheetErrors =
     schemeErrors.copy(errors = schemeErrors.errors.take(appConfig.errorCount))
-  }
 
   def checkFileType(name: String)(implicit messages: Messages): Either[Throwable, String] =
     if (name.endsWith(".csv")) {

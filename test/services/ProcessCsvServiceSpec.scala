@@ -200,14 +200,24 @@ class ProcessCsvServiceSpec
 
   }
 
-  "getRowsWithNumbers" should {
+  "getValidationResultsWithCorrectRowNumber" should {
 
     "return validation errors if there are no exceptions" in {
-      val errors = Seq(RowValidationResults(List(
-        ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
-        ValidationError(Cell("B", 0, "test"), "001", "error.1", "ers.upload.error.date"),
-        ValidationError(Cell("C", 1, "test"), "001", "error.1", "ers.upload.error.date")
-      )))
+      val errors = Seq(
+        RowValidationResults(List(
+          ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("B", 0, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("C", 0, "test"), "001", "error.1", "ers.upload.error.date")
+        )),
+        RowValidationResults(List(
+          ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("B", 0, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("C", 0, "test"), "001", "error.1", "ers.upload.error.date")
+        )),
+        RowValidationResults(List(
+          ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date")
+        )),
+      )
       val result = processCsvService.getValidationResultsWithCorrectRowNumber(errors, "test.csv")
 
       result.isRight shouldBe true
@@ -215,7 +225,12 @@ class ProcessCsvServiceSpec
         value should contain theSameElementsAs Seq(
           ValidationError(Cell("A", 1, "test"), "001", "error.1", "ers.upload.error.date"),
           ValidationError(Cell("B", 1, "test"), "001", "error.1", "ers.upload.error.date"),
-          ValidationError(Cell("C", 2, "test"), "001", "error.1", "ers.upload.error.date")
+          ValidationError(Cell("C", 1, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("A", 2, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("B", 2, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("C", 2, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("A", 3, "test"), "001", "error.1", "ers.upload.error.date"),
+
         )
       }
     }
@@ -228,6 +243,49 @@ class ProcessCsvServiceSpec
       result.isLeft shouldBe true
       value.context shouldBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload test.csv as part of your annual return."
     }
+  }
+
+  "updateValidationResultRowNumbers" should {
+
+    "return an empty sequence when parsed a sequence of RowValidationResults which contain no errors" in {
+      val validationResultsWithoutIndex = Seq(
+        RowValidationResults(validationErrors = List.empty[ValidationError]),
+        RowValidationResults(validationErrors = List.empty[ValidationError]),
+        RowValidationResults(validationErrors = List.empty[ValidationError]),
+        RowValidationResults(validationErrors = List.empty[ValidationError])
+      )
+      processCsvService.updateValidationResultRowNumbers(validationResultsWithoutIndex) shouldBe Seq.empty[ValidationError]
+    }
+
+    "return a list of ValidationErrors with the correct row numbers when parsed a list of validation results " +
+      "containing validation errors" in {
+      val validationResultsWithIndex = Seq(
+        RowValidationResults(validationErrors = List.empty[ValidationError]),
+        RowValidationResults(validationErrors = List(
+          ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("I", 0, "noooo"), "009", "error.9", "Enter 'yes' or 'no'")
+        )),
+        RowValidationResults(validationErrors = List(
+          ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("I", 0, "noooo"), "009", "error.9", "Enter 'yes' or 'no'")
+        )),
+        RowValidationResults(validationErrors = List.empty[ValidationError]),
+        RowValidationResults(validationErrors = List(
+          ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("I", 0, "noooo"), "009", "error.9", "Enter 'yes' or 'no'")
+        ))
+      )
+      val expectedValidationErrors = Seq(
+        ValidationError(Cell("A", 2, "test"), "001", "error.1", "ers.upload.error.date"),
+        ValidationError(Cell("I", 2, "noooo"), "009", "error.9", "Enter 'yes' or 'no'"),
+        ValidationError(Cell("A", 3, "test"), "001", "error.1", "ers.upload.error.date"),
+        ValidationError(Cell("I", 3, "noooo"), "009", "error.9", "Enter 'yes' or 'no'"),
+        ValidationError(Cell("A", 5, "test"), "001", "error.1", "ers.upload.error.date"),
+        ValidationError(Cell("I", 5, "noooo"), "009", "error.9", "Enter 'yes' or 'no'")
+      )
+      processCsvService.updateValidationResultRowNumbers(validationResultsWithIndex) should contain theSameElementsAs(expectedValidationErrors)
+    }
+
   }
 
   "checkValidityOfRows" should {
@@ -247,7 +305,7 @@ class ProcessCsvServiceSpec
       when(mockErsUtil.SCHEME_ERROR_COUNT_CACHE).thenReturn("10")
       when(mockSessionCacheRepo.cache[Long](any(), any())(any(), any())).thenReturn(Future(("", "")))
       when(mockSessionCacheRepo.cache[ListBuffer[SheetErrors]](any(), any())(any(), any())).thenReturn(Future(("", "")))
-      val errors = List(
+      val errors = Seq(
         ValidationError(Cell("A", 1, "test"), "001", "error.1", "ers.upload.error.date"),
         ValidationError(Cell("A", 3, "test"), "001", "error.1", "ers.upload.error.date")
       )
