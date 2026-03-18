@@ -134,15 +134,15 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
     }
   }
 
+  // row numbers are not currently returned with validation errors
+  // this method adds the correct row number to the validation errors based on their position in the sequence
   def updateValidationResultRowNumbers(validationResults: Seq[RowValidationResults]): Seq[ValidationError] =
     validationResults
-      .zipWithIndex
+      .zip(LazyList.from(1)) // start row numbers from 1
       .flatMap{
         case (rowValidationResults: RowValidationResults, rowNum: Int) =>
-          // The zipped index starts at 0 the row number starts at 1, to account for this we need to add 1
-          val rowNumberInCsv = rowNum + 1
           rowValidationResults.validationErrors.map((error: ValidationError) => {
-            val updatedCell: Cell = error.cell.copy(row = rowNumberInCsv)
+            val updatedCell: Cell = error.cell.copy(row = rowNum)
             error.copy(cell = updatedCell)
           })
       }
