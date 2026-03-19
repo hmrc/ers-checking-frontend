@@ -1,5 +1,3 @@
-import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings}
-
 ThisBuild / scalaVersion := "2.13.16"
 ThisBuild / majorVersion := 4
 

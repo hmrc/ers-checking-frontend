@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-package services.headers
+package models
 
-/**
- * Created by matt on 12/02/16.
- */
-trait HeaderData extends OtherHeaders with SAYEHeaders with SIPHeaders with EMIHeaders with CSOPHeaders
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.validator.models._
+import uk.gov.hmrc.validator.models.ods.SheetErrors
+
+object SheetErrors {
+  implicit val formatCell: OFormat[Cell] = Json.format[Cell]
+  implicit val formatErrors: OFormat[ValidationError] = Json.format[ValidationError]
+  implicit val format: OFormat[SheetErrors] = Json.format[SheetErrors]
+}

@@ -52,7 +52,7 @@ class UpscanServiceSpec extends AnyWordSpecLike with Matchers with OptionValues 
   "getUpscanFormDataOds" must {
     "get form data from Upscan Connector with an initiate request" in new TestUpscanService {
       val callback: Call = controllers.internal.routes.UpscanCallbackController.callbackOds(sessionId)
-      val success: String = "fakeUrlBase" + controllers.routes.UpscanController.successODS("csop").url
+      val success: String = "fakeUrlBase" + controllers.routes.UpscanController.successOds("csop").url
       val failure: String = "fakeUrlBase" + controllers.routes.UpscanController.failure().url
       val expectedInitiateRequest: UpscanInitiateRequest = UpscanInitiateRequest(callback.absoluteURL(secure = true), success, failure, Some(1), Some(209715200))
       val initiateRequestCaptor: ArgumentCaptor[UpscanInitiateRequest] = ArgumentCaptor.forClass(classOf[UpscanInitiateRequest])
@@ -60,7 +60,7 @@ class UpscanServiceSpec extends AnyWordSpecLike with Matchers with OptionValues 
       when(mockUpscanConnector.getUpscanFormData(initiateRequestCaptor.capture())(any[HeaderCarrier]))
         .thenReturn(Future.successful(upscanInitiateResponse))
 
-      Await.ready(getUpscanFormData(isCSV = false, "csop"), Duration.Inf)
+      Await.ready(getUpscanFormData(isCsv = false, "csop"), Duration.Inf)
       initiateRequestCaptor.getValue shouldBe expectedInitiateRequest
     }
   }
@@ -71,7 +71,7 @@ class UpscanServiceSpec extends AnyWordSpecLike with Matchers with OptionValues 
       val upscanIds: UpscanIds = UpscanIds(uploadId, "fileId", uploadStatus = NotStarted)
 
       val callback: Call = controllers.internal.routes.UpscanCallbackController.callbackCsv(uploadId, sessionId)
-      val success: String = "fakeUrlBase" + controllers.routes.UpscanController.successCSV(uploadId, "csop").url
+      val success: String = "fakeUrlBase" + controllers.routes.UpscanController.successCsv(uploadId, "csop").url
       val failure: String = "fakeUrlBase" + controllers.routes.UpscanController.failure().url
       val expectedInitiateRequest: UpscanInitiateRequest = UpscanInitiateRequest(callback.absoluteURL(secure = true), success, failure, Some(1), Some(209715200))
       val initiateRequestCaptor: ArgumentCaptor[UpscanInitiateRequest] = ArgumentCaptor.forClass(classOf[UpscanInitiateRequest])
@@ -79,7 +79,7 @@ class UpscanServiceSpec extends AnyWordSpecLike with Matchers with OptionValues 
       when(mockUpscanConnector.getUpscanFormData(initiateRequestCaptor.capture())(any[HeaderCarrier]))
         .thenReturn(Future.successful(upscanInitiateResponse))
 
-      Await.ready(getUpscanFormData(isCSV = true, scheme = "csop", Some(upscanIds)), Duration.Inf)
+      Await.ready(getUpscanFormData(isCsv = true, scheme = "csop", Some(upscanIds)), Duration.Inf)
       initiateRequestCaptor.getValue shouldBe expectedInitiateRequest
     }
   }

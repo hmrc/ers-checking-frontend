@@ -16,9 +16,9 @@
 
 package utils
 
-class UploadedFileUtil {
+object UploadedFileUtil {
 
-  def checkODSFileType(fileName: String): Boolean = {
+  def checkOdsFileType(fileName: String): Boolean = {
     val delimiter: Char = '.'
     val stringTokens: Array[String] = fileName.split(delimiter)
     stringTokens(stringTokens.length - 1).toLowerCase match {

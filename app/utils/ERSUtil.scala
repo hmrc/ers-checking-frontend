@@ -23,7 +23,6 @@ import javax.inject.Singleton
 @Singleton
 class ERSUtil
   extends CacheUtil
-    with PageBuilder
-    with ContentUtil {
+    with PageBuilder {
   val logger: Logger = Logger(getClass)
 }

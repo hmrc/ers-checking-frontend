@@ -65,13 +65,13 @@ class UpscanController @Inject()(authAction: AuthAction,
     }
   }
 
-  def successCSV(uploadId: UploadId, scheme: String): Action[AnyContent] = authAction.async { implicit request =>
-    logger.info(s"[UpscanController][successCSV] Upload form submitted for ID: $uploadId")
+  def successCsv(uploadId: UploadId, scheme: String): Action[AnyContent] = authAction.async { implicit request =>
+    logger.info(s"[UpscanController][successCsv] Upload form submitted for ID: $uploadId")
 
     val upscanCsvFilesList = for {
       csvFileList   <- sessionCacheService.fetchAndGetEntry[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
       updatedCacheFileList = {
-        logger.info(s"[UpscanController][successCSV] Updating uploadId: ${uploadId.value} to InProgress")
+        logger.info(s"[UpscanController][successCsv] Updating uploadId: ${uploadId.value} to InProgress")
         csvFileList.updateToInProgress(uploadId)
       }
       _ <- sessionCacheService.cache(ersUtil.CSV_FILES_UPLOAD, updatedCacheFileList)
@@ -80,9 +80,9 @@ class UpscanController @Inject()(authAction: AuthAction,
     upscanCsvFilesList flatMap { fileList =>
       if(fileList.noOfFilesToUpload == fileList.noOfUploads) {
         fetchCsvCallbackList(fileList).withRetry(appConfig.allCsvFilesCacheRetryAmount){ list =>
-          logger.debug(s"[UpscanController][successCSV] Fetched Callback list - $list")
-          logger.info(s"[UpscanController][successCSV] Comparing cached files [${list.size}] to numberOfFileToUpload[${fileList.noOfFilesToUpload}]")
-          logger.info(s"[UpscanController][successCSV] Checking if all files have completed upload - [${list.forall(_.isComplete)}]")
+          logger.debug(s"[UpscanController][successCsv] Fetched Callback list - $list")
+          logger.info(s"[UpscanController][successCsv] Comparing cached files [${list.size}] to numberOfFileToUpload[${fileList.noOfFilesToUpload}]")
+          logger.info(s"[UpscanController][successCsv] Checking if all files have completed upload - [${list.forall(_.isComplete)}]")
 
           (list.size == fileList.noOfFilesToUpload) && list.forall(_.isComplete)
         } flatMap  { files =>
@@ -91,35 +91,35 @@ class UpscanController @Inject()(authAction: AuthAction,
           sessionCacheService.cache[UpscanCsvFilesCallbackList](ersUtil.CALLBACK_DATA_KEY_CSV, callbackData).map{ ele =>
             if(callbackData.areAllFilesSuccessful()) {
               logger.debug(s"[UpscanController][successCsv] - callback upscan successful, callback: $callbackData")
-              Redirect(routes.UploadController.uploadCSVFile(scheme))
+              Redirect(routes.UploadController.uploadCsvFile(scheme))
             } else if (callbackData.areAnyFilesWrongMimeType()) {
               logger.info(s"[UpscanController][successCsv] - callback upscan rejected due to wrong mime type")
               Redirect(routes.CheckingServiceController.checkingInvalidFilePage())
             } else {
-              logger.error(s"[UpscanController][successCSV] Not all files are completed uploading - (${callbackData.areAllFilesComplete()}) " +
+              logger.error(s"[UpscanController][successCsv] Not all files are completed uploading - (${callbackData.areAllFilesComplete()}) " +
                 s"or  had a successful response - (${callbackData.areAllFilesSuccessful()})")
               getGlobalErrorPage
             }
           }
         } recover {
           case e: Exception =>
-            logger.error(s"[UpscanController][successCSV] failed to fetch callback data with exception ${e.getMessage}," +
+            logger.error(s"[UpscanController][successCsv] failed to fetch callback data with exception ${e.getMessage}," +
               s"timestamp: ${java.time.LocalTime.now()}.", e)
             getGlobalErrorPage
         }
       } else {
         logger.info(s"[UpscanController][successCsv] - checking the number of files upload to checking service, fileList: $fileList")
-        Future.successful(Redirect(routes.CheckingServiceController.checkCSVFilePage()))
+        Future.successful(Redirect(routes.CheckingServiceController.checkCsvFilePage()))
       }
     } recover {
       case e: Exception =>
-        logger.error(s"[UpscanController][successCSV] Failed to update the ids with exception ${e.getMessage}.", e)
+        logger.error(s"[UpscanController][successCsv] Failed to update the ids with exception ${e.getMessage}.", e)
         getGlobalErrorPage
     }
 
   }
 
-  def successODS(scheme: String): Action[AnyContent] = authAction.async { implicit request =>
+  def successOds(scheme: String): Action[AnyContent] = authAction.async { implicit request =>
     val futureCallbackData: Future[Option[UploadStatus]] = sessionCacheService.fetch[UploadStatus](
       ersUtil.CALLBACK_DATA_KEY).withRetry(appConfig.odsSuccessRetryAmount) {
       _.fold(true) {
@@ -130,25 +130,25 @@ class UpscanController @Inject()(authAction: AuthAction,
 
     futureCallbackData flatMap {
       case Some(_: UploadedSuccessfully) =>
-        Future.successful(Redirect(routes.UploadController.uploadODSFile(scheme)))
+        Future.successful(Redirect(routes.UploadController.uploadOdsFile(scheme)))
       case Some(Failed) =>
-        logger.warn("[UpscanController][successODS] Upload status is failed")
+        logger.warn("[UpscanController][successOds] Upload status is failed")
         Future.successful(getGlobalErrorPage)
       case Some(FailedMimeType) =>
-        logger.warn("[UpscanController][successODS] Upload status is rejected")
+        logger.warn("[UpscanController][successOds] Upload status is rejected")
         Future.successful(Redirect(routes.CheckingServiceController.checkingInvalidFilePage()))
       case Some(status) =>
-        logger.warn(s"[UpscanController][successODS] Invalid upload status: $status")
+        logger.warn(s"[UpscanController][successOds] Invalid upload status: $status")
         Future.successful(getGlobalErrorPage)
       case None =>
-        logger.error(s"[UpscanController][successODS] Failed to verify upload. No data found in cache")
+        logger.error(s"[UpscanController][successOds] Failed to verify upload. No data found in cache")
         Future.successful(getGlobalErrorPage)
     } recover {
       case e: LoopException[Option[UploadStatus] @unchecked] =>
-        logger.error(s"[UpscanController][successODS] Failed to verify upload. Upload status: ${e.finalFutureData.flatten}", e)
+        logger.error(s"[UpscanController][successOds] Failed to verify upload. Upload status: ${e.finalFutureData.flatten}", e)
         getGlobalErrorPage
       case e: Exception =>
-        logger.error(s"[UpscanController][successODS] Failed to save ods file with exception ${e.getMessage}.", e)
+        logger.error(s"[UpscanController][successOds] Failed to save ods file with exception ${e.getMessage}.", e)
         getGlobalErrorPage
     }
   }

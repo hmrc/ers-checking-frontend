@@ -18,9 +18,9 @@ package controllers
 
 import config.ApplicationConfig
 import controllers.auth.AuthAction
+import models.SheetErrors.format
 
 import javax.inject.{Inject, Singleton}
-import models.SheetErrors
 import models.upscan.{UploadId, UpscanCsvFilesCallbackList}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
@@ -31,8 +31,10 @@ import services.audit.AuditEvents
 import uk.gov.hmrc.http.InternalServerException
 import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import utils.{ERSUtil, JsonParser}
-import uk.gov.hmrc.services.validation.models.ValidationError
+import uk.gov.hmrc.validator.models.ods.SheetErrors
+import utils.{ContentUtil, ERSUtil}
+import uk.gov.hmrc.validator.models.ValidationError
+import utils.ContentUtil.ErrorMessageKeyPrefixAndScheme
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
@@ -45,7 +47,7 @@ class HtmlReportController @Inject()(authAction: AuthAction,
                                      auditEvents: AuditEvents,
                                      override val global_error: views.html.global_error
                                     )(implicit executionContext: ExecutionContext, ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with JsonParser with I18nSupport with ErsBaseController with Logging {
+  extends FrontendController(mcc) with I18nSupport with ErsBaseController with Logging {
 
   def htmlErrorReportPage(isCsv: Boolean): Action[AnyContent] = authAction.async {
     implicit request =>
@@ -76,9 +78,9 @@ class HtmlReportController @Inject()(authAction: AuthAction,
 
   def showHtmlErrorReportPage(isCsv: Boolean)(implicit request: Request[AnyRef], messages: Messages): Future[Result] = {
     sessionCacheService.fetchAll().map { all =>
-      val scheme: (String, String) = getEntry[String](all, ersUtil.SCHEME_CACHE) match {
-        case Some(name) => ersUtil.getSchemeName(name)
-        case _ => ("", "")
+      val scheneNameWithShortenedVersion: ErrorMessageKeyPrefixAndScheme = getEntry[String](all, ersUtil.SCHEME_CACHE) match {
+        case Some(name) => ContentUtil.getScheneNameWithShortenedVersion(name)
+        case None => ErrorMessageKeyPrefixAndScheme("", "")
       }
       lazy val (errorsList, errorCountLong, totalErrorsCount) = if (isCsv) {
         val uploadIds: Seq[UploadId] = getEntry[UpscanCsvFilesCallbackList](all, ersUtil.CALLBACK_DATA_KEY_CSV)
@@ -91,8 +93,6 @@ class HtmlReportController @Inject()(authAction: AuthAction,
         val odsErrors = schemeErrors.flatMap(sheet => sheet.errors).length
         (schemeErrors, schemeErrorCount, odsErrors)
       }
-
-      val (schemeName, schemeNameShort) = scheme
 
       val sheetNameList = errorsList.map(ele => ele.sheetName)
       val sheetName = sheetNameList.headOption.getOrElse("SheetName Not Found")
@@ -109,8 +109,16 @@ class HtmlReportController @Inject()(authAction: AuthAction,
         .distinct
         .mkString(",")
 
-      auditEvents.fileProcessingErrorAudit(schemeName, sheetName, errorMsg)
-      Ok(html_error_report(schemeName, schemeNameShort, totalErrorsCount, errorCountLong, errorsList.toSeq)(request, messages, appConfig))
+      auditEvents.fileProcessingErrorAudit(scheneNameWithShortenedVersion.errorMessageKeyPrefix, sheetName, errorMsg)
+      Ok(
+        html_error_report(
+          scheneNameWithShortenedVersion.errorMessageKeyPrefix,
+          scheneNameWithShortenedVersion.scheme,
+          totalErrorsCount,
+          errorCountLong,
+          errorsList.toSeq
+        )(request, messages, appConfig)
+      )
     } recover {
       case e: NoSuchElementException =>
         auditEvents.auditRunTimeError(e, "Failed to get values ", "")

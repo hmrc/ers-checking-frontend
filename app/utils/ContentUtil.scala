@@ -16,16 +16,18 @@
 
 package utils
 
-trait ContentUtil {
+object ContentUtil {
 
-  def getSchemeName(schemeType: String) : (String,String) = {
+  case class ErrorMessageKeyPrefixAndScheme(errorMessageKeyPrefix: String, scheme: String)
+
+  def getScheneNameWithShortenedVersion(schemeType: String): ErrorMessageKeyPrefixAndScheme = {
     schemeType.toLowerCase match {
-      case "csop" | "1" => ("ers_pdf_error_report.csop", "CSOP")
-      case "emi" | "2" => ("ers_pdf_error_report.emi", "EMI")
-      case "saye" | "4" => ("ers_pdf_error_report.saye", "SAYE")
-      case "sip" | "5" => ("ers_pdf_error_report.sip", "SIP")
-      case "other" | "3" => ("ers_pdf_error_report.other", "OTHER")
-      case _ => ("","")
+      case "csop" | "1" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.csop", "CSOP")
+      case "emi" | "2" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.emi", "EMI")
+      case "saye" | "4" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.saye", "SAYE")
+      case "sip" | "5" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.sip", "SIP")
+      case "other" | "3" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.other", "OTHER")
+      case _ => ErrorMessageKeyPrefixAndScheme("","")
     }
   }
 

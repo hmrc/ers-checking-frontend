@@ -229,7 +229,8 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showCheckFileTypeSelected(request)
       status(result) shouldBe Status.SEE_OTHER
-      result.futureValue.header.headers("Location") shouldBe routes.CheckingServiceController.checkODSFilePage().toString
+      result.futureValue.header.headers("Location") shouldBe routes.CheckingServiceController.checkOdsFilePage()
+        .toString
     }
 
     "if no form errors with scheme type and save fails" in {
@@ -270,19 +271,19 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
 
     "give a call to showCheckFilePage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.checkODSFilePage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result = controllerUnderTest.checkOdsFilePage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
     }
 
     "give a status OK and shows check file page if fetch successful" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.showCheckODSFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
+      val result = controllerUnderTest.showCheckOdsFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       status(result) shouldBe Status.OK
     }
 
     "direct to ers errors page if fetch fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
-      val res: Future[Result] = controllerUnderTest.showCheckODSFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
+      val res: Future[Result] = controllerUnderTest.showCheckOdsFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       res.map { result =>
         result shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request, testMessages)))
       }
@@ -291,7 +292,7 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
   }
 
 
-  "Check CSV file page GET" should {
+  "Check csv file page GET" should {
 
     def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
       new CheckingServiceController(mockAuthAction, mockUpscanService, mockSessionCacheRepo, mcc,
@@ -308,21 +309,21 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
         mockAnyContentAction
       }
 
-    "give a call to showCheckCSVFilePage if user is authenticated" in {
+    "give a call to showCheckCsvFilePage if user is authenticated" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.checkCSVFilePage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result = controllerUnderTest.checkCsvFilePage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
     }
 
     "give a status OK and shows check csv file page if fetch successful" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.showCheckCSVFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
+      val result = controllerUnderTest.showCheckCsvFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       status(result) shouldBe Status.OK
     }
 
     "direct to ers errors page if fetch fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
-      val res: Future[Result] = controllerUnderTest.showCheckCSVFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
+      val res: Future[Result] = controllerUnderTest.showCheckCsvFilePage()(Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       (Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
       res.map { result =>
         result shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request, testMessages)))
@@ -386,7 +387,6 @@ class CheckingServiceControllerTest extends AnyWordSpecLike with Matchers with O
 
         when(mockSessionCacheRepo.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any()))
           .thenReturn(if (schemeRes) Future.successful(("", "")) else Future.failed(new Exception))
-        when(mockErsUtil.getSchemeName(any())).thenReturn(("a", "b"))
 
         when(mockSessionCacheRepo.fetchAndGetEntry[String](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(), any()))
           .thenReturn(if (schemeRes) Future.successful(fileTypeRes) else Future.failed(new Exception))

@@ -16,39 +16,76 @@
 
 package utils
 
-import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import org.scalatestplus.mockito.MockitoSugar
+import utils.ContentUtil.{ErrorMessageKeyPrefixAndScheme, getScheneNameWithShortenedVersion, withArticle}
 
-class ContentUtilSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar {
-
-  class TestUtil extends ContentUtil
+class ContentUtilSpec extends AnyWordSpecLike with Matchers {
 
   "ContentUtil" should {
-    val contentUtil = new TestUtil
-    val data = List(
-      ("csop", "Company Share Option Plan"),
-      ("emi", "Enterprise Management Incentives"),
-      ("other", "Other"),
-      ("saye", "Save As You Earn"),
-      ("sip", "Share Incentive Plan"),
-      ("", "an invalid thing")
-    )
-    for(schemeType <- data) {
-      s"return scheme name and abbreviation for ${schemeType._2}" in {
-        contentUtil.getSchemeName(schemeType._1)._2 shouldBe schemeType._1.toUpperCase
-      }
+
+    case class TestCase(inputSchemeType: String, expectedOutputErrorReport: String, expectedOutputSchemeType: String)
+
+    "return the expected error report and scheme type" when {
+      List(
+        TestCase("CSOP", "ers_pdf_error_report.csop", "CSOP"),
+        TestCase("EMI", "ers_pdf_error_report.emi", "EMI"),
+        TestCase("OTHER", "ers_pdf_error_report.other", "OTHER"),
+        TestCase("SAYE", "ers_pdf_error_report.saye", "SAYE"),
+        TestCase("SIP", "ers_pdf_error_report.sip", "SIP"),
+        TestCase("cSop", "ers_pdf_error_report.csop", "CSOP"),
+        TestCase("eMi", "ers_pdf_error_report.emi", "EMI"),
+        TestCase("othEr", "ers_pdf_error_report.other", "OTHER"),
+        TestCase("saYe", "ers_pdf_error_report.saye", "SAYE"),
+        TestCase("sIp", "ers_pdf_error_report.sip", "SIP")
+      ).foreach((testCase: TestCase) =>
+        s"passed a valid scheme type of any case: ${testCase.inputSchemeType}" in {
+          getScheneNameWithShortenedVersion(testCase.inputSchemeType) shouldBe ErrorMessageKeyPrefixAndScheme(
+            testCase.expectedOutputErrorReport,
+            testCase.expectedOutputSchemeType
+          )
+        }
+      )
+
+      List(
+        TestCase("1", "ers_pdf_error_report.csop", "CSOP"),
+        TestCase("2", "ers_pdf_error_report.emi", "EMI"),
+        TestCase("3", "ers_pdf_error_report.other", "OTHER"),
+        TestCase("5", "ers_pdf_error_report.sip", "SIP"),
+        TestCase("4", "ers_pdf_error_report.saye", "SAYE")
+      ).foreach((testCase: TestCase) =>
+        s"passed a number linked to the scheme type ${testCase.inputSchemeType}" in {
+          getScheneNameWithShortenedVersion(testCase.inputSchemeType) shouldBe ErrorMessageKeyPrefixAndScheme(
+            testCase.expectedOutputErrorReport,
+            testCase.expectedOutputSchemeType
+          )
+        }
+      )
     }
+
+    "return a tuple containing two empty strings" when {
+      List(
+        TestCase("", "", ""),
+        TestCase("not a valid scheme", "", "")
+      ).foreach((testCase: TestCase) =>
+        s"passed a scheme type or number that isn't linked to a scheme type ${testCase.inputSchemeType}" in {
+          getScheneNameWithShortenedVersion(testCase.inputSchemeType) shouldBe ErrorMessageKeyPrefixAndScheme(
+            testCase.expectedOutputErrorReport,
+            testCase.expectedOutputSchemeType
+          )
+        }
+      )
+    }
+
 
     "parse withArticle" when {
       "data starts with a consonant" in {
         val string = "bing!"
-        contentUtil.withArticle(string) shouldBe "a bing!"
+        withArticle(string) shouldBe "a bing!"
       }
       "data starts with a vowel" in {
         val string = "apple"
-        contentUtil.withArticle(string) shouldBe "an apple"
+        withArticle(string) shouldBe "an apple"
       }
     }
   }

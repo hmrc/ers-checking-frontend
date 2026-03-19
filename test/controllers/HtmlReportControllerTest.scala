@@ -17,7 +17,7 @@
 package controllers
 
 import helpers.ErsTestHelper
-import models.SheetErrors
+import models.SheetErrors.format
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -33,8 +33,9 @@ import play.api.mvc.{DefaultMessagesControllerComponents, Result}
 import play.api.test.Helpers._
 import play.api.test.Injecting
 import play.api.{Application, i18n}
+import uk.gov.hmrc.validator.models.{Cell, ValidationError}
 import uk.gov.hmrc.mongo.cache.CacheItem
-import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
+import uk.gov.hmrc.validator.models.ods.SheetErrors
 import utils.CacheUtil
 import views.html.{global_error, html_error_report}
 
@@ -84,7 +85,6 @@ class HtmlReportControllerTest
       mockAnyContentAction
 
       when(mockSessionCacheRepo.fetchAll()(any())).thenReturn(Future.successful(cacheItem))
-      when(mockErsUtil.getSchemeName(any())).thenReturn(("ers_pdf_error_report.csop", "CSOP"))
 
       lazy val result = controllerUnderTest.htmlErrorReportPage(true).apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
@@ -186,7 +186,6 @@ class HtmlReportControllerTest
         ))
 
       when(mockSessionCacheRepo.fetchAll()(any())).thenReturn(Future.successful(cacheItemWithErrors))
-      when(mockErsUtil.getSchemeName(any())).thenReturn(("ers_pdf_error_report.csop", "CSOP"))
       val res = controllerUnderTest
         .showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"), testMessages)
       res.map { result =>

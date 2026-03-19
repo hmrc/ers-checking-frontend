@@ -16,40 +16,39 @@
 
 package services
 
-import org.apache.pekko.NotUsed
+import cats.implicits.toTraverseOps
 import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.http.scaladsl.model.HttpResponse
-import org.apache.pekko.stream.connectors.csv.scaladsl.CsvParsing
 import org.apache.pekko.stream.scaladsl.{Flow, Sink, Source}
-import org.apache.pekko.util.ByteString
 import config.ApplicationConfig
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
-import models.{ERSFileProcessingException, RowValidationResults, SheetErrors}
+import models.ERSFileProcessingException
+import models.SheetErrors.format
 import org.apache.commons.io.FilenameUtils
+import org.apache.pekko.http.scaladsl.model.HttpResponse
+import org.apache.pekko.stream.connectors.csv.scaladsl.CsvParsing
+import org.apache.pekko.util.ByteString
 import play.api.Logging
 import play.api.i18n.Messages
 import play.api.mvc.Request
 import repository.ErsCheckingFrontendSessionCacheRepository
-import services.FlowOps.eitherFromFunction
-import services.validation.ErsValidator
-import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import uk.gov.hmrc.services.validation.DataValidator
-import uk.gov.hmrc.services.validation.models._
-import utils.{CsvParserUtil, ERSUtil}
+import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.validator.csv.CsvValidator
+import uk.gov.hmrc.validator.models.csv.RowValidationResults
+import uk.gov.hmrc.validator.models.ods.SheetErrors
+import uk.gov.hmrc.validator.models.{Cell, ValidationError}
+import utils.ERSUtil
 
 import javax.inject.{Inject, Singleton}
-import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import uk.gov.hmrc.validator._
+import cats.data.EitherT
+import cats.instances.future.catsStdInstancesForFuture
 
 @Singleton
-class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
-                                  dataGenerator: DataGenerator,
-                                  appConfig: ApplicationConfig,
+class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
                                   sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
-                                  ersUtil: ERSUtil,
-                                  ersValidator: ErsValidator
+                                  ersUtil: ERSUtil
                                  )(implicit executionContext: ExecutionContext,
                                    actorSystem: ActorSystem) extends Logging {
 
@@ -73,127 +72,111 @@ class ProcessCsvService @Inject()(parserUtil: CsvParserUtil,
         case e => Left(e)
       }
 
-  def processFiles(callback: Option[UpscanCsvFilesCallbackList], scheme: String, source: String => Source[HttpResponse, _])(
-    implicit request: Request[_], hc: HeaderCarrier, messages: Messages
-  ): List[Future[Either[Throwable, Boolean]]] = {
-    logger.info(s"[ProcessCsvService][processFiles] callback $callback scheme : $scheme" )
+  def validateCsv(
+                   source: Source[HttpResponse, _],
+                   dataEngine: DataEngine
+                 ): Future[Either[Throwable, Seq[RowValidationResults]]] =
+    extractBodyOfRequest(source)
+      .via(FlowOps.eitherFromFunction(
+        (rowBytes: Seq[ByteString]) => CsvValidator.validateCsvRow(dataEngine, rowBytes))
+      )
+      .runWith(Sink.seq[Either[Throwable, RowValidationResults]])
+      .map(_.traverse(identity))
 
-    callback.get.files map { file =>
 
-      val successUpload = file.uploadStatus.asInstanceOf[UploadedSuccessfully]
+  def processFile(scheme: String, downloadSourceFile: String => Source[HttpResponse, _], file: UpscanCsvFilesCallback)
+                 (implicit request: Request[_], messages: Messages): Future[Either[Throwable, Boolean]] = {
 
-      val validatorFuture: Future[Either[Throwable, DataValidator]] = Source(List(successUpload.name))
-        .via(Flow.fromFunction(checkFileType(_)(messages)))
-        .via(eitherFromFunction(dataGenerator.getSheetCsv(_, scheme)(messages)))
-        .via(eitherFromFunction(dataGenerator.identifyAndDefineSheetCsv(_)(hc, messages)))
-        .via(eitherFromFunction(dataGenerator.setValidatorCsv(_)(hc, messages)))
-        .runWith(Sink.head)
+    val successUpload: UploadedSuccessfully = file.uploadStatus.asInstanceOf[UploadedSuccessfully]
+    val source: Source[HttpResponse, _] = downloadSourceFile(successUpload.downloadUrl)
 
-      validatorFuture.flatMap {
-        _.fold(
-          throwable => Future.successful(Left(throwable)),
-          validator => {
-            val futureListOfErrors: Future[Seq[Either[Throwable, RowValidationResults]]] = extractBodyOfRequest(source(successUpload.downloadUrl))
-              .via(eitherFromFunction(processRow(_, successUpload.name, validator)))
-              .runWith(Sink.seq[Either[Throwable, RowValidationResults]])
+    (for {
+      sheetName                       <- EitherT.fromEither[Future](checkFileType(successUpload.name))
+      _                               <- EitherT.fromEither[Future](ERSTemplatesInfo.findSheetWithinSchemeType(sheetName, scheme))
+      dataEngine                      <- EitherT.fromEither(DataEngine(sheetName, SchemeVersion.All))
+      csvValidationResult             <- EitherT(validateCsv(source, dataEngine))
+      rowsWithCorrectedRowNumbers     <- EitherT.fromEither(getValidationResultsWithCorrectRowNumber(csvValidationResult, sheetName)(messages))
+      result                          <- EitherT(checkValidityOfRows(rowsWithCorrectedRowNumbers, sheetName, file))
+    } yield result).value
+  }
 
-            futureListOfErrors.map {
-              getRowsWithNumbers(_, successUpload.name)(messages)
-            }.flatMap{
-              case Right(errorsFromRow) => checkValidityOfRows(errorsFromRow, successUpload.name, file)
-              case Left(exception) => Future(Left(exception))
-            }
-          }
-        )
+  def processFiles(callback: Option[UpscanCsvFilesCallbackList],
+                   scheme: String,
+                   downloadSourceFile: String => Source[HttpResponse, _])
+                  (implicit request: Request[_], messages: Messages): List[Future[Either[Throwable, Boolean]]] = {
+    logger.info(s"[ProcessCsvService][processFiles] callback $callback scheme: $scheme")
+    callback.get.files map { file: UpscanCsvFilesCallback =>
+      processFile(scheme = scheme, downloadSourceFile = downloadSourceFile, file = file)
+    }
+  }
+
+  def generateNoDataException(name: String)(implicit messages: Messages): ERSFileProcessingException =
+    ERSFileProcessingException(
+      "ers_check_csv_file.noData",
+      messages("ers_check_csv_file.noData", name),
+      needsExtendedInstructions = true,
+      optionalParams = Seq(name)
+    )
+
+  def checkIfValidationResultsEmpty(validationResults: Seq[RowValidationResults]): Boolean = {
+    val allRowsEmpty: Boolean = validationResults.forall(_.rowWasEmpty)
+    validationResults.isEmpty || allRowsEmpty
+  }
+
+  def getValidationResultsWithCorrectRowNumber(validationResults: Seq[RowValidationResults], name: String)(
+    implicit messages: Messages): Either[Throwable, Seq[ValidationError]] = {
+    if (checkIfValidationResultsEmpty(validationResults)){
+      Left(generateNoDataException(name))
+    } else {
+      Right(
+        updateValidationResultRowNumbers(validationResults)
+      )
+    }
+  }
+
+  // row numbers are not currently returned with validation errors
+  // this method adds the correct row number to the validation errors based on their position in the sequence
+  def updateValidationResultRowNumbers(validationResults: Seq[RowValidationResults]): Seq[ValidationError] =
+    validationResults
+      .zip(LazyList.from(1)) // start row numbers from 1
+      .flatMap{
+        case (rowValidationResults: RowValidationResults, rowNum: Int) =>
+          rowValidationResults.validationErrors.map((error: ValidationError) => {
+            val updatedCell: Cell = error.cell.copy(row = rowNum)
+            error.copy(cell = updatedCell)
+          })
+      }
+
+
+  def checkValidityOfRows(listOfErrors: Seq[ValidationError], name: String, file: UpscanCsvFilesCallback)(
+    implicit request: Request[_]): Future[Either[Throwable, Boolean]] = {
+    if (listOfErrors.isEmpty){
+      Future.successful(Right(true))
+    } else {
+      val errorsToCache = ListBuffer(getSheetErrors(SheetErrors(FilenameUtils.removeExtension(name), listOfErrors.to(ListBuffer))))
+      for {
+        _ <- sessionCacheService.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${file.uploadId.value}", listOfErrors.length)
+        _ <- sessionCacheService.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${file.uploadId.value}", errorsToCache)
+      } yield Right(false)
       }
     }
-  }
 
-  def processRow(rowBytes: List[ByteString], sheetName: String, validator: DataValidator): Either[Throwable, RowValidationResults] = {
-    val rowStrings = rowBytes.map(byteString => byteString.utf8String)
-    val parsedRow = parserUtil.formatDataToValidate(rowStrings, sheetName)
-    val rowIsEmpty = parserUtil.rowIsEmpty(rowStrings)
+  def getSheetErrors(schemeErrors: SheetErrors): SheetErrors =
+    schemeErrors.copy(errors = schemeErrors.errors.take(appConfig.errorCount))
 
-    Try {
-      validator.validateRow(Row(0, ersValidator.getCells(parsedRow, 0)))
-    } match {
-      case Failure(e) =>
-        logger.warn(e.toString)
-        Left(e)
-      case Success(list) => Right(RowValidationResults(list.getOrElse(List.empty), rowIsEmpty))
-    }
-  }
-
-  def checkFileType(name: String)(implicit messages: Messages): Either[Throwable, String] = if (name.endsWith(".csv")) {
-    Right(FilenameUtils.removeExtension(name))
-  } else {
-    Left(ERSFileProcessingException(
-      Messages("ers_check_csv_file.file_type_error", name)(messages),
-      Messages("ers_check_csv_file.file_type_error", name)(messages)))
-  }
-
-@tailrec
-private[services] final def processDisplayedErrors(errorsLeftToDisplay: Int,
-                                                   rowsWithIndex: Seq[(List[ValidationError], Int)]): Seq[(List[ValidationError], Int)] = {
-  if (errorsLeftToDisplay <= 0) {
-    rowsWithIndex
-  }
-  else {
-    val indexOfFirstOccurrence: Int = rowsWithIndex.indexWhere(errorsWithIndex => errorsWithIndex._1.nonEmpty &&
-      errorsWithIndex._1.exists(validationError => validationError.cell.row == 0))
-    if (indexOfFirstOccurrence != -1) {
-      val listOriginalReference = rowsWithIndex(indexOfFirstOccurrence)._1
-      val entryReplacement = (listOriginalReference.map(validationError => {
-        val cellReplaced = validationError.cell.copy(row = indexOfFirstOccurrence + 1)
-        validationError.copy(cell = cellReplaced)
-      }), indexOfFirstOccurrence)
-      processDisplayedErrors(errorsLeftToDisplay - entryReplacement._1.length, rowsWithIndex.updated(indexOfFirstOccurrence, entryReplacement))
+  def checkFileType(name: String)(implicit messages: Messages): Either[Throwable, String] =
+    if (name.endsWith(".csv")) {
+      Right(FilenameUtils.removeExtension(name))
     } else {
-      rowsWithIndex
-    }
-  }
-}
-
-  def giveRowNumbers(list: Seq[List[ValidationError]]): Seq[List[ValidationError]] = {
-    val maximumNumberOfErrorsToDisplay: Int = appConfig.errorCount
-    processDisplayedErrors(maximumNumberOfErrorsToDisplay, list.zipWithIndex).map(_._1)
-  }
-
-  def getRowsWithNumbers(listOfErrors: Seq[Either[Throwable, RowValidationResults]], name: String)(
-    implicit messages: Messages): Either[Throwable, Seq[List[ValidationError]]] = listOfErrors match {
-    case allEmpty if allEmpty.isEmpty || allEmpty.filter(_.isRight).forall(_.map(_.rowWasEmpty).forall(identity)) =>
       Left(ERSFileProcessingException(
-        "ers_check_csv_file.noData",
-        messages("ers_check_csv_file.noData", name),
-        needsExtendedInstructions = true,
-        optionalParams = Seq(name)))
-    case nonEmpty =>
-      nonEmpty.find(_.isLeft) match {
-      case Some(Left(issues)) => Left(issues)
-      case _ =>
-        val maybeErrors = nonEmpty.map(_.getOrElse(RowValidationResults(List())).validationErrors)
-        Right(giveRowNumbers(maybeErrors))
+        Messages("ers_check_csv_file.file_type_error", name)(messages),
+        Messages("ers_check_csv_file.file_type_error", name)(messages)))
     }
+
+  private object FlowOps {
+
+    def eitherFromFunction[A, B](input: A => Either[Throwable, B]): Flow[Either[Throwable, A], Either[Throwable, B], _] =
+      Flow.fromFunction(_.flatMap(input))
+
   }
-
-  def checkValidityOfRows(listOfErrors: Seq[List[ValidationError]], name: String, file: UpscanCsvFilesCallback)(
-    implicit request: Request[_]): Future[Either[Throwable, Boolean]] = {
-    listOfErrors.filter(rowErrors => rowErrors.nonEmpty) match {
-      case allGood if allGood.isEmpty => Future.successful(Right(true))
-      case errors =>
-        val errorsToCache = ListBuffer(parserUtil.getSheetErrors(SheetErrors(FilenameUtils.removeExtension(name), errors.flatten.to(ListBuffer))))
-        for {
-          _ <- sessionCacheService.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${file.uploadId.value}", errors.flatten.length)
-          _ <- sessionCacheService.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${file.uploadId.value}",
-            errorsToCache)
-        } yield Right(false)
-    }
-  }
-}
-
-object FlowOps {
-
-  def eitherFromFunction[A, B](input: A => Either[Throwable, B]): Flow[Either[Throwable, A], Either[Throwable, B], NotUsed] =
-    Flow.fromFunction(_.flatMap(input))
-
 }

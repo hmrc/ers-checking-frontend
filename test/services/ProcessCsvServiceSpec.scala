@@ -16,38 +16,31 @@
 
 package services
 
-import com.typesafe.config.ConfigFactory
 import helpers.ErsTestHelper
-import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
-import models.{ERSFileProcessingException, RowValidationResults, SheetErrors}
+import models.upscan._
+import models.ERSFileProcessingException
 import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.http.scaladsl.model.{HttpResponse, StatusCodes}
-import org.apache.pekko.stream.IOResult
-import org.apache.pekko.stream.connectors.csv.scaladsl.CsvParsing
-import org.apache.pekko.stream.scaladsl.{FileIO, Sink, Source}
+import org.apache.pekko.stream.scaladsl.{Sink, Source}
 import org.apache.pekko.testkit.TestKit
 import org.apache.pekko.util.ByteString
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.concurrent.{ScalaFutures, TimeLimits}
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{EitherValues, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.i18n.{Messages, MessagesImpl}
-import play.api.inject.bind
+import play.api.i18n.MessagesImpl
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.DefaultMessagesControllerComponents
 import play.api.{Application, i18n}
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.test.MongoSupport
-import uk.gov.hmrc.services.validation.DataValidator
-import uk.gov.hmrc.services.validation.models.{Cell, ValidationError}
-import utils.CsvParserUtil
+import uk.gov.hmrc.validator.models.{Cell, ValidationError}
+import uk.gov.hmrc.validator.models.csv.RowValidationResults
+import uk.gov.hmrc.validator.models.ods.SheetErrors
 
-import java.io.File
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -60,9 +53,7 @@ class ProcessCsvServiceSpec
     with EitherValues
     with ErsTestHelper
     with GuiceOneAppPerSuite
-    with TimeLimits
-    with ScalaFutures
-    with MongoSupport {
+    with ScalaFutures {
 
   override lazy val fakeApplication: Application = new GuiceApplicationBuilder()
     .configure(
@@ -71,161 +62,14 @@ class ProcessCsvServiceSpec
         "metrics.enabled" -> "false"
       )
     )
-    .overrides(
-      bind(classOf[MongoComponent]).toInstance(mongoComponent)
-    ).build()
+  .build()
 
-  def convertToPekkoSource(file: File): Source[List[ByteString], Future[IOResult]] = {
-    FileIO.fromPath(file.toPath)
-      .via(CsvParsing.lineScanner())
-  }
-
-  lazy val testParserUtil: CsvParserUtil = fakeApplication.injector.instanceOf[CsvParserUtil]
-  val mockDataGenerator: DataGenerator = mock[DataGenerator]
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication)
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
 
-  def testProcessCsvService: ProcessCsvService = new ProcessCsvService(testParserUtil, mockDataGenerator, mockAppConfig,
-    mockSessionCacheRepo, mockErsUtil, mockErsValidator)
+  val processCsvService: ProcessCsvService = new ProcessCsvService(mockAppConfig, mockSessionCacheRepo, mockErsUtil)
 
   when(mockAppConfig.csopV5Enabled).thenReturn(true)
-
-  "processRow" should {
-
-    "process a row and return the errors it contains" in {
-      val source = convertToPekkoSource(new File(System.getProperty("user.dir") + "/test/resources/copy/Other_Grants_V4.csv"))
-      val dataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-other-grants-validation-config"))
-      when(mockErsValidator.validateRow(any())(any(), any()))
-        .thenReturn(Some(List(ValidationError(Cell("A", 0, "25  2015"), "error.1", "001", "ers.upload.error.date"))))
-      when(mockErsValidator.getCells(any(), any()))
-        .thenReturn(Seq(Cell("A", 0, "25  2015")))
-
-      val resultFuture = source
-        .runWith(Sink.seq).map { fileCopied =>
-        testProcessCsvService.processRow(fileCopied.flatten.toList, "Other_Grants_V4.csv", dataValidator)
-      }
-
-      val result = Await.result(resultFuture, Duration.Inf)
-      assert(result.isRight)
-      result.value.validationErrors.head.cell shouldBe Cell("A", 0, "25  2015")
-      result.value.validationErrors.head.errorId shouldBe "001"
-      result.value.validationErrors.head.errorMsg shouldBe "ers.upload.error.date"
-      result.value.validationErrors.head.ruleId shouldBe "error.1"
-    }
-
-    "process a row and return an empty list if there are no errors" in {
-      val source = convertToPekkoSource(new File(System.getProperty("user.dir") + "/test/resources/copy/CSOP_OptionsGranted_V5.csv"))
-      val dataValidator = new DataValidator(ConfigFactory.load.getConfig("ers-csop-granted-validation-config-v5"))
-      when(mockErsValidator.validateRow(any())(any(), any()))
-        .thenReturn(None)
-      when(mockErsValidator.getCells(any(), any()))
-        .thenReturn(Seq(Cell("A", 0, "2015-09-23"), Cell("B", 0, "250"),
-          Cell("C", 0, "123.12"), Cell("D", 0, "12.1234"), Cell("E", 0, "12.1234"),
-          Cell("F", 0, "no"), Cell("G", 0, "yes"),
-          Cell("H", 0, "AB12345678"), Cell("I", 0, "no")
-        ))
-
-      val resultFuture = source
-        .runWith(Sink.seq).map { fileCopied =>
-        testProcessCsvService.processRow(fileCopied.flatten.toList, "CSOP_OptionsGranted_V5.csv", dataValidator)
-      }
-
-      val result = Await.result(resultFuture, Duration.Inf)
-      assert(result.isRight)
-      result.value.validationErrors.isEmpty shouldBe true
-      }
-  }
-
-  "processFiles" should {
-    when(mockDataGenerator.getSheetCsv(any(), any())(any())).thenReturn(Right((ERSTemplatesInfo.ersSheetsWithCsopV5("CSOP_OptionsGranted_V5"), "csop")))
-    when(mockDataGenerator.identifyAndDefineSheetCsv(any())(any(), any())).thenReturn(Right("CSOP_OptionsGranted_V5"))
-    when(mockDataGenerator.setValidatorCsv(any())(any(), any())).thenReturn(Right(new DataValidator(ConfigFactory.load.getConfig("ers-csop-granted-validation-config-v5"))))
-    when(mockErsUtil.SCHEME_ERROR_COUNT_CACHE).thenReturn("10")
-    when(mockSessionCacheRepo.cache[Any](any(), any())(any(), any())).thenReturn(Future(("", "")))
-
-    def returnStubSource(x: String, data: String): Source[HttpResponse, NotUsed] = {
-      Source.single(HttpResponse(entity = data))
-    }
-
-    "return true if all rows are valid" in {
-      val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))))
-      val data = "2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no"
-
-      when(mockErsValidator.getCells(any(), any()))
-        .thenReturn(Seq(Cell("A", 0, "2015-09-23"), Cell("B", 0, "250"),
-          Cell("C", 0, "123.12"), Cell("D", 0, "12.1234"), Cell("E", 0, "12.1234"),
-          Cell("F", 0, "no"), Cell("G", 0, "yes"),
-          Cell("H", 0, "AB12345678"), Cell("I", 0, "no")
-        ))
-      val resultFuture = testProcessCsvService.processFiles(Some(callback), "csop", returnStubSource(_ , data))
-
-      val result = resultFuture.map(_.futureValue)
-      assert(result.forall(_.isRight))
-      result shouldBe List(Right(true))
-    }
-    "return false when the data contains at least one invalid row" in {
-      val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))))
-      val data = "2015-09-23,test,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no"
-
-      when(mockErsValidator.validateRow(any())(any(), any()))
-        .thenReturn(Some(List(ValidationError(Cell("A", 0, "25  2015"), "error.1", "001", "ers.upload.error.date"))))
-      when(mockErsValidator.getCells(any(), any()))
-        .thenReturn(Seq(Cell("A", 0, "badValue$£")))
-      val resultFuture = testProcessCsvService.processFiles(Some(callback), "csop", returnStubSource(_, data))
-
-      val result = resultFuture.map(_.futureValue)
-      assert(result.forall(_.isRight))
-      result shouldBe List(Right(false))
-    }
-
-    "return a throwable when an error occurs during the file validation" in {
-      val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))))
-      val data = ""
-      val resultFuture = testProcessCsvService.processFiles(Some(callback), "csop", returnStubSource(_, data))
-
-      val result = resultFuture.map(_.futureValue)
-      assert(result.forall(_.isLeft))
-      val value = result.head.left.toOption.get.asInstanceOf[ERSFileProcessingException]
-
-      value.context shouldBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload CSOP_OptionsGranted_V5.csv as part of your annual return."
-    }
-
-    "return a throwable when an error occurs during the file processing" in {
-      val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))))
-      val data = "2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no"
-      when(mockDataGenerator.setValidatorCsv(any())(any(), any())).thenReturn(Left(ERSFileProcessingException(
-        "ers.exceptions.dataParser.configFailure",
-        Messages("ers.exceptions.dataParser.validatorError"),
-        optionalParams = Seq("test")
-      )))
-
-      val resultFuture = testProcessCsvService.processFiles(Some(callback), "csop", returnStubSource(_, data))
-
-      val result = resultFuture.map(_.futureValue)
-      assert(result.forall(_.isLeft))
-      result.head.left.value
-        .getMessage shouldBe "ers.exceptions.dataParser.configFailure"
-    }
-
-  }
-
-  "extractEntityData" should {
-
-    "extract the data from an HttpResponse" in {
-      val response = HttpResponse(entity = "Test response body")
-      val resultFuture = testProcessCsvService.extractEntityData(response).runWith(Sink.head)
-
-      val result = Await.result(resultFuture, Duration.Inf)
-      result.utf8String shouldBe "Test response body"
-    }
-
-    "return a failed source with an UpstreamErrorResponse if response status is not Ok (200)" in {
-      val response = HttpResponse(status = StatusCodes.InternalServerError)
-      val resultFuture = testProcessCsvService.extractEntityData(response).runWith(Sink.head)
-
-      assert(resultFuture.failed.futureValue.getMessage.contains("Illegal response from Upscan"))
-    }
-  }
 
   "extractBodyOfRequest" should {
 
@@ -233,198 +77,223 @@ class ProcessCsvServiceSpec
       val source = Source
         .single(HttpResponse(entity = "0, 1, 2, 3\n4, 5"))
 
-      val resultFuture = testProcessCsvService.extractBodyOfRequest(source).runWith(Sink.seq)
-      val result = Await.result(resultFuture, Duration.Inf)
+      val resultFuture: Future[Seq[Either[Throwable, List[ByteString]]]] = processCsvService.extractBodyOfRequest(source).runWith(Sink.seq)
+      val result: Seq[Either[Throwable, List[ByteString]]] = Await.result(resultFuture, Duration.Inf)
 
       assert(result.forall(_.isRight))
-      result.head.value shouldBe List(ByteString("0"), ByteString(" 1"), ByteString(" 2"), ByteString(" 3"))
-      result(1).value shouldBe List(ByteString("4"), ByteString(" 5"))
+      result.head.map(_ shouldBe List(ByteString("0"), ByteString(" 1"), ByteString(" 2"), ByteString(" 3")))
+      result(1).map(_ shouldBe List(ByteString("4"), ByteString(" 5")))
     }
 
     "return a left containing a throwable when an error occurs" in {
       val source = Source
         .single(HttpResponse(status = StatusCodes.InternalServerError))
 
-      val resultFuture = testProcessCsvService.extractBodyOfRequest(source).runWith(Sink.seq)
+      val resultFuture = processCsvService.extractBodyOfRequest(source).runWith(Sink.seq)
       val result = Await.result(resultFuture, Duration.Inf)
       result.head.isLeft shouldBe true
-      val exception = result.head.left.value
-      assert(exception.isInstanceOf[UpstreamErrorResponse])
-      assert(exception.asInstanceOf[UpstreamErrorResponse].getMessage().contains("Illegal response from Upscan"))
+      val exception: Either[List[ByteString], Throwable] = result.head.swap
+      exception.map{e: Throwable =>
+        assert(e.isInstanceOf[UpstreamErrorResponse])
+        assert(e.asInstanceOf[UpstreamErrorResponse].getMessage.contains("Illegal response from Upscan"))
+      }
     }
   }
 
-  "checkFileType" should {
-    "check the file is a csv and remove the extension" in {
-      val result = testProcessCsvService.checkFileType("test.csv")
-      result.isRight shouldBe true
-      result.value shouldBe "test"
+  "processFiles" should {
+
+    when(mockErsUtil.SCHEME_ERROR_COUNT_CACHE).thenReturn("10")
+    when(mockSessionCacheRepo.cache[Any](any(), any())(any(), any())).thenReturn(Future(("", "")))
+
+    def returnStubSource(x: String, data: String): Source[HttpResponse, NotUsed] = {
+      Source.single(HttpResponse(entity = data))
     }
 
-    "if the file is not a csv throw an ERSFileProcessingException" in {
-      val result = testProcessCsvService.checkFileType("test.ods")
-      result.isLeft shouldBe true
-      result.left.value.getMessage shouldBe "You chose to check a CSV file, but test.ods isn’t a CSV file."
+    "return a Right containing true if row is valid" in {
+      val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))))
+      val data: String = "2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no"
+
+      processCsvService.processFiles(Some(callback), "csop", returnStubSource(_ , data)).foreach{ futureResult =>
+        val result: Either[Throwable, Boolean] = Await.result(futureResult, Duration.Inf)
+        assert(result.isRight)
+        result.map(validFile => assert(validFile))
+      }
+    }
+
+    "return false when the data contains at least one invalid row" in {
+      val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))))
+      val data =
+        "2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,test,123.12,12.1234,12.1234,no,yes,AB12345678,no\n"
+
+      processCsvService.processFiles(Some(callback), "csop", returnStubSource(_ , data)).foreach{ futureResult =>
+        val result: Either[Throwable, Boolean] = Await.result(futureResult, Duration.Inf)
+          assert(result.isRight)
+          result.map(validFile => assert(!validFile))
+      }
+    }
+
+    "return a throwable when an error occurs during the file validation" in {
+      val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))))
+      val data = ""
+      val resultFuture = processCsvService.processFiles(Some(callback), "csop", returnStubSource(_, data))
+
+      val result = resultFuture.map(_.futureValue)
+      assert(result.forall(_.isLeft))
+      val value = result.head.left.toOption.get.asInstanceOf[ERSFileProcessingException]
+
+      value.context shouldBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload CSOP_OptionsGranted_V5 as part of your annual return."
+    }
+
+    "return a throwable when an error occurs during the file processing" in {
+      val callback = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("NOT A VALID SHEET NAME", "no", Some(1)))))
+      val data = "2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no\n2015-09-23,250,123.12,12.1234,12.1234,no,yes,AB12345678,no"
+      val exception: Throwable = processCsvService.processFiles(Some(callback), "csop", returnStubSource(_, data)).head.futureValue.swap.value
+      exception.getMessage shouldBe "You chose to check a CSV file, but NOT A VALID SHEET NAME isn’t a CSV file."
     }
   }
 
-  "processDisplayedErrors" should {
-    "correctly update the cells with the row number for as many errors as required" when {
+  "extractEntityData" should {
 
-      "asked to display 3 errors given 2 rows with 3 errors in each" in {
-        val errors = Seq((List(
-          ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
-          ValidationError(Cell("B", 0, "test"), "001", "error.1", "ers.upload.error.date"),
-          ValidationError(Cell("C", 0, "test"), "001", "error.1", "ers.upload.error.date")
-        ), 0), (List(
-          ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
-          ValidationError(Cell("B", 0, "test"), "001", "error.1", "ers.upload.error.date"),
-          ValidationError(Cell("C", 0, "test"), "001", "error.1", "ers.upload.error.date")
-        ), 0)
-        )
-        val result = testProcessCsvService.processDisplayedErrors(3, errors)
-        result.head shouldBe ((List(
-          ValidationError(Cell("A", 1, "test"), "001", "error.1", "ers.upload.error.date"),
-          ValidationError(Cell("B", 1, "test"), "001", "error.1", "ers.upload.error.date"),
-          ValidationError(Cell("C", 1, "test"), "001", "error.1", "ers.upload.error.date")
-        ), 0))
+    "extract the data from an HttpResponse" in {
+      val response = HttpResponse(entity = "Test response body")
+      val resultFuture = processCsvService.extractEntityData(response).runWith(Sink.head)
 
-        result(1) shouldBe ((List(
-          ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
-          ValidationError(Cell("B", 0, "test"), "001", "error.1", "ers.upload.error.date"),
-          ValidationError(Cell("C", 0, "test"), "001", "error.1", "ers.upload.error.date")
-        ), 0))
-      }
-
-      "asked to display 4 errors given 2 rows with 3 errors in each" in {
-        val errors = Seq((List(
-          ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
-          ValidationError(Cell("B", 0, "test"), "001", "error.1", "ers.upload.error.date"),
-          ValidationError(Cell("C", 0, "test"), "001", "error.1", "ers.upload.error.date")
-        ), 0), (List(
-          ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
-          ValidationError(Cell("B", 0, "test"), "001", "error.1", "ers.upload.error.date"),
-          ValidationError(Cell("C", 0, "test"), "001", "error.1", "ers.upload.error.date")
-        ), 0)
-        )
-        val result = testProcessCsvService.processDisplayedErrors(4, errors)
-        result shouldBe Seq((List(
-          ValidationError(Cell("A", 1, "test"), "001", "error.1", "ers.upload.error.date"),
-          ValidationError(Cell("B", 1, "test"), "001", "error.1", "ers.upload.error.date"),
-          ValidationError(Cell("C", 1, "test"), "001", "error.1", "ers.upload.error.date")
-        ), 0), (List(
-          ValidationError(Cell("A", 2, "test"), "001", "error.1", "ers.upload.error.date"),
-          ValidationError(Cell("B", 2, "test"), "001", "error.1", "ers.upload.error.date"),
-          ValidationError(Cell("C", 2, "test"), "001", "error.1", "ers.upload.error.date")
-        ), 1)
-        )
-      }
-
-      "asked to display 5 errors given 7 rows with 1 error in each" in {
-        val errors = Seq(
-          (List(ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date")), 0),
-          (List(ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date")), 0),
-          (List(ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date")), 0),
-          (List(ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date")), 0),
-          (List(ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date")), 0),
-          (List(ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date")), 0),
-          (List(ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date")), 0)
-        )
-
-        val result = testProcessCsvService.processDisplayedErrors(5, errors)
-
-        result shouldBe Seq(
-          (List(ValidationError(Cell("A", 1, "test"), "001", "error.1", "ers.upload.error.date")), 0),
-          (List(ValidationError(Cell("A", 2, "test"), "001", "error.1", "ers.upload.error.date")), 1),
-          (List(ValidationError(Cell("A", 3, "test"), "001", "error.1", "ers.upload.error.date")), 2),
-          (List(ValidationError(Cell("A", 4, "test"), "001", "error.1", "ers.upload.error.date")), 3),
-          (List(ValidationError(Cell("A", 5, "test"), "001", "error.1", "ers.upload.error.date")), 4),
-          (List(ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date")), 0),
-          (List(ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date")), 0)
-        )
-      }
+      val result = Await.result(resultFuture, Duration.Inf)
+      result.utf8String shouldBe "Test response body"
     }
 
-    "return the original input when there are no errors" in {
-      val errors = Seq(
-        (List.empty[ValidationError], 0),
-        (List.empty[ValidationError], 0),
-        (List.empty[ValidationError], 0),
-        (List.empty[ValidationError], 0)
+    "return a failed source with an UpstreamErrorResponse if response status is not Ok (200)" in {
+      val response = HttpResponse(status = StatusCodes.InternalServerError)
+      val resultFuture = processCsvService.extractEntityData(response).runWith(Sink.head)
+
+      assert(resultFuture.failed.futureValue.getMessage.contains("Illegal response from Upscan"))
+    }
+  }
+
+  "checkIfValidationResultsEmpty" should {
+
+    "return true if there is one RowValidationResults record which is empty" in {
+      val emptyValidationResults = Seq(
+        RowValidationResults(List.empty[ValidationError], rowWasEmpty = true)
       )
-      val result = testProcessCsvService.processDisplayedErrors(3, errors)
-
-      result shouldBe errors
+      assert(processCsvService.checkIfValidationResultsEmpty(emptyValidationResults))
     }
+
+    "return true if there are multiple RowValidationResults record which are all empty" in {
+      val emptyValidationResults = Seq(
+        RowValidationResults(List.empty[ValidationError], rowWasEmpty = true),
+        RowValidationResults(List.empty[ValidationError], rowWasEmpty = true),
+        RowValidationResults(List.empty[ValidationError], rowWasEmpty = true),
+        RowValidationResults(List.empty[ValidationError], rowWasEmpty = true)
+      )
+      assert(processCsvService.checkIfValidationResultsEmpty(emptyValidationResults))
+    }
+
+    "return false if there are multiple RowValidationResults record with any which are not empty" in {
+      val emptyValidationResults = Seq(
+        RowValidationResults(List.empty[ValidationError], rowWasEmpty = true),
+        RowValidationResults(List(ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date")), rowWasEmpty = false),
+        RowValidationResults(List.empty[ValidationError], rowWasEmpty = true)
+      )
+      assert(!processCsvService.checkIfValidationResultsEmpty(emptyValidationResults))
+    }
+
   }
 
-  "giveRowNumbers" should {
-
-    "return a seq of list of validation errors with correct row numbers" in {
-      val errors = Seq(List(
-        ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
-        ValidationError(Cell("B", 0, "test"), "001", "error.1", "ers.upload.error.date"),
-        ValidationError(Cell("C", 1, "test"), "001", "error.1", "ers.upload.error.date")
-      ))
-      val result = testProcessCsvService.giveRowNumbers(errors)
-
-      result shouldBe Seq(List(
-        ValidationError(Cell("A", 1, "test"), "001", "error.1", "ers.upload.error.date"),
-        ValidationError(Cell("B", 1, "test"), "001", "error.1", "ers.upload.error.date"),
-        ValidationError(Cell("C", 1, "test"), "001", "error.1", "ers.upload.error.date")
-      ))
-    }
-  }
-
-  "getRowsWithNumbers" should {
+  "getValidationResultsWithCorrectRowNumber" should {
 
     "return validation errors if there are no exceptions" in {
-      val errors = Seq(Right(RowValidationResults(List(
-        ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
-        ValidationError(Cell("B", 0, "test"), "001", "error.1", "ers.upload.error.date"),
-        ValidationError(Cell("C", 1, "test"), "001", "error.1", "ers.upload.error.date")
-      ))))
-      val result = testProcessCsvService.getRowsWithNumbers(errors, "test.csv")
+      val errors = Seq(
+        RowValidationResults(List(
+          ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("B", 0, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("C", 0, "test"), "001", "error.1", "ers.upload.error.date")
+        )),
+        RowValidationResults(List(
+          ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("B", 0, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("C", 0, "test"), "001", "error.1", "ers.upload.error.date")
+        )),
+        RowValidationResults(List(
+          ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date")
+        )),
+      )
+      val result = processCsvService.getValidationResultsWithCorrectRowNumber(errors, "test.csv")
 
       result.isRight shouldBe true
-      result.map { value =>
-        value shouldBe Seq(List(
+      result.map { value: Seq[ValidationError] =>
+        value should contain theSameElementsAs Seq(
           ValidationError(Cell("A", 1, "test"), "001", "error.1", "ers.upload.error.date"),
           ValidationError(Cell("B", 1, "test"), "001", "error.1", "ers.upload.error.date"),
-          ValidationError(Cell("C", 1, "test"), "001", "error.1", "ers.upload.error.date")
-        ))
+          ValidationError(Cell("C", 1, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("A", 2, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("B", 2, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("C", 2, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("A", 3, "test"), "001", "error.1", "ers.upload.error.date"),
+
+        )
       }
     }
 
     "return an exception if the file is empty" in {
-      val errors = Seq.empty[Either[Throwable, RowValidationResults]]
-      val result = testProcessCsvService.getRowsWithNumbers(errors, "test.csv")
+      val errors = Seq.empty[RowValidationResults]
+      val result = processCsvService.getValidationResultsWithCorrectRowNumber(errors, "test.csv")
       val value = result.left.toOption.get.asInstanceOf[ERSFileProcessingException]
 
       result.isLeft shouldBe true
       value.context shouldBe "The file that you chose doesn’t contain any data.<br/><br/>You won’t be able to upload test.csv as part of your annual return."
     }
+  }
 
-    "return the earliest previous exception if one exists" in {
-      val errors = Seq(
-        Left(ERSFileProcessingException("test error", "b")),
-        Right(RowValidationResults(List(ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date")))),
-        Left(ERSFileProcessingException("a", "b"))
+  "updateValidationResultRowNumbers" should {
+
+    "return an empty sequence when parsed a sequence of RowValidationResults which contain no errors" in {
+      val validationResultsWithoutIndex = Seq(
+        RowValidationResults(validationErrors = List.empty[ValidationError]),
+        RowValidationResults(validationErrors = List.empty[ValidationError]),
+        RowValidationResults(validationErrors = List.empty[ValidationError]),
+        RowValidationResults(validationErrors = List.empty[ValidationError])
       )
-      val result = testProcessCsvService.getRowsWithNumbers(errors, "test.csv")
-
-      result.isLeft shouldBe true
-      result.left.value.getMessage shouldBe "test error"
+      processCsvService.updateValidationResultRowNumbers(validationResultsWithoutIndex) shouldBe Seq.empty[ValidationError]
     }
+
+    "return a list of ValidationErrors with the correct row numbers when parsed a list of validation results " +
+      "containing validation errors" in {
+      val validationResultsWithIndex = Seq(
+        RowValidationResults(validationErrors = List.empty[ValidationError]),
+        RowValidationResults(validationErrors = List(
+          ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("I", 0, "noooo"), "009", "error.9", "Enter 'yes' or 'no'")
+        )),
+        RowValidationResults(validationErrors = List(
+          ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("I", 0, "noooo"), "009", "error.9", "Enter 'yes' or 'no'")
+        )),
+        RowValidationResults(validationErrors = List.empty[ValidationError]),
+        RowValidationResults(validationErrors = List(
+          ValidationError(Cell("A", 0, "test"), "001", "error.1", "ers.upload.error.date"),
+          ValidationError(Cell("I", 0, "noooo"), "009", "error.9", "Enter 'yes' or 'no'")
+        ))
+      )
+      val expectedValidationErrors = Seq(
+        ValidationError(Cell("A", 2, "test"), "001", "error.1", "ers.upload.error.date"),
+        ValidationError(Cell("I", 2, "noooo"), "009", "error.9", "Enter 'yes' or 'no'"),
+        ValidationError(Cell("A", 3, "test"), "001", "error.1", "ers.upload.error.date"),
+        ValidationError(Cell("I", 3, "noooo"), "009", "error.9", "Enter 'yes' or 'no'"),
+        ValidationError(Cell("A", 5, "test"), "001", "error.1", "ers.upload.error.date"),
+        ValidationError(Cell("I", 5, "noooo"), "009", "error.9", "Enter 'yes' or 'no'")
+      )
+      processCsvService.updateValidationResultRowNumbers(validationResultsWithIndex) should contain theSameElementsAs(expectedValidationErrors)
+    }
+
   }
 
   "checkValidityOfRows" should {
 
     "return true if there are no validation errors in any row" in {
-      val errors = Seq(List.empty[ValidationError], List.empty[ValidationError], List.empty[ValidationError])
       val callback = UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))
 
-      val resultFuture = testProcessCsvService.checkValidityOfRows(errors, "CSOP_OptionsGranted_V5.csv", callback)
+      val resultFuture = processCsvService.checkValidityOfRows(List.empty[ValidationError], "CSOP_OptionsGranted_V5.csv", callback)
 
       val result = Await.result(resultFuture, Duration.Inf)
 
@@ -437,13 +306,12 @@ class ProcessCsvServiceSpec
       when(mockSessionCacheRepo.cache[Long](any(), any())(any(), any())).thenReturn(Future(("", "")))
       when(mockSessionCacheRepo.cache[ListBuffer[SheetErrors]](any(), any())(any(), any())).thenReturn(Future(("", "")))
       val errors = Seq(
-        List(ValidationError(Cell("A", 1, "test"), "001", "error.1", "ers.upload.error.date")),
-        List.empty[ValidationError],
-        List(ValidationError(Cell("A", 3, "test"), "001", "error.1", "ers.upload.error.date"))
+        ValidationError(Cell("A", 1, "test"), "001", "error.1", "ers.upload.error.date"),
+        ValidationError(Cell("A", 3, "test"), "001", "error.1", "ers.upload.error.date")
       )
       val callback = UpscanCsvFilesCallback(UploadId("1"), UploadedSuccessfully("CSOP_OptionsGranted_V5.csv", "no", Some(1)))
 
-      val resultFuture = testProcessCsvService.checkValidityOfRows(errors, "CSOP_OptionsGranted_V5.csv", callback)
+      val resultFuture = processCsvService.checkValidityOfRows(errors, "CSOP_OptionsGranted_V5.csv", callback)
 
       val result = Await.result(resultFuture, Duration.Inf)
 
@@ -451,4 +319,5 @@ class ProcessCsvServiceSpec
       result.value shouldBe false
     }
   }
+
 }

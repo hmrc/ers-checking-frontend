@@ -32,7 +32,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{DefaultMessagesControllerComponents, Request, Result}
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.Injecting
-import services.{ProcessCsvService, ProcessODSService}
+import services.{ProcessCsvService, ProcessOdsService}
 import views.html.global_error
 
 import scala.concurrent.Future
@@ -49,7 +49,7 @@ class UpscanControllerSpec extends AnyWordSpecLike with Matchers with OptionValu
   override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
   implicit val as: ActorSystem = app.actorSystem
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(app)
-  val mockProcessODSService: ProcessODSService = mock[ProcessODSService]
+  val mockProcessOdsService: ProcessOdsService = mock[ProcessOdsService]
   val mockProcessCsvService: ProcessCsvService = mock[ProcessCsvService]
   val globalErrorView: global_error = inject[global_error]
 
@@ -96,9 +96,10 @@ class UpscanControllerSpec extends AnyWordSpecLike with Matchers with OptionValu
       when(mockSessionCacheRepo.fetchAndGetEntry[UpscanCsvFilesList](any())(any(), any())).thenReturn(Future.successful(singleCsvFile))
       when(mockSessionCacheRepo.cache(any(), any())(any(), any())).thenReturn(Future.successful(null))
 
-      val result = upscanController(upscanCsvFilesListCallbackList).successCSV(uploadId, Fixtures.getMockSchemeTypeString).apply(fakeRequest)
+      val result = upscanController(upscanCsvFilesListCallbackList).successCsv(uploadId, Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      result.futureValue.header.headers("Location") shouldBe routes.UploadController.uploadCSVFile(Fixtures.getMockSchemeTypeString).toString
+      result.futureValue.header.headers("Location") shouldBe routes.UploadController.uploadCsvFile(Fixtures
+        .getMockSchemeTypeString).toString
     }
 
     "send a user to the global error page when a file is still in progress" in {
@@ -109,7 +110,7 @@ class UpscanControllerSpec extends AnyWordSpecLike with Matchers with OptionValu
       when(mockSessionCacheRepo.fetchAndGetEntry[UpscanCsvFilesList](any())(any(), any())).thenReturn(Future.successful(singleCsvFile))
       when(mockSessionCacheRepo.cache(any(), any())(any(), any())).thenReturn(Future.successful(null))
 
-      val result = upscanController(upscanCsvFilesListCallbackList).successCSV(uploadId, Fixtures.getMockSchemeTypeString).apply(fakeRequest)
+      val result = upscanController(upscanCsvFilesListCallbackList).successCsv(uploadId, Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
 
@@ -120,7 +121,7 @@ class UpscanControllerSpec extends AnyWordSpecLike with Matchers with OptionValu
       when(mockSessionCacheRepo.fetchAndGetEntry[UpscanCsvFilesList](any())(any(), any())).thenReturn(Future.successful(singleCsvFile))
       when(mockSessionCacheRepo.cache(any(), any())(any(), any())).thenReturn(Future.successful(null))
 
-      val result = upscanController(upscanCsvFilesListCallbackList).successCSV(uploadId, Fixtures.getMockSchemeTypeString).apply(fakeRequest)
+      val result = upscanController(upscanCsvFilesListCallbackList).successCsv(uploadId, Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
 
@@ -141,7 +142,7 @@ class UpscanControllerSpec extends AnyWordSpecLike with Matchers with OptionValu
           mockAnyContentAction
         }
 
-      val result = upscanControllerError().successCSV(uploadId, Fixtures.getMockSchemeTypeString).apply(fakeRequest)
+      val result = upscanControllerError().successCsv(uploadId, Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
   }
@@ -153,9 +154,10 @@ class UpscanControllerSpec extends AnyWordSpecLike with Matchers with OptionValu
 
       when(mockSessionCacheRepo.fetch[UploadStatus](any())(any(), any())).thenReturn(Future.successful(Some(successfully)))
 
-      val result = upscanController().successODS(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
+      val result = upscanController().successOds(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
-      result.futureValue.header.headers("Location") shouldBe routes.UploadController.uploadODSFile(Fixtures.getMockSchemeTypeString).toString
+      result.futureValue.header.headers("Location") shouldBe routes.UploadController.uploadOdsFile(Fixtures
+        .getMockSchemeTypeString).toString
 
     }
 
@@ -164,7 +166,7 @@ class UpscanControllerSpec extends AnyWordSpecLike with Matchers with OptionValu
 
       when(mockSessionCacheRepo.fetch[UploadStatus](any())(any(), any())).thenReturn(Future.successful(None))
 
-      val result = upscanController().successODS(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
+      val result = upscanController().successOds(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
 
@@ -173,7 +175,7 @@ class UpscanControllerSpec extends AnyWordSpecLike with Matchers with OptionValu
 
       when(mockSessionCacheRepo.fetch[UploadStatus](any())(any() ,any())).thenReturn(Future.failed(new Exception("an error occured")))
 
-      val result = upscanController().successODS(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
+      val result = upscanController().successOds(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
   }
