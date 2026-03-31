@@ -18,7 +18,6 @@ package controllers
 
 import controllers.auth.{RequestWithOptionalEmpRefAndPAYE, PAYEDetails}
 import helpers.ErsTestHelper
-import models.CsvFiles
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesList, UpscanIds}
 import org.mockito.ArgumentMatchers.{any, refEq}
 import org.mockito.Mockito.when
@@ -107,7 +106,7 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
         .thenReturn(Future.successful(HttpResponse(Status.OK, "we uploadin")))
       when(mockSessionCacheRepo.fetchAndGetEntry[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any()))
         .thenReturn(Future.successful("a string"))
-      when(mockErsUtil.getCsvFilesList(any())).thenReturn(Seq(CsvFiles("a file")))
+      when(mockErsUtil.getCsvFilesList(any())).thenReturn(Seq("a file"))
       when(mockErsUtil.getPageElement(any(), any(), any())).thenReturn("this is okay!")
 
       val result = controllerUnderTest.showCheckCsvFilesPage()(Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig))
@@ -136,7 +135,7 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
 
     "call reloadWithError if form has errors" in {
       val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, mockSessionCacheRepo, selectFileTypeView, globalErrorView) {
-        override def reloadWithError(form: Option[Form[List[CsvFiles]]])(implicit messages: Messages): Future[Result] =
+        override def reloadWithError(form: Option[Form[List[String]]])(implicit messages: Messages): Future[Result] =
           Future.successful(Ok("this is a reload"))
 
         mockAnyContentAction
@@ -160,7 +159,7 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
 
     "call reloadWithError if form does not have errors" in {
       val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, mockSessionCacheRepo, selectFileTypeView, globalErrorView) {
-        override def performCsvFilesPageSelected(formData: Seq[CsvFiles])(
+        override def performCsvFilesPageSelected(formData: Seq[String])(
           implicit request: Request[AnyRef]): Future[Result] = Future.successful(Ok("form good"))
         mockAnyContentAction
       }
@@ -176,10 +175,10 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
   "performCsvFilesPageSelected" should {
     "reloadWithError if ids are empty" in {
       val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, mockSessionCacheRepo, selectFileTypeView, globalErrorView) {
-        override def reloadWithError(form: Option[Form[List[CsvFiles]]])(implicit messages: Messages): Future[Result] =
+        override def reloadWithError(form: Option[Form[List[String]]])(implicit messages: Messages): Future[Result] =
           Future.successful(Ok("this is a reload"))
 
-        override def createCacheData(csvFilesList: Seq[CsvFiles]): UpscanCsvFilesList = UpscanCsvFilesList(Seq.empty)
+        override def createCacheData(csvFilesList: Seq[String]): UpscanCsvFilesList = UpscanCsvFilesList(Seq.empty)
         mockAnyContentAction
       }
 
@@ -191,10 +190,10 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike with Matchers with Opt
 
     "redirect to checkCsvFilePage if everything is good" in {
       val controllerUnderTest = new CheckCsvFilesController(mockAuthAction, mcc, mockSessionCacheRepo, selectFileTypeView, globalErrorView) {
-        override def reloadWithError(form: Option[Form[List[CsvFiles]]])(implicit messages: Messages): Future[Result] =
+        override def reloadWithError(form: Option[Form[List[String]]])(implicit messages: Messages): Future[Result] =
           Future.successful(Ok("this is a reload"))
 
-        override def createCacheData(csvFilesList: Seq[CsvFiles]): UpscanCsvFilesList =
+        override def createCacheData(csvFilesList: Seq[String]): UpscanCsvFilesList =
           UpscanCsvFilesList(Seq(UpscanIds(UploadId("value"), "field", UploadedSuccessfully("name", "download"))))
       }
       when(mockSessionCacheRepo.cache[UpscanCsvFilesList](any(), any())(any(), any()))

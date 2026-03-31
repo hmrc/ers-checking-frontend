@@ -17,7 +17,6 @@
 package utils
 
 import controllers.routes
-import models.CsvFiles
 
 trait PageBuilder {
 
@@ -29,7 +28,6 @@ trait PageBuilder {
   val SCHEME_SAYE: String = "saye"
   val SCHEME_SIP: String = "sip"
   val SCHEME_OTHER: String = "other"
-  val schemeList: Seq[String] = Seq(SCHEME_CSOP, SCHEME_EMI, SCHEME_SAYE, SCHEME_SIP, SCHEME_OTHER)
 
   // pageId's
   val PAGE_CHECK_CSV_FILE = "ers_check_csv_file"
@@ -49,48 +47,48 @@ trait PageBuilder {
   val MSG_SIP: String = ".sip."
   val MSG_OTHER: String = ".other."
 
-  val CSVFilesList: Map[String, List[CsvFiles]] = Map(
+  val CSVFilesList: Map[String, List[String]] = Map(
     (
       SCHEME_EMI, List(
-      CsvFiles("EMI_ADJUSTMENTS"),
-      CsvFiles("EMI_REPLACED"),
-      CsvFiles("EMI_RCL"),
-      CsvFiles("EMI_NONTAXABLE"),
-      CsvFiles("EMI_TAXABLE")
+      "EMI_ADJUSTMENTS",
+      "EMI_REPLACED",
+      "EMI_RCL",
+      "EMI_NONTAXABLE",
+      "EMI_TAXABLE"
     )),
     (
       SCHEME_CSOP, List(
-      CsvFiles("CSOP_GRANTED"),
-      CsvFiles("CSOP_RCL"),
-      CsvFiles("CSOP_Exercised")
+      "CSOP_GRANTED",
+      "CSOP_RCL",
+      "CSOP_Exercised"
     )),
     (
       SCHEME_OTHER, List(
-      CsvFiles("OTHER_GRANTS"),
-      CsvFiles("OTHER_OPTIONS"),
-      CsvFiles("OTHER_ACQUISITION"),
-      CsvFiles("OTHER_RESTRICTED"),
-      CsvFiles("OTHER_BENEFITS"),
-      CsvFiles("OTHER_CONVERTABLE"),
-      CsvFiles("OTHER_NOTIONAL"),
-      CsvFiles("OTHER_ENCHANCEMENT"),
-      CsvFiles("OTHER_SOLD")
+      "OTHER_GRANTS",
+      "OTHER_OPTIONS",
+      "OTHER_ACQUISITION",
+      "OTHER_RESTRICTED",
+      "OTHER_BENEFITS",
+      "OTHER_CONVERTABLE",
+      "OTHER_NOTIONAL",
+      "OTHER_ENCHANCEMENT",
+      "OTHER_SOLD",
     )),
     (
       SCHEME_SAYE, List(
-      CsvFiles("SAYE_GRANTED"),
-      CsvFiles("SAYE_RCL"),
-      CsvFiles("SAYE_EXERCISED")
+      "SAYE_GRANTED",
+      "SAYE_RCL",
+      "SAYE_EXERCISED"
     )),
     (
       SCHEME_SIP, List(
-      CsvFiles("SIP_AWARDS"),
-      CsvFiles("SIP_OUT")
+      "SIP_AWARDS",
+      "SIP_OUT"
     ))
   )
 
-  def getCsvFilesList(scheme: String): Seq[CsvFiles] = {
-    CSVFilesList.getOrElse(scheme.toLowerCase, Seq[CsvFiles]())
+  def getCsvFilesList(scheme: String): Seq[String] = {
+    CSVFilesList.getOrElse(scheme.toLowerCase, Seq.empty[String])
   }
 
   def getPageElement(scheme: String, pageId: String, element: String): String = {

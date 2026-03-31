@@ -51,7 +51,7 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
       _           <- sessionCacheService.delete(ersUtil.CSV_FILES_UPLOAD)
       scheme      <- sessionCacheService.fetchAndGetEntry[String](ersUtil.SCHEME_CACHE)
     } yield {
-      val csvFilesList: Seq[CsvFiles] = ersUtil.getCsvFilesList(scheme)
+      val csvFilesList: Seq[String] = ersUtil.getCsvFilesList(scheme)
       Ok(select_csv_file_types(scheme, csvFilesList))
     }) recover {
       case _: Throwable => getGlobalErrorPage
@@ -73,7 +73,7 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
     )
   }
 
-  def performCsvFilesPageSelected(formData: Seq[CsvFiles])(implicit request: Request[AnyRef]): Future[Result] = {
+  def performCsvFilesPageSelected(formData: Seq[String])(implicit request: Request[AnyRef]): Future[Result] = {
     val csvFilesCallbackList: UpscanCsvFilesList = createCacheData(formData)
     if(csvFilesCallbackList.ids.isEmpty) {
       logger.info("[CheckCsvFilesController][csvFilesCallbackList] ids are empty")
@@ -98,14 +98,14 @@ class CheckCsvFilesController @Inject()(authAction: AuthAction,
     }
   }
 
-  def createCacheData(csvFilesList: Seq[CsvFiles]): UpscanCsvFilesList = {
+  def createCacheData(csvFilesList: Seq[String]): UpscanCsvFilesList = {
     val ids = for(fileData <- csvFilesList) yield {
-      UpscanIds(UploadId.generate, fileData.fileId, NotStarted)
+      UpscanIds(UploadId.generate, fileData, NotStarted)
     }
     UpscanCsvFilesList(ids)
   }
 
-  def reloadWithError(form: Option[Form[List[CsvFiles]]] = None)(implicit messages: Messages): Future[Result] = {
+  def reloadWithError(form: Option[Form[List[String]]] = None)(implicit messages: Messages): Future[Result] = {
     val errorKey = if(form.isDefined) form.get.errors.head.message else "no_file_error"
     Future.successful(
       Redirect(routes.CheckCsvFilesController.selectCsvFilesPage())

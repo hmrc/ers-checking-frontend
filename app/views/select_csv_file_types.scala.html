@@ -25,7 +25,8 @@
         formWithCSRF: FormWithCSRF
 )
 
-@(scheme: String, csvFilesList: Seq[CsvFiles])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, appConfig: ApplicationConfig, ersUtil: ERSUtil)
+@(scheme: String, csvFilesList: Seq[String])(implicit request: Request[AnyRef], flash: Flash, messages: Messages,
+appConfig: ApplicationConfig, ersUtil: ERSUtil)
 
 @ers_main(title = messages("ers.choose_csv_files.title")) {
     @govukBackLink(BackLink(
@@ -37,7 +38,7 @@
         @govukErrorSummary(ErrorSummary(
             errorList = Seq(
                 ErrorLink(
-                    href = Some("#" + csvFilesList.head.fileId),
+                    href = Some("#" + csvFilesList.head),
                     content = Text(errorMessage)
                 )
             ),
@@ -62,10 +63,10 @@
                 val file = fileAndIndex._1
                 val index = fileAndIndex._2
                 CheckboxItem(
-                    name = Some(s"files[$index].fileId"),
-                    id = Some(file.fileId),
-                    content = Text(messages(ersUtil.getPageElement(scheme, ersUtil.PAGE_CHECK_CSV_FILE, file.fileId))),
-                    value = file.fileId
+                    name = Some(s"files[$index]"),
+                    id = Some(file),
+                    content = Text(messages(ersUtil.getPageElement(scheme, ersUtil.PAGE_CHECK_CSV_FILE, file))),
+                    value = file
                 )
 
             }

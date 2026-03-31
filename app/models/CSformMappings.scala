@@ -39,14 +39,15 @@ object CSformMappings {
     )(CS_schemeType.apply)(CS_schemeType.unapply)
   )
 
-  def csvFileCheckForm(): Form[List[CsvFiles]] = Form(
-    mapping(
+  def csvFileCheckForm(): Form[List[String]] = Form(
+    single(
       "files" -> list(
-        mapping(
-          "fileId" -> text.verifying("no_file_error", _.nonEmpty).verifying("invalidCharacters", id => fileIdList.contains(id))
-        )
-        (CsvFiles.apply)(CsvFiles.unapply)
-      ))(List[CsvFiles])(Option[List[CsvFiles]]))
+        text
+          .verifying("no_file_error", _.nonEmpty)
+          .verifying("invalidCharacters", id => fileIdList.contains(id))
+      )
+    )
+  )
 
   val fileIdList = Seq(
     "EMI_ADJUSTMENTS", "EMI_REPLACED", "EMI_RCL", "EMI_NONTAXABLE", "EMI_TAXABLE",
