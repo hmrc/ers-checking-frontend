@@ -20,28 +20,32 @@ import play.api.libs.json._
 import play.api.mvc.Call
 
 case class UpscanInitiateResponse(
-                                   fileReference: Reference,
-                                   postTarget: Call,
-                                   formFields: Map[String, String]
-                                 )
+  fileReference: Reference,
+  postTarget: Call,
+  formFields: Map[String, String]
+)
 
 case class Reference(value: String) extends AnyVal
 
 case class UploadForm(href: String, fields: Map[String, String])
+
 object Reference {
-  implicit val referenceReader: Reads[Reference] = Reads.StringReads.map(Reference(_))
+  implicit val referenceReader: Reads[Reference]  = Reads.StringReads.map(Reference(_))
   implicit val referenceWrites: Writes[Reference] = Writes[Reference](x => JsString(x.value))
 }
 
 case class PreparedUpload(reference: Reference, uploadRequest: UploadForm) {
+
   def toUpscanInitiateResponse: UpscanInitiateResponse = {
     val fileReference = reference
     val postTarget    = Call("post", uploadRequest.href)
     val formFields    = uploadRequest.fields
     UpscanInitiateResponse(fileReference, postTarget, formFields)
   }
+
 }
+
 object PreparedUpload {
   implicit val uploadFormFormat: Format[UploadForm] = Json.format[UploadForm]
-  implicit val format: Format[PreparedUpload] = Json.format[PreparedUpload]
+  implicit val format: Format[PreparedUpload]       = Json.format[PreparedUpload]
 }

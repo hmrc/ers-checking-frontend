@@ -25,13 +25,15 @@ import scala.concurrent.{ExecutionContext, Future}
 trait AuditService {
   val auditSource = "ers-checking-frontend"
 
-  def auditConnector : AuditConnector
+  def auditConnector: AuditConnector
 
-  def sendEvent(transactionName : String, details: Map[String, String])
-               (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AuditResult] =
+  def sendEvent(transactionName: String, details: Map[String, String])(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[AuditResult] =
     auditConnector.sendEvent(buildEvent(transactionName, details))
 
-  private[audit] def buildEvent(transactionName: String,  details: Map[String, String])(implicit hc: HeaderCarrier) =
+  private[audit] def buildEvent(transactionName: String, details: Map[String, String])(implicit hc: HeaderCarrier) =
     DataEvent(
       auditSource = auditSource,
       auditType = transactionName,
@@ -39,12 +41,12 @@ trait AuditService {
       detail = details
     )
 
-
   private[audit] def generateTags(hc: HeaderCarrier): Map[String, String] =
 
+    hc.headers(HeaderNames.explicitlyIncludedHeaders).toMap ++ hc.extraHeaders.toMap ++ hc.otherHeaders.toMap ++ Map(
+      "dateTime" -> getDateTime.toString
+    )
 
-    hc.headers(HeaderNames.explicitlyIncludedHeaders).toMap ++ hc.extraHeaders.toMap ++ hc.otherHeaders.toMap ++ Map("dateTime" ->  getDateTime.toString)
-
-    private def getDateTime = java.time.LocalTime.now()
+  private def getDateTime = java.time.LocalTime.now()
 
 }

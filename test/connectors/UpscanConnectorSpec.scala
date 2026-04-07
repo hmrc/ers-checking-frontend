@@ -31,11 +31,17 @@ import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import utils.WireMockHelper
 
-class UpscanConnectorSpec extends AnyWordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite with MockitoSugar with WireMockHelper {
+class UpscanConnectorSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with GuiceOneAppPerSuite
+    with MockitoSugar
+    with WireMockHelper {
 
   lazy val connector: UpscanConnector = app.injector.instanceOf[UpscanConnector]
-  implicit val hc: HeaderCarrier = HeaderCarrier()
-  val request: UpscanInitiateRequest = UpscanInitiateRequest("callbackUrl", "successRedirectUrl", "errorRedirectUrl")
+  implicit val hc: HeaderCarrier      = HeaderCarrier()
+  val request: UpscanInitiateRequest  = UpscanInitiateRequest("callbackUrl", "successRedirectUrl", "errorRedirectUrl")
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder()
     .configure("microservice.services.upscan.port" -> server.port())
@@ -83,4 +89,5 @@ class UpscanConnectorSpec extends AnyWordSpecLike with Matchers with OptionValue
       }
     }
   }
+
 }

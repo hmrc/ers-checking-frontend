@@ -30,16 +30,18 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ErsCheckingFrontendSessionCacheRepository @Inject()(mongoComponent: MongoComponent,
-                                                          configuration: Configuration)
-                                                         (implicit ec: ExecutionContext)
+class ErsCheckingFrontendSessionCacheRepository @Inject() (
+  mongoComponent: MongoComponent,
+  configuration: Configuration
+)(implicit ec: ExecutionContext)
     extends SessionCacheRepository(
       mongoComponent = mongoComponent,
-      collectionName   = "sessions",
-      ttl              = Duration(configuration.get[Int]("mongodb.timeToLiveInSeconds"), TimeUnit.SECONDS),
-      timestampSupport =  new CurrentTimestampSupport(),
+      collectionName = "sessions",
+      ttl = Duration(configuration.get[Int]("mongodb.timeToLiveInSeconds"), TimeUnit.SECONDS),
+      timestampSupport = new CurrentTimestampSupport(),
       sessionIdKey = SessionKeys.sessionId
-    ) with Logging {
+    )
+    with Logging {
 
   def cache[T](key: String, body: T)(implicit request: Request[_], formats: json.Format[T]): Future[(String, String)] =
     putSession(DataKey(key), body)
@@ -54,15 +56,16 @@ class ErsCheckingFrontendSessionCacheRepository @Inject()(mongoComponent: MongoC
     cacheRepo.findById(request)
 
   @throws(classOf[NoSuchElementException])
-  def fetchAndGetEntry[T](key: String)(implicit request: Request[_], reads: Reads[T]): Future[T] = {
+  def fetchAndGetEntry[T](key: String)(implicit request: Request[_], reads: Reads[T]): Future[T] =
     getFromSession[T](DataKey[T](key)) map {
       case Some(value) => value
-      case None =>
-        logger.warn(s"[SessionCacheService][fetchAndGetEntry] " +
-          s"fetch failed to get key $key, timestamp: ${java.time.LocalTime.now()}.")
+      case None        =>
+        logger.warn(
+          s"[SessionCacheService][fetchAndGetEntry] " +
+            s"fetch failed to get key $key, timestamp: ${java.time.LocalTime.now()}."
+        )
         throw new NoSuchElementException
     }
-  }
 
   @throws(classOf[NoSuchElementException])
   def fetchAll()(implicit request: Request[_]): Future[CacheItem] =
@@ -72,19 +75,27 @@ class ErsCheckingFrontendSessionCacheRepository @Inject()(mongoComponent: MongoC
         sessionMap
       } catch {
         case e: NoSuchElementException =>
-          logger.warn(s"[SessionCacheService][fetchAll] failed to get all keys with exception. " +
-            s"Method: ${request.method} req: ${request.path}, param: ${request.rawQueryString}", e)
+          logger.warn(
+            s"[SessionCacheService][fetchAll] failed to get all keys with exception. " +
+              s"Method: ${request.method} req: ${request.path}, param: ${request.rawQueryString}",
+            e
+          )
           throw new NoSuchElementException
-        case t: Throwable =>
-          logger.error(s"[SessionCacheService][fetchAll] failed to get all keys with exception. " +
-            s"Method: ${request.method} req: ${request.path}, param: ${request.rawQueryString}", t)
+        case t: Throwable              =>
+          logger.error(
+            s"[SessionCacheService][fetchAll] failed to get all keys with exception. " +
+              s"Method: ${request.method} req: ${request.path}, param: ${request.rawQueryString}",
+            t
+          )
           throw new Exception
       }
-    } recover {
-      case e: NoSuchElementException =>
-        logger.error(s"[SessionCacheService][fetchAll] failed to get all keys with " +
-          s"exception ${e.getMessage} method: ${request.method}  req: ${request.path}, param: ${request.rawQueryString}", e)
-        throw new Exception
+    } recover { case e: NoSuchElementException =>
+      logger.error(
+        s"[SessionCacheService][fetchAll] failed to get all keys with " +
+          s"exception ${e.getMessage} method: ${request.method}  req: ${request.path}, param: ${request.rawQueryString}",
+        e
+      )
+      throw new Exception
     }
 
 }

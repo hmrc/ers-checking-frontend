@@ -26,31 +26,47 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.Future
 
 @Singleton
-class UpscanService @Inject()(upscanConnector: UpscanConnector, appConfig: ApplicationConfig) {
+class UpscanService @Inject() (upscanConnector: UpscanConnector, appConfig: ApplicationConfig) {
 
   private def urlToString(c: Call): String = redirectUrlBase + c.url
-  def callbackCsv(uploadId: UploadId)(implicit sessionId: String): Call = controllers.internal.routes.UpscanCallbackController.callbackCsv(uploadId, sessionId)
-  def callbackOds(implicit sessionId: String): Call = controllers.internal.routes.UpscanCallbackController.callbackOds(sessionId)
-  private def successCsv(uploadId: UploadId, scheme: String): String = urlToString(controllers.routes
-    .UpscanController.successCsv(uploadId, scheme))
+
+  def callbackCsv(uploadId: UploadId)(implicit sessionId: String): Call =
+    controllers.internal.routes.UpscanCallbackController.callbackCsv(uploadId, sessionId)
+
+  def callbackOds(implicit sessionId: String): Call =
+    controllers.internal.routes.UpscanCallbackController.callbackOds(sessionId)
+
+  private def successCsv(uploadId: UploadId, scheme: String): String = urlToString(
+    controllers.routes.UpscanController.successCsv(uploadId, scheme)
+  )
+
   private def successOds(scheme: String): String = urlToString(controllers.routes.UpscanController.successOds(scheme))
 
-  lazy val isSecure: Boolean = appConfig.upscanProtocol == "https"
+  lazy val isSecure: Boolean       = appConfig.upscanProtocol == "https"
   lazy val redirectUrlBase: String = appConfig.upscanRedirectBase
 
-  def getUpscanFormData(isCsv: Boolean, scheme: String, upscanId: Option[UpscanIds] = None)
-                       (implicit hc: HeaderCarrier, request: Request[_]): Future[UpscanInitiateResponse] = {
+  def getUpscanFormData(isCsv: Boolean, scheme: String, upscanId: Option[UpscanIds] = None)(implicit
+    hc: HeaderCarrier,
+    request: Request[_]
+  ): Future[UpscanInitiateResponse] = {
 
     implicit val sessionId: String = hc.sessionId.get.value
 
     def isCsvAndUploadId = isCsv && upscanId.isDefined
 
     val callback = if (isCsvAndUploadId) callbackCsv(upscanId.get.uploadId) else callbackOds
-    val success = if (isCsvAndUploadId) successCsv(upscanId.get.uploadId, scheme) else successOds(scheme)
-    val failure = urlToString(controllers.routes.UpscanController.failure())
+    val success  = if (isCsvAndUploadId) successCsv(upscanId.get.uploadId, scheme) else successOds(scheme)
+    val failure  = urlToString(controllers.routes.UpscanController.failure())
 
     val upscanInitiateRequest: UpscanInitiateRequest =
-      UpscanInitiateRequest(callback.absoluteURL(isSecure), success, failure, Some(1), Some(appConfig.upscanFileSizeLimit))
+      UpscanInitiateRequest(
+        callback.absoluteURL(isSecure),
+        success,
+        failure,
+        Some(1),
+        Some(appConfig.upscanFileSizeLimit)
+      )
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }
+
 }

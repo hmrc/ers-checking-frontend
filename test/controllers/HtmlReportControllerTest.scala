@@ -43,7 +43,7 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
 class HtmlReportControllerTest
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with OptionValues
     with GuiceOneAppPerSuite
@@ -52,32 +52,33 @@ class HtmlReportControllerTest
     with CacheUtil {
 
   val config: Map[String, Any] = Map(
-    "application.secret" -> "test",
-    "login-callback.url" -> "test",
+    "application.secret"    -> "test",
+    "login-callback.url"    -> "test",
     "contact-frontend.host" -> "localhost",
     "contact-frontend.port" -> "9250",
-    "metrics.enabled" -> false
+    "metrics.enabled"       -> false
   )
 
-  override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
+  implicit override lazy val app: Application       = new GuiceApplicationBuilder().configure(config).build()
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(app)
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
-  val view: html_error_report = inject[html_error_report]
-  val globalErrorView: global_error = inject[global_error]
+  implicit lazy val testMessages: MessagesImpl      = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
+  val view: html_error_report                       = inject[html_error_report]
+  val globalErrorView: global_error                 = inject[global_error]
 
   val uploadId: UploadId = UploadId("uploadId")
 
   "html Error Report Page GET" should {
     "gives a call to showHtmlErrorReportPage if user is authenticated" in {
-      lazy val controllerUnderTest = new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
+      lazy val controllerUnderTest       =
+        new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
       val upscanCsvFilesListCallbackList = UpscanCsvFilesCallbackList(
         files = List(UpscanCsvFilesCallback(uploadId, UploadedSuccessfully("thefilename", "downloadUrl", Some(1000))))
       )
 
       lazy val storedValues: Seq[(String, JsValue)] = Seq(
-        "scheme-error-count" -> JsString("test"),
-        "error-list" -> JsString("test"),
-        "scheme-type" -> JsString("csop"),
+        "scheme-error-count"    -> JsString("test"),
+        "error-list"            -> JsString("test"),
+        "scheme-type"           -> JsString("csop"),
         "callback_data_key_csv" -> Json.toJson(upscanCsvFilesListCallbackList)
       )
 
@@ -86,14 +87,16 @@ class HtmlReportControllerTest
 
       when(mockSessionCacheRepo.fetchAll()(any())).thenReturn(Future.successful(cacheItem))
 
-      lazy val result = controllerUnderTest.htmlErrorReportPage(true).apply(Fixtures.buildFakeRequestWithSessionId("GET"))
+      lazy val result =
+        controllerUnderTest.htmlErrorReportPage(true).apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
     }
   }
 
   "Calling HtmlReportController.showHtmlErrorReportPage with authentication, and nothing in cache" should {
     "throw exception" in {
-      val controllerUnderTest = new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
+      val controllerUnderTest =
+        new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
       when(mockSessionCacheRepo.fetchAll()(any())).thenReturn(Future(throw new NoSuchElementException))
       val res: Future[Result] = controllerUnderTest
         .showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"), testMessages)
@@ -105,15 +108,16 @@ class HtmlReportControllerTest
 
   "Calling HtmlReportController.showHtmlErrorReportPage with authentication, and error count > 0" should {
     "give a status 500 and show error report" in {
-      val controllerUnderTest = new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
+      val controllerUnderTest  =
+        new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
       val cacheItem: CacheItem = generateTestCacheItem(
         id = "idcsop",
         data = Seq(
-          mockErsUtil.ERROR_LIST_CACHE -> Fixtures.getMockErrorList,
-          mockErsUtil.SCHEME_CACHE -> Json.toJson("csop"),
-          mockErsUtil.FILE_TYPE_CACHE -> Json.toJson(mockErsUtil.OPTION_ODS),
+          mockErsUtil.ERROR_LIST_CACHE         -> Fixtures.getMockErrorList,
+          mockErsUtil.SCHEME_CACHE             -> Json.toJson("csop"),
+          mockErsUtil.FILE_TYPE_CACHE          -> Json.toJson(mockErsUtil.OPTION_ODS),
           mockErsUtil.SCHEME_ERROR_COUNT_CACHE -> Json.toJson(0),
-          mockErsUtil.ERROR_SUMMARY_CACHE -> Fixtures.getMockSummaryErrors
+          mockErsUtil.ERROR_SUMMARY_CACHE      -> Fixtures.getMockSummaryErrors
         )
       )
 
@@ -129,67 +133,78 @@ class HtmlReportControllerTest
     "return no errors when none are present" in {
       val cacheItem = generateTestCacheItem("uploadId")
 
-      val result = new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
-        .csvExtractErrors(Seq(uploadId), cacheItem)
+      val result =
+        new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
+          .csvExtractErrors(Seq(uploadId), cacheItem)
       result shouldBe ((ListBuffer(), 0, 0))
     }
 
     "return the errors and count when the sheet has errors" in {
       val errorList: ListBuffer[SheetErrors] = ListBuffer(
-        SheetErrors("CSOP_OptionsExercised_V4",
+        SheetErrors(
+          "CSOP_OptionsExercised_V4",
           ListBuffer(
             ValidationError(Cell("A", 1, "23-07-2015"), "error.1", "001", "ers.upload.error.date")
           )
         )
       )
-      val cacheItemWithErrors = generateTestCacheItem(
+      val cacheItemWithErrors                = generateTestCacheItem(
         id = uploadId.value,
         data = Seq(
-          s"$ERROR_LIST_CACHE${uploadId.value}" -> Json.toJson(errorList),
+          s"$ERROR_LIST_CACHE${uploadId.value}"         -> Json.toJson(errorList),
           s"$SCHEME_ERROR_COUNT_CACHE${uploadId.value}" -> Json.toJson(1)
-        ))
+        )
+      )
 
-      val result = new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
-        .csvExtractErrors(Seq(uploadId), cacheItemWithErrors)
+      val result =
+        new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
+          .csvExtractErrors(Seq(uploadId), cacheItemWithErrors)
       result shouldBe ((errorList, 1, 1))
     }
 
     "display the all the errors and send unique error keys while calling audit" in {
       val errorList: ListBuffer[SheetErrors] = ListBuffer(
-        SheetErrors("CSOP_OptionsExercised_V4",
+        SheetErrors(
+          "CSOP_OptionsExercised_V4",
           ListBuffer(
             ValidationError(Cell("A", 1, "23-07-2015"), "error.1", "001", "ers.upload.error.date")
           )
         ),
-        SheetErrors("CSOP_OptionsExercised_V4",
+        SheetErrors(
+          "CSOP_OptionsExercised_V4",
           ListBuffer(
             ValidationError(Cell("F", 6, "yes"), "error.6", "006", "ers.upload.error.yes-no")
           )
         ),
-        SheetErrors("CSOP_OptionsExercised_V4",
+        SheetErrors(
+          "CSOP_OptionsExercised_V4",
           ListBuffer(
             ValidationError(Cell("A", 1, "23-07-2015"), "error.1", "001", "ers.upload.error.date")
           )
         )
       )
 
-      val controllerUnderTest = new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
+      val controllerUnderTest            =
+        new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
       val upscanCsvFilesListCallbackList = UpscanCsvFilesCallbackList(
         files = List(UpscanCsvFilesCallback(uploadId, UploadedSuccessfully("thefilename", "downloadUrl", Some(1000))))
       )
-      val cacheItemWithErrors = generateTestCacheItem(
+      val cacheItemWithErrors            = generateTestCacheItem(
         id = uploadId.value,
         data = Seq(
-          "callback_data_key_csv" -> Json.toJson(upscanCsvFilesListCallbackList),
-          s"$ERROR_LIST_CACHE${uploadId.value}" -> Json.toJson(errorList),
+          "callback_data_key_csv"                       -> Json.toJson(upscanCsvFilesListCallbackList),
+          s"$ERROR_LIST_CACHE${uploadId.value}"         -> Json.toJson(errorList),
           s"$SCHEME_ERROR_COUNT_CACHE${uploadId.value}" -> Json.toJson(1)
-        ))
+        )
+      )
 
       when(mockSessionCacheRepo.fetchAll()(any())).thenReturn(Future.successful(cacheItemWithErrors))
       val res = controllerUnderTest
         .showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"), testMessages)
       res.map { result =>
-        result shouldBe contentAsString(controllerUnderTest.showHtmlErrorReportPage(isCsv = true)(request, testMessages))
+        result shouldBe contentAsString(
+          controllerUnderTest.showHtmlErrorReportPage(isCsv = true)(request, testMessages)
+        )
       }
     }
 
@@ -197,17 +212,19 @@ class HtmlReportControllerTest
 
   "getEntry" must {
     "return None when key isn't found" in {
-      val data = generateTestCacheItem(
+      val data   = generateTestCacheItem(
         "sessionId",
         Seq(
-          "name" -> JsString("some-name"),
+          "name"        -> JsString("some-name"),
           "downloadUrl" -> JsString("some-url")
         )
       )
-      val result = new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
-        .getEntry[UploadedSuccessfully](data, "key-not-found")
+      val result =
+        new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
+          .getEntry[UploadedSuccessfully](data, "key-not-found")
 
       result shouldBe None
     }
   }
+
 }

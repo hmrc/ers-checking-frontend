@@ -29,14 +29,23 @@ import play.api.test.{FakeRequest, Injecting}
 import play.mvc.Http.Status
 import views.html.{individual_not_authorised, individual_signout, not_authorised}
 
-class AuthorisationControllerSpec extends AnyWordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite
-  with MockitoSugar with Injecting with ScalaFutures with ErsTestHelper {
+class AuthorisationControllerSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with GuiceOneAppPerSuite
+    with MockitoSugar
+    with Injecting
+    with ScalaFutures
+    with ErsTestHelper {
 
-  private val mcc = testMCC(app)
-  val view: not_authorised = inject[not_authorised]
+  private val mcc                                               = testMCC(app)
+  val view: not_authorised                                      = inject[not_authorised]
   val individual_not_authorised_view: individual_not_authorised = inject[individual_not_authorised]
-  val individual_signout_view: individual_signout = inject[individual_signout]
-  val authController: AuthorisationController = new AuthorisationController(mcc, mockAppConfig, view, individual_not_authorised_view, individual_signout_view)
+  val individual_signout_view: individual_signout               = inject[individual_signout]
+
+  val authController: AuthorisationController =
+    new AuthorisationController(mcc, mockAppConfig, view, individual_not_authorised_view, individual_signout_view)
 
   "AuthorisationController" should {
     "call notAuthorised" in {
@@ -51,21 +60,22 @@ class AuthorisationControllerSpec extends AnyWordSpecLike with Matchers with Opt
       assert(contentAsString(result) contains "You signed in using a Government Gateway user ID for an individual.")
     }
 
-
     "call individualSignout" in {
       val result = authController.individualSignout.apply(FakeRequest())
       result.futureValue.header.status shouldBe Status.OK
-      assert(contentAsString(result) contains
-        "To check your Employment Related Securities (ERS) file you will need to sign in with the Government Gateway user ID " +
-          "and password that you use to manage PAYE for employers in your business tax account.")
+      assert(
+        contentAsString(result) contains
+          "To check your Employment Related Securities (ERS) file you will need to sign in with the Government Gateway user ID " +
+          "and password that you use to manage PAYE for employers in your business tax account."
+      )
     }
-
 
     "check url for individualSignoutRedirect for POST" in {
       val result = authController.individualSignoutRedirect().apply(FakeRequest())
       result.futureValue.header.status shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.AuthorisationController.individualSignout().url)
+      redirectLocation(result)         shouldBe Some(routes.AuthorisationController.individualSignout().url)
     }
 
   }
+
 }

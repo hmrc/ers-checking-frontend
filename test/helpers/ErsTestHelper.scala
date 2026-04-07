@@ -30,7 +30,9 @@ import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsObject, JsString, JsValue}
 import play.api.mvc._
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessagesApi}
+import play.api.test.Helpers.{
+  contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessagesApi
+}
 import play.twirl.api.Html
 import repository.ErsCheckingFrontendSessionCacheRepository
 import services.UpscanService
@@ -49,35 +51,45 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import java.io.InputStream
 
-trait ErsTestHelper extends MockitoSugar { 
+trait ErsTestHelper extends MockitoSugar {
   lazy val mockAuthAction = new AuthAction(mockAuthConnector, mockAppConfig, testBodyParser)
-  lazy val authResultDefault: Enrolments ~ Option[AffinityGroup.Organisation.type] = Enrolments(enrolments) and organisationAffinityGroup
-  val messagesActionBuilder: MessagesActionBuilder = new DefaultMessagesActionBuilderImpl(stubBodyParser[AnyContent](), stubMessagesApi())
-  val cc: ControllerComponents = stubControllerComponents()
-  val mockAuthConnector: AuthConnector = mock[AuthConnector]
-  val testBodyParser: BodyParsers.Default = mock[BodyParsers.Default]
-  val enrolments: Set[Enrolment] = Set(Enrolment("IR-PAYE", Seq(
-    EnrolmentIdentifier("TaxOfficeNumber", "123"),
-    EnrolmentIdentifier("TaxOfficeReference", "4567890")),
-    "Activated"))
-  val agentOrg: Some[AffinityGroup] = Some(AffinityGroup.Organisation)
-  val organisationAffinityGroup: Option[AffinityGroup.Organisation.type] = Some(AffinityGroup.Organisation)
-  val mockHttp: DefaultHttpClient = mock[DefaultHttpClient]
 
-  implicit val request: Request[AnyRef] = FakeRequest()
-  implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId("testSessionId")))
-  implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
-  val mockMetrics: Metrics = mock[Metrics]
-  implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
-  implicit val mockErsUtil: ERSUtil = mock[ERSUtil]
-  val mockAuditEvents: AuditEvents = mock[AuditEvents]
+  lazy val authResultDefault: Enrolments ~ Option[AffinityGroup.Organisation.type] =
+    Enrolments(enrolments) and organisationAffinityGroup
+
+  val messagesActionBuilder: MessagesActionBuilder =
+    new DefaultMessagesActionBuilderImpl(stubBodyParser[AnyContent](), stubMessagesApi())
+
+  val cc: ControllerComponents            = stubControllerComponents()
+  val mockAuthConnector: AuthConnector    = mock[AuthConnector]
+  val testBodyParser: BodyParsers.Default = mock[BodyParsers.Default]
+
+  val enrolments: Set[Enrolment] = Set(
+    Enrolment(
+      "IR-PAYE",
+      Seq(EnrolmentIdentifier("TaxOfficeNumber", "123"), EnrolmentIdentifier("TaxOfficeReference", "4567890")),
+      "Activated"
+    )
+  )
+
+  val agentOrg: Some[AffinityGroup]                                      = Some(AffinityGroup.Organisation)
+  val organisationAffinityGroup: Option[AffinityGroup.Organisation.type] = Some(AffinityGroup.Organisation)
+  val mockHttp: DefaultHttpClient                                        = mock[DefaultHttpClient]
+
+  implicit val request: Request[AnyRef]                               = FakeRequest()
+  implicit val hc: HeaderCarrier                                      = HeaderCarrier(sessionId = Some(SessionId("testSessionId")))
+  implicit val ec: ExecutionContext                                   = ExecutionContext.Implicits.global
+  val mockMetrics: Metrics                                            = mock[Metrics]
+  implicit val mockAppConfig: ApplicationConfig                       = mock[ApplicationConfig]
+  implicit val mockErsUtil: ERSUtil                                   = mock[ERSUtil]
+  val mockAuditEvents: AuditEvents                                    = mock[AuditEvents]
   val mockSessionCacheRepo: ErsCheckingFrontendSessionCacheRepository = mock[ErsCheckingFrontendSessionCacheRepository]
-  val mockUpscanService: UpscanService = mock[UpscanService]
-  val mockInputStream: InputStream = mock[InputStream]
+  val mockUpscanService: UpscanService                                = mock[UpscanService]
+  val mockInputStream: InputStream                                    = mock[InputStream]
 
   def doc(result: Html): Document = Jsoup.parse(contentAsString(result))
 
-  def testMCC(app: Application): DefaultMessagesControllerComponents = {
+  def testMCC(app: Application): DefaultMessagesControllerComponents =
     DefaultMessagesControllerComponents(
       messagesActionBuilder,
       DefaultActionBuilder(stubBodyParser[AnyContent]()),
@@ -87,13 +99,15 @@ trait ErsTestHelper extends MockitoSugar {
       cc.fileMimeTypes,
       ExecutionContext.global
     )
-  }
 
-  def mockAnyContentAction: OngoingStubbing[Future[Enrolments ~ Option[AffinityGroup]]] = {
-    when(mockAuthConnector.authorise[Enrolments ~ Option[AffinityGroup]]
-      (ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+  def mockAnyContentAction: OngoingStubbing[Future[Enrolments ~ Option[AffinityGroup]]] =
+    when(
+      mockAuthConnector.authorise[Enrolments ~ Option[AffinityGroup]](ArgumentMatchers.any(), ArgumentMatchers.any())(
+        ArgumentMatchers.any(),
+        ArgumentMatchers.any()
+      )
+    )
       .thenReturn(Future.successful(authResultDefault))
-  }
 
   when(mockAppConfig.signIn).thenReturn("http://localhost:9553/bas-gateway/sign-in")
   when(mockAppConfig.signOut).thenReturn("http://localhost:9553/bas-gateway/sign-out-without-state")
@@ -111,7 +125,7 @@ trait ErsTestHelper extends MockitoSugar {
   when(mockAppConfig.addBusinessTaxAccountPath).thenReturn("/business-account")
   when(mockAppConfig.dassGatewayHost).thenReturn("/dassGatewayHost")
 
-  //PageBuilder
+  // PageBuilder
   when(mockErsUtil.SCHEME_CSOP).thenReturn("1")
   when(mockErsUtil.SCHEME_EMI).thenReturn("2")
   when(mockErsUtil.SCHEME_OTHER).thenReturn("3")
@@ -124,7 +138,7 @@ trait ErsTestHelper extends MockitoSugar {
   when(mockErsUtil.OPTION_UPLOAD_SPREEDSHEET).thenReturn("1")
   when(mockErsUtil.OPTION_NIL_RETURN).thenReturn("2")
 
-  //Cache Util
+  // Cache Util
   when(mockErsUtil.CALLBACK_DATA_KEY).thenReturn("callback_data_key")
   when(mockErsUtil.CALLBACK_DATA_KEY_CSV).thenReturn("callback_data_key_csv")
   when(mockErsUtil.SCHEME_CACHE).thenReturn("scheme-type")
@@ -139,13 +153,12 @@ trait ErsTestHelper extends MockitoSugar {
   when(mockErsUtil.FILE_NAME_CACHE).thenReturn("file-name")
   when(mockErsUtil.CSV_FILES_UPLOAD).thenReturn("csv-files-upload")
 
-  def generateTestCacheItem(id: String = "id",
-                            data: Seq[(String, JsValue)] = Seq("" -> JsString(""))): CacheItem = {
+  def generateTestCacheItem(id: String = "id", data: Seq[(String, JsValue)] = Seq("" -> JsString(""))): CacheItem =
     CacheItem(
       id = id,
       data = JsObject(data),
       createdAt = LocalDate.parse("2023-11-17").atStartOfDay().toInstant(ZoneOffset.UTC),
       modifiedAt = LocalDate.parse("2023-11-17").atStartOfDay().toInstant(ZoneOffset.UTC)
     )
-  }
+
 }

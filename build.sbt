@@ -1,4 +1,4 @@
-ThisBuild / scalaVersion := "2.13.16"
+ThisBuild / scalaVersion := "2.13.18"
 ThisBuild / majorVersion := 4
 
 lazy val microservice = Project("ers-checking-frontend", file("."))
@@ -18,3 +18,5 @@ lazy val microservice = Project("ers-checking-frontend", file("."))
       "uk.gov.hmrc.hmrcfrontend.views.html.helpers._"
     )
   )
+
+addCommandAlias("scalafmtAll", "all scalafmtSbt scalafmt Test/scalafmt it/Test/scalafmt")

@@ -26,9 +26,9 @@ trait ErsBaseController {
   implicit val appConfig: ApplicationConfig
   val global_error: views.html.global_error
 
-  def getGlobalErrorPage(implicit request: Request[AnyRef], messages: Messages): Result = {
-    InternalServerError(global_error(
-      "ers.global_errors.title",
-      "ers.global_errors.message")(request, messages, appConfig))
-  }
+  def getGlobalErrorPage(implicit request: Request[AnyRef], messages: Messages): Result =
+    InternalServerError(
+      global_error("ers.global_errors.title", "ers.global_errors.message")(request, messages, appConfig)
+    )
+
 }

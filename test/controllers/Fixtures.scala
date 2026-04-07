@@ -32,35 +32,42 @@ object Fixtures {
   def buildFakeRequestWithSessionId(method: String, url: String = "") =
     FakeRequest(method, url).withSession("sessionId" -> "FAKE_SESSION_ID")
 
-  def buildEmpRefRequestWithSessionId(method: String, mockAppConfig: ApplicationConfig): RequestWithOptionalEmpRefAndPAYE[AnyContent] =
-    RequestWithOptionalEmpRefAndPAYE(FakeRequest(method, "").withSession("sessionId" -> "FAKE_SESSION_ID"), None, PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig))
+  def buildEmpRefRequestWithSessionId(
+    method: String,
+    mockAppConfig: ApplicationConfig
+  ): RequestWithOptionalEmpRefAndPAYE[AnyContent] =
+    RequestWithOptionalEmpRefAndPAYE(
+      FakeRequest(method, "").withSession("sessionId" -> "FAKE_SESSION_ID"),
+      None,
+      PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig)
+    )
 
-  def buildSheetErrors: ListBuffer[SheetErrors] =  {
+  def buildSheetErrors: ListBuffer[SheetErrors] = {
     val schemeErrors = new ListBuffer[SheetErrors]()
-    val list1 = ValidationError(Cell("A",1,"abc"),"001", "error.1", "This entry must be 'yes' or 'no'.")
-    val list2 = ValidationError(Cell("B",1,"abc"),"001", "error.1", "This entry must be 'yes' or 'no'.")
-    val list3 = ValidationError(Cell("C",1,"abc"),"001", "error.1", "This entry must be 'yes' or 'no'.")
+    val list1        = ValidationError(Cell("A", 1, "abc"), "001", "error.1", "This entry must be 'yes' or 'no'.")
+    val list2        = ValidationError(Cell("B", 1, "abc"), "001", "error.1", "This entry must be 'yes' or 'no'.")
+    val list3        = ValidationError(Cell("C", 1, "abc"), "001", "error.1", "This entry must be 'yes' or 'no'.")
     val sheetErrors3 = new ListBuffer[ValidationError]()
     sheetErrors3 += list1
     sheetErrors3 += list2
     sheetErrors3 += list3
-    schemeErrors += SheetErrors("Sheet1",sheetErrors3)
-    schemeErrors += SheetErrors("Sheet2",sheetErrors3)
+    schemeErrors += SheetErrors("Sheet1", sheetErrors3)
+    schemeErrors += SheetErrors("Sheet2", sheetErrors3)
     val sheetErrors1 = new ListBuffer[ValidationError]()
     sheetErrors1 += list1
-    schemeErrors += SheetErrors("Sheet3",sheetErrors1)
+    schemeErrors += SheetErrors("Sheet3", sheetErrors1)
 
     schemeErrors
   }
 
   def getMockErrorList: JsValue = {
-    val schemeErrors = buildSheetErrors
+    val schemeErrors       = buildSheetErrors
     val jsonValue: JsValue = Json.toJson(schemeErrors)
     jsonValue
   }
 
   def getMockSummaryErrors: JsValue = {
-    val errorList: String = "\"{\\\"b\\\":[{\\\"c\\\":\\\"11\\\", \\\"d\\\":\\\"1\\\"}]}\""
+    val errorList: String  = "\"{\\\"b\\\":[{\\\"c\\\":\\\"11\\\", \\\"d\\\":\\\"1\\\"}]}\""
     val jsonValue: JsValue = Json.parse(errorList)
     jsonValue
   }

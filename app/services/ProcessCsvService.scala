@@ -46,64 +46,70 @@ import cats.data.EitherT
 import cats.instances.future.catsStdInstancesForFuture
 
 @Singleton
-class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
-                                  sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
-                                  ersUtil: ERSUtil
-                                 )(implicit executionContext: ExecutionContext,
-                                   actorSystem: ActorSystem) extends Logging {
+class ProcessCsvService @Inject() (
+  appConfig: ApplicationConfig,
+  sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
+  ersUtil: ERSUtil
+)(implicit executionContext: ExecutionContext, actorSystem: ActorSystem)
+    extends Logging {
 
   private val uploadCsvSizeLimit: Int = appConfig.upscanFileSizeLimit
 
   def extractEntityData(response: HttpResponse): Source[ByteString, _] =
     response match {
-      case HttpResponse(org.apache.pekko.http.scaladsl.model.StatusCodes.OK, _, entity, _) => entity.withSizeLimit(uploadCsvSizeLimit).dataBytes
-      case notOkResponse =>
+      case HttpResponse(org.apache.pekko.http.scaladsl.model.StatusCodes.OK, _, entity, _) =>
+        entity.withSizeLimit(uploadCsvSizeLimit).dataBytes
+      case notOkResponse                                                                   =>
         Source.failed(
           UpstreamErrorResponse(
             s"[ProcessCsvService][extractEntityData] Illegal response from Upscan: ${notOkResponse.status.intValue}, body: ${notOkResponse.entity.dataBytes}",
-            notOkResponse.status.intValue))
+            notOkResponse.status.intValue
+          )
+        )
     }
 
   def extractBodyOfRequest: Source[HttpResponse, _] => Source[Either[Throwable, List[ByteString]], _] =
     _.flatMapConcat(extractEntityData)
       .via(CsvParsing.lineScanner())
       .via(Flow.fromFunction(Right(_)))
-      .recover {
-        case e => Left(e)
+      .recover { case e =>
+        Left(e)
       }
 
   def validateCsv(
-                   source: Source[HttpResponse, _],
-                   dataEngine: DataEngine
-                 ): Future[Either[Throwable, Seq[RowValidationResults]]] =
+    source: Source[HttpResponse, _],
+    dataEngine: DataEngine
+  ): Future[Either[Throwable, Seq[RowValidationResults]]] =
     extractBodyOfRequest(source)
-      .via(FlowOps.eitherFromFunction(
-        (rowBytes: Seq[ByteString]) => CsvValidator.validateCsvRow(dataEngine, rowBytes))
-      )
+      .via(FlowOps.eitherFromFunction((rowBytes: Seq[ByteString]) => CsvValidator.validateCsvRow(dataEngine, rowBytes)))
       .runWith(Sink.seq[Either[Throwable, RowValidationResults]])
       .map(_.traverse(identity))
 
-
-  def processFile(scheme: String, downloadSourceFile: String => Source[HttpResponse, _], file: UpscanCsvFilesCallback)
-                 (implicit request: Request[_], messages: Messages): Future[Either[Throwable, Boolean]] = {
+  def processFile(
+    scheme: String,
+    downloadSourceFile: String => Source[HttpResponse, _],
+    file: UpscanCsvFilesCallback
+  )(implicit request: Request[_], messages: Messages): Future[Either[Throwable, Boolean]] = {
 
     val successUpload: UploadedSuccessfully = file.uploadStatus.asInstanceOf[UploadedSuccessfully]
-    val source: Source[HttpResponse, _] = downloadSourceFile(successUpload.downloadUrl)
+    val source: Source[HttpResponse, _]     = downloadSourceFile(successUpload.downloadUrl)
 
     (for {
-      sheetName                       <- EitherT.fromEither[Future](checkFileType(successUpload.name))
-      _                               <- EitherT.fromEither[Future](ERSTemplatesInfo.findSheetWithinSchemeType(sheetName, scheme))
-      dataEngine                      <- EitherT.fromEither(DataEngine(sheetName, SchemeVersion.All))
-      csvValidationResult             <- EitherT(validateCsv(source, dataEngine))
-      rowsWithCorrectedRowNumbers     <- EitherT.fromEither(getValidationResultsWithCorrectRowNumber(csvValidationResult, sheetName)(messages))
-      result                          <- EitherT(checkValidityOfRows(rowsWithCorrectedRowNumbers, sheetName, file))
+      sheetName                   <- EitherT.fromEither[Future](checkFileType(successUpload.name))
+      _                           <- EitherT.fromEither[Future](ERSTemplatesInfo.findSheetWithinSchemeType(sheetName, scheme))
+      dataEngine                  <- EitherT.fromEither(DataEngine(sheetName, SchemeVersion.All))
+      csvValidationResult         <- EitherT(validateCsv(source, dataEngine))
+      rowsWithCorrectedRowNumbers <-
+        EitherT.fromEither(getValidationResultsWithCorrectRowNumber(csvValidationResult, sheetName)(messages))
+      result                      <- EitherT(checkValidityOfRows(rowsWithCorrectedRowNumbers, sheetName, file))
     } yield result).value
   }
 
-  def processFiles(callback: Option[UpscanCsvFilesCallbackList],
-                   scheme: String,
-                   downloadSourceFile: String => Source[HttpResponse, _])
-                  (implicit request: Request[_], messages: Messages): List[Future[Either[Throwable, Boolean]]] = {
+  def processFiles(
+    callback: Option[UpscanCsvFilesCallbackList],
+    scheme: String,
+    downloadSourceFile: String => Source[HttpResponse, _]
+  )(implicit request: Request[_], messages: Messages): List[Future[Either[Throwable, Boolean]]] = {
     logger.info(s"[ProcessCsvService][processFiles] callback $callback scheme: $scheme")
     callback.get.files map { file: UpscanCsvFilesCallback =>
       processFile(scheme = scheme, downloadSourceFile = downloadSourceFile, file = file)
@@ -123,42 +129,44 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
     validationResults.isEmpty || allRowsEmpty
   }
 
-  def getValidationResultsWithCorrectRowNumber(validationResults: Seq[RowValidationResults], name: String)(
-    implicit messages: Messages): Either[Throwable, Seq[ValidationError]] = {
-    if (checkIfValidationResultsEmpty(validationResults)){
+  def getValidationResultsWithCorrectRowNumber(validationResults: Seq[RowValidationResults], name: String)(implicit
+    messages: Messages
+  ): Either[Throwable, Seq[ValidationError]] =
+    if (checkIfValidationResultsEmpty(validationResults)) {
       Left(generateNoDataException(name))
     } else {
       Right(
         updateValidationResultRowNumbers(validationResults)
       )
     }
-  }
 
   // row numbers are not currently returned with validation errors
   // this method adds the correct row number to the validation errors based on their position in the sequence
   def updateValidationResultRowNumbers(validationResults: Seq[RowValidationResults]): Seq[ValidationError] =
     validationResults
       .zip(LazyList.from(1)) // start row numbers from 1
-      .flatMap{
-        case (rowValidationResults: RowValidationResults, rowNum: Int) =>
-          rowValidationResults.validationErrors.map((error: ValidationError) => {
-            val updatedCell: Cell = error.cell.copy(row = rowNum)
-            error.copy(cell = updatedCell)
-          })
+      .flatMap { case (rowValidationResults: RowValidationResults, rowNum: Int) =>
+        rowValidationResults.validationErrors.map { (error: ValidationError) =>
+          val updatedCell: Cell = error.cell.copy(row = rowNum)
+          error.copy(cell = updatedCell)
+        }
       }
 
-
-  def checkValidityOfRows(listOfErrors: Seq[ValidationError], name: String, file: UpscanCsvFilesCallback)(
-    implicit request: Request[_]): Future[Either[Throwable, Boolean]] = {
-    if (listOfErrors.isEmpty){
+  def checkValidityOfRows(listOfErrors: Seq[ValidationError], name: String, file: UpscanCsvFilesCallback)(implicit
+    request: Request[_]
+  ): Future[Either[Throwable, Boolean]] =
+    if (listOfErrors.isEmpty) {
       Future.successful(Right(true))
     } else {
-      val errorsToCache = ListBuffer(getSheetErrors(SheetErrors(FilenameUtils.removeExtension(name), listOfErrors.to(ListBuffer))))
+      val errorsToCache = ListBuffer(
+        getSheetErrors(SheetErrors(FilenameUtils.removeExtension(name), listOfErrors.to(ListBuffer)))
+      )
       for {
-        _ <- sessionCacheService.cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${file.uploadId.value}", listOfErrors.length)
-        _ <- sessionCacheService.cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${file.uploadId.value}", errorsToCache)
+        _ <- sessionCacheService
+               .cache[Long](s"${ersUtil.SCHEME_ERROR_COUNT_CACHE}${file.uploadId.value}", listOfErrors.length)
+        _ <- sessionCacheService
+               .cache[ListBuffer[SheetErrors]](s"${ersUtil.ERROR_LIST_CACHE}${file.uploadId.value}", errorsToCache)
       } yield Right(false)
-      }
     }
 
   def getSheetErrors(schemeErrors: SheetErrors): SheetErrors =
@@ -168,15 +176,21 @@ class ProcessCsvService @Inject()(appConfig: ApplicationConfig,
     if (name.endsWith(".csv")) {
       Right(FilenameUtils.removeExtension(name))
     } else {
-      Left(ERSFileProcessingException(
-        Messages("ers_check_csv_file.file_type_error", name)(messages),
-        Messages("ers_check_csv_file.file_type_error", name)(messages)))
+      Left(
+        ERSFileProcessingException(
+          Messages("ers_check_csv_file.file_type_error", name)(messages),
+          Messages("ers_check_csv_file.file_type_error", name)(messages)
+        )
+      )
     }
 
   private object FlowOps {
 
-    def eitherFromFunction[A, B](input: A => Either[Throwable, B]): Flow[Either[Throwable, A], Either[Throwable, B], _] =
+    def eitherFromFunction[A, B](
+      input: A => Either[Throwable, B]
+    ): Flow[Either[Throwable, A], Either[Throwable, B], _] =
       Flow.fromFunction(_.flatMap(input))
 
   }
+
 }

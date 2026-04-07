@@ -47,61 +47,64 @@ import utils.ERSUtil
 import utils.UploadedFileUtil.checkOdsFileType
 
 @Singleton
-class UploadController @Inject()(authAction: AuthAction,
-                                 processOdsService: ProcessOdsService,
-                                 processCsvService: ProcessCsvService,
-                                 sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
-                                 mcc: MessagesControllerComponents,
-                                 override val global_error: views.html.global_error
-                                )(implicit executionContext: ExecutionContext,
-                                  actorSystem: ActorSystem, val ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with I18nSupport with ErsBaseController with Logging {
+class UploadController @Inject() (
+  authAction: AuthAction,
+  processOdsService: ProcessOdsService,
+  processCsvService: ProcessCsvService,
+  sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
+  mcc: MessagesControllerComponents,
+  override val global_error: views.html.global_error
+)(implicit
+  executionContext: ExecutionContext,
+  actorSystem: ActorSystem,
+  val ersUtil: ERSUtil,
+  override val appConfig: ApplicationConfig
+) extends FrontendController(mcc) with I18nSupport with ErsBaseController with Logging {
 
   def downloadAsInputStream(downloadUrl: String): InputStream = new URL(downloadUrl).openStream()
 
-  def clearErrorCache()(implicit request: Request[_]): Future[Boolean] = {
-    //remove function doesn't work, the cache needs to be overwritten with 'blank' data
+  def clearErrorCache()(implicit request: Request[_]): Future[Boolean] =
+    // remove function doesn't work, the cache needs to be overwritten with 'blank' data
     (for {
       _ <- sessionCacheService.cache[Long](ersUtil.SCHEME_ERROR_COUNT_CACHE, 0L)
       _ <- sessionCacheService.cache[ListBuffer[SheetErrors]](ersUtil.ERROR_LIST_CACHE, new ListBuffer[SheetErrors]())
     } yield {
       logger.debug(s"[UploadController][clearCache] Successfully cleared cache")
       true
-    }) recoverWith {
-      case e: Exception =>
-        logger.error(s"[UploadController][clearCache] Failed to clear cache of errors and error count", e)
-        Future.successful(false)
+    }) recoverWith { case e: Exception =>
+      logger.error(s"[UploadController][clearCache] Failed to clear cache of errors and error count", e)
+      Future.successful(false)
     }
-  }
 
-  private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, _] = {
+  private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, _] =
     Source
       .single(HttpRequest(uri = downloadUrl))
       .mapAsync(parallelism = 1)(makeRequest)
-  }
 
-  private[controllers] def makeRequest(request: HttpRequest): Future[HttpResponse] = Http()(actorSystem).singleRequest(request)
+  private[controllers] def makeRequest(request: HttpRequest): Future[HttpResponse] =
+    Http()(actorSystem).singleRequest(request)
 
-  private[controllers] def readFileOds(downloadUrl: String)(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Either[Result, InputStream] = {
+  private[controllers] def readFileOds(
+    downloadUrl: String
+  )(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Either[Result, InputStream] =
     try {
-      val stream: InputStream = downloadAsInputStream(downloadUrl)
-      val targetFileName = "content.xml"
-      val zipInputStream = new ZipInputStream(stream)
+      val stream: InputStream                                = downloadAsInputStream(downloadUrl)
+      val targetFileName                                     = "content.xml"
+      val zipInputStream                                     = new ZipInputStream(stream)
       @scala.annotation.tailrec
-      def findFileInZip(stream: ZipInputStream): InputStream = {
+      def findFileInZip(stream: ZipInputStream): InputStream =
         Option(stream.getNextEntry) match {
           case Some(entry) if entry.getName == targetFileName =>
             stream
-          case Some(_) =>
+          case Some(_)                                        =>
             findFileInZip(stream)
-          case None =>
+          case None                                           =>
             throw ERSFileProcessingException(
               "Failed to stream the data from file",
               "Exception bulk entity streaming"
             )
         }
-      }
-      val contentInputStream: InputStream = findFileInZip(zipInputStream)
+      val contentInputStream: InputStream                    = findFileInZip(zipInputStream)
       Right(contentInputStream)
     } catch {
       case e: ERSFileProcessingException =>
@@ -112,13 +115,12 @@ class UploadController @Inject()(authAction: AuthAction,
         logger.error(s"[UploadController][readFileOds] Unexpected error while reading ods file: ${e.getMessage}", e)
         Left(getGlobalErrorPage)
     }
-  }
 
   def uploadCsvFile(scheme: String): Action[AnyContent] = authAction.async {
     implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent] =>
       clearErrorCache() flatMap {
         case false => Future(getGlobalErrorPage)
-        case _ =>
+        case _     =>
           sessionCacheService.fetch[UpscanCsvFilesCallbackList](ersUtil.CALLBACK_DATA_KEY_CSV) flatMap { callback =>
             val validationResults = processCsvService.processFiles(callback, scheme, readFileCsv)
             finaliseRequestAndRedirect(validationResults)
@@ -126,31 +128,32 @@ class UploadController @Inject()(authAction: AuthAction,
       }
   }
 
-  def finaliseRequestAndRedirect(validationResults: List[Future[Either[Throwable, Boolean]]])(
-    implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Result] =
+  def finaliseRequestAndRedirect(
+    validationResults: List[Future[Either[Throwable, Boolean]]]
+  )(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Result] =
     Future.sequence(validationResults).flatMap {
       case noFailures if noFailures.forall(_.contains(true)) =>
         Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
-      case failures  =>
+      case failures                                          =>
         failures.find(_.isLeft) match {
           case Some(Left(exception)) => handleException(exception)
-          case _ =>
+          case _                     =>
             Future.successful(Redirect(routes.HtmlReportController.htmlErrorReportPage(true)))
         }
 
     }
 
-  def uploadOdsFile(scheme: String): Action[AnyContent] = authAction.async {
-    implicit request =>
-      showuploadOdsFile(scheme)
+  def uploadOdsFile(scheme: String): Action[AnyContent] = authAction.async { implicit request =>
+    showuploadOdsFile(scheme)
   }
 
-  def showuploadOdsFile(scheme: String)
-                       (implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], messages: Messages): Future[Result] = {
+  def showuploadOdsFile(
+    scheme: String
+  )(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], messages: Messages): Future[Result] =
 
     clearErrorCache().flatMap { clearedSuccessfully =>
       if (clearedSuccessfully) {
-        //These .get's are safe because the UploadedSuccessfully model is already validated as existing in the UpscanController
+        // These .get's are safe because the UploadedSuccessfully model is already validated as existing in the UpscanController
         sessionCacheService.fetch[UploadedSuccessfully](ersUtil.CALLBACK_DATA_KEY).flatMap { file =>
           val fileName: String = file.get.name
           if (checkOdsFileType(fileName)) {
@@ -159,7 +162,7 @@ class UploadController @Inject()(authAction: AuthAction,
                 logger.error(s"[UploadController][showuploadOdsFile] failed in readFileOds for scheme : $scheme")
                 Future.successful(err)
               },
-              processor => {
+              processor =>
                 processOdsService
                   .performOdsUpload(appConfig.errorCount, fileName, processor, scheme)(request)
                   .map(fileIsValid =>
@@ -168,10 +171,10 @@ class UploadController @Inject()(authAction: AuthAction,
                     } else {
                       Redirect(routes.HtmlReportController.htmlErrorReportPage(false))
                     }
-                  ).recoverWith {
-                    case e => handleException(e)
+                  )
+                  .recoverWith { case e =>
+                    handleException(e)
                   }
-              }
             )
           } else {
             val exception: ERSFileProcessingException = ERSFileProcessingException(
@@ -187,39 +190,47 @@ class UploadController @Inject()(authAction: AuthAction,
         Future.successful(getGlobalErrorPage(request, messages))
       }
     }
-  }
 
-  def updateCacheThenRedirectToFormatErrorsPage(message: String, params: Seq[String], needsExtendedInstructions: Boolean)(implicit request: Request[AnyContent]): Future[Result] = {
+  def updateCacheThenRedirectToFormatErrorsPage(
+    message: String,
+    params: Seq[String],
+    needsExtendedInstructions: Boolean
+  )(implicit request: Request[AnyContent]): Future[Result] =
     for {
       _ <- sessionCacheService.cache[String](ersUtil.FORMAT_ERROR_CACHE, message)
       _ <- sessionCacheService.cache[Seq[String]](ersUtil.FORMAT_ERROR_CACHE_PARAMS, params)
       _ <- sessionCacheService.cache[Boolean](ersUtil.FORMAT_ERROR_EXTENDED_CACHE, needsExtendedInstructions)
-    } yield {
-      Redirect(routes.CheckingServiceController.formatErrorsPage())
-    }
-  }
+    } yield Redirect(routes.CheckingServiceController.formatErrorsPage())
 
-  def handleException(t: Throwable)(implicit request: Request[AnyContent]): Future[Result] = {
+  def handleException(t: Throwable)(implicit request: Request[AnyContent]): Future[Result] =
     t match {
-      case e: ERSFileProcessingException =>
+      case e: ERSFileProcessingException               =>
         updateCacheThenRedirectToFormatErrorsPage(e.message, e.optionalParams, e.needsExtendedInstructions)
-      case upstreamError: UpstreamErrorResponse =>
+      case upstreamError: UpstreamErrorResponse        =>
         logger.error(
           s"[UploadController][handleException] " +
             s"Encountered an upstream error response when processing a csv file: " +
-            s"status ${upstreamError.statusCode} with message ${upstreamError.getMessage()}")
+            s"status ${upstreamError.statusCode} with message ${upstreamError.getMessage()}"
+        )
         Future.successful(getGlobalErrorPage)
-      case e: javax.xml.stream.XMLStreamException =>
-        logger.error(s"[UploadController][handleException] " +
-          s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
+      case e: javax.xml.stream.XMLStreamException      =>
+        logger.error(
+          s"[UploadController][handleException] " +
+            s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page."
+        )
         Future.successful(getGlobalErrorPage)
-      case e: validator.IncorrectSchemeException =>
-        val selectedSchemeTypeWithArticle: String = withArticle(e.selectedSchemeType.toUpperCase())
+      case e: validator.IncorrectSchemeException       =>
+        val selectedSchemeTypeWithArticle: String     = withArticle(e.selectedSchemeType.toUpperCase())
         val uploadedFileSchemeTypeWithArticle: String = withArticle(e.uploadedFileSchemeType.toUpperCase())
-        val message = Messages("ers.exceptions.dataParser.incorrectSchemeType", uploadedFileSchemeTypeWithArticle, selectedSchemeTypeWithArticle, e.fileName)
-        val optionalParams = Seq(uploadedFileSchemeTypeWithArticle, selectedSchemeTypeWithArticle, e.fileName)
+        val message                                   = Messages(
+          "ers.exceptions.dataParser.incorrectSchemeType",
+          uploadedFileSchemeTypeWithArticle,
+          selectedSchemeTypeWithArticle,
+          e.fileName
+        )
+        val optionalParams                            = Seq(uploadedFileSchemeTypeWithArticle, selectedSchemeTypeWithArticle, e.fileName)
         updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = false)
-      case _: validator.NoDataException =>
+      case _: validator.NoDataException                =>
         updateCacheThenRedirectToFormatErrorsPage(
           Messages("ers.exceptions.dataParser.noData"),
           Seq.empty[String],
@@ -231,22 +242,26 @@ class UploadController @Inject()(authAction: AuthAction,
           Seq.empty[String],
           needsExtendedInstructions = true
         )
-      case e: validator.IncorrectHeaderException =>
-        val message = Messages("ers.exceptions.dataParser.incorrectHeader", e.sheetName, e.fileName)
+      case e: validator.IncorrectHeaderException       =>
+        val message        = Messages("ers.exceptions.dataParser.incorrectHeader", e.sheetName, e.fileName)
         val optionalParams = Seq(e.sheetName, e.fileName)
         updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
-      case e: validator.IncorrectSheetNameException =>
-        val message = Messages("ers.exceptions.dataParser.incorrectSheetName", e.sheetName, e.schemeName)
+      case e: validator.IncorrectSheetNameException    =>
+        val message        = Messages("ers.exceptions.dataParser.incorrectSheetName", e.sheetName, e.schemeName)
         val optionalParams = Seq(e.sheetName, e.schemeName)
         updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
-      case e: validator.ValidatorException =>
-        logger.error(s"[UploadController][handleException] " +
-          s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page.")
+      case e: validator.ValidatorException             =>
+        logger.error(
+          s"[UploadController][handleException] " +
+            s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page."
+        )
         Future.successful(getGlobalErrorPage)
-      case notERSProcessingException: Throwable => // Catch all case
-        logger.error(s"[UploadController][handleException] " +
-          s"Encountered unexpected exception: ${notERSProcessingException.getClass}. Redirecting to global error page.")
+      case notERSProcessingException: Throwable        => // Catch all case
+        logger.error(
+          s"[UploadController][handleException] " +
+            s"Encountered unexpected exception: ${notERSProcessingException.getClass}. Redirecting to global error page."
+        )
         Future.successful(getGlobalErrorPage)
     }
-  }
+
 }

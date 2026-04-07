@@ -37,17 +37,21 @@ class PAYEDetailsSpec extends Matchers with AnyWordSpecLike with ErsTestHelper {
     (payeDetailsWithDefaults.copy(agentHasPAYEEnrollement = false), "/not-enrolled-for-PAYE"),
     // Organisation redirects
     (payeDetailsWithDefaults.copy(isAgent = false, agentHasPAYEEnrollement = false), "/not-enrolled-for-PAYE"),
-    (payeDetailsWithDefaults.copy(isAgent = false, agentHasPAYEEnrollement = false, Some(EmpRef("", ""))), "/not-enrolled-for-PAYE"),
-    (payeDetailsWithDefaults.copy(isAgent = false, agentHasPAYEEnrollement = false, Some(EmpRef("1234", "test"))), "/ers/org/1234/test/schemes")
-  ).foreach {
-    case (details, expectedRedirect) =>
-      val empRefValueString = details.optionalEmpRef.map(empRef => s" (value: ${empRef.value})").getOrElse("")
-      s"getPAYERedirect should return ${expectedRedirect} when passed " +
-        s"isAgent: ${details.isAgent}, " +
-        s"agentHasPAYEEnrollement: ${details.agentHasPAYEEnrollement} and " +
-        s"optionalEmpRef.isDefined: ${details.optionalEmpRef.isDefined}${empRefValueString}" in {
-        details.getPAYERedirectCall.url.contains(expectedRedirect)
-      }
+    (
+      payeDetailsWithDefaults.copy(isAgent = false, agentHasPAYEEnrollement = false, Some(EmpRef("", ""))),
+      "/not-enrolled-for-PAYE"
+    ),
+    (
+      payeDetailsWithDefaults.copy(isAgent = false, agentHasPAYEEnrollement = false, Some(EmpRef("1234", "test"))),
+      "/ers/org/1234/test/schemes"
+    )
+  ).foreach { case (details, expectedRedirect) =>
+    val empRefValueString = details.optionalEmpRef.map(empRef => s" (value: ${empRef.value})").getOrElse("")
+    s"getPAYERedirect should return $expectedRedirect when passed " +
+      s"isAgent: ${details.isAgent}, " +
+      s"agentHasPAYEEnrollement: ${details.agentHasPAYEEnrollement} and " +
+      s"optionalEmpRef.isDefined: ${details.optionalEmpRef.isDefined}$empRefValueString" in
+      details.getPAYERedirectCall.url.contains(expectedRedirect)
   }
 
   Seq(
@@ -55,12 +59,10 @@ class PAYEDetailsSpec extends Matchers with AnyWordSpecLike with ErsTestHelper {
     (payeDetailsWithDefaults, "/ers/agent/clients"),
     // Organisation redirects
     (payeDetailsWithDefaults.copy(isAgent = false), "/business-account")
-  ).foreach {
-    case (details, expectedRedirect) =>
-      s"getSignOutRedirect should return ${expectedRedirect} when passed isAgent: ${details.isAgent}" in {
-        details.getSignOutRedirectCall.url shouldBe(expectedRedirect)
-      }
+  ).foreach { case (details, expectedRedirect) =>
+    s"getSignOutRedirect should return $expectedRedirect when passed isAgent: ${details.isAgent}" in {
+      details.getSignOutRedirectCall.url shouldBe expectedRedirect
+    }
   }
-
 
 }

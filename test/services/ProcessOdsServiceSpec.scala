@@ -40,7 +40,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 class ProcessOdsServiceSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with OptionValues
     with ErsTestHelper
@@ -48,13 +48,17 @@ class ProcessOdsServiceSpec
     with ScalaFutures
     with MongoSupport {
 
-  implicit val fakeRequest: RequestWithOptionalEmpRefAndPAYE[AnyContent] = RequestWithOptionalEmpRefAndPAYE(FakeRequest(), None, PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, None, mockAppConfig))
+  implicit val fakeRequest: RequestWithOptionalEmpRefAndPAYE[AnyContent] = RequestWithOptionalEmpRefAndPAYE(
+    FakeRequest(),
+    None,
+    PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, None, mockAppConfig)
+  )
 
-  def buildProcessOdsService(sheetErrors: ListBuffer[SheetErrors]): ProcessOdsService = {
-    new ProcessOdsService(mockSessionCacheRepo, mockErsUtil){
-      override def validateOdsFile(fileName: String, processor: InputStream, scheme: String): ListBuffer[SheetErrors] = sheetErrors
+  def buildProcessOdsService(sheetErrors: ListBuffer[SheetErrors]): ProcessOdsService =
+    new ProcessOdsService(mockSessionCacheRepo, mockErsUtil) {
+      override def validateOdsFile(fileName: String, processor: InputStream, scheme: String): ListBuffer[SheetErrors] =
+        sheetErrors
     }
-  }
 
   "calling performOdsUpload" should {
 
@@ -64,7 +68,9 @@ class ProcessOdsServiceSpec
       // mocking calls to cache
       when(mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any()))
         .thenReturn(Future.successful(("", "")))
-      when(mockSessionCacheRepo.cache[Long](ArgumentMatchers.eq(mockErsUtil.SCHEME_ERROR_COUNT_CACHE), any())(any(), any()))
+      when(
+        mockSessionCacheRepo.cache[Long](ArgumentMatchers.eq(mockErsUtil.SCHEME_ERROR_COUNT_CACHE), any())(any(), any())
+      )
         .thenReturn(Future.successful(("", "")))
       when(mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.ERROR_LIST_CACHE), any())(any(), any()))
         .thenReturn(Future.successful(("", "")))
@@ -79,7 +85,7 @@ class ProcessOdsServiceSpec
       when(mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any()))
         .thenReturn(Future.successful(("", "")))
 
-      val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
+      val emptyErrors     = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
       val output: Boolean = buildProcessOdsService(emptyErrors)
         .performOdsUpload(10, "testFileName.ods", mockInputStream, "csop")
         .futureValue
@@ -93,7 +99,8 @@ class ProcessOdsServiceSpec
 
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
 
-      val result: Future[Boolean] = buildProcessOdsService(emptyErrors).performOdsUpload(10, "testFileName.ods", mockInputStream, "csop")
+      val result: Future[Boolean] =
+        buildProcessOdsService(emptyErrors).performOdsUpload(10, "testFileName.ods", mockInputStream, "csop")
       intercept[NoSuchElementException](Await.result(result, Duration.Inf))
     }
   }
@@ -103,7 +110,7 @@ class ProcessOdsServiceSpec
   val list3 = ValidationError(Cell("C", 1, "abc"), "001", "error.1", "This entry must be 'yes' or 'no'.")
 
   val sheetWithThreeErrors = new ListBuffer[ValidationError].addAll(Seq(list1, list2, list3))
-  val sheetWithOneError = new ListBuffer[ValidationError].addOne(list1)
+  val sheetWithOneError    = new ListBuffer[ValidationError].addOne(list1)
 
   val sheetWithMultipleSchemeError = new ListBuffer[SheetErrors].addAll(
     Seq(
@@ -128,20 +135,18 @@ class ProcessOdsServiceSpec
       val result = getSheetErrors(sheetWithMultipleSchemeError, 100)
 
       result.head.errors.size shouldBe 3
-      result(1).errors.size shouldBe 3
-      result(2).errors.size shouldBe 1
+      result(1).errors.size   shouldBe 3
+      result(2).errors.size   shouldBe 1
     }
   }
 
   "calling isValid" should {
 
-    "return false if there are no errors in any of the sheetErrors passed in" in {
+    "return false if there are no errors in any of the sheetErrors passed in" in
       assert(!isValid(sheetWithMultipleSchemeError))
-    }
 
-    "return true if there are no errors in any of the sheetErrors passed in" in {
+    "return true if there are no errors in any of the sheetErrors passed in" in
       assert(isValid(sheetWithNoSchemeError))
-    }
 
   }
 

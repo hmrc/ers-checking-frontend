@@ -32,24 +32,28 @@ object UploadedSuccessfully {
 
 object UploadStatus {
   implicit val uploadedSuccessfullyFormat: OFormat[UploadedSuccessfully] = Json.format[UploadedSuccessfully]
+
   implicit val readsUploadStatus: Reads[UploadStatus] = (json: JsValue) => {
     val jsObject = json.asInstanceOf[JsObject]
     jsObject.value.get("_type") match {
-      case Some(JsString("NotStarted")) => JsSuccess(NotStarted)
-      case Some(JsString("InProgress")) => JsSuccess(InProgress)
-      case Some(JsString("Failed")) => JsSuccess(Failed)
-      case Some(JsString("FailedMimeType")) => JsSuccess(FailedMimeType)
-      case Some(JsString("UploadedSuccessfully")) => Json.fromJson[UploadedSuccessfully](jsObject)(uploadedSuccessfullyFormat)
-      case Some(value) => JsError(s"Unexpected value of _type: $value")
-      case None => JsError("Missing _type field")
+      case Some(JsString("NotStarted"))           => JsSuccess(NotStarted)
+      case Some(JsString("InProgress"))           => JsSuccess(InProgress)
+      case Some(JsString("Failed"))               => JsSuccess(Failed)
+      case Some(JsString("FailedMimeType"))       => JsSuccess(FailedMimeType)
+      case Some(JsString("UploadedSuccessfully")) =>
+        Json.fromJson[UploadedSuccessfully](jsObject)(uploadedSuccessfullyFormat)
+      case Some(value)                            => JsError(s"Unexpected value of _type: $value")
+      case None                                   => JsError("Missing _type field")
     }
   }
 
   implicit val writesUploadStatus: Writes[UploadStatus] = {
-    case NotStarted => JsObject(Map("_type" -> JsString("NotStarted")))
-    case InProgress => JsObject(Map("_type" -> JsString("InProgress")))
-    case Failed => JsObject(Map("_type" -> JsString("Failed")))
-    case FailedMimeType => JsObject(Map("_type" -> JsString("FailedMimeType")))
-    case s: UploadedSuccessfully => Json.toJson(s)(uploadedSuccessfullyFormat).as[JsObject] + ("_type" -> JsString("UploadedSuccessfully"))
+    case NotStarted              => JsObject(Map("_type" -> JsString("NotStarted")))
+    case InProgress              => JsObject(Map("_type" -> JsString("InProgress")))
+    case Failed                  => JsObject(Map("_type" -> JsString("Failed")))
+    case FailedMimeType          => JsObject(Map("_type" -> JsString("FailedMimeType")))
+    case s: UploadedSuccessfully =>
+      Json.toJson(s)(uploadedSuccessfullyFormat).as[JsObject] + ("_type" -> JsString("UploadedSuccessfully"))
   }
+
 }
