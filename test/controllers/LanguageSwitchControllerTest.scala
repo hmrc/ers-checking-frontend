@@ -15,6 +15,7 @@
  */
 
 package controllers
+
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -24,31 +25,33 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.language.LanguageUtils
 
-
 class LanguageSwitchControllerTest extends AnyWordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite {
   val controllerComponents: ControllerComponents = app.injector.instanceOf[ControllerComponents]
-  val langUtils : LanguageUtils = app.injector.instanceOf[LanguageUtils]
-  val testLanguageSwitchController = new LanguageSwitchController(langUtils : LanguageUtils, controllerComponents : ControllerComponents)
+  val langUtils: LanguageUtils                   = app.injector.instanceOf[LanguageUtils]
+
+  val testLanguageSwitchController =
+    new LanguageSwitchController(langUtils: LanguageUtils, controllerComponents: ControllerComponents)
 
   "Hitting language selection endpoint" must {
     "redirect to Welsh translated start page if Welsh language is selected" in {
-      val request = FakeRequest()
-      val result = testLanguageSwitchController.switchToLanguage("cymraeg")(request)
+      val request                = FakeRequest()
+      val result                 = testLanguageSwitchController.switchToLanguage("cymraeg")(request)
       val resultCookies: Cookies = cookies(result)
       resultCookies.size shouldBe 1
       val cookie: Cookie = resultCookies.head
-      cookie.name shouldBe "PLAY_LANG"
+      cookie.name  shouldBe "PLAY_LANG"
       cookie.value shouldBe "cy"
     }
 
     "redirect to English translated start page if English language is selected" in {
-      val request = FakeRequest()
-      val result = testLanguageSwitchController.switchToLanguage("english")(request)
+      val request                = FakeRequest()
+      val result                 = testLanguageSwitchController.switchToLanguage("english")(request)
       val resultCookies: Cookies = cookies(result)
       resultCookies.size shouldBe 1
       val cookie: Cookie = resultCookies.head
-      cookie.name shouldBe "PLAY_LANG"
+      cookie.name  shouldBe "PLAY_LANG"
       cookie.value shouldBe "en"
     }
   }
+
 }

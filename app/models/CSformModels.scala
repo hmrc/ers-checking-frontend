@@ -16,14 +16,13 @@
 
 package models
 
-case class CS_checkFileType (
+case class CS_checkFileType(
   checkFileType: Option[String]
 ) {
   def getFileType: String = checkFileType.getOrElse("")
 }
 
-
-case class CS_schemeType (
+case class CS_schemeType(
   schemeType: Option[String]
 ) {
   def getSchemeType: String = schemeType.getOrElse("")

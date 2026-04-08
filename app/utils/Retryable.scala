@@ -26,26 +26,30 @@ import scala.concurrent.duration.FiniteDuration
 
 trait Retryable {
 
- val appConfig: ApplicationConfig
- val logger: Logger
+  val appConfig: ApplicationConfig
+  val logger: Logger
 
   case class LoopException[A](retryNumber: Int, finalFutureData: Option[A])
-    extends Exception(s"Failed to meet predicate after retrying $retryNumber times.")
+      extends Exception(s"Failed to meet predicate after retrying $retryNumber times.")
 
   implicit class RetryCache[A](f: => Future[A]) {
-    def withRetry(maxTimes: Int)(pToBreakLoop: A => Boolean)(implicit actorSystem: ActorSystem, ec: ExecutionContext): Future[A] = {
-      val delay: FiniteDuration = appConfig.retryDelay
-      val scheduler: Scheduler = actorSystem.getScheduler
+
+    def withRetry(
+      maxTimes: Int
+    )(pToBreakLoop: A => Boolean)(implicit actorSystem: ActorSystem, ec: ExecutionContext): Future[A] = {
+      val delay: FiniteDuration                                       = appConfig.retryDelay
+      val scheduler: Scheduler                                        = actorSystem.getScheduler
       def loop(count: Int = 0, previous: Option[A] = None): Future[A] = {
-        logger.info(s"[Retryable][withRetry][loop] Retrying call x$count with predicate - Future completed: ${f.isCompleted}")
-        if(count < maxTimes){
-          f.flatMap {
-            data =>
-              if(pToBreakLoop(data)) {
-                Future.successful(data)
-              } else {
-                after(delay, scheduler)(loop(count + 1, Some(data)))
-              }
+        logger.info(
+          s"[Retryable][withRetry][loop] Retrying call x$count with predicate - Future completed: ${f.isCompleted}"
+        )
+        if (count < maxTimes) {
+          f.flatMap { data =>
+            if (pToBreakLoop(data)) {
+              Future.successful(data)
+            } else {
+              after(delay, scheduler)(loop(count + 1, Some(data)))
+            }
           }
         } else {
           throw LoopException(count, previous)
@@ -53,5 +57,7 @@ trait Retryable {
       }
       loop()
     }
+
   }
+
 }

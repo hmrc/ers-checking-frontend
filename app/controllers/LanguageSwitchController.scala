@@ -21,9 +21,8 @@ import play.api.i18n.Lang
 import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.play.language.{LanguageController, LanguageUtils}
 
-class LanguageSwitchController @Inject()(languageUtils: LanguageUtils,
-                                         cc: ControllerComponents
-                                        ) extends LanguageController(languageUtils, cc) {
+class LanguageSwitchController @Inject() (languageUtils: LanguageUtils, cc: ControllerComponents)
+    extends LanguageController(languageUtils, cc) {
 
   override def languageMap: Map[String, Lang] = Map(
     "english" -> Lang("en"),

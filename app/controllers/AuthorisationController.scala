@@ -25,20 +25,20 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import scala.concurrent.Future
 
 @Singleton
-class AuthorisationController @Inject()(mcc: MessagesControllerComponents,
-                                        implicit val appConfig: ApplicationConfig,
-                                        not_authorised: views.html.not_authorised,
-                                        individual_not_authorised: views.html.individual_not_authorised,
-                                        individual_signout: views.html.individual_signout
-                                       ) extends FrontendController(mcc) with I18nSupport {
-  def notAuthorised: Action[AnyContent] = Action.async {
-    implicit request =>
-      Future.successful(Unauthorized(not_authorised(request, request2Messages, appConfig)))
+class AuthorisationController @Inject() (
+  mcc: MessagesControllerComponents,
+  implicit val appConfig: ApplicationConfig,
+  not_authorised: views.html.not_authorised,
+  individual_not_authorised: views.html.individual_not_authorised,
+  individual_signout: views.html.individual_signout
+) extends FrontendController(mcc) with I18nSupport {
+
+  def notAuthorised: Action[AnyContent] = Action.async { implicit request =>
+    Future.successful(Unauthorized(not_authorised(request, request2Messages, appConfig)))
   }
 
-  def individualNotAuthorised: Action[AnyContent] = Action.async {
-    implicit request =>
-      Future.successful(Unauthorized(individual_not_authorised(request, request2Messages, appConfig)))
+  def individualNotAuthorised: Action[AnyContent] = Action.async { implicit request =>
+    Future.successful(Unauthorized(individual_not_authorised(request, request2Messages, appConfig)))
   }
 
   def individualSignout: Action[AnyContent] = Action { implicit request =>
@@ -48,4 +48,5 @@ class AuthorisationController @Inject()(mcc: MessagesControllerComponents,
   def individualSignoutRedirect: Action[AnyContent] = Action { _ =>
     Redirect(routes.AuthorisationController.individualSignout()).withNewSession
   }
+
 }

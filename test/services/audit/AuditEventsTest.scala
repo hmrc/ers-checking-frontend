@@ -44,24 +44,24 @@ class AuditEventsTest extends AnyWordSpecLike with Matchers with OptionValues wi
 
     "include the 'CheckingServiceFileProcessingError' auditType" in {
       val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
-      val testAuditEvent = new AuditEvents(mockAuditConnector)
-      val eventCaptor = ArgumentCaptor.forClass(classOf[DataEvent])
-      val testException: TestException = new TestException("testErrorMessage")
-      val expectedDataEvent: DataEvent = dataEvent.copy(
+      val testAuditEvent                            = new AuditEvents(mockAuditConnector)
+      val eventCaptor                               = ArgumentCaptor.forClass(classOf[DataEvent])
+      val testException: TestException              = new TestException("testErrorMessage")
+      val expectedDataEvent: DataEvent              = dataEvent.copy(
         auditType = "CheckingServiceRunTimeError",
         detail = Map(
           "ErrorMessage" -> "testErrorMessage",
-          "Context" -> "testContextInfo",
-          "sheetName" -> "testSheetName",
-          "StackTrace" -> testException.getStackTrace.toString
+          "Context"      -> "testContextInfo",
+          "sheetName"    -> "testSheetName",
+          "StackTrace"   -> testException.getStackTrace.toString
         )
       )
 
       testAuditEvent.auditRunTimeError(testException, "testContextInfo", "testSheetName")
       verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(any(), any())
-      expectedDataEvent.auditSource shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditSource
-      expectedDataEvent.auditType shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditType
-      expectedDataEvent.detail.head shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail.head
+      expectedDataEvent.auditSource    shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditSource
+      expectedDataEvent.auditType      shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditType
+      expectedDataEvent.detail.head    shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail.head
       expectedDataEvent.detail.take(1) shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail.take(1)
       expectedDataEvent.detail.take(2) shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail.take(2)
     }
@@ -70,69 +70,71 @@ class AuditEventsTest extends AnyWordSpecLike with Matchers with OptionValues wi
   "The fileProcessingErrorAudit DataEvent" should {
     "include the 'CheckingServiceFileProcessingError' auditType" in {
       val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
-      val testAuditEvent = new AuditEvents(mockAuditConnector)
-      val eventCaptor = ArgumentCaptor.forClass(classOf[DataEvent])
-      val expectedDataEvent: DataEvent = dataEvent.copy(
+      val testAuditEvent                            = new AuditEvents(mockAuditConnector)
+      val eventCaptor                               = ArgumentCaptor.forClass(classOf[DataEvent])
+      val expectedDataEvent: DataEvent              = dataEvent.copy(
         auditType = "CheckingServiceFileProcessingError",
-        detail = Map(
-          "schemeType" -> "testScheme",
-          "sheetName" -> "testSheetName",
-          "ErrorMessage" -> "testErrorMessage")
+        detail = Map("schemeType" -> "testScheme", "sheetName" -> "testSheetName", "ErrorMessage" -> "testErrorMessage")
       )
 
       testAuditEvent.fileProcessingErrorAudit("testScheme", "testSheetName", "testErrorMessage")
       verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(any(), any())
       expectedDataEvent.auditSource shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditSource
-      expectedDataEvent.auditType shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditType
-      expectedDataEvent.detail shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail
+      expectedDataEvent.auditType   shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditType
+      expectedDataEvent.detail      shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail
     }
   }
 
   "The numRowsInSchemeData DataEvent" should {
     "include the 'CheckingServiceFileProcessingError' audit type when the request has no EmpRef" in {
-      val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
-      val testAuditEvent = new AuditEvents(mockAuditConnector)
+      val mockAuditConnector: DefaultAuditConnector                 = mock[DefaultAuditConnector]
+      val testAuditEvent                                            = new AuditEvents(mockAuditConnector)
       implicit val fakeRequest: RequestWithOptionalEmpRefAndPAYE[_] = RequestWithOptionalEmpRefAndPAYE(
-        FakeRequest(), None, PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig)
+        FakeRequest(),
+        None,
+        PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig)
       )
-      val eventCaptor = ArgumentCaptor.forClass(classOf[DataEvent])
-      val expectedDataEvent: DataEvent = dataEvent.copy(
+      val eventCaptor                                               = ArgumentCaptor.forClass(classOf[DataEvent])
+      val expectedDataEvent: DataEvent                              = dataEvent.copy(
         auditType = "CheckingServiceNumRowsInSchemeData",
         detail = Map(
-          "sheetName" -> "testSheetName",
+          "sheetName"    -> "testSheetName",
           "rowsWithData" -> "3",
-          "empRef" -> ""
+          "empRef"       -> ""
         )
       )
 
       testAuditEvent.numRowsInSchemeData("testSheetName", 3)
       verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(any(), any())
       expectedDataEvent.auditSource shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditSource
-      expectedDataEvent.auditType shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditType
-      expectedDataEvent.detail shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail
+      expectedDataEvent.auditType   shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditType
+      expectedDataEvent.detail      shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail
     }
 
     "include the 'CheckingServiceFileProcessingError' audit type when the request has an EmpRef" in {
-      val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
-      val testAuditEvent = new AuditEvents(mockAuditConnector)
+      val mockAuditConnector: DefaultAuditConnector                 = mock[DefaultAuditConnector]
+      val testAuditEvent                                            = new AuditEvents(mockAuditConnector)
       implicit val fakeRequest: RequestWithOptionalEmpRefAndPAYE[_] = RequestWithOptionalEmpRefAndPAYE(
-        FakeRequest(), Some(EmpRef("1234", "GA4567")), PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig)
+        FakeRequest(),
+        Some(EmpRef("1234", "GA4567")),
+        PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig)
       )
-      val eventCaptor = ArgumentCaptor.forClass(classOf[DataEvent])
-      val expectedDataEvent: DataEvent = dataEvent.copy(
+      val eventCaptor                                               = ArgumentCaptor.forClass(classOf[DataEvent])
+      val expectedDataEvent: DataEvent                              = dataEvent.copy(
         auditType = "CheckingServiceNumRowsInSchemeData",
         detail = Map(
-          "sheetName" -> "testSheetName",
+          "sheetName"    -> "testSheetName",
           "rowsWithData" -> "2",
-          "empRef" -> "1234/GA4567"
+          "empRef"       -> "1234/GA4567"
         )
       )
 
       testAuditEvent.numRowsInSchemeData("testSheetName", 2)
       verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(any(), any())
       expectedDataEvent.auditSource shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditSource
-      expectedDataEvent.auditType shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditType
-      expectedDataEvent.detail shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail
+      expectedDataEvent.auditType   shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditType
+      expectedDataEvent.detail      shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail
     }
   }
+
 }

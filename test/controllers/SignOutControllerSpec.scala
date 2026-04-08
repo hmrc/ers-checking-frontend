@@ -31,12 +31,12 @@ import views.html.signed_out
 
 import scala.concurrent.Future
 
-class SignOutControllerSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPerSuite
-   with Injecting with ErsTestHelper {
+class SignOutControllerSpec
+    extends AnyWordSpecLike with Matchers with GuiceOneAppPerSuite with Injecting with ErsTestHelper {
 
   implicit val mcc: MessagesControllerComponents = inject[MessagesControllerComponents]
-  implicit val timeoutView: signed_out = inject[signed_out]
-  val signOutController = new SignOutController(mcc, timeoutView)
+  implicit val timeoutView: signed_out           = inject[signed_out]
+  val signOutController                          = new SignOutController(mcc, timeoutView)
 
   "Calling SignOutController.timeout" should {
     val result: Future[Result] = signOutController.timedOut().apply(FakeRequest())
@@ -59,8 +59,8 @@ class SignOutControllerSpec extends AnyWordSpecLike with Matchers with GuiceOneA
     "render the timeout page" in {
       def returnMessage(key: String): String = stubMessages(mcc.messagesApi).messages(key)
 
-      val title: String = returnMessage("ers.header")
-      val header: String = returnMessage("ers_signed_out.info")
+      val title: String        = returnMessage("ers.header")
+      val header: String       = returnMessage("ers_signed_out.info")
       val signInButton: String = returnMessage("ers_signed_out.link")
       val pageAsString: String = contentAsString(result)
 
@@ -76,8 +76,9 @@ class SignOutControllerSpec extends AnyWordSpecLike with Matchers with GuiceOneA
 
       redirectLocation(result).value mustBe
         "http://localhost:9553/bas-gateway/" +
-          "sign-in?continue_url=http%3A%2F%2Flocalhost%3A9225%2Fcheck-your-ers-files&origin=ers-checking-frontend"
+        "sign-in?continue_url=http%3A%2F%2Flocalhost%3A9225%2Fcheck-your-ers-files&origin=ers-checking-frontend"
 
     }
   }
+
 }

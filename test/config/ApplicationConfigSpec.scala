@@ -30,8 +30,8 @@ class ApplicationConfigSpec extends AnyWordSpecLike with Matchers {
     ".languageMap" should {
       "return correct language map" in {
         val servicesConfig = mock[ServicesConfig]
-        val appConfig = new ApplicationConfig(servicesConfig)
-        val expected = Map("english" -> Lang("en"), "cymraeg" -> Lang("cy"))
+        val appConfig      = new ApplicationConfig(servicesConfig)
+        val expected       = Map("english" -> Lang("en"), "cymraeg" -> Lang("cy"))
         appConfig.languageMap mustBe expected
       }
     }
@@ -39,8 +39,8 @@ class ApplicationConfigSpec extends AnyWordSpecLike with Matchers {
     ".routeToSwitchLanguage" should {
       "return correct route to switch language" in {
         val servicesConfig = mock[ServicesConfig]
-        val appConfig = new ApplicationConfig(servicesConfig)
-        val call: Call = appConfig.routeToSwitchLanguage("cy")
+        val appConfig      = new ApplicationConfig(servicesConfig)
+        val call: Call     = appConfig.routeToSwitchLanguage("cy")
         call.url must include("/language/cy")
       }
     }
@@ -48,16 +48,15 @@ class ApplicationConfigSpec extends AnyWordSpecLike with Matchers {
     ".getSignOutUrl" should {
       "return a correctly formatted sign-out URL with encoded callback" in {
         val mockServicesConfig = mock[ServicesConfig]
-        val appConfig = new ApplicationConfig(mockServicesConfig) {
+        val appConfig          = new ApplicationConfig(mockServicesConfig) {
           override lazy val basGatewayHost: String = "https://example.com"
         }
-        val callbackUrl = "http://localhost:9000/callback"
-        val expectedEncoded = java.net.URLEncoder.encode(callbackUrl, "UTF-8")
-        val expectedUrl = s"https://example.com/bas-gateway/sign-out-without-state?continue=$expectedEncoded"
+        val callbackUrl        = "http://localhost:9000/callback"
+        val expectedEncoded    = java.net.URLEncoder.encode(callbackUrl, "UTF-8")
+        val expectedUrl        = s"https://example.com/bas-gateway/sign-out-without-state?continue=$expectedEncoded"
         appConfig.getSignOutUrl(callbackUrl) mustBe expectedUrl
       }
     }
   }
+
 }
-
-

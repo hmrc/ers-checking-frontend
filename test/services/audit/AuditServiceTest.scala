@@ -33,8 +33,7 @@ import scala.concurrent.Future
 
 class AuditServiceTest extends AnyWordSpecLike with Matchers with MockitoSugar {
   val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
-  implicit val hc: HeaderCarrier = HeaderCarrier()
-
+  implicit val hc: HeaderCarrier                = HeaderCarrier()
 
   val dataEvent: DataEvent = DataEvent(
     auditSource = "ers-checking-frontend",
@@ -47,48 +46,52 @@ class AuditServiceTest extends AnyWordSpecLike with Matchers with MockitoSugar {
   "sendEvent" should {
     class TestAuditService(auditResult: AuditResult) extends AuditService {
       override val auditConnector: DefaultAuditConnector = mockAuditConnector
-      override def buildEvent(transactionName: String, details: Map[String, String])(implicit hc: HeaderCarrier): DataEvent = dataEvent
+      override def buildEvent(transactionName: String, details: Map[String, String])(implicit
+        hc: HeaderCarrier
+      ): DataEvent = dataEvent
       when(auditConnector.sendEvent(any())(any(), any())).thenReturn(Future.successful(auditResult))
     }
 
     "return a Success" in {
       val testAuditService = new TestAuditService(Success)
-      val result = testAuditService.sendEvent("transactionName", Map("test" -> "details"))
+      val result           = testAuditService.sendEvent("transactionName", Map("test" -> "details"))
       await(result) shouldBe Success
     }
 
     "return a Disabled" in {
       val testAuditService = new TestAuditService(Disabled)
-      val result = testAuditService.sendEvent("transactionName", Map("test" -> "details"))
+      val result           = testAuditService.sendEvent("transactionName", Map("test" -> "details"))
       await(result) shouldBe Disabled
     }
 
     "return a Failure" in {
       val testAuditService = new TestAuditService(Failure("it failed"))
-      val result = testAuditService.sendEvent("transactionName", Map("test" -> "details"))
+      val result           = testAuditService.sendEvent("transactionName", Map("test" -> "details"))
       await(result) shouldBe Failure("it failed")
     }
   }
 
   "buildEvent" should {
     class TestAuditService extends AuditService {
-      override val auditConnector: DefaultAuditConnector = mockAuditConnector
+      override val auditConnector: DefaultAuditConnector                = mockAuditConnector
       override def generateTags(hc: HeaderCarrier): Map[String, String] = Map("test" -> "test")
     }
 
     "return a valid DataEvent" in {
       val testAuditService = new TestAuditService
-      val result = testAuditService.buildEvent("transactionName", Map("test" -> "details"))
+      val result           = testAuditService.buildEvent("transactionName", Map("test" -> "details"))
       result.auditSource shouldBe dataEvent.auditSource
-      result.auditType shouldBe dataEvent.auditType
-      result.detail shouldBe dataEvent.detail
-      result.tags shouldBe dataEvent.tags
+      result.auditType   shouldBe dataEvent.auditType
+      result.detail      shouldBe dataEvent.detail
+      result.tags        shouldBe dataEvent.tags
 
     }
   }
 
   "generateTags" should {
-    class TestAuditService extends AuditService {override val auditConnector: DefaultAuditConnector = mockAuditConnector}
+    class TestAuditService extends AuditService {
+      override val auditConnector: DefaultAuditConnector = mockAuditConnector
+    }
     val testAuditService = new TestAuditService
 
     "include the dateTime parameter in the returned Map" in {
@@ -96,4 +99,5 @@ class AuditServiceTest extends AnyWordSpecLike with Matchers with MockitoSugar {
       result.contains("dateTime") shouldBe true
     }
   }
+
 }

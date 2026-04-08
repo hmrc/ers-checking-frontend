@@ -31,14 +31,19 @@ import play.api.test.Helpers._
 
 import scala.concurrent.Future
 
-class UpscanCallbackControllerSpec extends AnyWordSpecLike with Matchers with OptionValues with ErsTestHelper
-                                                    with GuiceOneAppPerSuite
-                                                    with BeforeAndAfterEach {
+class UpscanCallbackControllerSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with ErsTestHelper
+    with GuiceOneAppPerSuite
+    with BeforeAndAfterEach {
 
   import models.upscan._
   import models.upscan.UpscanCallback._
 
-  implicit val failedWrites: OWrites[UpscanFailedCallback] = Json.writes[UpscanFailedCallback]
+  implicit val failedWrites: OWrites[UpscanFailedCallback] = Json
+    .writes[UpscanFailedCallback]
     .transform((js: JsValue) => js.as[JsObject] + ("fileStatus" -> JsString("FAILED")))
 
   implicit val readWrites: OWrites[UpscanReadyCallback] =
@@ -47,14 +52,19 @@ class UpscanCallbackControllerSpec extends AnyWordSpecLike with Matchers with Op
   val sessionId = "sessionId"
 
   val uploadDetails: UploadDetails = UploadDetails(Instant.now(), "checksum", "fileMimeType", "fileName", 100)
-  val readyCallback: UpscanReadyCallback = UpscanReadyCallback(Reference("Reference"), new URL("https://callbackUrl.com"), uploadDetails)
-  val failedCallback: UpscanFailedCallback = UpscanFailedCallback(Reference("Reference"), ErrorDetails("failureReason", "message"))
+
+  val readyCallback: UpscanReadyCallback =
+    UpscanReadyCallback(Reference("Reference"), new URL("https://callbackUrl.com"), uploadDetails)
+
+  val failedCallback: UpscanFailedCallback =
+    UpscanFailedCallback(Reference("Reference"), ErrorDetails("failureReason", "message"))
 
   def request(body: JsValue): FakeRequest[JsValue] = FakeRequest().withBody(body)
 
   val fileSizeUtils: FileSizeUtils = mock[FileSizeUtils]
 
-  lazy val upscanCallbackController: UpscanCallbackController = new UpscanCallbackController(mockSessionCacheRepo, testMCC(fakeApplication()), fileSizeUtils)
+  lazy val upscanCallbackController: UpscanCallbackController =
+    new UpscanCallbackController(mockSessionCacheRepo, testMCC(fakeApplication()), fileSizeUtils)
 
   override def beforeEach(): Unit = {
     reset(mockSessionCacheRepo)
@@ -68,7 +78,7 @@ class UpscanCallbackControllerSpec extends AnyWordSpecLike with Matchers with Op
     "update upload status to Uploaded Successfully" when {
       "callback is UpscanReadyCallback" in {
         val uploadedSuccessfully = UploadedSuccessfully("name", "downloadUrl", noOfRows = None)
-        val upscanId = UpscanIds(uploadId, "fileId", uploadedSuccessfully)
+        val upscanId             = UpscanIds(uploadId, "fileId", uploadedSuccessfully)
 
         when(mockSessionCacheRepo.fetch[UpscanIds](any())(any(), any())).thenReturn(Future.successful(Some(upscanId)))
         when(mockSessionCacheRepo.cache(any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
@@ -99,7 +109,8 @@ class UpscanCallbackControllerSpec extends AnyWordSpecLike with Matchers with Op
       "updating the cache fails" in {
         val body = UpscanFailedCallback(Reference("ref"), ErrorDetails("failed", "message"))
 
-        when(mockSessionCacheRepo.fetch[UpscanIds](any())(any(), any())).thenReturn(Future.failed(new Exception("Test Exception")))
+        when(mockSessionCacheRepo.fetch[UpscanIds](any())(any(), any()))
+          .thenReturn(Future.failed(new Exception("Test Exception")))
 
         val result = upscanCallbackController.callbackCsv(uploadId, sessionId)(request(Json.toJson(body)))
 
@@ -111,7 +122,7 @@ class UpscanCallbackControllerSpec extends AnyWordSpecLike with Matchers with Op
     "return a BadRequest" when {
       "callback data is not in the correct format" in {
         val jsonBody = Json.parse("""{"key":"value"}""")
-        val result = upscanCallbackController.callbackCsv(uploadId, sessionId)(request(jsonBody))
+        val result   = upscanCallbackController.callbackCsv(uploadId, sessionId)(request(jsonBody))
 
         status(result) shouldBe BAD_REQUEST
         verify(mockSessionCacheRepo, never()).fetchAndGetEntry[UpscanIds](any())(any(), any())
@@ -142,7 +153,8 @@ class UpscanCallbackControllerSpec extends AnyWordSpecLike with Matchers with Op
 
     "return InternalServerError" when {
       "updating the cache fails" in {
-        when(mockSessionCacheRepo.cache(any(), any())(any(), any())).thenReturn(Future.failed(new Exception("Test exception")))
+        when(mockSessionCacheRepo.cache(any(), any())(any(), any()))
+          .thenReturn(Future.failed(new Exception("Test exception")))
         val result = upscanCallbackController.callbackOds(sessionId)(request(Json.toJson(readyCallback)))
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
@@ -153,11 +165,12 @@ class UpscanCallbackControllerSpec extends AnyWordSpecLike with Matchers with Op
     "return a BadRequest" when {
       "callback data is not in the correct format" in {
         val jsonBody = Json.parse("""{"key":"value"}""")
-        val result = upscanCallbackController.callbackOds(sessionId)(request(jsonBody))
+        val result   = upscanCallbackController.callbackOds(sessionId)(request(jsonBody))
 
         status(result) shouldBe BAD_REQUEST
         verify(mockSessionCacheRepo, never()).cache(any(), any())(any(), any())
       }
     }
   }
+
 }

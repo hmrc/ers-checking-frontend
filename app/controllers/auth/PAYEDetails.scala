@@ -22,48 +22,44 @@ import play.api.mvc.Call
 import uk.gov.hmrc.domain.EmpRef
 
 case class PAYEDetails(
-    isAgent: Boolean,
-    agentHasPAYEEnrollement: Boolean,
-    optionalEmpRef: Option[EmpRef],
-    appConfig: ApplicationConfig
-                      ){
+  isAgent: Boolean,
+  agentHasPAYEEnrollement: Boolean,
+  optionalEmpRef: Option[EmpRef],
+  appConfig: ApplicationConfig
+) {
 
-  val dassAgentClientCall: Call = Call.apply("GET", appConfig.dassAgentClientsPath)
+  val dassAgentClientCall: Call       = Call.apply("GET", appConfig.dassAgentClientsPath)
   val addBusinessTaxAccountCall: Call = Call.apply("GET", appConfig.addBusinessTaxAccountPath)
 
   def getAgentPAYERedirectCall(agentHasPAYEEnrollement: Boolean): Call =
-    if (agentHasPAYEEnrollement){
+    if (agentHasPAYEEnrollement) {
       dassAgentClientCall
-    }
-    else {
+    } else {
       routes.CheckPAYEController.missingPAYE()
     }
 
-  def getOrgPAYERedirectCall(optionalEmpRef: Option[EmpRef]): Call = {
+  def getOrgPAYERedirectCall(optionalEmpRef: Option[EmpRef]): Call =
     optionalEmpRef
       .filter(_.value != "/") match {
-        case Some(empRef: EmpRef) => {
-          val orgPAYRRedirectUrl = s"${appConfig.dassGatewayHost}/ers/org/${empRef.value}/schemes"
-          Call.apply("GET", orgPAYRRedirectUrl)
-        }
-        case None =>
-          routes.CheckPAYEController.missingPAYE()
-      }
-  }
+      case Some(empRef: EmpRef) =>
+        val orgPAYRRedirectUrl = s"${appConfig.dassGatewayHost}/ers/org/${empRef.value}/schemes"
+        Call.apply("GET", orgPAYRRedirectUrl)
+      case None                 =>
+        routes.CheckPAYEController.missingPAYE()
+    }
 
   val getPAYERedirectCall: Call =
     if (isAgent) {
       getAgentPAYERedirectCall(agentHasPAYEEnrollement)
-    }
-    else {
+    } else {
       getOrgPAYERedirectCall(optionalEmpRef)
     }
 
   val getSignOutRedirectCall: Call =
     if (isAgent) {
       dassAgentClientCall
-    }
-    else {
+    } else {
       addBusinessTaxAccountCall
     }
+
 }

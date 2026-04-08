@@ -24,7 +24,8 @@ import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AuditEvents @Inject()(val auditConnector: AuditConnector)(implicit val ec: ExecutionContext) extends AuditService {
+class AuditEvents @Inject() (val auditConnector: AuditConnector)(implicit val ec: ExecutionContext)
+    extends AuditService {
 
   def auditFileSize(fileSize: String)(implicit hc: HeaderCarrier): Future[AuditResult] =
     sendEvent(
@@ -34,33 +35,43 @@ class AuditEvents @Inject()(val auditConnector: AuditConnector)(implicit val ec:
       )
     )
 
-  def auditRunTimeError(exception : Throwable, contextInfo : String, sheetName : String)
-                       (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AuditResult] = {
-    sendEvent("CheckingServiceRunTimeError", Map(
-      "ErrorMessage" -> exception.getMessage,
-      "Context" -> contextInfo,
-      "sheetName" -> sheetName,
-      "StackTrace" -> exception.getStackTrace.toString
-    ))
-  }
-
-  def fileProcessingErrorAudit(schemeType : String, sheetName : String, errorMsg:String)
-                              (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AuditResult] = {
-    sendEvent("CheckingServiceFileProcessingError", Map(
-      "schemeType" -> schemeType,
-      "sheetName" -> sheetName,
-      "ErrorMessage" -> errorMsg)
+  def auditRunTimeError(exception: Throwable, contextInfo: String, sheetName: String)(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[AuditResult] =
+    sendEvent(
+      "CheckingServiceRunTimeError",
+      Map(
+        "ErrorMessage" -> exception.getMessage,
+        "Context"      -> contextInfo,
+        "sheetName"    -> sheetName,
+        "StackTrace"   -> exception.getStackTrace.toString
+      )
     )
-  }
 
-  def numRowsInSchemeData(sheetName : String, rowsWithData : Int)
-                         (implicit hc: HeaderCarrier, request: RequestWithOptionalEmpRefAndPAYE[_], ec: ExecutionContext): Future[AuditResult] = {
+  def fileProcessingErrorAudit(schemeType: String, sheetName: String, errorMsg: String)(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[AuditResult] =
+    sendEvent(
+      "CheckingServiceFileProcessingError",
+      Map("schemeType" -> schemeType, "sheetName" -> sheetName, "ErrorMessage" -> errorMsg)
+    )
+
+  def numRowsInSchemeData(sheetName: String, rowsWithData: Int)(implicit
+    hc: HeaderCarrier,
+    request: RequestWithOptionalEmpRefAndPAYE[_],
+    ec: ExecutionContext
+  ): Future[AuditResult] = {
     val empRef = request.optionalEmpRef.map(_.value).getOrElse("")
-    sendEvent("CheckingServiceNumRowsInSchemeData", Map(
-    "sheetName" -> sheetName,
-    "rowsWithData" -> rowsWithData.toString,
-    "empRef" -> empRef
-    ))
+    sendEvent(
+      "CheckingServiceNumRowsInSchemeData",
+      Map(
+        "sheetName"    -> sheetName,
+        "rowsWithData" -> rowsWithData.toString,
+        "empRef"       -> empRef
+      )
+    )
   }
 
 }

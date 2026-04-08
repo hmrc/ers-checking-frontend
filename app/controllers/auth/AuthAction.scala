@@ -32,49 +32,63 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 case class RequestWithOptionalEmpRefAndPAYE[A](
-                                                request: Request[A],
-                                                optionalEmpRef: Option[EmpRef],
-                                                orgOrAgentPAYEDetails: PAYEDetails) extends WrappedRequest[A](request)
-trait AuthIdentifierAction extends ActionBuilder[RequestWithOptionalEmpRefAndPAYE, AnyContent]
-  with ActionFunction[Request, RequestWithOptionalEmpRefAndPAYE]
+  request: Request[A],
+  optionalEmpRef: Option[EmpRef],
+  orgOrAgentPAYEDetails: PAYEDetails
+) extends WrappedRequest[A](request)
+
+trait AuthIdentifierAction
+    extends ActionBuilder[RequestWithOptionalEmpRefAndPAYE, AnyContent]
+    with ActionFunction[Request, RequestWithOptionalEmpRefAndPAYE]
 
 @Singleton
-class AuthAction @Inject()(override val authConnector: AuthConnector,
-                           appConfig: ApplicationConfig,
-                           val parser: BodyParsers.Default
-                          )(implicit val executionContext: ExecutionContext) extends AuthorisedFunctions with AuthIdentifierAction with Logging {
+class AuthAction @Inject() (
+  override val authConnector: AuthConnector,
+  appConfig: ApplicationConfig,
+  val parser: BodyParsers.Default
+)(implicit val executionContext: ExecutionContext)
+    extends AuthorisedFunctions with AuthIdentifierAction with Logging {
 
   val origin: String = "ers-checking-frontend"
 
-  val orgEnrolmentIdentifier: String = "IR-PAYE"
+  val orgEnrolmentIdentifier: String   = "IR-PAYE"
   val agentEnrolmentIdentifier: String = "IR-PAYE-AGENT"
 
   def loginParams: Map[String, Seq[String]] = Map(
     "continue_url" -> Seq(appConfig.loginCallback),
-    "origin" -> Seq(origin)
+    "origin"       -> Seq(origin)
   )
 
-  def getIdentifierValue(identifiers: Seq[EnrolmentIdentifier])(key: String): Option[String] = identifiers.collectFirst{
-    case EnrolmentIdentifier(`key`, value) => value
-  }
-
-  def getIdentifier(enrollements: Enrolments, enrolmentIdentifier: String, key: String): Option[String] = getIdentifierValue(
-    enrollements
-      .getEnrolment(enrolmentIdentifier)
-      .map(_.identifiers)
-      .getOrElse(Seq.empty[EnrolmentIdentifier])
-  )(key)
-
-  def checkAgentPAYE(enrollments: Enrolments): Boolean = getIdentifier(enrollments, agentEnrolmentIdentifier, "IRAgentReference")
-    .exists(_.nonEmpty)
-
-  def getOptionalEmpRef(enrollements: Enrolments): Option[EmpRef] =
-    (getIdentifier(enrollements, orgEnrolmentIdentifier, "TaxOfficeNumber"), getIdentifier(enrollements, orgEnrolmentIdentifier, "TaxOfficeReference")) match {
-      case (Some(taxOfficeNumber), Some(taxOfficeReference)) => Some(EmpRef(taxOfficeNumber, taxOfficeReference))
-      case _ => None
+  def getIdentifierValue(identifiers: Seq[EnrolmentIdentifier])(key: String): Option[String] =
+    identifiers.collectFirst { case EnrolmentIdentifier(`key`, value) =>
+      value
     }
 
-  override def invokeBlock[A](request: Request[A], block: RequestWithOptionalEmpRefAndPAYE[A] => Future[Result]): Future[Result] = {
+  def getIdentifier(enrollements: Enrolments, enrolmentIdentifier: String, key: String): Option[String] =
+    getIdentifierValue(
+      enrollements
+        .getEnrolment(enrolmentIdentifier)
+        .map(_.identifiers)
+        .getOrElse(Seq.empty[EnrolmentIdentifier])
+    )(key)
+
+  def checkAgentPAYE(enrollments: Enrolments): Boolean =
+    getIdentifier(enrollments, agentEnrolmentIdentifier, "IRAgentReference")
+      .exists(_.nonEmpty)
+
+  def getOptionalEmpRef(enrollements: Enrolments): Option[EmpRef] =
+    (
+      getIdentifier(enrollements, orgEnrolmentIdentifier, "TaxOfficeNumber"),
+      getIdentifier(enrollements, orgEnrolmentIdentifier, "TaxOfficeReference")
+    ) match {
+      case (Some(taxOfficeNumber), Some(taxOfficeReference)) => Some(EmpRef(taxOfficeNumber, taxOfficeReference))
+      case _                                                 => None
+    }
+
+  override def invokeBlock[A](
+    request: Request[A],
+    block: RequestWithOptionalEmpRefAndPAYE[A] => Future[Result]
+  ): Future[Result] = {
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
@@ -83,16 +97,20 @@ class AuthAction @Inject()(override val authConnector: AuthConnector,
         maybeAffinityGroup match {
           case Some(affinityGroup: AffinityGroup) =>
             affinityGroup match {
-              case AffinityGroup.Agent => {
+              case AffinityGroup.Agent        =>
                 block(
                   RequestWithOptionalEmpRefAndPAYE(
                     request,
                     optionalEmpRef = None,
-                    orgOrAgentPAYEDetails = PAYEDetails(isAgent = true, agentHasPAYEEnrollement = checkAgentPAYE(enrollements), optionalEmpRef = None, appConfig)
+                    orgOrAgentPAYEDetails = PAYEDetails(
+                      isAgent = true,
+                      agentHasPAYEEnrollement = checkAgentPAYE(enrollements),
+                      optionalEmpRef = None,
+                      appConfig
+                    )
                   )
                 )
-              }
-              case AffinityGroup.Individual =>
+              case AffinityGroup.Individual   =>
                 Future.successful(Redirect(controllers.routes.AuthorisationController.individualNotAuthorised()))
               case AffinityGroup.Organisation =>
                 val optionalEmpRef: Option[EmpRef] = getOptionalEmpRef(enrollements)
@@ -100,20 +118,29 @@ class AuthAction @Inject()(override val authConnector: AuthConnector,
                   RequestWithOptionalEmpRefAndPAYE(
                     request,
                     optionalEmpRef = optionalEmpRef,
-                    orgOrAgentPAYEDetails = PAYEDetails(isAgent = false, agentHasPAYEEnrollement = optionalEmpRef.isDefined, optionalEmpRef = optionalEmpRef, appConfig)
+                    orgOrAgentPAYEDetails = PAYEDetails(
+                      isAgent = false,
+                      agentHasPAYEEnrollement = optionalEmpRef.isDefined,
+                      optionalEmpRef = optionalEmpRef,
+                      appConfig
+                    )
                   )
                 )
             }
-          case None =>
+          case None                               =>
             Future.successful(Redirect(controllers.routes.AuthorisationController.notAuthorised().url))
         }
     } recover {
-      case er: NoActiveSession =>
-        logger.warn(s"[AuthAction][invokeBlock] no active session for uri: ${request.uri} with message: ${er.getMessage}", er)
+      case er: NoActiveSession        =>
+        logger.warn(
+          s"[AuthAction][invokeBlock] no active session for uri: ${request.uri} with message: ${er.getMessage}",
+          er
+        )
         Redirect(appConfig.signIn, loginParams)
       case er: AuthorisationException =>
         logger.warn(s"[AuthAction][invokeBlock] Auth exception: ${er.getMessage} for  uri ${request.uri}")
         Redirect(controllers.routes.AuthorisationController.notAuthorised().url)
     }
   }
+
 }

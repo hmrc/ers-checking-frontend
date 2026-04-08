@@ -63,7 +63,7 @@ class ContentUtilSpec extends AnyWordSpecLike with Matchers {
       )
     }
 
-    "return a tuple containing two empty strings" when {
+    "return a tuple containing two empty strings" when
       List(
         TestCase("", "", ""),
         TestCase("not a valid scheme", "", "")
@@ -75,8 +75,6 @@ class ContentUtilSpec extends AnyWordSpecLike with Matchers {
           )
         }
       )
-    }
-
 
     "parse withArticle" when {
       "data starts with a consonant" in {
@@ -89,4 +87,5 @@ class ContentUtilSpec extends AnyWordSpecLike with Matchers {
       }
     }
   }
+
 }

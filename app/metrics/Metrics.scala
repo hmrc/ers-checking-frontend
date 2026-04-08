@@ -25,10 +25,12 @@ class Metrics extends Logging {
 
   lazy val registry: MetricRegistry = new MetricRegistry
 
-   def dataIteratorTimer(diff: Long, unit: TimeUnit): Unit =
-    try {
+  def dataIteratorTimer(diff: Long, unit: TimeUnit): Unit =
+    try
       registry.timer("data-iterator-time").update(diff, unit)
-    } catch {
-      case t: Throwable => logger.warn("[Metrics][dataIteratorTimer] Unable to initialise MetricRegistry, timer will not be created.", t)
+    catch {
+      case t: Throwable =>
+        logger.warn("[Metrics][dataIteratorTimer] Unable to initialise MetricRegistry, timer will not be created.", t)
     }
+
 }

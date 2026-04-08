@@ -20,24 +20,23 @@ object ContentUtil {
 
   case class ErrorMessageKeyPrefixAndScheme(errorMessageKeyPrefix: String, scheme: String)
 
-  def getScheneNameWithShortenedVersion(schemeType: String): ErrorMessageKeyPrefixAndScheme = {
+  def getScheneNameWithShortenedVersion(schemeType: String): ErrorMessageKeyPrefixAndScheme =
     schemeType.toLowerCase match {
-      case "csop" | "1" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.csop", "CSOP")
-      case "emi" | "2" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.emi", "EMI")
-      case "saye" | "4" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.saye", "SAYE")
-      case "sip" | "5" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.sip", "SIP")
+      case "csop" | "1"  => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.csop", "CSOP")
+      case "emi" | "2"   => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.emi", "EMI")
+      case "saye" | "4"  => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.saye", "SAYE")
+      case "sip" | "5"   => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.sip", "SIP")
       case "other" | "3" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.other", "OTHER")
-      case _ => ErrorMessageKeyPrefixAndScheme("","")
+      case _             => ErrorMessageKeyPrefixAndScheme("", "")
     }
-  }
 
   def withArticle(data: String): String = {
     val vocals: List[Char] = List('a', 'o', 'e', 'u', 'i', 'y')
-    if(vocals.contains(data.charAt(0).toLower)) {
+    if (vocals.contains(data.charAt(0).toLower)) {
       "an " + data
-    }
-    else {
+    } else {
       "a " + data
     }
   }
+
 }

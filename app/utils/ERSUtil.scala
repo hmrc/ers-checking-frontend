@@ -21,8 +21,6 @@ import play.api.Logger
 import javax.inject.Singleton
 
 @Singleton
-class ERSUtil
-  extends CacheUtil
-    with PageBuilder {
+class ERSUtil extends CacheUtil with PageBuilder {
   val logger: Logger = Logger(getClass)
 }

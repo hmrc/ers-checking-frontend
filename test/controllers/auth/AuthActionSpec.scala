@@ -39,22 +39,28 @@ import uk.gov.hmrc.domain.EmpRef
 
 import scala.concurrent.Future
 
-class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
-  with ErsTestHelper with BeforeAndAfterEach with GuiceOneServerPerTest with ScalaFutures {
+class AuthActionSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with ErsTestHelper
+    with BeforeAndAfterEach
+    with GuiceOneServerPerTest
+    with ScalaFutures {
 
   override val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
-  def mockAuthoriseFunc(futureToReturn: Future[Enrolments ~ Option[AffinityGroup]]): Unit = {
+  def mockAuthoriseFunc(futureToReturn: Future[Enrolments ~ Option[AffinityGroup]]): Unit =
     when(
       mockAuthConnector
         .authorise[RetrievalType](
           ArgumentMatchers.any(),
           ArgumentMatchers.any()
         )(
-          ArgumentMatchers.any(), ArgumentMatchers.any()
+          ArgumentMatchers.any(),
+          ArgumentMatchers.any()
         )
     ).thenReturn(futureToReturn)
-  }
 
   override val testBodyParser: BodyParsers.Default = fakeApplication().injector.instanceOf[BodyParsers.Default]
 
@@ -67,13 +73,17 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
 
   def authAction: AuthAction = new AuthAction(mockAuthConnector, mockAppConfig, testBodyParser)
 
-  def assertOrganisationWithMissingPAYE(requestWithOptionalEmpRefAndPAYE: RequestWithOptionalEmpRefAndPAYE[_]): Assertion = {
-    requestWithOptionalEmpRefAndPAYE.optionalEmpRef shouldBe None
-    requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getPAYERedirectCall.url shouldBe "/check-your-ers-files/not-enrolled-for-PAYE"
+  def assertOrganisationWithMissingPAYE(
+    requestWithOptionalEmpRefAndPAYE: RequestWithOptionalEmpRefAndPAYE[_]
+  ): Assertion = {
+    requestWithOptionalEmpRefAndPAYE.optionalEmpRef                                   shouldBe None
+    requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getPAYERedirectCall.url    shouldBe "/check-your-ers-files/not-enrolled-for-PAYE"
     requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getSignOutRedirectCall.url shouldBe "/business-account"
   }
 
-  def defaultAsyncBody(requestTestCase: RequestWithOptionalEmpRefAndPAYE[_] => Assertion): RequestWithOptionalEmpRefAndPAYE[_] => Result = testRequest => {
+  def defaultAsyncBody(
+    requestTestCase: RequestWithOptionalEmpRefAndPAYE[_] => Assertion
+  ): RequestWithOptionalEmpRefAndPAYE[_] => Result = testRequest => {
     requestTestCase(testRequest)
     Results.Ok("Successful")
   }
@@ -84,7 +94,12 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
   val orgErsEnrolmentsWithPAYE: Enrolments =
     Enrolments(
       Set(
-        Enrolment("IR-PAYE", Seq(EnrolmentIdentifier("TaxOfficeNumber", "1234"), EnrolmentIdentifier("TaxOfficeReference", "1234")), "Activated", None)
+        Enrolment(
+          "IR-PAYE",
+          Seq(EnrolmentIdentifier("TaxOfficeNumber", "1234"), EnrolmentIdentifier("TaxOfficeReference", "1234")),
+          "Activated",
+          None
+        )
       )
     )
 
@@ -111,17 +126,24 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
     )
 
   type RetrievalType = Enrolments ~ Option[AffinityGroup]
-  val organisationWithPAYE: ~[Enrolments, Option[AffinityGroup]] = new~(orgErsEnrolmentsWithPAYE, Some(AffinityGroup.Organisation))
-  val organisationWithoutPAYE: ~[Enrolments, Option[AffinityGroup]] = new~(orgErsEnrolmentsWithoutPAYE, Some(AffinityGroup.Organisation))
-  val agentWithPAYE: ~[Enrolments, Option[AffinityGroup]] = new~(agentErsEnrolmentsWithPAYE, Some(AffinityGroup.Agent))
-  val agentWithoutPAYE: ~[Enrolments, Option[AffinityGroup]] = new~(agentErsEnrolmentsWithoutPAYE, Some(AffinityGroup.Agent))
+
+  val organisationWithPAYE: ~[Enrolments, Option[AffinityGroup]] =
+    new ~(orgErsEnrolmentsWithPAYE, Some(AffinityGroup.Organisation))
+
+  val organisationWithoutPAYE: ~[Enrolments, Option[AffinityGroup]] =
+    new ~(orgErsEnrolmentsWithoutPAYE, Some(AffinityGroup.Organisation))
+
+  val agentWithPAYE: ~[Enrolments, Option[AffinityGroup]] = new ~(agentErsEnrolmentsWithPAYE, Some(AffinityGroup.Agent))
+
+  val agentWithoutPAYE: ~[Enrolments, Option[AffinityGroup]] =
+    new ~(agentErsEnrolmentsWithoutPAYE, Some(AffinityGroup.Agent))
 
   "AuthAction" should {
 
     "return a 401 if an SessionRecordNotFound Exception (NoActiveSession) is experienced" in {
       mockAuthoriseFunc(Future.failed(SessionRecordNotFound("failed")))
       val result: Future[Result] = authAction(Results.Ok("Successful"))(FakeRequest())
-      status(result) shouldBe Status.SEE_OTHER
+      status(result)                                shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe "http://localhost:9553/bas-gateway/sign-in?" +
         "continue_url=http%3A%2F%2Flocalhost%3A9225%2Fcheck-your-ers-files&origin=ers-checking-frontend"
     }
@@ -129,14 +151,14 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
     "return a 401 if an UnsupportedAuthProvider Exception is experienced" in {
       mockAuthoriseFunc(Future.failed(UnsupportedAuthProvider("failed")))
       val result: Future[Result] = authAction(Results.Ok("Successful"))(FakeRequest())
-      status(result) shouldBe Status.SEE_OTHER
+      status(result)                                shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.AuthorisationController.notAuthorised().url
     }
 
     "return a 401 if an InsufficientConfidenceLevel Exception is experienced" in {
       mockAuthoriseFunc(Future.failed(InsufficientConfidenceLevel("failed")))
       val result: Future[Result] = authAction(Results.Ok("Successful"))(FakeRequest())
-      status(result) shouldBe Status.SEE_OTHER
+      status(result)                                shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.AuthorisationController.notAuthorised().url
     }
 
@@ -144,13 +166,11 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
       "return a perform the action if the user is authorised with an empref in the request" in {
         mockAuthoriseFunc(Future.successful(organisationWithPAYE))
         val result: Future[Result] = authAction(
-          defaultAsyncBody(
-            (requestWithOptionalEmpRefAndPAYE: RequestWithOptionalEmpRefAndPAYE[_]) => {
-              requestWithOptionalEmpRefAndPAYE.optionalEmpRef shouldBe Some(EmpRef("1234", "1234"))
-              requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getPAYERedirectCall.url shouldBe "/dassGatewayHost/ers/org/1234/1234/schemes"
-              requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getSignOutRedirectCall.url shouldBe "/business-account"
-            }
-          )
+          defaultAsyncBody { (requestWithOptionalEmpRefAndPAYE: RequestWithOptionalEmpRefAndPAYE[_]) =>
+            requestWithOptionalEmpRefAndPAYE.optionalEmpRef                                   shouldBe Some(EmpRef("1234", "1234"))
+            requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getPAYERedirectCall.url    shouldBe "/dassGatewayHost/ers/org/1234/1234/schemes"
+            requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getSignOutRedirectCall.url shouldBe "/business-account"
+          }
         )(FakeRequest())
         status(result) shouldBe Status.OK
         contentAsString(result) shouldBe "Successful"
@@ -161,7 +181,7 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
         val result: Future[Result] = authAction(
           defaultAsyncBody(assertOrganisationWithMissingPAYE)
         )(FakeRequest())
-        status(result) shouldBe Status.OK
+        status(result)          shouldBe Status.OK
         contentAsString(result) shouldBe "Successful"
       }
 
@@ -170,17 +190,18 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
         val result: Future[Result] = authAction(
           defaultAsyncBody(assertOrganisationWithMissingPAYE)
         )(FakeRequest())
-        status(result) shouldBe Status.OK
+        status(result)          shouldBe Status.OK
         contentAsString(result) shouldBe "Successful"
       }
     }
 
     "if the Affinity group is Individual" should {
       "return a 401" in {
-        mockAuthoriseFunc(Future.successful(new~(Enrolments(Set()), Some(AffinityGroup.Individual))))
+        mockAuthoriseFunc(Future.successful(new ~(Enrolments(Set()), Some(AffinityGroup.Individual))))
         val result: Future[Result] = authAction(defaultAsyncBody(_.optionalEmpRef shouldBe None))(FakeRequest())
-        status(result) shouldBe Status.SEE_OTHER
-        result.futureValue.header.headers("Location") shouldBe routes.AuthorisationController.individualNotAuthorised().url
+        status(result)         shouldBe Status.SEE_OTHER
+        result.futureValue.header
+          .headers("Location") shouldBe routes.AuthorisationController.individualNotAuthorised().url
       }
     }
 
@@ -188,12 +209,10 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
       "return a perform the action if the user is authorised with IR-PAYE-AGENT enrolement" in {
         mockAuthoriseFunc(Future.successful(agentWithPAYE))
         val result: Future[Result] = authAction(
-          defaultAsyncBody(
-            (requestWithOptionalEmpRefAndPAYE: RequestWithOptionalEmpRefAndPAYE[_]) => {
-              requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getPAYERedirectCall.url shouldBe "/ers/agent/clients"
-              requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getSignOutRedirectCall.url shouldBe "/ers/agent/clients"
-            }
-          )
+          defaultAsyncBody { (requestWithOptionalEmpRefAndPAYE: RequestWithOptionalEmpRefAndPAYE[_]) =>
+            requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getPAYERedirectCall.url    shouldBe "/ers/agent/clients"
+            requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getSignOutRedirectCall.url shouldBe "/ers/agent/clients"
+          }
         )(FakeRequest())
         status(result) shouldBe Status.OK
         contentAsString(result) shouldBe "Successful"
@@ -202,12 +221,10 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
       "return a perform the action if the user is not authorised with IR-PAYE-AGENT enrolement" in {
         mockAuthoriseFunc(Future.successful(agentWithoutPAYE))
         val result: Future[Result] = authAction(
-          defaultAsyncBody(
-            (requestWithOptionalEmpRefAndPAYE: RequestWithOptionalEmpRefAndPAYE[_]) => {
-              requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getPAYERedirectCall.url shouldBe "/check-your-ers-files/not-enrolled-for-PAYE"
-              requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getSignOutRedirectCall.url shouldBe "/ers/agent/clients"
-            }
-          )
+          defaultAsyncBody { (requestWithOptionalEmpRefAndPAYE: RequestWithOptionalEmpRefAndPAYE[_]) =>
+            requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getPAYERedirectCall.url    shouldBe "/check-your-ers-files/not-enrolled-for-PAYE"
+            requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getSignOutRedirectCall.url shouldBe "/ers/agent/clients"
+          }
         )(FakeRequest())
         status(result) shouldBe Status.OK
         contentAsString(result) shouldBe "Successful"
@@ -219,7 +236,7 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
     "return true when agent has only IR-PAYE-AGENT enrolment with IRAgentReference identifier" in {
       val enrollments: Enrolments = Enrolments(
         Set(
-          Enrolment("IR-PAYE-AGENT", Seq(EnrolmentIdentifier("IRAgentReference", "A12345")), "Activated"),
+          Enrolment("IR-PAYE-AGENT", Seq(EnrolmentIdentifier("IRAgentReference", "A12345")), "Activated")
         )
       )
       authAction.checkAgentPAYE(enrollments) shouldBe true
@@ -230,7 +247,7 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
         Set(
           Enrolment("TEST", Seq(), "Activated"),
           Enrolment("IR-PAYE-AGENT", Seq(EnrolmentIdentifier("IRAgentReference", "A12345")), "Activated"),
-          Enrolment("ANOTHER_TEST", Seq(EnrolmentIdentifier("IRAgentReference", "A12345")), "Activated"),
+          Enrolment("ANOTHER_TEST", Seq(EnrolmentIdentifier("IRAgentReference", "A12345")), "Activated")
         )
       )
       authAction.checkAgentPAYE(enrollments) shouldBe true
@@ -252,4 +269,5 @@ class AuthActionSpec extends AnyWordSpecLike with Matchers with OptionValues
     )
     authAction.checkAgentPAYE(enrollments) shouldBe false
   }
+
 }

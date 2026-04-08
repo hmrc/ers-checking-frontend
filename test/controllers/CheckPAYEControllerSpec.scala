@@ -29,30 +29,40 @@ import play.api.test.Helpers._
 import play.api.test._
 import views.html.{global_error, not_enrolled_in_paye, sign_out_paye}
 
-class CheckPAYEControllerSpec extends AnyWordSpecLike with Matchers with OptionValues
-  with GuiceOneAppPerSuite with ErsTestHelper with Injecting with ScalaFutures {
+class CheckPAYEControllerSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with GuiceOneAppPerSuite
+    with ErsTestHelper
+    with Injecting
+    with ScalaFutures {
 
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
-  val notEnrolledView: not_enrolled_in_paye = inject[not_enrolled_in_paye]
-  val signOutView: sign_out_paye = inject[sign_out_paye]
-  val globalErrorView: global_error = inject[global_error]
+  val notEnrolledView: not_enrolled_in_paye         = inject[not_enrolled_in_paye]
+  val signOutView: sign_out_paye                    = inject[sign_out_paye]
+  val globalErrorView: global_error                 = inject[global_error]
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
 
-  def buildFakeCheckPAYEController() = new CheckPAYEController(mockAuthAction, mcc, notEnrolledView, signOutView, globalErrorView)(mockAppConfig) {
-    mockAnyContentAction
-  }
+  def buildFakeCheckPAYEController() =
+    new CheckPAYEController(mockAuthAction, mcc, notEnrolledView, signOutView, globalErrorView)(mockAppConfig) {
+      mockAnyContentAction
+    }
 
   "check status for missingPAYE" should {
     "return 200 OK and render the not_enrolled_in_paye view" in {
       val controllerUnderTest = buildFakeCheckPAYEController()
-      val result = controllerUnderTest.missingPAYE().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result              = controllerUnderTest.missingPAYE().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe OK
     }
 
     "checking page for missingPAYE" in {
       val controllerUnderTest = buildFakeCheckPAYEController()
-      val result = controllerUnderTest.showMissingPAYE()(Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), testMessages)
+      val result              = controllerUnderTest.showMissingPAYE()(
+        Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig),
+        testMessages
+      )
       status(result) shouldBe OK
 
       contentAsString(result) should include("There is a problem – Employment Related Securities – GOV.UK")
@@ -60,23 +70,26 @@ class CheckPAYEControllerSpec extends AnyWordSpecLike with Matchers with OptionV
 
     }
   }
+
   "check status for signOutPAYE" should {
     "return 200 OK and render the sign_out_paye view" in {
       val controllerUnderTest = buildFakeCheckPAYEController()
-      val result = controllerUnderTest.signOutPAYE().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result              = controllerUnderTest.signOutPAYE().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe OK
     }
 
     "checking page for signOutPAYE" in {
       val controllerUnderTest = buildFakeCheckPAYEController()
-      val result = controllerUnderTest.showSignOutPAYE()(Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig), testMessages)
-      status(result) shouldBe OK
+      val result              = controllerUnderTest.showSignOutPAYE()(
+        Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig),
+        testMessages
+      )
+      status(result)        shouldBe OK
       contentAsString(result) should include("You have signed out – Employment Related Securities – GOV.UK")
       contentAsString(result) should include("You have signed out")
 
     }
 
   }
-
 
 }
