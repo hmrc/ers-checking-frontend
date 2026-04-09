@@ -31,6 +31,7 @@ import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import services.ProcessOdsService._
 import uk.gov.hmrc.mongo.test.MongoSupport
+import uk.gov.hmrc.validator._
 import uk.gov.hmrc.validator.models.{Cell, ValidationError}
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 
@@ -148,6 +149,90 @@ class ProcessOdsServiceSpec
     "return true if there are no errors in any of the sheetErrors passed in" in
       assert(isValid(sheetWithNoSchemeError))
 
+  }
+
+  val processOdsService: ProcessOdsService = new ProcessOdsService(mockSessionCacheRepo, mockErsUtil)
+
+  "ProcessOdsService" should {
+
+    "when calling the ers-file-validator-config library directly" should {
+
+      "must successfully process valid EMI ODS data" in {
+        val sheetErrors: ListBuffer[SheetErrors] =
+          processOdsService.validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateLarge, "EMI")
+        sheetErrors should contain theSameElementsAs ListBuffer(SheetErrors("EMI40_Adjustments_V4", ListBuffer()))
+      }
+
+      "must return DataContainsAmpersandException when ODS data contains ampersands" in {
+        val exception: DataContainsAmpersandException = intercept[DataContainsAmpersandException](
+          processOdsService.validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateWithAmpersand, "EMI")
+        )
+        exception.getMessage() shouldBe "Must not contain ampersands."
+      }
+
+      "must return NoDataException when ODS data is empty" in {
+        val exception: NoDataException = intercept[NoDataException](
+          processOdsService.validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateWithNoData, "EMI")
+        )
+
+        exception.getMessage() shouldBe "No data in file"
+      }
+
+      "must return IncorrectHeaderException when ODS header is invalid" in {
+
+        val exception: IncorrectHeaderException = intercept[IncorrectHeaderException](
+          processOdsService.validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateWithIncorrectHeader, "EMI")
+        )
+
+        exception.getMessage() shouldBe "Incorrect header row"
+      }
+
+      "must return the expected sheetErrors when ODS data is invalid" in {
+
+        val sheetErrors: ListBuffer[SheetErrors] =
+          processOdsService.validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateWithInvalidData, "EMI")
+
+        val expectedSheetErrors: SheetErrors = SheetErrors(
+          "EMI40_Adjustments_V4",
+          ListBuffer(
+            ValidationError(Cell("A", 10, "123"), "error.1", "001", "Enter 'yes' or 'no'"),
+            ValidationError(Cell("B", 10, "123"), "error.2", "002", "Enter 'yes' or 'no'"),
+            ValidationError(Cell("C", 10, "123"), "error.3", "003", "Enter 'yes' or 'no'"),
+            ValidationError(Cell("D", 10, "canoe"), "error.4", "004", "Enter '1', '2', '3', '4', '5', '6', '7' or '8'"),
+            ValidationError(
+              Cell("E", 10, "apples"),
+              "error.5",
+              "005",
+              "Enter a date that matches the yyyy-mm-dd pattern"
+            )
+          )
+        )
+
+        sheetErrors should contain theSameElementsAs ListBuffer(expectedSheetErrors)
+      }
+
+      "must return IncorrectSheetNameException when ODS sheet name is unknown" in {
+
+        val exception: IncorrectSheetNameException = intercept[IncorrectSheetNameException](
+          processOdsService.validateOdsFile(
+            "EMI.ods",
+            XMLTestData.getEMIAdjustmentsTemplateWithIncorrectSheetName,
+            "EMI"
+          )
+        )
+
+        exception.getMessage() shouldBe "Incorrect sheet name"
+      }
+
+      "must return IncorrectSchemeException when ODS sheet belongs to a different scheme type" in {
+
+        val exception: IncorrectSchemeException = intercept[IncorrectSchemeException](
+          processOdsService.validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateWithCsopSchemeType, "EMI")
+        )
+
+        exception.getMessage() shouldBe "Incorrect Scheme type"
+      }
+    }
   }
 
 }
