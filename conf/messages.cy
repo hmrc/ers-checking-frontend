@@ -164,6 +164,7 @@ ers.exceptions.dataParser.parserFailure =Ymddengys fod y ffeil a ddewisoch i’w
 ers.exceptions.dataParser.fileParsingError =Ymddengys fod y ffeil a ddewisoch i’w gwirio wedi torri. Ni fyddwch yn gallu uwchlwytho {0} fel rhan o’ch Datganiad Blynyddol.
 ers.exceptions.dataParser.parsingOfFileData =Dosrannu Data Ffeil
 ers.exceptions.dataParser.incorrectSheetName =Nid yw {0} yn (deitl) enw dalen all gael ei ddefnyddio yn ffeiliau {1}.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i’ch helpu i greu ffeiliau heb wallau.
+ers.exceptions.dataParser.wrongSchemeFile =Nid yw hon yn ffeil y rhoesoch wybod fod angen i chi ei huwchlwytho – dewiswch ffeil wahanol
 ers.exceptions.dataParser.incorrectSchemeType =Gwnaethoch ddewis gwirio ffeil {1}, ond ffeil {0} yw {2}.
 ers.exceptions.dataParser.unidentifiableSheetName =Nid oedd modd adnabod EnwDalen
 ers.exceptions.dataParser.incorrectHeader =Nid yw’r penynnau ar {0} yn {1} yn gywir.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i sicrhau eu bod yn bodloni gofynion.
