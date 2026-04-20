@@ -32,30 +32,30 @@ object XMLTestData {
   def openTable(sheetName: String) = s"""<table:table table:name="$sheetName" table:style-name="ta1">"""
   val closeTable                   = """</table:table>"""
 
-  val sheetName                = "EMI40_Adjustments_V4"
+  val sheetName = "EMI40_Adjustments_V4"
 
-  val row1                     =
+  val row1 =
     <table:table-row table:style-name="ro1"><table:table-cell office:value-type="string" table:number-columns-spanned="14" table:number-rows-spanned="1" table:style-name="ce26"><text:p>EMI template - Adjustment of options</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated="13"/><table:table-cell table:number-columns-repeated="16370" table:style-name="ce2"/></table:table-row>.toString
 
-  val row2                     =
+  val row2 =
     <table:table-row table:style-name="ro1"><table:table-cell office:value-type="string" table:number-columns-spanned="14" table:number-rows-spanned="1" table:style-name="ce27"><text:p>How to complete this schedule:</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated="13"/><table:table-cell table:number-columns-repeated="16370" table:style-name="ce2"/></table:table-row>.toString
 
-  val row3                     =
+  val row3 =
     <table:table-row table:style-name="ro2"><table:table-cell office:value-type="string" table:number-columns-spanned="14" table:number-rows-spanned="1" table:style-name="ce28"><text:p><text:span text:style-name="T1">ONLY complete this sheet if, following a variation in the share capital of the company whose shares are under option, there has been an adjustment of the option price or there has been a change in the description of shares under option.<text:s/></text:span><text:span text:style-name="T1"/></text:p><text:p><text:span text:style-name="T4">Please note</text:span>: Monetary values must be entered to 4 decimal places in pounds sterling.</text:p><text:p>Numbers of shares and securities must be entered to 2 decimal places in pounds sterling.</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated="13"/><table:table-cell table:number-columns-repeated="16370" table:style-name="ce2"/></table:table-row>.toString
 
-  val row4                     =
+  val row4 =
     <table:table-row table:style-name="ro3"><table:table-cell office:value-type="string" table:number-columns-spanned="6" table:number-rows-spanned="1" table:style-name="ce28"><text:p>Please note: Monetary values must be entered to 4 decimal places in pounds sterling.</text:p><text:p>Numbers of shares and securities must be entered to 2 decimal places.</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated="5"/><table:table-cell table:number-columns-repeated="8" table:style-name="ce3"/><table:table-cell table:number-columns-repeated="16370" table:style-name="ce2"/></table:table-row>.toString
 
-  val row5                     =
+  val row5 =
     <table:table-row table:style-name="ro4"><table:table-cell office:value-type="string" table:number-columns-spanned="14" table:number-rows-spanned="1" table:style-name="ce28"><text:p><text:span text:style-name="T2">Important note</text:span><text:span text:style-name="T2"/></text:p><text:p>You<text:s/><text:span text:style-name="T4">must not</text:span><text:s/>alter the structure or formatting of this schedule. If you do your schedule will be rejected.</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated="13"/><table:table-cell table:number-columns-repeated="16370" table:style-name="ce2"/></table:table-row>.toString
 
-  val row6                     =
+  val row6 =
     <table:table-row table:style-name="ro2"><table:table-cell office:value-type="string" table:number-columns-spanned="12" table:number-rows-spanned="1" table:style-name="ce28"><text:p>For more information on completing this schedule, follow the link below. You must be connected to the internet to access the guide.</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated="11"/><table:table-cell table:number-columns-repeated="2" table:style-name="ce4"/><table:table-cell table:number-columns-repeated="16370" table:style-name="ce2"/></table:table-row>.toString
 
-  val row7                     =
+  val row7 =
     <table:table-row table:style-name="ro1"><table:table-cell office:value-type="string" table:style-name="ce5"><text:p><text:a xlink:href="https://www.gov.uk/government/publications/enterprise-management-incentives-end-of-year-template">EMI guidance</text:a></text:p></table:table-cell><table:table-cell table:style-name="ce6"/><table:table-cell table:number-columns-spanned="3" table:number-rows-spanned="1" table:style-name="ce29"/><table:covered-table-cell table:number-columns-repeated="2"/><table:table-cell table:number-columns-repeated="2" table:style-name="ce7"/><table:table-cell table:content-validation-name="val2" table:style-name="ce8"/><table:table-cell table:style-name="ce9"/><table:table-cell table:content-validation-name="val2" table:style-name="ce8"/><table:table-cell table:content-validation-name="val2" table:style-name="ce8"/><table:table-cell table:content-validation-name="val2" table:style-name="ce8"/><table:table-cell table:number-columns-repeated="2" table:style-name="ce4"/><table:table-cell table:number-columns-repeated="16370" table:style-name="ce2"/></table:table-row>.toString
 
-  val row8                     =
+  val row8 =
     <table:table-row table:style-name="ro1"><table:table-cell table:number-columns-repeated="4" table:style-name="ce10"/><table:table-cell table:number-columns-repeated="16380" table:style-name="ce2"/></table:table-row>.toString
 
   val row9EMIAdjustmentsHeader =
