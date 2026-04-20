@@ -110,7 +110,7 @@ class ProcessCsvService @Inject() (
     scheme: String,
     downloadSourceFile: String => Source[HttpResponse, _]
   )(implicit request: Request[_], messages: Messages): List[Future[Either[Throwable, Boolean]]] = {
-    logger.info(s"[ProcessCsvService][processFiles] callback $callback scheme: $scheme")
+    logger.info(s"[ProcessCsvService][processFiles] upscan callback successful for scheme: $scheme")
     callback.get.files map { file: UpscanCsvFilesCallback =>
       processFile(scheme = scheme, downloadSourceFile = downloadSourceFile, file = file)
     }
