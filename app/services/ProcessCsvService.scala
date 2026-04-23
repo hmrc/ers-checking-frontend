@@ -20,7 +20,7 @@ import cats.implicits.toTraverseOps
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.scaladsl.{Flow, Sink, Source}
 import config.ApplicationConfig
-import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
+import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList, UploadStatus}
 import models.ERSFileProcessingException
 import models.SheetErrors.format
 import org.apache.commons.io.FilenameUtils
@@ -110,8 +110,14 @@ class ProcessCsvService @Inject() (
     scheme: String,
     downloadSourceFile: String => Source[HttpResponse, _]
   )(implicit request: Request[_], messages: Messages): List[Future[Either[Throwable, Boolean]]] = {
-    logger.info(s"[ProcessCsvService][processFiles] callback $callback scheme: $scheme")
-    callback.get.files map { file: UpscanCsvFilesCallback =>
+
+    callback.get.files map {
+      file: UpscanCsvFilesCallback =>
+      val rows = fetchRows(file.uploadStatus).getOrElse(0)
+      logger.info(
+        s"[ProcessCsvService][processFiles] upscan callback successful for scheme: $scheme, with no of rows: $rows"
+      )
+
       processFile(scheme = scheme, downloadSourceFile = downloadSourceFile, file = file)
     }
   }
@@ -192,5 +198,11 @@ class ProcessCsvService @Inject() (
       Flow.fromFunction(_.flatMap(input))
 
   }
+
+  private def fetchRows(status: UploadStatus): Option[Int] =
+    status match {
+      case UploadedSuccessfully(_, _, Some(rows)) => Some(rows)
+      case _                                      => None
+    }
 
 }
