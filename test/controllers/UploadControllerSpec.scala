@@ -24,8 +24,8 @@ import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import helpers.ErsTestHelper
 import models.ERSFileProcessingException
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
-import org.mockito.ArgumentMatchers.{any, anyString, refEq}
-import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers.{any, anyString, eq => meq, refEq}
+import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -40,6 +40,7 @@ import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, i18n}
 import services.{ProcessCsvService, ProcessOdsService}
 import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.validator.{SchemeVersion, SheetNameNotInSchemeVersion}
 import views.html.global_error
 
 import scala.concurrent.duration.Duration
@@ -124,9 +125,9 @@ class UploadControllerSpec
 
       when(mockProcessCsvService.processFiles(any(), any(), any())(any(), any())).thenReturn(returnValue)
 
-      when(mockSessionCacheRepo.cache(refEq(ersUtil.FORMAT_ERROR_CACHE), anyString())(any(), any()))
+      when(mockSessionCacheRepo.cache(refEq("format_error"), anyString())(any(), any()))
         .thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))
-      when(mockSessionCacheRepo.cache(refEq(ersUtil.FORMAT_ERROR_CACHE_PARAMS), any[Seq[String]])(any(), any()))
+      when(mockSessionCacheRepo.cache(refEq("format_error_params"), any[Seq[String]])(any(), any()))
         .thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))
       when(mockSessionCacheRepo.cache(refEq(ersUtil.FORMAT_ERROR_EXTENDED_CACHE), any[Boolean])(any(), any()))
         .thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))
@@ -261,6 +262,48 @@ class UploadControllerSpec
 
       status(result)          shouldBe Status.INTERNAL_SERVER_ERROR
       contentAsString(result) shouldBe "Test body"
+    }
+
+    "redirect to formatErrorsPage with wrongSchemeFile message for SheetNameNotInSchemeVersion exception" in {
+      reset(mockSessionCacheRepo)
+      val controllerUnderTest = buildFakeUploadControllerCsv()
+      val result              =
+        controllerUnderTest.handleException(SheetNameNotInSchemeVersion("Sheet1", SchemeVersion.V4))(
+          FakeRequest("", "")
+        )
+
+      status(result)         shouldBe Status.SEE_OTHER
+      result.futureValue.header
+        .headers("Location") shouldBe routes.CheckingServiceController.formatErrorsPage().toString
+      verify(mockSessionCacheRepo).cache(
+        meq("format_error"),
+        meq("This is not a file that you said you needed to upload, choose a different file")
+      )(any(), any())
+      verify(mockSessionCacheRepo).cache(
+        meq("format_error_params"),
+        meq(Seq.empty[String])
+      )(any(), any())
+    }
+
+    "redirect to formatErrorsPage with wrongSchemeFile message for SheetNameNotInSchemeVersion with V5 scheme version" in {
+      reset(mockSessionCacheRepo)
+      val controllerUnderTest = buildFakeUploadControllerCsv()
+      val result              =
+        controllerUnderTest.handleException(SheetNameNotInSchemeVersion("Sheet1", SchemeVersion.V5))(
+          FakeRequest("", "")
+        )
+
+      status(result)         shouldBe Status.SEE_OTHER
+      result.futureValue.header
+        .headers("Location") shouldBe routes.CheckingServiceController.formatErrorsPage().toString
+      verify(mockSessionCacheRepo).cache(
+        meq("format_error"),
+        meq("This is not a file that you said you needed to upload, choose a different file")
+      )(any(), any())
+      verify(mockSessionCacheRepo).cache(
+        meq("format_error_params"),
+        meq(Seq.empty[String])
+      )(any(), any())
     }
   }
 

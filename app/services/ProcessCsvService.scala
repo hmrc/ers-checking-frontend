@@ -20,7 +20,7 @@ import cats.implicits.toTraverseOps
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.scaladsl.{Flow, Sink, Source}
 import config.ApplicationConfig
-import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList, UploadStatus}
+import models.upscan.{UploadStatus, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import models.ERSFileProcessingException
 import models.SheetErrors.format
 import org.apache.commons.io.FilenameUtils
@@ -109,10 +109,9 @@ class ProcessCsvService @Inject() (
     callback: Option[UpscanCsvFilesCallbackList],
     scheme: String,
     downloadSourceFile: String => Source[HttpResponse, _]
-  )(implicit request: Request[_], messages: Messages): List[Future[Either[Throwable, Boolean]]] = {
+  )(implicit request: Request[_], messages: Messages): List[Future[Either[Throwable, Boolean]]] =
 
-    callback.get.files map {
-      file: UpscanCsvFilesCallback =>
+    callback.get.files map { file: UpscanCsvFilesCallback =>
       val rows = fetchRows(file.uploadStatus).getOrElse(0)
       logger.info(
         s"[ProcessCsvService][processFiles] upscan callback successful for scheme: $scheme, with no of rows: $rows"
@@ -120,7 +119,6 @@ class ProcessCsvService @Inject() (
 
       processFile(scheme = scheme, downloadSourceFile = downloadSourceFile, file = file)
     }
-  }
 
   def generateNoDataException(name: String)(implicit messages: Messages): ERSFileProcessingException =
     ERSFileProcessingException(

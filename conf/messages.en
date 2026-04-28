@@ -164,6 +164,7 @@ ers.exceptions.dataParser.parserFailure = The file that you chose seems to be da
 ers.exceptions.dataParser.fileParsingError = The file that you chose to check seems to be damaged. You won’t be able to upload {0} as part of your annual return.
 ers.exceptions.dataParser.parsingOfFileData = Parsing of File Data
 ers.exceptions.dataParser.incorrectSheetName = {0} isn’t a sheet name (title) that can be used in {1} files.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Use the Employment Related Securities (ERS) guidance documents</a> to help you create error-free files.
+ers.exceptions.dataParser.wrongSchemeFile = This is not a file that you said you needed to upload, choose a different file
 ers.exceptions.dataParser.incorrectSchemeType = You chose to check {1} file, but {2} is {0} file.
 ers.exceptions.dataParser.unidentifiableSheetName = Couldn’t identify SheetName
 ers.exceptions.dataParser.incorrectHeader = The headers on {0} in {1} aren’t right.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Use the Employment Related Securities (ERS) guidance documents</a> to make sure they’re as required.

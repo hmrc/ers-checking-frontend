@@ -250,6 +250,9 @@ class UploadController @Inject() (
         val message        = Messages("ers.exceptions.dataParser.incorrectSheetName", e.sheetName, e.schemeName)
         val optionalParams = Seq(e.sheetName, e.schemeName)
         updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
+      case _: validator.SheetNameNotInSchemeVersion    =>
+        val message = Messages("ers.exceptions.dataParser.wrongSchemeFile")
+        updateCacheThenRedirectToFormatErrorsPage(message, Seq.empty[String], needsExtendedInstructions = true)
       case e: validator.ValidatorException             =>
         logger.error(
           s"[UploadController][handleException] " +
