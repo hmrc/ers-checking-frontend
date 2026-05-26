@@ -616,6 +616,22 @@ class CheckingServiceControllerTest
       val result              = controllerUnderTest.formatErrorsPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       assert(contentAsString(result).contains(Messages("ers.file_upload_error.instructions2.hyperlink")))
     }
+
+    "hyperlink1 points to selectCsvFilesPage when file type is csv" in {
+      val controllerUnderTest = buildFakeCheckingServiceController(fileTypeRes = "csv")
+      val result              = controllerUnderTest.formatErrorsPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val document            = Jsoup.parse(contentAsString(result))
+      document.select("a#fix-the-errors").attr("href") shouldBe
+        routes.CheckCsvFilesController.selectCsvFilesPage().url
+    }
+
+    "hyperlink1 points to checkOdsFilePage when file type is ods" in {
+      val controllerUnderTest = buildFakeCheckingServiceController(fileTypeRes = "ods")
+      val result              = controllerUnderTest.formatErrorsPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val document            = Jsoup.parse(contentAsString(result))
+      document.select("a#fix-the-errors").attr("href") shouldBe
+        routes.CheckingServiceController.checkOdsFilePage().url
+    }
   }
 
 }

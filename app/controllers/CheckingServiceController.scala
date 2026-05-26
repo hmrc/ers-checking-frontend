@@ -200,6 +200,11 @@ class CheckingServiceController @Inject() (
     } yield {
       auditEvents.fileProcessingErrorAudit(fileType, schemeName, errorMsg)
       val scheneNameWithShortenedVersion = getScheneNameWithShortenedVersion(schemeName)
+
+      val uploadAgainLink =
+        if (fileType == ersUtil.OPTION_CSV) routes.CheckCsvFilesController.selectCsvFilesPage()
+        else routes.CheckingServiceController.checkOdsFilePage()
+
       Ok(
         format_errors(
           fileType,
@@ -207,7 +212,8 @@ class CheckingServiceController @Inject() (
           scheneNameWithShortenedVersion.scheme,
           errorMsg,
           errorParams,
-          extendedInstructions
+          extendedInstructions,
+          uploadAgainLink
         )
       )
     }

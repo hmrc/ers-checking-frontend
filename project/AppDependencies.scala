@@ -9,7 +9,7 @@ object AppDependencies {
 
   private val compile: Seq[ModuleID] = Seq(
     ws,
-    "commons-io"                  %  "commons-io"                   % "2.21.0",
+    "commons-io"                  %  "commons-io"                   % "2.22.0",
     "org.apache.pekko"            %% "pekko-stream"                 % PlayVersion.pekkoVersion,
     "org.apache.pekko"            %% "pekko-connectors-csv"         % "1.0.2", // sync with PlayVersion.pekkoVersion closes major and minor version gaps
     "org.typelevel"               %% "cats-core"                    % "2.13.0",
