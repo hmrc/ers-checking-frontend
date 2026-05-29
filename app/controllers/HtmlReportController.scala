@@ -110,6 +110,10 @@ class HtmlReportController @Inject() (
         .distinct
         .mkString(",")
 
+      val uploadAgainLink: Call =
+        if (isCsv) routes.CheckingServiceController.checkCsvFilePage()
+        else routes.CheckingServiceController.checkOdsFilePage()
+
       auditEvents.fileProcessingErrorAudit(scheneNameWithShortenedVersion.errorMessageKeyPrefix, sheetName, errorMsg)
       Ok(
         html_error_report(
@@ -117,7 +121,8 @@ class HtmlReportController @Inject() (
           scheneNameWithShortenedVersion.scheme,
           totalErrorsCount,
           errorCountLong,
-          errorsList.toSeq
+          errorsList.toSeq,
+          uploadAgainLink
         )(request, messages, appConfig)
       )
     } recover { case e: NoSuchElementException =>

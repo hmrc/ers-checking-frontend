@@ -29,7 +29,8 @@
         schemeNameShort: String,
         errorListCount: Long,
         schemeErrorCount: Long,
-        schemeErrors: Seq[SheetErrors] = Seq.empty)(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
+        schemeErrors: Seq[SheetErrors] = Seq.empty,
+        uploadAgainLink: Call)(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
 @* HTML Error Report Template *@
 @ers_main(title = messages("ers.error_report.page_title")) {
 
@@ -87,7 +88,7 @@
     <h2 class="govuk-heading-m">@Html(messages("ers_error_report.sub_heading"))</h2>
         <p class="govuk-body">@messages("ers_error_report.view_as_html2")</p>
     <ul class="govuk-list govuk-list--bullet">
-        <li>@messages("ers_error_report.instructions1") <a href="@routes.CheckingServiceController.schemeTypePage()" class="govuk-link" id="check-another-return-file-link-1">@messages("ers_error_report.instructions1.hyperlink")</a></li>
+        <li>@messages("ers_error_report.instructions1") <a href="@uploadAgainLink" class="govuk-link" id="check-another-return-file-link-1">@messages("ers_error_report.instructions1.hyperlink")</a></li>
         <li>@messages("ers_error_report.instructions2") <a href="@routes.CheckingServiceController.schemeTypePage()" class="govuk-link" id="check-another-return-file-link-2">@messages("ers_error_report.instructions2.hyperlink")</a></li>
     </ul>
 
