@@ -19,6 +19,7 @@ package controllers
 import helpers.ErsTestHelper
 import models.SheetErrors.format
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
+import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.OptionValues
@@ -90,6 +91,29 @@ class HtmlReportControllerTest
       lazy val result =
         controllerUnderTest.htmlErrorReportPage(true).apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
+    }
+
+    "point the csv upload-again link to checkCsvFilePage" in {
+      val controllerUnderTest =
+        new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
+      val callbackList        = UpscanCsvFilesCallbackList(
+        files = List(UpscanCsvFilesCallback(uploadId, UploadedSuccessfully("thefilename", "downloadUrl", Some(1000))))
+      )
+      val cacheItem           = generateTestCacheItem(
+        id = "test",
+        data = Seq(
+          "scheme-error-count"    -> JsString("test"),
+          "error-list"            -> JsString("test"),
+          "scheme-type"           -> JsString("csop"),
+          "callback_data_key_csv" -> Json.toJson(callbackList)
+        )
+      )
+      when(mockSessionCacheRepo.fetchAll()(any())).thenReturn(Future.successful(cacheItem))
+
+      val result   = controllerUnderTest.htmlErrorReportPage(true).apply(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val document = Jsoup.parse(contentAsString(result))
+      document.select("a#check-another-return-file-link-1").attr("href") shouldBe
+        routes.CheckingServiceController.checkCsvFilePage().url
     }
   }
 

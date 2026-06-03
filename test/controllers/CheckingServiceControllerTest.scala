@@ -391,7 +391,10 @@ class CheckingServiceControllerTest
 
   "Check csv file page GET" should {
 
-    def buildFakeCheckingServiceController(schemeRes: Boolean = true): CheckingServiceController =
+    def buildFakeCheckingServiceController(
+      schemeRes: Boolean = true,
+      csvFiles: Seq[UpscanIds] = Seq(UpscanIds(UploadId("id"), "fileId", NotStarted))
+    ): CheckingServiceController =
       new CheckingServiceController(
         mockAuthAction,
         mockUpscanService,
@@ -409,6 +412,8 @@ class CheckingServiceControllerTest
         mockAuditEvents,
         globalErrorView
       ) {
+        when(mockSessionCacheRepo.cache(any(), any())(any(), any()))
+          .thenReturn(Future.successful(("", "")))
         when(mockSessionCacheRepo.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any()))
           .thenReturn(if (schemeRes) Future.successful(("", "")) else Future.failed(new Exception))
         when(mockSessionCacheRepo.fetchAndGetEntry[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any()))
@@ -416,10 +421,7 @@ class CheckingServiceControllerTest
         when(
           mockSessionCacheRepo.fetchAndGetEntry[UpscanCsvFilesList](refEq(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())
         )
-          .thenReturn(
-            if (schemeRes) Future.successful(UpscanCsvFilesList(Seq(UpscanIds(UploadId("id"), "fileId", NotStarted))))
-            else Future.failed(new Exception)
-          )
+          .thenReturn(if (schemeRes) Future.successful(UpscanCsvFilesList(csvFiles)) else Future.failed(new Exception))
         when(mockUpscanService.getUpscanFormData(any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(UpscanInitiateResponse(Reference("ref"), Call("GET", "/"), Map.empty)))
         mockAnyContentAction
@@ -452,6 +454,29 @@ class CheckingServiceControllerTest
       res.map { result =>
         result shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request, testMessages)))
       }
+    }
+
+    "reset the list and return OK when no file is NotStarted (upload-again after errors)" in {
+      val controllerUnderTest = buildFakeCheckingServiceController(
+        csvFiles = Seq(UpscanIds(UploadId("id"), "fileId", InProgress))
+      )
+      val result              = controllerUnderTest.showCheckCsvFilePage()(
+        Fixtures.buildFakeRequestWithSessionId("GET"),
+        hc,
+        implicitly[Messages]
+      )
+      status(result) shouldBe Status.OK
+    }
+
+    "redirect to fileUploadError when the upload list is empty" in {
+      val controllerUnderTest = buildFakeCheckingServiceController(csvFiles = Seq.empty)
+      val result              = controllerUnderTest.showCheckCsvFilePage()(
+        Fixtures.buildFakeRequestWithSessionId("GET"),
+        hc,
+        implicitly[Messages]
+      )
+      status(result)           shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.CheckingServiceController.fileUploadError().url)
     }
 
   }
@@ -615,6 +640,22 @@ class CheckingServiceControllerTest
       val controllerUnderTest = buildFakeCheckingServiceController()
       val result              = controllerUnderTest.formatErrorsPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       assert(contentAsString(result).contains(Messages("ers.file_upload_error.instructions2.hyperlink")))
+    }
+
+    "hyperlink1 points to selectCsvFilesPage when file type is csv" in {
+      val controllerUnderTest = buildFakeCheckingServiceController(fileTypeRes = "csv")
+      val result              = controllerUnderTest.formatErrorsPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val document            = Jsoup.parse(contentAsString(result))
+      document.select("a#fix-the-errors").attr("href") shouldBe
+        routes.CheckingServiceController.checkCsvFilePage().url
+    }
+
+    "hyperlink1 points to checkOdsFilePage when file type is ods" in {
+      val controllerUnderTest = buildFakeCheckingServiceController(fileTypeRes = "ods")
+      val result              = controllerUnderTest.formatErrorsPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val document            = Jsoup.parse(contentAsString(result))
+      document.select("a#fix-the-errors").attr("href") shouldBe
+        routes.CheckingServiceController.checkOdsFilePage().url
     }
   }
 

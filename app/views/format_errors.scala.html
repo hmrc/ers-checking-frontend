@@ -28,7 +28,8 @@
         schemeNameShort: String,
         errorMsg: String,
         errorMsgParams: Seq[String],
-        showExtendedInstructions: Boolean)(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig, ersUtil: ERSUtil)
+        showExtendedInstructions: Boolean,
+        uploadAgainLink: Call)(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig, ersUtil: ERSUtil)
 
 @ers_main(title = messages("ers.error_report.page_title")) {
 
@@ -47,7 +48,7 @@
 
             <li>
                 @Html(messages("ers.file_upload_error.instructions1"))
-                <a href="@routes.CheckingServiceController.schemeTypePage()" class="govuk-link" id="fix-the-errors">
+                <a href="@uploadAgainLink" class="govuk-link" id="fix-the-errors">
                     @Html(messages("ers.file_upload_error.instructions1.hyperlink"))</a>
             </li>
             <li>

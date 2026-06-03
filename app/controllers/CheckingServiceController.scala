@@ -20,7 +20,7 @@ import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRefAndPAYE}
 
 import javax.inject.{Inject, Singleton}
-import models.upscan.{NotStarted, UploadStatus, UpscanCsvFilesList}
+import models.upscan.{NotStarted, UploadId, UploadStatus, UpscanCsvFilesList, UpscanIds}
 import models.{CS_checkFileType, CS_schemeType, CSformMappings}
 import play.api.Logging
 import play.api.data.Form
@@ -138,7 +138,8 @@ class CheckingServiceController @Inject() (
     (for {
       scheme         <- sessionCacheService.fetchAndGetEntry[String](ersUtil.SCHEME_CACHE)
       csvFilesList   <- sessionCacheService.fetchAndGetEntry[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
-      currentCsvFile  = csvFilesList.ids.find(ids => ids.uploadStatus == NotStarted)
+      refreshedList  <- resetIfNoneNotStarted(csvFilesList)
+      currentCsvFile  = refreshedList.ids.find(ids => ids.uploadStatus == NotStarted)
       if currentCsvFile.isDefined
       upscanResponse <- upscanService.getUpscanFormData(isCsv = true, scheme, currentCsvFile)
     } yield Ok(
@@ -152,6 +153,24 @@ class CheckingServiceController @Inject() (
           s"[CheckingServiceController][showCheckCsvFilePage]: Unable to fetch scheme. Error: ${e.getMessage}"
         )
         getGlobalErrorPage(request, messages)
+    }
+
+  private def resetIfNoneNotStarted(
+    list: UpscanCsvFilesList
+  )(implicit request: Request[AnyRef]): Future[UpscanCsvFilesList] =
+
+    if (list.ids.exists(_.uploadStatus == NotStarted)) {
+      Future.successful(list)
+    } else {
+      val refreshed = UpscanCsvFilesList(
+        list.ids.map(id => UpscanIds(UploadId.generate, id.fileId, NotStarted))
+      )
+      for {
+        _ <- Future.sequence(
+               refreshed.ids.map(id => sessionCacheService.cache[UpscanIds](id.uploadId.value, id))
+             )
+        _ <- sessionCacheService.cache(ersUtil.CSV_FILES_UPLOAD, refreshed)
+      } yield refreshed
     }
 
   def checkOdsFilePage(): Action[AnyContent] = authAction.async { implicit request =>
@@ -200,6 +219,11 @@ class CheckingServiceController @Inject() (
     } yield {
       auditEvents.fileProcessingErrorAudit(fileType, schemeName, errorMsg)
       val scheneNameWithShortenedVersion = getScheneNameWithShortenedVersion(schemeName)
+
+      val uploadAgainLink =
+        if (fileType == ersUtil.OPTION_CSV) routes.CheckingServiceController.checkCsvFilePage()
+        else routes.CheckingServiceController.checkOdsFilePage()
+
       Ok(
         format_errors(
           fileType,
@@ -207,7 +231,8 @@ class CheckingServiceController @Inject() (
           scheneNameWithShortenedVersion.scheme,
           errorMsg,
           errorParams,
-          extendedInstructions
+          extendedInstructions,
+          uploadAgainLink
         )
       )
     }
