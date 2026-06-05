@@ -20,6 +20,7 @@
     <logger name="com.ning.http.client" level="WARN"/>
 
     <logger name="uk.gov" level="DEBUG"/>
+    <logger name="uk.gov.hmrc.validator" level="INFO"/>
 
     <logger name="uk.gov.hmrc.audit.handler" level="INFO"/>
 
