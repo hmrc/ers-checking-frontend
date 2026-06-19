@@ -289,7 +289,7 @@ class UploadController @Inject() (
           s"[UploadController][handleValidatorFailure] Unhandled validator failure: " +
             s"${other.getClass.getSimpleName} - ${other.message}. Redirecting to global error page."
         )
-        
+
         Future.successful(getGlobalErrorPage)
     }
 
