@@ -51,10 +51,10 @@
             rows = sheetErrors.errors.toSeq.map { error =>
                 Seq(
                     TableRow(
-                        content = Text(error.cell.column)
+                        content = Text(error.cell.columnName)
                     ),
                     TableRow(
-                        content = Text(error.cell.row.toString)
+                        content = Text(error.cell.rowNumber.toString)
                     ),
                     TableRow(
                         content = Text(messages(error.errorMsg))

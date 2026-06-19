@@ -20,10 +20,11 @@ import controllers.Fixtures
 import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import helpers.ErsTestHelper
 import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers._
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
-import org.scalatest.OptionValues
+import org.scalatest.{EitherValues, OptionValues}
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -32,8 +33,8 @@ import play.api.test.FakeRequest
 import services.ProcessOdsService._
 import uk.gov.hmrc.mongo.test.MongoSupport
 import uk.gov.hmrc.validator._
-import uk.gov.hmrc.validator.models.{Cell, ValidationError}
 import uk.gov.hmrc.validator.models.ods.SheetErrors
+import uk.gov.hmrc.validator.models._
 
 import java.io.InputStream
 import scala.collection.mutable.ListBuffer
@@ -47,7 +48,8 @@ class ProcessOdsServiceSpec
     with ErsTestHelper
     with GuiceOneAppPerSuite
     with ScalaFutures
-    with MongoSupport {
+    with MongoSupport
+    with EitherValues {
 
   implicit val fakeRequest: RequestWithOptionalEmpRefAndPAYE[AnyContent] = RequestWithOptionalEmpRefAndPAYE(
     FakeRequest(),
@@ -57,8 +59,12 @@ class ProcessOdsServiceSpec
 
   def buildProcessOdsService(sheetErrors: ListBuffer[SheetErrors]): ProcessOdsService =
     new ProcessOdsService(mockSessionCacheRepo, mockErsUtil) {
-      override def validateOdsFile(fileName: String, processor: InputStream, scheme: String): ListBuffer[SheetErrors] =
-        sheetErrors
+      override def validateOdsFile(
+        fileName: String,
+        processor: InputStream,
+        scheme: String
+      ): Either[ValidatorFailure, ListBuffer[SheetErrors]] =
+        Right(sheetErrors)
     }
 
   "calling performOdsUpload" should {
@@ -158,39 +164,52 @@ class ProcessOdsServiceSpec
     "when calling the ers-file-validator-config library directly" should {
 
       "must successfully process valid EMI ODS data" in {
-        val sheetErrors: ListBuffer[SheetErrors] =
-          processOdsService.validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateLarge, "EMI")
+        val sheetErrors =
+          processOdsService.validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateLarge, "EMI").value
+
         sheetErrors should contain theSameElementsAs ListBuffer(SheetErrors("EMI40_Adjustments_V4", ListBuffer()))
       }
 
       "must return DataContainsAmpersandException when ODS data contains ampersands" in {
-        val exception: DataContainsAmpersandException = intercept[DataContainsAmpersandException](
-          processOdsService.validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateWithAmpersand, "EMI")
-        )
-        exception.getMessage() shouldBe "Must not contain ampersands."
+        val validatorFailure =
+          processOdsService
+            .validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateWithAmpersand, "EMI")
+            .left
+            .value
+
+        validatorFailure           mustBe a[DataContainsAmpersandFailure]
+        validatorFailure.message shouldBe "Must not contain ampersands."
       }
 
-      "must return NoDataException when ODS data is empty" in {
-        val exception: NoDataException = intercept[NoDataException](
-          processOdsService.validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateWithNoData, "EMI")
-        )
+      "must return NoDataFailure when ODS data is empty" in {
+        val validatorFailure =
+          processOdsService
+            .validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateWithNoData, "EMI")
+            .left
+            .value
 
-        exception.getMessage() shouldBe "No data in file"
+        validatorFailure           mustBe a[NoDataFailure]
+        validatorFailure.message shouldBe "No data in file"
       }
 
       "must return IncorrectHeaderException when ODS header is invalid" in {
 
-        val exception: IncorrectHeaderException = intercept[IncorrectHeaderException](
-          processOdsService.validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateWithIncorrectHeader, "EMI")
-        )
+        val validatorFailure =
+          processOdsService
+            .validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateWithIncorrectHeader, "EMI")
+            .left
+            .value
 
-        exception.getMessage() shouldBe "Incorrect header row"
+        validatorFailure           mustBe a[IncorrectHeaderFailure]
+        validatorFailure.message shouldBe "Incorrect header row"
       }
 
       "must return the expected sheetErrors when ODS data is invalid" in {
 
         val sheetErrors: ListBuffer[SheetErrors] =
-          processOdsService.validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateWithInvalidData, "EMI")
+          processOdsService
+            .validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateWithInvalidData, "EMI")
+            .value
 
         val expectedSheetErrors: SheetErrors = SheetErrors(
           "EMI40_Adjustments_V4",
@@ -213,24 +232,30 @@ class ProcessOdsServiceSpec
 
       "must return IncorrectSheetNameException when ODS sheet name is unknown" in {
 
-        val exception: IncorrectSheetNameException = intercept[IncorrectSheetNameException](
-          processOdsService.validateOdsFile(
-            "EMI.ods",
-            XMLTestData.getEMIAdjustmentsTemplateWithIncorrectSheetName,
-            "EMI"
-          )
-        )
+        val validatorFailure =
+          processOdsService
+            .validateOdsFile(
+              "EMI.ods",
+              XMLTestData.getEMIAdjustmentsTemplateWithIncorrectSheetName,
+              "EMI"
+            )
+            .left
+            .value
 
-        exception.getMessage() shouldBe "Incorrect sheet name"
+        validatorFailure           mustBe a[IncorrectSheetNameFailure]
+        validatorFailure.message shouldBe "Incorrect sheet name"
       }
 
       "must return IncorrectSchemeException when ODS sheet belongs to a different scheme type" in {
 
-        val exception: IncorrectSchemeException = intercept[IncorrectSchemeException](
-          processOdsService.validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateWithCsopSchemeType, "EMI")
-        )
+        val validatorFailure =
+          processOdsService
+            .validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateWithCsopSchemeType, "EMI")
+            .left
+            .value
 
-        exception.getMessage() shouldBe "Incorrect Scheme type"
+        validatorFailure           mustBe a[IncorrectSchemeFailure]
+        validatorFailure.message shouldBe "Incorrect Scheme type"
       }
     }
   }

@@ -96,8 +96,10 @@ class ProcessCsvService @Inject() (
 
     (for {
       sheetName                   <- EitherT.fromEither[Future](checkFileType(successUpload.name))
-      _                           <- EitherT.fromEither[Future](ERSTemplatesInfo.findSheetWithinSchemeType(sheetName, scheme))
-      dataEngine                  <- EitherT.fromEither(DataEngine(sheetName, SchemeVersion.All))
+      _                           <- EitherT.fromEither[Future](
+                                       ERSTemplatesInfo.findSheetWithinSchemeType(sheetName, scheme).left.map(_.asThrowable)
+                                     )
+      dataEngine                  <- EitherT.fromEither[Future](DataEngine(sheetName, SchemeVersion.All).left.map(_.asThrowable))
       csvValidationResult         <- EitherT(validateCsv(source, dataEngine))
       rowsWithCorrectedRowNumbers <-
         EitherT.fromEither(getValidationResultsWithCorrectRowNumber(csvValidationResult, sheetName)(messages))
@@ -151,7 +153,7 @@ class ProcessCsvService @Inject() (
       .zip(LazyList.from(1)) // start row numbers from 1
       .flatMap { case (rowValidationResults: RowValidationResults, rowNum: Int) =>
         rowValidationResults.validationErrors.map { (error: ValidationError) =>
-          val updatedCell: Cell = error.cell.copy(row = rowNum)
+          val updatedCell: Cell = error.cell.copy(rowNumber = rowNum)
           error.copy(cell = updatedCell)
         }
       }
