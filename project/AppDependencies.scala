@@ -17,7 +17,7 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "bootstrap-frontend-play-30"   % bootstrapVersion,
     "uk.gov.hmrc"                 %% "domain-play-30"               % "11.0.0",
     "uk.gov.hmrc"                 %% "ers-file-validator-config"    % "1.1.0",
-    "uk.gov.hmrc"                 %% "play-frontend-hmrc-play-30"   % "12.32.0"
+    "uk.gov.hmrc"                 %% "play-frontend-hmrc-play-30"   % "13.9.0"
   )
 
   private val test: Seq[ModuleID] = Seq(
