@@ -20,14 +20,9 @@
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage.{HmrcStandardPageParams, ServiceURLs, TemplateOverrides}
 
 @this(
-        govUkLayout: GovukLayout,
         hmrcStandardPage: HmrcStandardPage,
-        header: GovukHeader,
         hmrcHead: HmrcHead,
-        hmrcStandardHeader: HmrcStandardHeader,
-        hmrcStandardFooter: HmrcStandardFooter,
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
-        hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
         hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
         hmrcScripts: HmrcScripts,
         assetsConfig: AssetsConfig
@@ -40,11 +35,12 @@
     <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/ers.css")'>
 
     @if(timeoutDialogEnabled) {
-        @hmrcTimeoutDialogHelper(signOutUrl = applicationConfig.signOut,
-                            timeoutUrl = Some(applicationConfig.timeOutUrl),
-                            timeout = Some(applicationConfig.timeOutSeconds),
-                            countdown = Some(applicationConfig.timeOutCountDownSeconds))
-                            }
+        @hmrcTimeoutDialogHelper(
+            signOutUrl = applicationConfig.signOut,
+            timeoutUrl = Some(applicationConfig.timeOutUrl),
+            timeout = Some(applicationConfig.timeOutSeconds),
+            countdown = Some(applicationConfig.timeOutCountDownSeconds))
+        }
 }
 
 @scripts = {
