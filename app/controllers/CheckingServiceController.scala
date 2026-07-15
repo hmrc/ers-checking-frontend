@@ -138,6 +138,10 @@ class CheckingServiceController @Inject() (
     (for {
       scheme         <- sessionCacheService.fetchAndGetEntry[String](ersUtil.SCHEME_CACHE)
       csvFilesList   <- sessionCacheService.fetchAndGetEntry[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
+      _               = logger.info(
+                          s"[CheckingServiceController][showCheckCsvFilePage]: The following " +
+                            s"sub schemes were selected to be uploaded: ${csvFilesList.ids.map(_.fileId).mkString(", ")}"
+                        )
       refreshedList  <- resetIfNoneNotStarted(csvFilesList)
       currentCsvFile  = refreshedList.ids.find(ids => ids.uploadStatus == NotStarted)
       if currentCsvFile.isDefined

@@ -144,7 +144,6 @@ trait ErsTestHelper extends MockitoSugar {
   when(mockErsUtil.SCHEME_CACHE).thenReturn("scheme-type")
   when(mockErsUtil.FILE_TYPE_CACHE).thenReturn("check-file-type")
   when(mockErsUtil.SCHEME_ERROR_COUNT_CACHE).thenReturn("scheme-error-count")
-  when(mockErsUtil.FILE_NAME_NO_EXTN_CACHE).thenReturn("file-name-no-extn")
   when(mockErsUtil.ERROR_LIST_CACHE).thenReturn("error-list")
   when(mockErsUtil.ERROR_SUMMARY_CACHE).thenReturn("error-summary")
   when(mockErsUtil.FORMAT_ERROR_CACHE).thenReturn("format_error")
