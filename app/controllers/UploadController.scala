@@ -16,15 +16,15 @@
 
 package controllers
 
-import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.http.scaladsl._
-import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse}
-import org.apache.pekko.stream.scaladsl.Source
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRefAndPAYE}
 import models.ERSFileProcessingException
 import models.SheetErrors.format
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallbackList}
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl._
+import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse}
+import org.apache.pekko.stream.scaladsl.Source
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
@@ -33,10 +33,11 @@ import repository.ErsCheckingFrontendSessionCacheRepository
 import services.{ProcessCsvService, ProcessOdsService}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import uk.gov.hmrc.validator.models.{
-  DataContainsAmpersandFailure, IncorrectHeaderFailure, IncorrectSchemeFailure, IncorrectSheetNameFailure,
-  NoDataFailure, SheetNameNotInSchemeVersionFailure, ValidatorFailure
-}
+import uk.gov.hmrc.validator.models.ods.SheetErrors
+import uk.gov.hmrc.validator.models._
+import utils.ContentUtil.withArticle
+import utils.ERSUtil
+import utils.UploadedFileUtil.checkOdsFileType
 
 import java.io.InputStream
 import java.net.URL
@@ -44,10 +45,6 @@ import java.util.zip.ZipInputStream
 import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.validator.models.ods.SheetErrors
-import utils.ContentUtil.withArticle
-import utils.ERSUtil
-import utils.UploadedFileUtil.checkOdsFileType
 
 @Singleton
 class UploadController @Inject() (
@@ -164,7 +161,7 @@ class UploadController @Inject() (
           if (checkOdsFileType(fileName)) {
             readFileOds(file.get.downloadUrl).fold(
               err => {
-                logger.error(s"[UploadController][showuploadOdsFile] failed in readFileOds for scheme : $scheme")
+                logger.error(s"[UploadController][showUploadOdsFile] failed in readFileOds for scheme : $scheme")
                 Future.successful(err)
               },
               processor =>
@@ -222,13 +219,6 @@ class UploadController @Inject() (
         )
         Future.successful(getGlobalErrorPage)
 
-      case e: javax.xml.stream.XMLStreamException => // todo: caught by lib now?
-        logger.error(
-          s"[UploadController][handleException] Encountered unexpected exception: ${e.getClass}. " +
-            s"Redirecting to global error page."
-        )
-        Future.successful(getGlobalErrorPage)
-
       case notERSProcessingException: Throwable => // Catch all case
         logger.error(
           s"[UploadController][handleException] Encountered unexpected exception: " +
@@ -256,14 +246,14 @@ class UploadController @Inject() (
 
         updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = false)
 
-      case _: NoDataFailure =>
+      case NoDataFailure =>
         updateCacheThenRedirectToFormatErrorsPage(
           Messages("ers.exceptions.dataParser.noData"),
           Seq.empty[String],
           needsExtendedInstructions = true
         )
 
-      case _: DataContainsAmpersandFailure =>
+      case DataContainsAmpersandFailure =>
         updateCacheThenRedirectToFormatErrorsPage(
           Messages("ers.exceptions.dataParser.ampersand"),
           Seq.empty[String],

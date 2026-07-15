@@ -177,7 +177,7 @@ class ProcessOdsServiceSpec
             .left
             .value
 
-        validatorFailure           mustBe a[DataContainsAmpersandFailure]
+        validatorFailure           mustBe DataContainsAmpersandFailure
         validatorFailure.message shouldBe "Must not contain ampersands."
       }
 
@@ -188,7 +188,7 @@ class ProcessOdsServiceSpec
             .left
             .value
 
-        validatorFailure           mustBe a[NoDataFailure]
+        validatorFailure           mustBe NoDataFailure
         validatorFailure.message shouldBe "No data in file"
       }
 
