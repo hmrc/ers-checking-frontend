@@ -16,15 +16,15 @@
 
 package controllers
 
-import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.http.scaladsl._
-import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse}
-import org.apache.pekko.stream.scaladsl.Source
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRefAndPAYE}
 import models.ERSFileProcessingException
 import models.SheetErrors.format
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallbackList}
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl._
+import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse}
+import org.apache.pekko.stream.scaladsl.Source
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
@@ -33,7 +33,11 @@ import repository.ErsCheckingFrontendSessionCacheRepository
 import services.{ProcessCsvService, ProcessOdsService}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import uk.gov.hmrc.validator
+import uk.gov.hmrc.validator.models.ods.SheetErrors
+import uk.gov.hmrc.validator.models._
+import utils.ContentUtil.withArticle
+import utils.ERSUtil
+import utils.UploadedFileUtil.checkOdsFileType
 
 import java.io.InputStream
 import java.net.URL
@@ -41,10 +45,6 @@ import java.util.zip.ZipInputStream
 import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.validator.models.ods.SheetErrors
-import utils.ContentUtil.withArticle
-import utils.ERSUtil
-import utils.UploadedFileUtil.checkOdsFileType
 
 @Singleton
 class UploadController @Inject() (
@@ -88,9 +88,10 @@ class UploadController @Inject() (
     downloadUrl: String
   )(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Either[Result, InputStream] =
     try {
-      val stream: InputStream                                = downloadAsInputStream(downloadUrl)
-      val targetFileName                                     = "content.xml"
-      val zipInputStream                                     = new ZipInputStream(stream)
+      val stream: InputStream = downloadAsInputStream(downloadUrl)
+      val targetFileName      = "content.xml"
+      val zipInputStream      = new ZipInputStream(stream)
+
       @scala.annotation.tailrec
       def findFileInZip(stream: ZipInputStream): InputStream =
         Option(stream.getNextEntry) match {
@@ -104,7 +105,9 @@ class UploadController @Inject() (
               "Exception bulk entity streaming"
             )
         }
-      val contentInputStream: InputStream                    = findFileInZip(zipInputStream)
+
+      val contentInputStream: InputStream = findFileInZip(zipInputStream)
+
       Right(contentInputStream)
     } catch {
       case e: ERSFileProcessingException =>
@@ -144,13 +147,12 @@ class UploadController @Inject() (
     }
 
   def uploadOdsFile(scheme: String): Action[AnyContent] = authAction.async { implicit request =>
-    showuploadOdsFile(scheme)
+    showUploadOdsFile(scheme)
   }
 
-  def showuploadOdsFile(
+  def showUploadOdsFile(
     scheme: String
   )(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], messages: Messages): Future[Result] =
-
     clearErrorCache().flatMap { clearedSuccessfully =>
       if (clearedSuccessfully) {
         // These .get's are safe because the UploadedSuccessfully model is already validated as existing in the UpscanController
@@ -159,7 +161,7 @@ class UploadController @Inject() (
           if (checkOdsFileType(fileName)) {
             readFileOds(file.get.downloadUrl).fold(
               err => {
-                logger.error(s"[UploadController][showuploadOdsFile] failed in readFileOds for scheme : $scheme")
+                logger.error(s"[UploadController][showUploadOdsFile] failed in readFileOds for scheme : $scheme")
                 Future.successful(err)
               },
               processor =>
@@ -204,22 +206,32 @@ class UploadController @Inject() (
 
   def handleException(t: Throwable)(implicit request: Request[AnyContent]): Future[Result] =
     t match {
-      case e: ERSFileProcessingException               =>
+      case ValidatorFailure.Wrapper(failure) =>
+        handleValidatorFailure(failure)
+
+      case e: ERSFileProcessingException =>
         updateCacheThenRedirectToFormatErrorsPage(e.message, e.optionalParams, e.needsExtendedInstructions)
-      case upstreamError: UpstreamErrorResponse        =>
+
+      case upstreamError: UpstreamErrorResponse =>
         logger.error(
-          s"[UploadController][handleException] " +
-            s"Encountered an upstream error response when processing a csv file: " +
+          s"[UploadController][handleException] Encountered an upstream error response when processing a csv file: " +
             s"status ${upstreamError.statusCode} with message ${upstreamError.getMessage()}"
         )
         Future.successful(getGlobalErrorPage)
-      case e: javax.xml.stream.XMLStreamException      =>
+
+      case notERSProcessingException: Throwable => // Catch all case
         logger.error(
-          s"[UploadController][handleException] " +
-            s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page."
+          s"[UploadController][handleException] Encountered unexpected exception: " +
+            s"${notERSProcessingException.getClass}. Redirecting to global error page."
         )
         Future.successful(getGlobalErrorPage)
-      case e: validator.IncorrectSchemeException       =>
+    }
+
+  private def handleValidatorFailure(
+    failure: ValidatorFailure
+  )(implicit request: Request[AnyContent]): Future[Result] =
+    failure match {
+      case e: IncorrectSchemeFailure =>
         val selectedSchemeTypeWithArticle: String     = withArticle(e.selectedSchemeType.toUpperCase())
         val uploadedFileSchemeTypeWithArticle: String = withArticle(e.uploadedFileSchemeType.toUpperCase())
         val message                                   = Messages(
@@ -228,42 +240,46 @@ class UploadController @Inject() (
           selectedSchemeTypeWithArticle,
           e.fileName
         )
-        val optionalParams                            = Seq(uploadedFileSchemeTypeWithArticle, selectedSchemeTypeWithArticle, e.fileName)
+
+        val optionalParams =
+          Seq(uploadedFileSchemeTypeWithArticle, selectedSchemeTypeWithArticle, e.fileName)
+
         updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = false)
-      case _: validator.NoDataException                =>
+
+      case NoDataFailure =>
         updateCacheThenRedirectToFormatErrorsPage(
           Messages("ers.exceptions.dataParser.noData"),
           Seq.empty[String],
           needsExtendedInstructions = true
         )
-      case _: validator.DataContainsAmpersandException =>
+
+      case DataContainsAmpersandFailure =>
         updateCacheThenRedirectToFormatErrorsPage(
           Messages("ers.exceptions.dataParser.ampersand"),
           Seq.empty[String],
           needsExtendedInstructions = true
         )
-      case e: validator.IncorrectHeaderException       =>
+
+      case e: IncorrectHeaderFailure =>
         val message        = Messages("ers.exceptions.dataParser.incorrectHeader", e.sheetName, e.fileName)
         val optionalParams = Seq(e.sheetName, e.fileName)
         updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
-      case e: validator.IncorrectSheetNameException    =>
+
+      case e: IncorrectSheetNameFailure =>
         val message        = Messages("ers.exceptions.dataParser.incorrectSheetName", e.sheetName, e.schemeName)
         val optionalParams = Seq(e.sheetName, e.schemeName)
         updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
-      case _: validator.SheetNameNotInSchemeVersion    =>
+
+      case _: SheetNameNotInSchemeVersionFailure =>
         val message = Messages("ers.exceptions.dataParser.wrongSchemeFile")
         updateCacheThenRedirectToFormatErrorsPage(message, Seq.empty[String], needsExtendedInstructions = true)
-      case e: validator.ValidatorException             =>
+
+      case other =>
         logger.error(
-          s"[UploadController][handleException] " +
-            s"Encountered unexpected exception: ${e.getClass}. Redirecting to global error page."
+          s"[UploadController][handleValidatorFailure] Unhandled validator failure: " +
+            s"${other.getClass.getSimpleName} - ${other.message}. Redirecting to global error page."
         )
-        Future.successful(getGlobalErrorPage)
-      case notERSProcessingException: Throwable        => // Catch all case
-        logger.error(
-          s"[UploadController][handleException] " +
-            s"Encountered unexpected exception: ${notERSProcessingException.getClass}. Redirecting to global error page."
-        )
+
         Future.successful(getGlobalErrorPage)
     }
 

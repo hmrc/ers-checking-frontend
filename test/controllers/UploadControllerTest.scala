@@ -128,7 +128,7 @@ class UploadControllerTest
 
     "give a redirect status to checkingSuccessPage if no formatting or structural errors" in {
       val controllerUnderTest = buildFakeUploadControllerOds()
-      val result              = controllerUnderTest.showuploadOdsFile(Fixtures.getMockSchemeTypeString)(
+      val result              = controllerUnderTest.showUploadOdsFile(Fixtures.getMockSchemeTypeString)(
         Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig),
         implicitly[Messages]
       )
@@ -139,7 +139,7 @@ class UploadControllerTest
 
     "give a redirect status to checkingSuccessPage if formatting errors" in {
       val controllerUnderTest = buildFakeUploadControllerOds(uploadRes = false)
-      val result              = controllerUnderTest.showuploadOdsFile(Fixtures.getMockSchemeTypeString)(
+      val result              = controllerUnderTest.showUploadOdsFile(Fixtures.getMockSchemeTypeString)(
         Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig),
         implicitly[Messages]
       )
@@ -150,7 +150,7 @@ class UploadControllerTest
 
     "send the user to the global error page if the error cache fails to clear" in {
       val controllerUnderTest = buildFakeUploadControllerOds(clearCacheResponse = false)
-      val result              = controllerUnderTest.showuploadOdsFile(Fixtures.getMockSchemeTypeString)(
+      val result              = controllerUnderTest.showUploadOdsFile(Fixtures.getMockSchemeTypeString)(
         Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig),
         implicitly[Messages]
       )
@@ -160,7 +160,7 @@ class UploadControllerTest
 
     "send the user to the global error page when reading the ods file is failed" in {
       val controllerUnderTest = buildFakeUploadControllerOds(clearCacheResponse = false, readFileOdsError = true)
-      val result              = controllerUnderTest.showuploadOdsFile(Fixtures.getMockSchemeTypeString)(
+      val result              = controllerUnderTest.showUploadOdsFile(Fixtures.getMockSchemeTypeString)(
         Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig),
         implicitly[Messages]
       )

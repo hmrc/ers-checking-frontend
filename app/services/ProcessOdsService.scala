@@ -23,7 +23,7 @@ import play.api.Logging
 import play.api.mvc.{AnyContent, Request}
 import repository.ErsCheckingFrontendSessionCacheRepository
 import uk.gov.hmrc.validator.SchemeVersion.All
-import uk.gov.hmrc.validator.ValidatorException
+import uk.gov.hmrc.validator.models.ValidatorFailure
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 import uk.gov.hmrc.validator.ods.OdsValidator
 import utils.ERSUtil
@@ -39,26 +39,31 @@ class ProcessOdsService @Inject() (sessionCacheService: ErsCheckingFrontendSessi
   implicit ec: ExecutionContext
 ) extends Logging {
 
-  def validateOdsFile(fileName: String, processor: InputStream, scheme: String): ListBuffer[SheetErrors] =
+  def validateOdsFile(
+    fileName: String,
+    processor: InputStream,
+    scheme: String
+  ): Either[ValidatorFailure, ListBuffer[SheetErrors]] =
     OdsValidator.validateOdsFile(All, processor, scheme, fileName)
 
   def performOdsUpload(errorCount: Int, fileName: String, processor: InputStream, scheme: String)(implicit
     request: RequestWithOptionalEmpRefAndPAYE[AnyContent]
   ): Future[Boolean] = {
     for {
-      _                                   <- sessionCacheService.cache[String](ersUtil.FILE_NAME_CACHE, fileName)
-      sheetErrors: ListBuffer[SheetErrors] = validateOdsFile(fileName, processor, scheme)
-      result: Boolean                     <- processSheetErrors(sheetErrors, errorCount)
+      _           <- sessionCacheService.cache[String](ersUtil.FILE_NAME_CACHE, fileName)
+      sheetErrors <- validateOdsFile(fileName, processor, scheme) match {
+                       case Right(errors) => Future.successful(errors)
+                       case Left(failure) => Future.failed(failure.asThrowable)
+                     }
+      result      <- processSheetErrors(sheetErrors, errorCount)
     } yield result
   }.andThen {
-    case Success(validFile: Boolean)                     =>
+    case Success(validFile)                              =>
       logger.info(s"[ProcessOdsService][performOdsUpload] Performed ods upload, file valid: $validFile")
-    case Failure(e: NoSuchElementException)              =>
-      logger.warn(s"[ProcessOdsService][performOdsUpload] Encountered NoSuchElementException - $e")
-    case Failure(e: ValidatorException)                  =>
-      logger.warn(s"[ProcessOdsService][performOdsUpload] ValidationException thrown trying to upload file - $e")
+    case Failure(ValidatorFailure.Wrapper(failure))      =>
+      logger.warn(s"[ProcessOdsService][performOdsUpload] Validation failure trying to upload file - $failure")
     case Failure(e: ERSFileProcessingException)          =>
-      logger.warn(s"[ProcessOsdService][performOdsUpload] ERSFileProcessingException thrown trying to upload file - $e")
+      logger.warn(s"[ProcessOdsService][performOdsUpload] ERSFileProcessingException thrown trying to upload file - $e")
     case Failure(e: javax.xml.stream.XMLStreamException) =>
       logger.warn(s"[ProcessOdsService][performOdsUpload] XMLStreamException - $e")
   }

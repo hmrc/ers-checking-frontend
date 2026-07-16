@@ -40,7 +40,8 @@ import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, i18n}
 import services.{ProcessCsvService, ProcessOdsService}
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.validator.{SchemeVersion, SheetNameNotInSchemeVersion}
+import uk.gov.hmrc.validator.SchemeVersion
+import uk.gov.hmrc.validator.models.SheetNameNotInSchemeVersionFailure
 import views.html.global_error
 
 import scala.concurrent.duration.Duration
@@ -268,7 +269,7 @@ class UploadControllerSpec
       reset(mockSessionCacheRepo)
       val controllerUnderTest = buildFakeUploadControllerCsv()
       val result              =
-        controllerUnderTest.handleException(SheetNameNotInSchemeVersion("Sheet1", SchemeVersion.V4))(
+        controllerUnderTest.handleException(SheetNameNotInSchemeVersionFailure("Sheet1", SchemeVersion.V4).asThrowable)(
           FakeRequest("", "")
         )
 
@@ -289,7 +290,7 @@ class UploadControllerSpec
       reset(mockSessionCacheRepo)
       val controllerUnderTest = buildFakeUploadControllerCsv()
       val result              =
-        controllerUnderTest.handleException(SheetNameNotInSchemeVersion("Sheet1", SchemeVersion.V5))(
+        controllerUnderTest.handleException(SheetNameNotInSchemeVersionFailure("Sheet1", SchemeVersion.V5).asThrowable)(
           FakeRequest("", "")
         )
 
