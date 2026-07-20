@@ -136,16 +136,18 @@ class CheckingServiceController @Inject() (
 
   def showCheckCsvFilePage()(implicit request: Request[AnyRef], hc: HeaderCarrier, messages: Messages): Future[Result] =
     (for {
-      scheme         <- sessionCacheService.fetchAndGetEntry[String](ersUtil.SCHEME_CACHE)
-      csvFilesList   <- sessionCacheService.fetchAndGetEntry[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
-      _               = logger.info(
-                          s"[CheckingServiceController][showCheckCsvFilePage]: The following " +
-                            s"sub schemes were selected to be uploaded: ${csvFilesList.ids.map(_.fileId).mkString(", ")}"
-                        )
-      refreshedList  <- resetIfNoneNotStarted(csvFilesList)
-      currentCsvFile  = refreshedList.ids.find(ids => ids.uploadStatus == NotStarted)
+      scheme             <- sessionCacheService.fetchAndGetEntry[String](ersUtil.SCHEME_CACHE)
+      csvFilesList       <- sessionCacheService.fetchAndGetEntry[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
+      allSelectedCsvFiles = csvFilesList.ids.map(_.fileId)
+      _                  <- auditEvents.auditSelectedCsvRadioButtons(allSelectedCsvFiles)
+      _                   = logger.info(
+                              s"[CheckingServiceController][showCheckCsvFilePage]: The following " +
+                                s"sub schemes were selected to be uploaded: ${allSelectedCsvFiles.mkString(", ")}"
+                            )
+      refreshedList      <- resetIfNoneNotStarted(csvFilesList)
+      currentCsvFile      = refreshedList.ids.find(ids => ids.uploadStatus == NotStarted)
       if currentCsvFile.isDefined
-      upscanResponse <- upscanService.getUpscanFormData(isCsv = true, scheme, currentCsvFile)
+      upscanResponse     <- upscanService.getUpscanFormData(isCsv = true, scheme, currentCsvFile)
     } yield Ok(
       check_csv_file(scheme, currentCsvFile.get.fileId)(request, messages, upscanResponse, appConfig, ersUtil)
     )) recover {
