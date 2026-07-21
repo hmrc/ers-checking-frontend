@@ -26,7 +26,6 @@ trait CacheUtil {
   val SCHEME_CACHE: String                = "scheme-type"
   val FILE_TYPE_CACHE: String             = "check-file-type"
   val SCHEME_ERROR_COUNT_CACHE: String    = "scheme-error-count"
-  val FILE_NAME_NO_EXTN_CACHE: String     = "file-name-no-extn"
   val ERROR_LIST_CACHE: String            = "error-list"
   val ERROR_SUMMARY_CACHE: String         = "error-summary"
   val FORMAT_ERROR_CACHE: String          = "format_error"

@@ -29,11 +29,13 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
-import play.api.i18n
+import play.api.{Logger, i18n}
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.mvc.{Call, DefaultMessagesControllerComponents, Result}
 import play.api.test.Helpers._
 import play.api.test.Injecting
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
+import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
 import views.html._
 
 import scala.concurrent.Future
@@ -45,7 +47,8 @@ class CheckingServiceControllerTest
     with GuiceOneAppPerSuite
     with ErsTestHelper
     with Injecting
-    with ScalaFutures {
+    with ScalaFutures
+    with LogCapturing {
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
   val formatErrorsView: format_errors               = inject[format_errors]
   val startView: start                              = inject[start]
@@ -59,6 +62,7 @@ class CheckingServiceControllerTest
   val invalidErrorView: file_upload_problem         = inject[file_upload_problem]
   val fileUploadErrorView: file_upload_error        = inject[file_upload_error]
   implicit lazy val testMessages: MessagesImpl      = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
+  val checkingServiceControllerLogger: Logger       = Logger(classOf[CheckingServiceController])
 
   "start Page GET" should {
 
@@ -424,7 +428,11 @@ class CheckingServiceControllerTest
           .thenReturn(if (schemeRes) Future.successful(UpscanCsvFilesList(csvFiles)) else Future.failed(new Exception))
         when(mockUpscanService.getUpscanFormData(any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(UpscanInitiateResponse(Reference("ref"), Call("GET", "/"), Map.empty)))
+        when(mockAuditEvents.auditSelectedCsvRadioButtons(any())(any())).thenReturn(
+          Future.successful(AuditResult.Success)
+        )
         mockAnyContentAction
+        override val logger: Logger = checkingServiceControllerLogger
       }
 
     "give a call to showCheckCsvFilePage if user is authenticated" in {
@@ -477,6 +485,29 @@ class CheckingServiceControllerTest
       )
       status(result)           shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.CheckingServiceController.fileUploadError().url)
+    }
+
+    "log out selected radio buttons" in {
+
+      val controllerUnderTest = buildFakeCheckingServiceController(
+        csvFiles = Seq.fill(3)(
+          UpscanIds(UploadId("id"), "fileId123", InProgress)
+        )
+      )
+
+      val expectedLogMessage =
+        "[CheckingServiceController][showCheckCsvFilePage]: The following sub schemes were selected to be uploaded: fileId123, fileId123, fileId123"
+
+      withCaptureOfLoggingFrom(checkingServiceControllerLogger) { captureEvents =>
+        val result: Result =
+          await(controllerUnderTest.checkCsvFilePage().apply(Fixtures.buildFakeRequestWithSessionId("GET")))
+        result.header.status shouldBe Status.OK
+        assert(captureEvents.exists(_.getMessage.contains(expectedLogMessage)))
+      }
+
+      verify(mockAuditEvents, times(1)).auditSelectedCsvRadioButtons(refEq(Seq("fileId123", "fileId123", "fileId123")))(
+        any()
+      )
     }
 
   }
