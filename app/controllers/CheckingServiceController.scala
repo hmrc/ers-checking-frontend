@@ -139,7 +139,7 @@ class CheckingServiceController @Inject() (
       scheme             <- sessionCacheService.fetchAndGetEntry[String](ersUtil.SCHEME_CACHE)
       csvFilesList       <- sessionCacheService.fetchAndGetEntry[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
       allSelectedCsvFiles = csvFilesList.ids.map(_.fileId)
-      _                  <- auditEvents.auditSelectedCsvRadioButtons(allSelectedCsvFiles)
+      _                   = auditEvents.auditSelectedCsvRadioButtons(allSelectedCsvFiles)
       _                   = logger.info(
                               s"[CheckingServiceController][showCheckCsvFilePage]: The following " +
                                 s"sub schemes were selected to be uploaded: ${allSelectedCsvFiles.mkString(", ")}"
