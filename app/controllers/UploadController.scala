@@ -166,7 +166,16 @@ class UploadController @Inject() (
               },
               processor =>
                 processOdsService
-                  .performOdsUpload(appConfig.errorCount, fileName, processor, scheme)(request)
+                  .performOdsUpload(
+                    appConfig.errorCount,
+                    fileName,
+                    processor,
+                    scheme,
+                    appConfig.useV4andV5Scheme,
+                    appConfig.useV6andV7Scheme
+                  )(
+                    request
+                  )
                   .map(fileIsValid =>
                     if (fileIsValid) {
                       Redirect(routes.CheckingServiceController.checkingSuccessPage())

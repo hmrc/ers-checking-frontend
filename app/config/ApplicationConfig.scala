@@ -41,7 +41,6 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
   lazy val mongoTTLInSeconds: Int = config.getInt("mongodb.timeToLiveInSeconds")
 
   lazy val languageTranslationEnabled: Boolean = config.getConfBool("features.welsh-translation", defBool = true)
-  lazy val csopV5Enabled: Boolean              = config.getConfBool("features.csop-v5.enabled", defBool = false)
   def languageMap: Map[String, Lang]           = Map("english" -> Lang("en"), "cymraeg" -> Lang("cy"))
   def routeToSwitchLanguage: String => Call    = (lang: String) => routes.LanguageSwitchController.switchToLanguage(lang)
 
@@ -71,6 +70,9 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
   lazy val timeOutUrl: String           = getSignOutUrl(timeOut)
   lazy val timeOutSeconds: Int          = config.getInt("sessionTimeout.timeoutSeconds")
   lazy val timeOutCountDownSeconds: Int = config.getInt("sessionTimeout.time-out-countdown-seconds")
+
+  lazy val useV4andV5Scheme: Boolean = config.getConfBool("features.scheme-version.use-V4-and-V5", defBool = true)
+  lazy val useV6andV7Scheme: Boolean = config.getConfBool("features.scheme-version.use-V6-and-V7", defBool = false)
 
   def getSignOutUrl(callbackUrl: String): String = {
     val encodedCallbackUrl = java.net.URLEncoder.encode(callbackUrl, "UTF-8")

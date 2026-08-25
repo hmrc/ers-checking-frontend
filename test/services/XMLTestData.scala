@@ -16,6 +16,8 @@
 
 package services
 
+import services.XMLTestHelpers._
+
 import java.io.ByteArrayInputStream
 
 object XMLTestData {
@@ -28,9 +30,6 @@ object XMLTestData {
 
   val emiAdjustmentsXmlRowWithInvalidData =
     <table:table-row table:style-name="ro6"><table:table-cell table:number-columns-repeated="3" office:value-type="string" calcext:value-type="string"><text:p>123</text:p></table:table-cell><table:table-cell table:style-name="ce15" office:value-type="string" calcext:value-type="string"><text:p>canoe</text:p></table:table-cell><table:table-cell table:style-name="ce12" office:value-type="date" office:date-value="1989-10-20" calcext:value-type="date"><text:p>apples</text:p></table:table-cell><table:table-cell table:style-name="ce15" office:value-type="string" calcext:value-type="string"><text:p>Anthony</text:p></table:table-cell><table:table-cell table:style-name="ce15" office:value-type="string" calcext:value-type="string"><text:p>Joe</text:p></table:table-cell><table:table-cell table:style-name="ce15" office:value-type="string" calcext:value-type="string"><text:p>Jones</text:p></table:table-cell><table:table-cell table:style-name="ce19" office:value-type="string" calcext:value-type="string"><text:p>AA123456A</text:p></table:table-cell><table:table-cell table:style-name="ce19" office:value-type="string" calcext:value-type="string"><text:p>123/XZ55555555</text:p></table:table-cell><table:table-cell table:style-name="ce22" office:value-type="float" office:value="10.1232" calcext:value-type="float"><text:p>10.1232</text:p></table:table-cell><table:table-cell table:style-name="ce25" office:value-type="float" office:value="100" calcext:value-type="float"><text:p>100.00</text:p></table:table-cell><table:table-cell table:style-name="ce22" office:value-type="float" office:value="10.2585" calcext:value-type="float"><text:p>10.2585</text:p></table:table-cell><table:table-cell table:style-name="ce22" office:value-type="float" office:value="10.2544" calcext:value-type="float"><text:p>10.2544</text:p></table:table-cell><table:table-cell table:number-columns-repeated="1008"/><table:table-cell table:style-name="ce28" table:number-columns-repeated="2"/></table:table-row>
-
-  def openTable(sheetName: String) = s"""<table:table table:name="$sheetName" table:style-name="ta1">"""
-  val closeTable                   = """</table:table>"""
 
   val sheetName = "EMI40_Adjustments_V4"
 

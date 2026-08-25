@@ -32,7 +32,6 @@ import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import services.ProcessOdsService._
 import uk.gov.hmrc.mongo.test.MongoSupport
-import uk.gov.hmrc.validator._
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 import uk.gov.hmrc.validator.models._
 
@@ -62,7 +61,9 @@ class ProcessOdsServiceSpec
       override def validateOdsFile(
         fileName: String,
         processor: InputStream,
-        scheme: String
+        scheme: String,
+        useV4andV5Scheme: Boolean,
+        useV6andV7Scheme: Boolean
       ): Either[ValidatorFailure, ListBuffer[SheetErrors]] =
         Right(sheetErrors)
     }
@@ -170,6 +171,30 @@ class ProcessOdsServiceSpec
         sheetErrors should contain theSameElementsAs ListBuffer(SheetErrors("EMI40_Adjustments_V4", ListBuffer()))
       }
 
+      "must successfully process valid V7 SIP data stream when useV6andV7Scheme is set to true" in {
+
+        val sheetErrors = processOdsService
+          .validateOdsFile("SIP.ods", SipXMLTestData.getValidSipV7DataStream, "SIP", useV6andV7Scheme = true)
+          .value
+
+        sheetErrors should contain theSameElementsAs ListBuffer(
+          SheetErrors("SIP_Out_V7", ListBuffer()),
+          SheetErrors("SIP_Awards_V7", ListBuffer())
+        )
+      }
+
+      "must successfully process valid V4 SIP data stream when useV6andV7Scheme is set to false" in {
+
+        val sheetErrors = processOdsService
+          .validateOdsFile("SIP.ods", SipXMLTestData.getValidSipV4DataStream, "SIP", useV6andV7Scheme = false)
+          .value
+
+        sheetErrors should contain theSameElementsAs ListBuffer(
+          SheetErrors("SIP_Out_V4", ListBuffer()),
+          SheetErrors("SIP_Awards_V4", ListBuffer())
+        )
+      }
+
       "must return DataContainsAmpersandException when ODS data contains ampersands" in {
         val validatorFailure =
           processOdsService
@@ -230,20 +255,58 @@ class ProcessOdsServiceSpec
         sheetErrors should contain theSameElementsAs ListBuffer(expectedSheetErrors)
       }
 
-      "must return IncorrectSheetNameException when ODS sheet name is unknown" in {
+      "must return IncorrectSheetNameException" when {
+        "ODS sheet name is unknown" in {
 
-        val validatorFailure =
-          processOdsService
-            .validateOdsFile(
-              "EMI.ods",
-              XMLTestData.getEMIAdjustmentsTemplateWithIncorrectSheetName,
-              "EMI"
-            )
-            .left
-            .value
+          val validatorFailure =
+            processOdsService
+              .validateOdsFile(
+                "EMI.ods",
+                XMLTestData.getEMIAdjustmentsTemplateWithIncorrectSheetName,
+                "EMI"
+              )
+              .left
+              .value
 
-        validatorFailure           mustBe a[IncorrectSheetNameFailure]
-        validatorFailure.message shouldBe "Incorrect sheet name"
+          validatorFailure           mustBe a[IncorrectSheetNameFailure]
+          validatorFailure.message shouldBe "Incorrect sheet name"
+        }
+
+        "parsed a valid V7 Sip file, useV4andV5Scheme is set to true and useV6andV7Scheme is set to false" in {
+
+          val validatorFailure: ValidatorFailure =
+            processOdsService
+              .validateOdsFile(
+                "SIP.ods",
+                SipXMLTestData.getValidSipV7DataStream,
+                "SIP",
+                useV4andV5Scheme = true,
+                useV6andV7Scheme = false
+              )
+              .left
+              .value
+
+          validatorFailure           mustBe a[IncorrectSheetNameFailure]
+          validatorFailure.message shouldBe "Incorrect sheet name"
+        }
+
+        "parsed a valid V4 SIP file, useV4andV5Scheme is set to false and useV6andV7Scheme is set to true" in {
+
+          val validatorFailure =
+            processOdsService
+              .validateOdsFile(
+                "SIP.ods",
+                SipXMLTestData.getValidSipV4DataStream,
+                "SIP",
+                useV4andV5Scheme = false,
+                useV6andV7Scheme = true
+              )
+              .left
+              .value
+
+          validatorFailure           mustBe a[IncorrectSheetNameFailure]
+          validatorFailure.message shouldBe "Incorrect sheet name"
+        }
       }
 
       "must return IncorrectSchemeException when ODS sheet belongs to a different scheme type" in {
