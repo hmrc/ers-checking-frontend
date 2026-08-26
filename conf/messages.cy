@@ -134,8 +134,7 @@ ers_file_format_successful.page_title =Gwiriad wedi’i gwblhau
 ers_file_format_successful.sub_heading =Yr hyn y gallwch ei wneud nesaf
 ers_file_format_successful.return_to_start_page_link =gwirio ffeil wahanol
 ers_file_format_successful.banner =Nid oes unrhyw wallau ar y dudalen hon.
-ers_file_format_successful.feedback =Beth oedd eich barn ar y gwasanaeth hwn?
-ers_file_format_successful.feedback_time =(mae’n cymryd 30 eiliad)
+
 
 ers_service_unavailable.page_title =Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS)
 ers_service_unavailable.para1 =Nid yw’r Gwasanaeth Gwirio ar gael ar hyn o bryd, rhowch gynnig arall arni’n nes ymlaen.
