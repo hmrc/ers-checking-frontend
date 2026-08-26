@@ -134,8 +134,7 @@ ers_file_format_successful.page_title = Check complete
 ers_file_format_successful.sub_heading = What you can do next
 ers_file_format_successful.return_to_start_page_link = check a different file
 ers_file_format_successful.banner = There are no errors in the file.
-ers_file_format_successful.feedback = What did you think of this service?
-ers_file_format_successful.feedback_time = (takes 30 seconds)
+
 
 ers_service_unavailable.page_title = Check your Employment Related Securities (ERS) files
 ers_service_unavailable.para1 = The Checking Service is currently unavailable, please try again later
