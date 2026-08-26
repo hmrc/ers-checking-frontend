@@ -57,7 +57,10 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
 
   lazy val loginPath: String                 = Option(config.getString("govuk-tax.auth.login_path")).getOrElse("sign-in")
   lazy val signIn: String                    = s"$basGatewayHost/bas-gateway/$loginPath"
-  lazy val feedBackUrl: String               = s"${config.getString("microservice.services.feedback-survey-frontend.url")}?useServiceNavigation"
+
+  lazy val feedBackUrl: String               =
+    s"${config.getString("microservice.services.feedback-survey-frontend.url")}?useServiceNavigation"
+
   lazy val signOut: String                   = getSignOutUrl(feedBackUrl)
   lazy val timeOut: String                   = s"$loginCallback/signed-out"
   lazy val dassGatewayHost: String           = config.getString("govuk-tax.dass-gateway.host")
