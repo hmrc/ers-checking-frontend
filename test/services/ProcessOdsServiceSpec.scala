@@ -164,14 +164,14 @@ class ProcessOdsServiceSpec
 
     "when calling the ers-file-validator-config library directly" should {
 
-      "must successfully process valid EMI ODS data" in {
+      "successfully process valid EMI ODS data" in {
         val sheetErrors =
           processOdsService.validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateLarge, "EMI").value
 
         sheetErrors should contain theSameElementsAs ListBuffer(SheetErrors("EMI40_Adjustments_V4", ListBuffer()))
       }
 
-      "must successfully process valid V7 SIP data stream when useV6andV7Scheme is set to true" in {
+      "successfully process valid V7 SIP data stream when useV6andV7Scheme is set to true" in {
 
         val sheetErrors = processOdsService
           .validateOdsFile("SIP.ods", SipXMLTestData.getValidSipV7DataStream, "SIP", useV6andV7Scheme = true)
@@ -183,7 +183,7 @@ class ProcessOdsServiceSpec
         )
       }
 
-      "must successfully process valid V4 SIP data stream when useV6andV7Scheme is set to false" in {
+      "successfully process valid V4 SIP data stream when useV6andV7Scheme is set to false" in {
 
         val sheetErrors = processOdsService
           .validateOdsFile("SIP.ods", SipXMLTestData.getValidSipV4DataStream, "SIP", useV6andV7Scheme = false)
@@ -195,7 +195,7 @@ class ProcessOdsServiceSpec
         )
       }
 
-      "must return DataContainsAmpersandException when ODS data contains ampersands" in {
+      "return DataContainsAmpersandException when ODS data contains ampersands" in {
         val validatorFailure =
           processOdsService
             .validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateWithAmpersand, "EMI")
@@ -206,7 +206,7 @@ class ProcessOdsServiceSpec
         validatorFailure.message shouldBe "Must not contain ampersands."
       }
 
-      "must return NoDataFailure when ODS data is empty" in {
+      "return NoDataFailure when ODS data is empty" in {
         val validatorFailure =
           processOdsService
             .validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateWithNoData, "EMI")
@@ -217,7 +217,7 @@ class ProcessOdsServiceSpec
         validatorFailure.message shouldBe "No data in file"
       }
 
-      "must return IncorrectHeaderException when ODS header is invalid" in {
+      "return IncorrectHeaderException when ODS header is invalid" in {
 
         val validatorFailure =
           processOdsService
@@ -229,7 +229,7 @@ class ProcessOdsServiceSpec
         validatorFailure.message shouldBe "Incorrect header row"
       }
 
-      "must return the expected sheetErrors when ODS data is invalid" in {
+      "return the expected sheetErrors when ODS data is invalid" in {
 
         val sheetErrors: ListBuffer[SheetErrors] =
           processOdsService
@@ -255,7 +255,7 @@ class ProcessOdsServiceSpec
         sheetErrors should contain theSameElementsAs ListBuffer(expectedSheetErrors)
       }
 
-      "must return IncorrectSheetNameException" when {
+      "return IncorrectSheetNameException" when {
         "ODS sheet name is unknown" in {
 
           val validatorFailure =
@@ -309,7 +309,7 @@ class ProcessOdsServiceSpec
         }
       }
 
-      "must return IncorrectSchemeException when ODS sheet belongs to a different scheme type" in {
+      "return IncorrectSchemeException when ODS sheet belongs to a different scheme type" in {
 
         val validatorFailure =
           processOdsService

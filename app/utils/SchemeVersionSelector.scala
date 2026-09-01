@@ -16,15 +16,22 @@
 
 package utils
 
+import play.api.Logging
 import uk.gov.hmrc.validator.SchemeVersion
 
-object SchemeVersionSelector {
+object SchemeVersionSelector extends Logging {
 
   def getSchemeVersion(useV4andV5Scheme: Boolean, useV6andV7Scheme: Boolean): SchemeVersion =
     (useV4andV5Scheme, useV6andV7Scheme) match {
-      case (true, true)  => SchemeVersion.All
-      case (true, false) => SchemeVersion.V4andV5
-      case (false, true) => SchemeVersion.V6andV7
+      case (true, true)   => SchemeVersion.All
+      case (true, false)  => SchemeVersion.V4andV5
+      case (false, true)  => SchemeVersion.V6andV7
+      case (false, false) =>
+        logger.info(
+          "[SchemeVersionSelector][getSchemeVersion] PARSED FALSE FALSE for getSchemeVersion, using V4andV5" +
+            " as a fall back"
+        )
+        SchemeVersion.V4andV5
     }
 
 }
