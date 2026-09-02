@@ -22,11 +22,11 @@ import models.SheetErrors.format
 import play.api.Logging
 import play.api.mvc.{AnyContent, Request}
 import repository.ErsCheckingFrontendSessionCacheRepository
-import uk.gov.hmrc.validator.SchemeVersion.All
 import uk.gov.hmrc.validator.models.ValidatorFailure
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 import uk.gov.hmrc.validator.ods.OdsValidator
 import utils.ERSUtil
+import utils.SchemeVersionSelector.getSchemeVersion
 
 import java.io.InputStream
 import javax.inject.{Inject, Singleton}
@@ -42,16 +42,23 @@ class ProcessOdsService @Inject() (sessionCacheService: ErsCheckingFrontendSessi
   def validateOdsFile(
     fileName: String,
     processor: InputStream,
-    scheme: String
+    scheme: String,
+    useV4andV5Scheme: Boolean = true,
+    useV6andV7Scheme: Boolean = false
   ): Either[ValidatorFailure, ListBuffer[SheetErrors]] =
-    OdsValidator.validateOdsFile(All, processor, scheme, fileName)
+    OdsValidator.validateOdsFile(getSchemeVersion(useV4andV5Scheme, useV6andV7Scheme), processor, scheme, fileName)
 
-  def performOdsUpload(errorCount: Int, fileName: String, processor: InputStream, scheme: String)(implicit
-    request: RequestWithOptionalEmpRefAndPAYE[AnyContent]
-  ): Future[Boolean] = {
+  def performOdsUpload(
+    errorCount: Int,
+    fileName: String,
+    processor: InputStream,
+    scheme: String,
+    useV4andV5Scheme: Boolean = true,
+    useV6andV7Scheme: Boolean = false
+  )(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Boolean] = {
     for {
       _           <- sessionCacheService.cache[String](ersUtil.FILE_NAME_CACHE, fileName)
-      sheetErrors <- validateOdsFile(fileName, processor, scheme) match {
+      sheetErrors <- validateOdsFile(fileName, processor, scheme, useV4andV5Scheme, useV6andV7Scheme) match {
                        case Right(errors) => Future.successful(errors)
                        case Left(failure) => Future.failed(failure.asThrowable)
                      }

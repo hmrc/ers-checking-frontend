@@ -32,16 +32,18 @@ import play.api.i18n.Messages
 import play.api.mvc.Request
 import repository.ErsCheckingFrontendSessionCacheRepository
 import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.validator.{DataEngine, ERSTemplatesInfo}
 import uk.gov.hmrc.validator.csv.CsvValidator
 import uk.gov.hmrc.validator.models.csv.RowValidationResults
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 import uk.gov.hmrc.validator.models.{Cell, ValidationError}
+
 import utils.ERSUtil
+import utils.SchemeVersionSelector.getSchemeVersion
 
 import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.validator._
 import cats.data.EitherT
 import cats.instances.future.catsStdInstancesForFuture
 
@@ -99,7 +101,12 @@ class ProcessCsvService @Inject() (
       _                           <- EitherT.fromEither[Future](
                                        ERSTemplatesInfo.findSheetWithinSchemeType(sheetName, scheme).left.map(_.asThrowable)
                                      )
-      dataEngine                  <- EitherT.fromEither[Future](DataEngine(sheetName, SchemeVersion.All).left.map(_.asThrowable))
+      dataEngine                  <- EitherT.fromEither[Future](
+                                       DataEngine(
+                                         sheetName,
+                                         getSchemeVersion(appConfig.useV4andV5Scheme, appConfig.useV6andV7Scheme)
+                                       ).left.map(_.asThrowable)
+                                     )
       csvValidationResult         <- EitherT(validateCsv(source, dataEngine))
       rowsWithCorrectedRowNumbers <-
         EitherT.fromEither(getValidationResultsWithCorrectRowNumber(csvValidationResult, sheetName)(messages))
