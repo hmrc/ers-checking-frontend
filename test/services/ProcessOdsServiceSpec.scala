@@ -183,6 +183,19 @@ class ProcessOdsServiceSpec
         )
       }
 
+      "successfully process valid V7 SAYE data stream when useV6andV7Scheme is set to true" in {
+
+        val sheetErrors = processOdsService
+          .validateOdsFile("SAYE.ods", SayeXMLTestData.getValidSayeV7DataStream, "SAYE", useV6andV7Scheme = true)
+          .value
+
+        sheetErrors should contain theSameElementsAs ListBuffer(
+          SheetErrors("SAYE_Granted_V7", ListBuffer()),
+          SheetErrors("SAYE_RCL_V7", ListBuffer()),
+          SheetErrors("SAYE_Exercised_V7", ListBuffer())
+        )
+      }
+
       "successfully process valid V4 SIP data stream when useV6andV7Scheme is set to false" in {
 
         val sheetErrors = processOdsService
@@ -192,6 +205,19 @@ class ProcessOdsServiceSpec
         sheetErrors should contain theSameElementsAs ListBuffer(
           SheetErrors("SIP_Out_V4", ListBuffer()),
           SheetErrors("SIP_Awards_V4", ListBuffer())
+        )
+      }
+
+      "successfully process valid V4 SAYE data stream when useV6andV7Scheme is set to false" in {
+
+        val sheetErrors = processOdsService
+          .validateOdsFile("SAYE.ods", SayeXMLTestData.getValidSayeV4DataStream, "SAYE", useV6andV7Scheme = false)
+          .value
+
+        sheetErrors should contain theSameElementsAs ListBuffer(
+          SheetErrors("SAYE_Granted_V4", ListBuffer()),
+          SheetErrors("SAYE_RCL_V4", ListBuffer()),
+          SheetErrors("SAYE_Exercised_V4", ListBuffer())
         )
       }
 
