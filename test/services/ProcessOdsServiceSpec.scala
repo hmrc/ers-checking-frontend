@@ -196,6 +196,20 @@ class ProcessOdsServiceSpec
         )
       }
 
+      "successfully process valid V7 EMI data stream when useV6andV7Scheme is set to true" in {
+
+        val sheetErrors = processOdsService
+          .validateOdsFile("EMI.ods", EmiXMLTestData.getValidEMIV7DataStream, "EMI", useV6andV7Scheme = true)
+          .value
+        sheetErrors should contain theSameElementsAs ListBuffer(
+          SheetErrors("EMI40_Adjustments_V7", ListBuffer()),
+          SheetErrors("EMI40_Replaced_V7", ListBuffer()),
+          SheetErrors("EMI40_RLC_V7", ListBuffer()),
+          SheetErrors("EMI40_NonTaxable_V7", ListBuffer()),
+          SheetErrors("EMI40_Taxable_V7", ListBuffer())
+        )
+      }
+
       "successfully process valid V4 SIP data stream when useV6andV7Scheme is set to false" in {
 
         val sheetErrors = processOdsService
