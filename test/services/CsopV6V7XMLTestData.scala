@@ -108,10 +108,11 @@ object CsopV6V7XMLTestData {
 
   def getValidCSOPV6DataStream: ByteArrayInputStream = {
     val csopV6BodyXml: String =
-      csopOptionsGrantedV6XML + csopOptionsRCLV6V7("CSOP_OptionsRCL_V6") + csopOptionsExercisedV6V7("CSOP_OptionsExercised_V6")
+      csopOptionsGrantedV6XML + csopOptionsRCLV6V7("CSOP_OptionsRCL_V6") + csopOptionsExercisedV6V7(
+        "CSOP_OptionsExercised_V6"
+      )
     new ByteArrayInputStream(buildValidOdsXml(csopV6BodyXml).getBytes("utf-8"))
   }
-
 
   // ---------------------------- CSOP V7 test data ----------------------------
 
@@ -148,23 +149,22 @@ object CsopV6V7XMLTestData {
       csopOptionsGrantedV7Row3 + csopOptionsGrantedV7Row4 + csopOptionsGrantedV7Row5 +
       csopOptionsGrantedV7Row6 + csopOptionsGrantedV7Row7 + closeTable
 
-
   def getValidCSOPV7DataStream: ByteArrayInputStream = {
     val csopV7BodyXml: String =
-      csopOptionsGrantedV7XML + csopOptionsRCLV6V7("CSOP_OptionsRCL_V7") + csopOptionsExercisedV6V7("CSOP_OptionsExercised_V7")
+      csopOptionsGrantedV7XML + csopOptionsRCLV6V7("CSOP_OptionsRCL_V7") + csopOptionsExercisedV6V7(
+        "CSOP_OptionsExercised_V7"
+      )
     new ByteArrayInputStream(buildValidOdsXml(csopV7BodyXml).getBytes("utf-8"))
   }
 
-  def csopOptionsRCLV6V7(sheetName : String): String = {
+  def csopOptionsRCLV6V7(sheetName: String): String =
     openTable(sheetName) + csopOptionsRCLV6V7Row1 + csopOptionsRCLV6V7Row2 +
       csopOptionsRCLV6V7Row3 + csopOptionsRCLV6V7Row4 + csopOptionsRCLV6V7Row5 +
       csopOptionsRCLV6V7Row6 + csopOptionsRCLV6V7Row7 + csopOptionsRCLV6V7Row8 + closeTable
-  }
 
-  def csopOptionsExercisedV6V7(sheetName : String): String = {
+  def csopOptionsExercisedV6V7(sheetName: String): String =
     openTable(sheetName) + csopOptionsExercisedV6V7Row1 + csopOptionsExercisedV6V7Row2 +
       csopOptionsExercisedV6V7Row3 + csopOptionsExercisedV6V7Row4 + csopOptionsExercisedV6V7Row5 +
       csopOptionsExercisedV6V7Row6 + csopOptionsExercisedV6V7Row7 + csopOptionsExercisedV6V7Row8 + closeTable
-  }
 
 }

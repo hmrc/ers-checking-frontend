@@ -196,6 +196,30 @@ class ProcessOdsServiceSpec
         )
       }
 
+      "successfully process valid V4 CSOP data stream when useV6andV7Scheme is set to false" in {
+
+        val sheetErrors = processOdsService
+          .validateOdsFile("CSOP.ods", CsopV4V5XMLTestData.getValidCSOPV4DataStream, "CSOP", useV6andV7Scheme = false)
+          .value
+        sheetErrors should contain theSameElementsAs ListBuffer(
+          SheetErrors("CSOP_OptionsGranted_V4", ListBuffer()),
+          SheetErrors("CSOP_OptionsRCL_V4", ListBuffer()),
+          SheetErrors("CSOP_OptionsExercised_V4", ListBuffer())
+        )
+      }
+
+      "successfully process valid V5 CSOP data stream when useV6andV7Scheme is set to false" in {
+
+        val sheetErrors = processOdsService
+          .validateOdsFile("CSOP.ods", CsopV4V5XMLTestData.getValidCSOPV5DataStream, "CSOP", useV6andV7Scheme = false)
+          .value
+        sheetErrors should contain theSameElementsAs ListBuffer(
+          SheetErrors("CSOP_OptionsGranted_V5", ListBuffer()),
+          SheetErrors("CSOP_OptionsRCL_V5", ListBuffer()),
+          SheetErrors("CSOP_OptionsExercised_V5", ListBuffer())
+        )
+      }
+
       "successfully process valid V6 CSOP data stream when useV6andV7Scheme is set to true" in {
 
         val sheetErrors = processOdsService
