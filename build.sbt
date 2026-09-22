@@ -18,5 +18,8 @@ lazy val microservice = Project("ers-checking-frontend", file("."))
       "uk.gov.hmrc.hmrcfrontend.views.html.helpers._"
     )
   )
+  .settings(
+    resolvers += Resolver.defaultLocal
+  )
 
 addCommandAlias("scalafmtAll", "all scalafmtSbt scalafmt Test/scalafmt it/Test/scalafmt")

@@ -31,6 +31,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import services.ProcessOdsService._
+import services.getValidOTHERV4DataStream.validOtherV4DataStream
 import uk.gov.hmrc.mongo.test.MongoSupport
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 import uk.gov.hmrc.validator.models._
@@ -279,6 +280,22 @@ class ProcessOdsServiceSpec
           SheetErrors("SAYE_Granted_V4", ListBuffer()),
           SheetErrors("SAYE_RCL_V4", ListBuffer()),
           SheetErrors("SAYE_Exercised_V4", ListBuffer())
+        )
+      }
+
+      "successfully process valid V4 OTHER data stream when useV6andV7Scheme is set to false" in {
+
+        val sheetErrors = processOdsService
+          .validateOdsFile("OTHER.ods", validOtherV4DataStream, "OTHER", useV6andV7Scheme = false)
+          .value
+
+        sheetErrors should contain theSameElementsAs ListBuffer(
+          SheetErrors("Other_Grants_V4", ListBuffer()),
+          SheetErrors("Other_Options_V4", ListBuffer()),
+          SheetErrors("Other_Acquisition_V4", ListBuffer()),
+          SheetErrors("Other_RestrictedSecurities_V4", ListBuffer()),
+          SheetErrors("Other_OtherBenefits_V4", ListBuffer()),
+          SheetErrors("Other_Convertible_V4", ListBuffer())
         )
       }
 
