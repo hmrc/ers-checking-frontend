@@ -74,6 +74,11 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
   lazy val useV4andV5Scheme: Boolean = config.getConfBool("features.scheme-version.use-V4-and-V5", defBool = true)
   lazy val useV6andV7Scheme: Boolean = config.getConfBool("features.scheme-version.use-V6-and-V7", defBool = false)
 
+  lazy val startPageBannerEnabled: Boolean        = config.getConfBool("features.start-page-banner.enabled", defBool = false)
+
+  lazy val startPageBannerParaTwoEnabled: Boolean =
+    config.getConfBool("features.start-page-banner.para-2-enabled", defBool = false)
+
   def getSignOutUrl(callbackUrl: String): String = {
     val encodedCallbackUrl = java.net.URLEncoder.encode(callbackUrl, "UTF-8")
     s"$basGatewayHost/bas-gateway/sign-out-without-state?continue=$encodedCallbackUrl"

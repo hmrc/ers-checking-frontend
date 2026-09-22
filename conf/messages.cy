@@ -34,6 +34,9 @@ ers.confirmation.page_title = Cadarnhad – Gwarantau ar Sail Cyflogaeth – GOV
 #********************************************************************
 
 ers_start.page_title = Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS)
+ers_start.banner.title = Pwysig
+ers_start.banner.para_1 = O 6 Ebrill 2027 ymlaen, bydd yn rhaid i chi ddefnyddio’r fersiwn wedi’i diweddaru o dempledi CThEF pan fyddwch yn cyflwyno’ch datganiad ERS. Os ydych yn creu eich ffeiliau eich hun, bydd angen i chi ddefnyddio’r nodiadau technegol i ddiweddaru’ch ffeil.
+ers_start.banner.para_2 = Gallwch ddefnyddio’r gwasanaeth gwirio i wirio’ch ffeiliau sydd wedi’u diweddaru o 1st February 2027.
 ers_start.intro_para_1 = Defnyddiwch y gwasanaeth hwn i wirio am wallau yn y ffeiliau y mae angen i chi eu huwchlwytho fel rhan o’ch Datganiad Blynyddol ar gyfer Gwarantau ar Sail Cyflogaeth (ERS)
 ers_start.sub_title = Cyn i chi ddechrau
 ers_start.intro_para_3 = Bydd angen i chi wybod pa fath o drefniant neu gynllun ERS y mae’r ffeil ar ei gyfer.
