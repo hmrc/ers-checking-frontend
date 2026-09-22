@@ -1,16 +1,33 @@
-package services
+/*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+package services
 
 import services.OtherAcquisitionV4XmlTestData.otherAcquisitionV4XML
 import services.OtherConvertibleV4XmlTestData.otherConvertibleV4XML
+import services.OtherEnhancementV4XmlTestData.otherEnhancementV4XML
 import services.OtherGrantsV4XMLTestData._
+import services.OtherNotionalV4XmlTestData.otherNotionalV4XML
 import services.OtherOptionsV4XMLTestData.otherOptionsV4XML
 import services.OtherOtherBenefitsV4XmlTestData.otherOtherBenefitsV4XML
 import services.OtherRestrictedSecuritiesV4XmlTestData.otherRestrictedSecuritiesV4XML
+import services.OtherSoldV4XmlTestData.otherSoldV4XML
 import services.XMLTestHelpers.{buildValidOdsXml, closeTable, openTable}
 
 import java.io.ByteArrayInputStream
-
 
 object OtherGrantsV4XMLTestData {
   val otherGrantsV4SheetName = "Other_Grants_V4"
@@ -51,7 +68,9 @@ object OtherGrantsV4XMLTestData {
   val otherGrantsV4Row12 =
     <table:table-row table:style-name='ro6' table:number-rows-repeated='1048560'><table:table-cell table:number-columns-repeated='16384'></table:table-cell></table:table-row>
 
-  val otherGrantsV4XML = openTable(otherGrantsV4SheetName) + otherGrantsV4Row1 + otherGrantsV4Row2 + otherGrantsV4Row3 + otherGrantsV4Row4 +
+  val otherGrantsV4XML = openTable(
+    otherGrantsV4SheetName
+  ) + otherGrantsV4Row1 + otherGrantsV4Row2 + otherGrantsV4Row3 + otherGrantsV4Row4 +
     otherGrantsV4Row5 + otherGrantsV4Row6 + otherGrantsV4Row7 + otherGrantsV4Row8 + otherGrantsV4Row9 + otherGrantsV4Row10 + otherGrantsV4Row11 + otherGrantsV4Row12 + closeTable
 
 }
@@ -95,9 +114,10 @@ object OtherOptionsV4XMLTestData {
   val otherOptionsV4Row12 =
     <table:table-row table:style-name='ro6' table:number-rows-repeated='1048560'><table:table-cell table:number-columns-repeated='16384'></table:table-cell></table:table-row>
 
-  val otherOptionsV4XML = openTable(otherOptionsV4SheetName) + otherOptionsV4Row1 + otherOptionsV4Row2 + otherOptionsV4Row3 + otherOptionsV4Row4 +
+  val otherOptionsV4XML = openTable(
+    otherOptionsV4SheetName
+  ) + otherOptionsV4Row1 + otherOptionsV4Row2 + otherOptionsV4Row3 + otherOptionsV4Row4 +
     otherOptionsV4Row5 + otherOptionsV4Row6 + otherOptionsV4Row7 + otherOptionsV4Row8 + otherOptionsV4Row9 + otherOptionsV4Row10 + otherOptionsV4Row11 + otherOptionsV4Row12 + closeTable
-
 
 }
 
@@ -178,9 +198,10 @@ object OtherAcquisitionV4XmlTestData {
       <table:table-cell table:number-columns-repeated='16384'></table:table-cell>
     </table:table-row>
 
-  val otherAcquisitionV4XML = openTable(otherAcquisitionV4SheetName) + otherAcquisitionV4Row1 + otherAcquisitionV4Row2 + otherAcquisitionV4Row3 + otherAcquisitionV4Row4 +
+  val otherAcquisitionV4XML = openTable(
+    otherAcquisitionV4SheetName
+  ) + otherAcquisitionV4Row1 + otherAcquisitionV4Row2 + otherAcquisitionV4Row3 + otherAcquisitionV4Row4 +
     otherAcquisitionV4Row5 + otherAcquisitionV4Row6 + otherAcquisitionV4Row7 + otherAcquisitionV4Row8 + otherAcquisitionV4Row9 + otherAcquisitionV4Row10 + otherAcquisitionV4Row11 + otherAcquisitionV4Row12 + closeTable
-
 
 }
 
@@ -265,7 +286,9 @@ object OtherRestrictedSecuritiesV4XmlTestData {
       <table:table-cell table:number-columns-repeated='16384'></table:table-cell>
     </table:table-row>
 
-  val otherRestrictedSecuritiesV4XML = openTable(otherRestrictedSecuritiesV4SheetName) + otherRestrictedSecuritiesV4Row1 + otherRestrictedSecuritiesV4Row2 + otherRestrictedSecuritiesV4Row3 + otherRestrictedSecuritiesV4Row4 +
+  val otherRestrictedSecuritiesV4XML = openTable(
+    otherRestrictedSecuritiesV4SheetName
+  ) + otherRestrictedSecuritiesV4Row1 + otherRestrictedSecuritiesV4Row2 + otherRestrictedSecuritiesV4Row3 + otherRestrictedSecuritiesV4Row4 +
     otherRestrictedSecuritiesV4Row5 + otherRestrictedSecuritiesV4Row6 + otherRestrictedSecuritiesV4Row7 + otherRestrictedSecuritiesV4Row8 + otherRestrictedSecuritiesV4Row9 + otherRestrictedSecuritiesV4Row10 + otherRestrictedSecuritiesV4Row11 + otherRestrictedSecuritiesV4Row12 + closeTable
 
 }
@@ -351,8 +374,11 @@ object OtherOtherBenefitsV4XmlTestData {
       <table:table-cell table:number-columns-repeated='16384'></table:table-cell>
     </table:table-row>
 
-  val otherOtherBenefitsV4XML = openTable(otherOtherBenefitsV4SheetName) + otherOtherBenefitsV4Row1 + otherOtherBenefitsV4Row2 + otherOtherBenefitsV4Row3 + otherOtherBenefitsV4Row4 +
+  val otherOtherBenefitsV4XML = openTable(
+    otherOtherBenefitsV4SheetName
+  ) + otherOtherBenefitsV4Row1 + otherOtherBenefitsV4Row2 + otherOtherBenefitsV4Row3 + otherOtherBenefitsV4Row4 +
     otherOtherBenefitsV4Row5 + otherOtherBenefitsV4Row6 + otherOtherBenefitsV4Row7 + otherOtherBenefitsV4Row8 + otherOtherBenefitsV4Row9 + otherOtherBenefitsV4Row10 + otherOtherBenefitsV4Row11 + otherOtherBenefitsV4Row12 + closeTable
+
 }
 
 object OtherConvertibleV4XmlTestData {
@@ -388,21 +414,166 @@ object OtherConvertibleV4XmlTestData {
   val otherConvertibleV4Row10 =
     <table:table-row table:style-name='ro6'><table:table-cell office:date-value='2015-01-02T00:00:00' table:style-name='ce37' office:value-type='date'><text:p>2015-01-02</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>yes</text:p></table:table-cell><table:table-cell table:style-name='ce74' office:value-type='float' office:value='12345678'><text:p>12345678</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>John</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>Eric</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>Smith</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>AB123456A</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>123/AB12345678</text:p></table:table-cell><table:table-cell office:date-value='2015-01-02T00:00:00' table:style-name='ce37' office:value-type='date'><text:p>2015-01-02</text:p></table:table-cell><table:table-cell table:style-name='ce9' office:value-type='float' office:value='123.12'><text:p>123.12</text:p></table:table-cell><table:table-cell table:style-name='ce10' office:value-type='float' office:value='10.1234'><text:p>10.1234</text:p></table:table-cell><table:table-cell table:style-name='ce10' office:value-type='float' office:value='12.1234'><text:p>12.1234</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>yes</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>yes</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>yes</text:p></table:table-cell><table:table-cell table:number-columns-repeated='16369'></table:table-cell></table:table-row>
 
-
   val otherConvertibleV4Row11 =
     <table:table-row table:style-name='ro6' table:number-rows-repeated='6'><table:table-cell table:style-name='ce1' table:number-columns-repeated='16384'></table:table-cell></table:table-row>
 
   val otherConvertibleV4Row12 =
     <table:table-row table:style-name='ro6' table:number-rows-repeated='1048560'><table:table-cell table:number-columns-repeated='16384'></table:table-cell></table:table-row>
 
-  val otherConvertibleV4XML = openTable(otherConvertibleV4SheetName) + otherConvertibleV4Row1 + otherConvertibleV4Row2 + otherConvertibleV4Row3 + otherConvertibleV4Row4 +
+  val otherConvertibleV4XML = openTable(
+    otherConvertibleV4SheetName
+  ) + otherConvertibleV4Row1 + otherConvertibleV4Row2 + otherConvertibleV4Row3 + otherConvertibleV4Row4 +
     otherConvertibleV4Row5 + otherConvertibleV4Row6 + otherConvertibleV4Row7 + otherConvertibleV4Row8 + otherConvertibleV4Row9 + otherConvertibleV4Row10 + otherConvertibleV4Row11 + otherConvertibleV4Row12 + closeTable
 
 }
+
+object OtherNotionalV4XmlTestData {
+
+  val otherNotionalV4SheetName = "Other_Notional_V4"
+
+  val otherNotionalV4Row1 =
+    <table:table-row table:style-name='ro1'><table:table-cell table:style-name='ce84' table:number-columns-spanned='13' table:number-rows-spanned='1' office:value-type='string'><text:p>Other ERS schemes or arrangements – Discharge of notional loans post-acquisition</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated='12'></table:covered-table-cell><table:table-cell table:number-columns-repeated='16371'></table:table-cell></table:table-row>
+
+  val otherNotionalV4Row2 =
+    <table:table-row table:style-name='ro2'><table:table-cell table:style-name='ce85' table:number-columns-spanned='13' table:number-rows-spanned='1' office:value-type='string'><text:p>How to complete this schedule:</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated='12'></table:covered-table-cell><table:table-cell table:number-columns-repeated='16371'></table:table-cell></table:table-row>
+
+  val otherNotionalV4Row3 =
+    <table:table-row table:style-name='ro1'><table:table-cell table:style-name='ce86' table:number-columns-spanned='13' table:number-rows-spanned='1' office:value-type='string'><text:p>Enter details of each employee and the amount of notional loan outstanding immediately before discharge.</text:p><text:p><text:span text:style-name='T4'>Please note</text:span>: Monetary values must be entered to 4 decimal places in pounds sterling.</text:p><text:p>Numbers of shares and securities must be entered to 2 decimal places.</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated='12'></table:covered-table-cell><table:table-cell table:number-columns-repeated='16371'></table:table-cell></table:table-row>
+
+  val otherNotionalV4Row4 =
+    <table:table-row table:style-name='ro2'><table:table-cell table:style-name='ce85' table:number-columns-spanned='13' table:number-rows-spanned='1' office:value-type='string'><text:p>Important note</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated='12'></table:covered-table-cell><table:table-cell table:number-columns-repeated='16371'></table:table-cell></table:table-row>
+
+  val otherNotionalV4Row5 =
+    <table:table-row table:style-name='ro25'><table:table-cell table:style-name='ce87' table:number-columns-spanned='10' table:number-rows-spanned='1' office:value-type='string'><text:p>You<text:s></text:s><text:span text:style-name='T5'>must not</text:span><text:s></text:s>alter the structure or formatting of this schedule. If you do your schedule will be rejected.</text:p><text:p>Please note when completing the template if you leave 10 or more consecutive rows blank with no data populated, It will be assumed that there is no further information contained below these blank rows within this sheet. Therefore it is important you do not leave blank rows between the rows of data you are reporting. Note the system will continue to check for information on subsequent sheets within the same template.</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated='9'></table:covered-table-cell><table:table-cell table:style-name='ce75'></table:table-cell><table:table-cell table:style-name='ce76' table:number-columns-repeated='2'></table:table-cell><table:table-cell table:number-columns-repeated='16371'></table:table-cell></table:table-row>
+
+  val otherNotionalV4Row6 =
+    <table:table-row table:style-name='ro1'><table:table-cell table:style-name='ce86' table:number-columns-spanned='12' table:number-rows-spanned='1' office:value-type='string'><text:p>For more information on completing this schedule, follow the link below. You must be connected to the internet to access the guide.</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated='11'></table:covered-table-cell><table:table-cell table:style-name='ce76'></table:table-cell><table:table-cell table:number-columns-repeated='16371'></table:table-cell></table:table-row>
+
+  val otherNotionalV4Row7 =
+    <table:table-row table:style-name='ro2'><table:table-cell table:style-name='ce77' office:value-type='string'><text:p><text:a xlink:href='https://www.gov.uk/government/publications/other-employment-related-securities-schemes-and-arrangements-end-of-year-return-template'>Other ERS schemes or arrangements guidance</text:a></text:p></table:table-cell><table:table-cell table:style-name='ce76'></table:table-cell><table:table-cell table:style-name='ce78'></table:table-cell><table:table-cell table:style-name='ce76' table:number-columns-repeated='4'></table:table-cell><table:table-cell table:style-name='ce79'></table:table-cell><table:table-cell table:style-name='ce80'></table:table-cell><table:table-cell table:style-name='ce81'></table:table-cell><table:table-cell table:style-name='ce82'></table:table-cell><table:table-cell table:content-validation-name='val12' table:style-name='ce79'></table:table-cell><table:table-cell table:style-name='ce76'></table:table-cell><table:table-cell table:number-columns-repeated='16371'></table:table-cell></table:table-row>
+
+  val otherNotionalV4Row8 =
+    <table:table-row table:style-name='ro1'><table:table-cell table:style-name='ce83'></table:table-cell><table:table-cell table:style-name='ce76'></table:table-cell><table:table-cell table:style-name='ce78'></table:table-cell><table:table-cell table:style-name='ce76' table:number-columns-repeated='5'></table:table-cell><table:table-cell table:style-name='ce83'></table:table-cell><table:table-cell table:style-name='ce81'></table:table-cell><table:table-cell table:style-name='ce75'></table:table-cell><table:table-cell table:content-validation-name='val12' table:style-name='ce76'></table:table-cell><table:table-cell table:style-name='ce76'></table:table-cell><table:table-cell table:number-columns-repeated='16371'></table:table-cell></table:table-row>
+
+  val otherNotionalV4Row9 =
+    <table:table-row table:style-name='ro26'><table:table-cell table:content-validation-name='val11' table:style-name='ce64' office:value-type='string'><text:p>1.</text:p><text:p>Date of event</text:p><text:p>(yyyy-mm-dd)</text:p></table:table-cell><table:table-cell table:style-name='ce33' office:value-type='string'><text:p>2.</text:p><text:p>Is the event in relation to a disclosable tax avoidance scheme?</text:p><text:p>(yes/no)</text:p></table:table-cell><table:table-cell table:style-name='ce34' office:value-type='string'><text:p>3.</text:p><text:p>If yes, enter the eight-digit scheme reference number (SRN)</text:p></table:table-cell><table:table-cell table:content-validation-name='val11' table:style-name='ce33' office:value-type='string'><text:p>4.</text:p><text:p>Employee first name</text:p></table:table-cell><table:table-cell table:content-validation-name='val11' table:style-name='ce33' office:value-type='string'><text:p>5.</text:p><text:p>Employee second name</text:p><text:p>(if applicable)</text:p></table:table-cell><table:table-cell table:content-validation-name='val11' table:style-name='ce33' office:value-type='string'><text:p>6.</text:p><text:p>Employee last name</text:p></table:table-cell><table:table-cell table:content-validation-name='val11' table:style-name='ce33' office:value-type='string'><text:p>7.</text:p><text:p>National Insurance number</text:p></table:table-cell><table:table-cell table:style-name='ce33' office:value-type='string'><text:p>8.</text:p><text:p>PAYE reference of employing company</text:p></table:table-cell><table:table-cell table:content-validation-name='val11' table:style-name='ce64' office:value-type='string'><text:p>9.</text:p><text:p>Date securities originally acquired</text:p><text:p>(yyyy-mm-dd)</text:p></table:table-cell><table:table-cell table:style-name='ce11' office:value-type='string'><text:p>10.</text:p><text:p>Number of securities originally acquired</text:p><text:p>e.g 100.00</text:p></table:table-cell><table:table-cell table:content-validation-name='val11' table:style-name='ce25' office:value-type='string'><text:p>11.</text:p><text:p>Amount of notional loan discharged</text:p><text:p>£</text:p><text:p>e.g. 10.1234</text:p></table:table-cell><table:table-cell table:style-name='ce33' office:value-type='string'><text:p>12.</text:p><text:p>Was PAYE operated?</text:p><text:p>(yes/no)</text:p></table:table-cell><table:table-cell table:style-name='ce33' office:value-type='string'><text:p>13.</text:p><text:p>Was any adjustment made for amounts subject to apportionment for residence or duties outside the UK? (yes/no)</text:p></table:table-cell><table:table-cell table:number-columns-repeated='16371'></table:table-cell></table:table-row>
+
+  val otherNotionalV4Row10 =
+    <table:table-row table:style-name='ro6'><table:table-cell office:date-value='2015-01-02T00:00:00' table:style-name='ce37' office:value-type='date'><text:p>2015-01-02</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>yes</text:p></table:table-cell><table:table-cell table:style-name='ce74' office:value-type='float' office:value='12345678'><text:p>12345678</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>John</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>Dave</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>Smith</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>AB123456A</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>123/SD12345678</text:p></table:table-cell><table:table-cell office:date-value='2015-01-02T00:00:00' table:style-name='ce37' office:value-type='date'><text:p>2015-01-02</text:p></table:table-cell><table:table-cell table:style-name='ce9' office:value-type='float' office:value='123.12'><text:p>123.12</text:p></table:table-cell><table:table-cell table:style-name='ce10' office:value-type='float' office:value='12.1234'><text:p>12.1234</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>yes</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>yes</text:p></table:table-cell><table:table-cell table:number-columns-repeated='16371'></table:table-cell></table:table-row>
+
+  val otherNotionalV4Row11 =
+    <table:table-row table:style-name='ro6' table:number-rows-repeated='6'><table:table-cell table:style-name='ce1' table:number-columns-repeated='16384'></table:table-cell></table:table-row>
+
+  val otherNotionalV4Row12 =
+    <table:table-row table:style-name='ro6' table:number-rows-repeated='1048560'><table:table-cell table:number-columns-repeated='16384'></table:table-cell></table:table-row>
+
+  val otherNotionalV4XML = openTable(
+    otherNotionalV4SheetName
+  ) + otherNotionalV4Row1 + otherNotionalV4Row2 + otherNotionalV4Row3 + otherNotionalV4Row4 +
+    otherNotionalV4Row5 + otherNotionalV4Row6 + otherNotionalV4Row7 + otherNotionalV4Row8 + otherNotionalV4Row9 + otherNotionalV4Row10 + otherNotionalV4Row11 + otherNotionalV4Row12 + closeTable
+
+}
+
+object OtherEnhancementV4XmlTestData {
+
+  val otherEnhancementV4SheetName = "Other_Enhancement_V4"
+
+  val otherEnhancementV4Row1 =
+    <table:table-row table:style-name='ro1'><table:table-cell table:style-name='ce84' table:number-columns-spanned='14' table:number-rows-spanned='1' office:value-type='string'><text:p>Other ERS schemes or arrangements – Artificial enhancement of market value. Value of securities post acquisition</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated='13'></table:covered-table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherEnhancementV4Row2 =
+    <table:table-row table:style-name='ro2'><table:table-cell table:style-name='ce85' table:number-columns-spanned='14' table:number-rows-spanned='1' office:value-type='string'><text:p>How to complete this schedule:</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated='13'></table:covered-table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherEnhancementV4Row3 =
+    <table:table-row table:style-name='ro1'><table:table-cell table:style-name='ce86' table:number-columns-spanned='14' table:number-rows-spanned='1' office:value-type='string'><text:p>Enter details of each employee and the securities artificially enhanced by non-commercial actions.</text:p><text:p><text:span text:style-name='T4'>Please note</text:span>: Monetary values must be entered to 4 decimal places in pounds sterling.</text:p><text:p>Numbers of shares and securities must be entered to 2 decimal places.</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated='13'></table:covered-table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherEnhancementV4Row4 =
+    <table:table-row table:style-name='ro2'><table:table-cell table:style-name='ce85' table:number-columns-spanned='14' table:number-rows-spanned='1' office:value-type='string'><text:p>Important note</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated='13'></table:covered-table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherEnhancementV4Row5 =
+    <table:table-row table:style-name='ro27'><table:table-cell table:style-name='ce87' table:number-columns-spanned='10' table:number-rows-spanned='1' office:value-type='string'><text:p>You<text:s></text:s><text:span text:style-name='T5'>must not</text:span><text:s></text:s>alter the structure or formatting of this schedule. If you do your schedule will be rejected.</text:p><text:p>Please note when completing the template if you leave 10 or more consecutive rows blank with no data populated, It will be assumed that there is no further information contained below these blank rows within this sheet. Therefore it is important you do not leave blank rows between the rows of data you are reporting. Note the system will continue to check for information on subsequent sheets within the same template.</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated='9'></table:covered-table-cell><table:table-cell table:style-name='ce75' table:number-columns-repeated='2'></table:table-cell><table:table-cell table:style-name='ce76' table:number-columns-repeated='2'></table:table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherEnhancementV4Row6 =
+    <table:table-row table:style-name='ro1'><table:table-cell table:style-name='ce86' table:number-columns-spanned='12' table:number-rows-spanned='1' office:value-type='string'><text:p>For more information on completing this schedule, follow the link below. You must be connected to the internet to access the guide.</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated='11'></table:covered-table-cell><table:table-cell table:style-name='ce76'></table:table-cell><table:table-cell table:number-columns-repeated='16371'></table:table-cell></table:table-row>
+
+  val otherEnhancementV4Row7 =
+    <table:table-row table:style-name='ro2'><table:table-cell table:style-name='ce77' office:value-type='string'><text:p><text:a xlink:href='https://www.gov.uk/government/publications/other-employment-related-securities-schemes-and-arrangements-end-of-year-return-template'>Other ERS schemes or arrangements guidance</text:a></text:p></table:table-cell><table:table-cell table:style-name='ce76'></table:table-cell><table:table-cell table:style-name='ce78'></table:table-cell><table:table-cell table:style-name='ce76' table:number-columns-repeated='4'></table:table-cell><table:table-cell table:style-name='ce79'></table:table-cell><table:table-cell table:style-name='ce80'></table:table-cell><table:table-cell table:style-name='ce81'></table:table-cell><table:table-cell table:style-name='ce82'></table:table-cell><table:table-cell table:content-validation-name='val14' table:style-name='ce82'></table:table-cell><table:table-cell table:content-validation-name='val14' table:style-name='ce79'></table:table-cell><table:table-cell table:style-name='ce76'></table:table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherEnhancementV4Row8 =
+    <table:table-row table:style-name='ro1'><table:table-cell table:style-name='ce83'></table:table-cell><table:table-cell table:style-name='ce76'></table:table-cell><table:table-cell table:style-name='ce78'></table:table-cell><table:table-cell table:style-name='ce76' table:number-columns-repeated='5'></table:table-cell><table:table-cell table:style-name='ce83'></table:table-cell><table:table-cell table:style-name='ce81'></table:table-cell><table:table-cell table:style-name='ce75'></table:table-cell><table:table-cell table:content-validation-name='val14' table:style-name='ce75'></table:table-cell><table:table-cell table:content-validation-name='val14' table:style-name='ce76'></table:table-cell><table:table-cell table:style-name='ce76'></table:table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherEnhancementV4Row9 =
+    <table:table-row table:style-name='ro28'><table:table-cell table:content-validation-name='val13' table:style-name='ce88' office:value-type='string'><text:p>1.</text:p><text:p>Date of event</text:p><text:p>(yyyy-mm-dd)</text:p></table:table-cell><table:table-cell table:style-name='ce89' office:value-type='string'><text:p>2.</text:p><text:p>Is the event in relation to a disclosable tax avoidance scheme?</text:p><text:p>(yes/no)</text:p></table:table-cell><table:table-cell table:style-name='ce90' office:value-type='string'><text:p>3.</text:p><text:p>If yes, enter the eight-digit scheme reference number (SRN)</text:p></table:table-cell><table:table-cell table:content-validation-name='val13' table:style-name='ce89' office:value-type='string'><text:p>4.</text:p><text:p>Employee first name</text:p></table:table-cell><table:table-cell table:content-validation-name='val13' table:style-name='ce89' office:value-type='string'><text:p>5.</text:p><text:p>Employee second name</text:p><text:p>(if applicable)</text:p></table:table-cell><table:table-cell table:content-validation-name='val13' table:style-name='ce89' office:value-type='string'><text:p>6.</text:p><text:p>Employee last name</text:p></table:table-cell><table:table-cell table:content-validation-name='val13' table:style-name='ce89' office:value-type='string'><text:p>7.</text:p><text:p>National Insurance number</text:p></table:table-cell><table:table-cell table:style-name='ce89' office:value-type='string'><text:p>8.</text:p><text:p>PAYE reference of employing company</text:p></table:table-cell><table:table-cell table:content-validation-name='val13' table:style-name='ce88' office:value-type='string'><text:p>9.</text:p><text:p>Date securities originally acquired</text:p><text:p>(yyyy-mm-dd)</text:p></table:table-cell><table:table-cell table:style-name='ce91' office:value-type='string'><text:p>10.</text:p><text:p>Number of securities originally acquired</text:p><text:p>e.g. 100.00</text:p></table:table-cell><table:table-cell table:content-validation-name='val13' table:style-name='ce92' office:value-type='string'><text:p>11.</text:p><text:p>Total unrestricted market value (UMV) on 5th April or date of disposal if earlier</text:p><text:p>£</text:p><text:p>e.g. 10.1234</text:p></table:table-cell><table:table-cell table:content-validation-name='val13' table:style-name='ce92' office:value-type='string'><text:p>12.</text:p><text:p>Total UMV ignoring effect of artificial increase on date of taxable event</text:p><text:p>£</text:p><text:p>e.g. 10.1234</text:p></table:table-cell><table:table-cell table:style-name='ce89' office:value-type='string'><text:p>13.</text:p><text:p>Was PAYE operated?</text:p><text:p>(yes/no)</text:p></table:table-cell><table:table-cell table:style-name='ce89' office:value-type='string'><text:p>14.</text:p><text:p>Was any adjustment made for amounts subject to apportionment for residence or duties outside the UK? (yes/no)</text:p></table:table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherEnhancementV4Row10 =
+    <table:table-row table:style-name='ro6'><table:table-cell office:date-value='2015-01-02T00:00:00' table:style-name='ce37' office:value-type='date'><text:p>2015-01-02</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>yes</text:p></table:table-cell><table:table-cell table:style-name='ce74' office:value-type='float' office:value='12345678'><text:p>12345678</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>John</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>Brian</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>Smith</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>AB123456A</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>123/FD12345678</text:p></table:table-cell><table:table-cell office:date-value='2015-01-02T00:00:00' table:style-name='ce37' office:value-type='date'><text:p>2015-01-02</text:p></table:table-cell><table:table-cell table:style-name='ce9' office:value-type='float' office:value='123.12'><text:p>123.12</text:p></table:table-cell><table:table-cell table:style-name='ce10' office:value-type='float' office:value='12.1234'><text:p>12.1234</text:p></table:table-cell><table:table-cell table:style-name='ce10' office:value-type='float' office:value='12.1234'><text:p>12.1234</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>yes</text:p></table:table-cell><table:table-cell table:style-name='ce27' office:value-type='string'><text:p>yes</text:p></table:table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherEnhancementV4Row11 =
+    <table:table-row table:style-name='ro6' table:number-rows-repeated='6'><table:table-cell table:style-name='ce1' table:number-columns-repeated='16384'></table:table-cell></table:table-row>
+
+  val otherEnhancementV4Row12 =
+    <table:table-row table:style-name='ro6' table:number-rows-repeated='1048560'><table:table-cell table:number-columns-repeated='16384'></table:table-cell></table:table-row>
+
+  val otherEnhancementV4XML = openTable(
+    otherEnhancementV4SheetName
+  ) + otherEnhancementV4Row1 + otherEnhancementV4Row2 + otherEnhancementV4Row3 + otherEnhancementV4Row4 +
+    otherEnhancementV4Row5 + otherEnhancementV4Row6 + otherEnhancementV4Row7 + otherEnhancementV4Row8 + otherEnhancementV4Row9 + otherEnhancementV4Row10 + otherEnhancementV4Row11 + otherEnhancementV4Row12 + closeTable
+
+}
+
+object OtherSoldV4XmlTestData {
+
+  val otherSoldV4SheetName = "Other_Sold_V4"
+
+  val otherSoldV4Row1 =
+    <table:table-row table:style-name='ro1'><table:table-cell table:style-name='ce16' table:number-columns-spanned='14' table:number-rows-spanned='1' office:value-type='string'><text:p>Other ERS schemes and arrangements – Securities sold for more than market value post acquisition</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated='13'></table:covered-table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherSoldV4Row2 =
+    <table:table-row table:style-name='ro2'><table:table-cell table:style-name='ce17' table:number-columns-spanned='14' table:number-rows-spanned='1' office:value-type='string'><text:p>How to complete this schedule:</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated='13'></table:covered-table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherSoldV4Row3 =
+    <table:table-row table:style-name='ro29'><table:table-cell table:style-name='ce18' table:number-columns-spanned='14' table:number-rows-spanned='1' office:value-type='string'><text:p>Enter details of each employee and securities disposed of for more than their market value.</text:p><text:p><text:span text:style-name='T4'>Please note</text:span>: Monetary values must be entered to 4 decimal places in pounds sterling.</text:p><text:p>Numbers of shares and securities must be entered to 2 decimal places.</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated='13'></table:covered-table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherSoldV4Row4 =
+    <table:table-row table:style-name='ro2'><table:table-cell table:style-name='ce17' table:number-columns-spanned='14' table:number-rows-spanned='1' office:value-type='string'><text:p>Important note</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated='13'></table:covered-table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherSoldV4Row5 =
+    <table:table-row table:style-name='ro30'><table:table-cell table:style-name='ce19' table:number-columns-spanned='10' table:number-rows-spanned='1' office:value-type='string'><text:p>You<text:s></text:s><text:span text:style-name='T5'>must not</text:span><text:s></text:s>alter the structure or formatting of this schedule. If you do your schedule will be rejected.</text:p><text:p>Please note when completing the template if you leave 10 or more consecutive rows blank with no data populated, It will be assumed that there is no further information contained below these blank rows within this sheet. Therefore it is important you do not leave blank rows between the rows of data you are reporting. Note the system will continue to check for information on subsequent sheets within the same template.</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated='9'></table:covered-table-cell><table:table-cell table:style-name='ce22' table:number-columns-repeated='2'></table:table-cell><table:table-cell table:style-name='ce68' table:number-columns-repeated='2'></table:table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherSoldV4Row6 =
+    <table:table-row table:style-name='ro31'><table:table-cell table:style-name='ce18' table:number-columns-spanned='12' table:number-rows-spanned='1' office:value-type='string'><text:p>For more information on completing this schedule, follow the link below. You must be connected to the internet to access the guide.</text:p></table:table-cell><table:covered-table-cell table:number-columns-repeated='11'></table:covered-table-cell><table:table-cell table:style-name='ce68' table:number-columns-repeated='2'></table:table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherSoldV4Row7 =
+    <table:table-row table:style-name='ro2'><table:table-cell table:style-name='ce77' office:value-type='string'><text:p><text:a xlink:href='https://www.gov.uk/government/publications/other-employment-related-securities-schemes-and-arrangements-end-of-year-return-template'>Other ERS schemes or arrangements guidance</text:a></text:p></table:table-cell><table:table-cell table:style-name='ce76'></table:table-cell><table:table-cell table:style-name='ce78'></table:table-cell><table:table-cell table:style-name='ce76' table:number-columns-repeated='4'></table:table-cell><table:table-cell table:style-name='ce79'></table:table-cell><table:table-cell table:style-name='ce93'></table:table-cell><table:table-cell table:style-name='ce82'></table:table-cell><table:table-cell table:content-validation-name='val16' table:style-name='ce82'></table:table-cell><table:table-cell table:content-validation-name='val16' table:style-name='ce82'></table:table-cell><table:table-cell table:content-validation-name='val16' table:style-name='ce79'></table:table-cell><table:table-cell table:style-name='ce76'></table:table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherSoldV4Row8 =
+    <table:table-row table:style-name='ro6'><table:table-cell table:style-name='ce94'></table:table-cell><table:table-cell table:style-name='ce68'></table:table-cell><table:table-cell table:style-name='ce73'></table:table-cell><table:table-cell table:style-name='ce68' table:number-columns-repeated='5'></table:table-cell><table:table-cell table:style-name='ce23'></table:table-cell><table:table-cell table:content-validation-name='val16' table:style-name='ce22'></table:table-cell><table:table-cell table:content-validation-name='val16' table:style-name='ce22'></table:table-cell><table:table-cell table:content-validation-name='val16' table:style-name='ce22'></table:table-cell><table:table-cell table:style-name='ce68' table:number-columns-repeated='2'></table:table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherSoldV4Row9 =
+    <table:table-row table:style-name='ro32'><table:table-cell table:content-validation-name='val15' table:style-name='ce64' office:value-type='string'><text:p>1.</text:p><text:p>Date of event</text:p><text:p>(yyyy-mm-dd)</text:p></table:table-cell><table:table-cell table:style-name='ce33' office:value-type='string'><text:p>2.</text:p><text:p>Is the event in relation to a disclosable tax avoidance scheme?</text:p><text:p>(yes/no)</text:p></table:table-cell><table:table-cell table:style-name='ce34' office:value-type='string'><text:p>3.</text:p><text:p>If yes, enter the eight-digit scheme reference number (SRN)</text:p></table:table-cell><table:table-cell table:content-validation-name='val15' table:style-name='ce33' office:value-type='string'><text:p>4.</text:p><text:p>Employee first name</text:p></table:table-cell><table:table-cell table:content-validation-name='val15' table:style-name='ce33' office:value-type='string'><text:p>5.</text:p><text:p>Employee second name</text:p><text:p>(if applicable)</text:p></table:table-cell><table:table-cell table:content-validation-name='val15' table:style-name='ce33' office:value-type='string'><text:p>6.</text:p><text:p>Employee last name</text:p></table:table-cell><table:table-cell table:content-validation-name='val15' table:style-name='ce33' office:value-type='string'><text:p>7.</text:p><text:p>National Insurance number</text:p></table:table-cell><table:table-cell table:style-name='ce33' office:value-type='string'><text:p>8.</text:p><text:p>PAYE reference of employing company</text:p></table:table-cell><table:table-cell table:style-name='ce11' office:value-type='string'><text:p>9.</text:p><text:p>Number of securities originally acquired</text:p><text:p>e.g. 100.00</text:p></table:table-cell><table:table-cell table:content-validation-name='val15' table:style-name='ce25' office:value-type='string'><text:p>10.</text:p><text:p>Amount received on disposal</text:p><text:p>£</text:p><text:p>e.g. 10.1234</text:p></table:table-cell><table:table-cell table:content-validation-name='val15' table:style-name='ce25' office:value-type='string'><text:p>11.</text:p><text:p>Total market value on disposal</text:p><text:p>£</text:p><text:p>e.g. 10.1234</text:p></table:table-cell><table:table-cell table:content-validation-name='val15' table:style-name='ce25' office:value-type='string'><text:p>12.</text:p><text:p>Expenses incurred</text:p><text:p>£</text:p><text:p>e.g. 10.1234</text:p></table:table-cell><table:table-cell table:style-name='ce33' office:value-type='string'><text:p>13.</text:p><text:p>Was PAYE operated?</text:p><text:p>(yes/no)</text:p></table:table-cell><table:table-cell table:style-name='ce33' office:value-type='string'><text:p>14.</text:p><text:p>Was any adjustment made for amounts subject to apportionment for residence or duties outside the UK? (yes/no)</text:p></table:table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherSoldV4Row10 =
+    <table:table-row table:style-name='ro6'><table:table-cell office:date-value='2015-01-02T00:00:00' table:style-name='ce37' office:value-type='date'><text:p>2015-01-02</text:p></table:table-cell><table:table-cell table:style-name='ce68' office:value-type='string'><text:p>yes</text:p></table:table-cell><table:table-cell table:style-name='ce73' office:value-type='float' office:value='12345678'><text:p>12345678</text:p></table:table-cell><table:table-cell table:style-name='ce68' office:value-type='string'><text:p>John</text:p></table:table-cell><table:table-cell table:style-name='ce68' office:value-type='string'><text:p>Davey</text:p></table:table-cell><table:table-cell table:style-name='ce68' office:value-type='string'><text:p>Doe</text:p></table:table-cell><table:table-cell table:style-name='ce68' office:value-type='string'><text:p>AB123456A</text:p></table:table-cell><table:table-cell table:style-name='ce68' office:value-type='string'><text:p>123/BG12345678</text:p></table:table-cell><table:table-cell table:style-name='ce23' office:value-type='float' office:value='123.12'><text:p>123.12</text:p></table:table-cell><table:table-cell table:style-name='ce22' office:value-type='float' office:value='12.1234'><text:p>12.1234</text:p></table:table-cell><table:table-cell table:style-name='ce22' office:value-type='float' office:value='12.1234'><text:p>12.1234</text:p></table:table-cell><table:table-cell table:style-name='ce22' office:value-type='float' office:value='12.1234'><text:p>12.1234</text:p></table:table-cell><table:table-cell table:style-name='ce68' office:value-type='string'><text:p>yes</text:p></table:table-cell><table:table-cell table:style-name='ce68' office:value-type='string'><text:p>yes</text:p></table:table-cell><table:table-cell table:number-columns-repeated='16370'></table:table-cell></table:table-row>
+
+  val otherSoldV4Row11 =
+    <table:table-row table:style-name='ro6' table:number-rows-repeated='6'><table:table-cell table:style-name='ce1' table:number-columns-repeated='16384'></table:table-cell></table:table-row>
+
+  val otherSoldV4Row12 =
+    <table:table-row table:style-name='ro6' table:number-rows-repeated='1048560'><table:table-cell table:number-columns-repeated='16384'></table:table-cell></table:table-row>
+
+  val otherSoldV4XML = openTable(
+    otherSoldV4SheetName
+  ) + otherSoldV4Row1 + otherSoldV4Row2 + otherSoldV4Row3 + otherSoldV4Row4 +
+    otherSoldV4Row5 + otherSoldV4Row6 + otherSoldV4Row7 + otherSoldV4Row8 + otherSoldV4Row9 + otherSoldV4Row10 + otherSoldV4Row11 + otherSoldV4Row12 + closeTable
+
+}
+
 object getValidOTHERV4DataStream {
 
   val validOtherV4DataStream: ByteArrayInputStream = {
-    val otherV4BodyXml: String = otherGrantsV4XML + otherOptionsV4XML + otherAcquisitionV4XML + otherRestrictedSecuritiesV4XML + otherOtherBenefitsV4XML + otherConvertibleV4XML
+    val otherV4BodyXml: String =
+      otherGrantsV4XML + otherOptionsV4XML + otherAcquisitionV4XML + otherRestrictedSecuritiesV4XML + otherOtherBenefitsV4XML +
+        otherConvertibleV4XML + otherNotionalV4XML + otherEnhancementV4XML + otherSoldV4XML
 
     new ByteArrayInputStream(buildValidOdsXml(otherV4BodyXml).getBytes("utf-8"))
   }

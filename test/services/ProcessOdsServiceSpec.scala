@@ -295,7 +295,10 @@ class ProcessOdsServiceSpec
           SheetErrors("Other_Acquisition_V4", ListBuffer()),
           SheetErrors("Other_RestrictedSecurities_V4", ListBuffer()),
           SheetErrors("Other_OtherBenefits_V4", ListBuffer()),
-          SheetErrors("Other_Convertible_V4", ListBuffer())
+          SheetErrors("Other_Convertible_V4", ListBuffer()),
+          SheetErrors("Other_Notional_V4", ListBuffer()),
+          SheetErrors("Other_Enhancement_V4", ListBuffer()),
+          SheetErrors("Other_Sold_V4", ListBuffer())
         )
       }
 
