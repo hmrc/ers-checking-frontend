@@ -32,6 +32,7 @@ import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import services.ProcessOdsService._
 import services.getValidOTHERV4DataStream.validOtherV4DataStream
+import services.completeValidNonTassV7DataStream.validNonTassV7DataStream
 import uk.gov.hmrc.mongo.test.MongoSupport
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 import uk.gov.hmrc.validator.models._
@@ -299,6 +300,29 @@ class ProcessOdsServiceSpec
           SheetErrors("Other_Notional_V4", ListBuffer()),
           SheetErrors("Other_Enhancement_V4", ListBuffer()),
           SheetErrors("Other_Sold_V4", ListBuffer())
+        )
+      }
+
+      "successfully process valid V7 Non TASS data stream when useV6andV7Scheme is set to true" in {
+
+        val sheetErrors = processOdsService
+          .validateOdsFile(
+            "Non-TASS.ods",
+            validNonTassV7DataStream,
+            "Non-TASS",
+            useV6andV7Scheme = true
+          )
+          .value
+        sheetErrors should contain theSameElementsAs ListBuffer(
+          SheetErrors("Non-TASS_Grants_V7", ListBuffer()),
+          SheetErrors("Non-TASS_Options_V7", ListBuffer()),
+          SheetErrors("Non-TASS_Acquisition_V7", ListBuffer()),
+          SheetErrors("Non-TASS_Restricted_V7", ListBuffer()),
+          SheetErrors("Non-TASS_Other_Benefits_V7", ListBuffer()),
+          SheetErrors("Non-TASS_Convertible_V7", ListBuffer()),
+          SheetErrors("Non-TASS_Notional_V7", ListBuffer()),
+          SheetErrors("Non-TASS_Enhancement_V7", ListBuffer()),
+          SheetErrors("Non-TASS_Sold_V7", ListBuffer())
         )
       }
 
