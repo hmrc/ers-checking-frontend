@@ -54,6 +54,7 @@ ers_scheme_type.emi = Enterprise Management Incentives (EMI)
 ers_scheme_type.saye = Save As You Earn (SAYE)
 ers_scheme_type.sip = Share Incentive Plan (SIP)
 ers_scheme_type.other = Other
+ers_scheme_type.non-tass = Non-TASS
 ers_scheme_type.continue = Continue
 ers_scheme_type.select_scheme_type = Select the type of Employment Related Securities (ERS) scheme or arrangement
 
