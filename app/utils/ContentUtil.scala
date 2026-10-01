@@ -27,6 +27,7 @@ object ContentUtil {
       case "saye" | "4"  => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.saye", "SAYE")
       case "sip" | "5"   => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.sip", "SIP")
       case "other" | "3" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.other", "OTHER")
+      case "non-tass" | "3" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.non-tass", "Non-TASS")
       case _             => ErrorMessageKeyPrefixAndScheme("", "")
     }
 

@@ -57,7 +57,9 @@ ers_scheme_type.emi = Enterprise Management Incentives (EMI)
 ers_scheme_type.saye = Save As You Earn (SAYE)
 ers_scheme_type.sip = Share Incentive Plan (SIP)
 ers_scheme_type.other = Other
+ers_scheme_type.other.hint = For checking files created with sheet names beginning with OTHER
 ers_scheme_type.non-tass = Non-TASS
+ers_scheme_type.non-tass.hint = For checking files created with sheet names beginning with Non-TASS
 ers_scheme_type.continue = Continue
 ers_scheme_type.select_scheme_type = Select the type of Employment Related Securities (ERS) scheme or arrangement
 
@@ -107,6 +109,16 @@ ers_check_csv_file.other.OTHER_CONVERTABLE = Convertible securities post-acquisi
 ers_check_csv_file.other.OTHER_NOTIONAL = Discharge of notional loans post-acquisition
 ers_check_csv_file.other.OTHER_ENCHANCEMENT = Artificial enhancement of market value. Value of securities post acquisition
 ers_check_csv_file.other.OTHER_SOLD = Securities sold for more than market value post acquisition
+
+ers_check_csv_file.non-tass.OTHER_GRANTS = Grant of options
+ers_check_csv_file.non-tass.OTHER_OPTIONS = Other option events
+ers_check_csv_file.non-tass.OTHER_ACQUISITION = Acquisition of securities
+ers_check_csv_file.non-tass.OTHER_RESTRICTED = Restricted securities post acquisition events
+ers_check_csv_file.non-tass.OTHER_BENEFITS = Receipt of other benefits from securities post acquisition
+ers_check_csv_file.non-tass.OTHER_CONVERTABLE = Convertible securities post-acquisition
+ers_check_csv_file.non-tass.OTHER_NOTIONAL = Discharge of notional loans post-acquisition
+ers_check_csv_file.non-tass.OTHER_ENCHANCEMENT = Artificial enhancement of market value. Value of securities post acquisition
+ers_check_csv_file.non-tass.OTHER_SOLD = Securities sold for more than market value post acquisition
 
 ers_check_file.title = Choose the ODS file that you want to check for errors
 ers_check_file.file_upload_label = Upload a file.
@@ -160,6 +172,7 @@ ers_pdf_error_report.emi = Enterprise Management Incentives
 ers_pdf_error_report.saye = Save As You Earn
 ers_pdf_error_report.sip = Share Incentive Plan
 ers_pdf_error_report.other = Other
+ers_pdf_error_report.non-tass = Non-tax advantaged share schemes
 
 ers_format_errors.instructions = Choose a different file to check
 ers.exceptions.dataParser.fileRetrievalFailed = The file that you chose seems to be damaged.<br/><br/>You won’t be able to upload {0} as part of your annual return.

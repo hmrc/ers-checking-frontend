@@ -29,7 +29,7 @@ trait PageBuilder {
   val SCHEME_SAYE: String     = "saye"
   val SCHEME_SIP: String      = "sip"
   val SCHEME_OTHER: String    = "other"
-  val schemeList: Seq[String] = Seq(SCHEME_CSOP, SCHEME_EMI, SCHEME_SAYE, SCHEME_SIP, SCHEME_OTHER)
+  val SCHEME_NON_TASS: String    = "non-tass"
 
   // pageId's
   val PAGE_CHECK_CSV_FILE = "ers_check_csv_file"
@@ -48,6 +48,7 @@ trait PageBuilder {
   val MSG_SAYE: String  = ".saye."
   val MSG_SIP: String   = ".sip."
   val MSG_OTHER: String = ".other."
+  val MSG_NON_TASS: String = ".non-tass."
 
   val CSVFilesList: Map[String, List[CsvFiles]] = Map(
     (
@@ -83,6 +84,20 @@ trait PageBuilder {
       )
     ),
     (
+      SCHEME_NON_TASS,
+      List(
+        CsvFiles("OTHER_GRANTS"),
+        CsvFiles("OTHER_OPTIONS"),
+        CsvFiles("OTHER_ACQUISITION"),
+        CsvFiles("OTHER_RESTRICTED"),
+        CsvFiles("OTHER_BENEFITS"),
+        CsvFiles("OTHER_CONVERTABLE"),
+        CsvFiles("OTHER_NOTIONAL"),
+        CsvFiles("OTHER_ENCHANCEMENT"),
+        CsvFiles("OTHER_SOLD")
+      )
+    ),
+    (
       SCHEME_SAYE,
       List(
         CsvFiles("SAYE_GRANTED"),
@@ -104,11 +119,12 @@ trait PageBuilder {
 
   def getPageElement(scheme: String, pageId: String, element: String): String =
     scheme match {
-      case SCHEME_CSOP  => pageId + MSG_CSOP + element
-      case SCHEME_EMI   => pageId + MSG_EMI + element
-      case SCHEME_SAYE  => pageId + MSG_SAYE + element
-      case SCHEME_SIP   => pageId + MSG_SIP + element
-      case SCHEME_OTHER => pageId + MSG_OTHER + element
+      case SCHEME_CSOP     => pageId + MSG_CSOP + element
+      case SCHEME_EMI      => pageId + MSG_EMI + element
+      case SCHEME_SAYE     => pageId + MSG_SAYE + element
+      case SCHEME_SIP      => pageId + MSG_SIP + element
+      case SCHEME_OTHER    => pageId + MSG_OTHER + element
+      case SCHEME_NON_TASS => pageId + MSG_NON_TASS + element
       case _            => DEFAULT
     }
 
