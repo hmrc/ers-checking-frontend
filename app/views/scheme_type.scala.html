@@ -25,6 +25,34 @@
 )
 
 @(form: Form[CS_schemeType])(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
+
+@otherOrNonTassButton = @{
+     if(appConfig.displayNonTASSRadio){
+         Seq(
+             RadioItem(
+                 id = Some("schemeType-other"),
+                 content = Text(messages("ers_scheme_type.other")),
+                 value = Some("other"),
+                 hint = Some(Hint(content = Text(messages("ers_scheme_type.non-tass.hint"))))
+             ),
+             RadioItem(
+                 id = Some("schemeType-non-tass"),
+                 content = Text(messages("ers_scheme_type.non-tass")),
+                 value = Some("non-tass"),
+                 hint = Some(Hint(content = Text(messages("ers_scheme_type.non-tass.hint"))))
+             )
+         )
+     } else {
+         Seq(
+             RadioItem(
+                 id = Some("schemeType-other"),
+                 content = Text(messages("ers_scheme_type.other")),
+                 value = Some("other")
+             )
+         )
+     }
+ }
+
 @* type of scheme template *@
 @ers_main(title = messages("ers.scheme_types.page_title")) {
 
@@ -79,13 +107,8 @@
                     id = Some("schemeType-sip"),
                     content = Text(messages("ers_scheme_type.sip")),
                     value = Some("sip")
-                ),
-                RadioItem(
-                    id = Some("schemeType-other"),
-                    content = Text(messages("ers_scheme_type.other")),
-                    value = Some("other")
                 )
-            )
+            ) ++ otherOrNonTassButton
         ))
 
         @govukButton(Button(
