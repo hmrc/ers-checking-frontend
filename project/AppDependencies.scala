@@ -4,8 +4,8 @@ import sbt.*
 
 object AppDependencies {
 
-  private val bootstrapVersion = "10.7.0"
-  private val mongoVersion = "2.13.0"
+  private val bootstrapVersion = "10.8.0"
+  private val mongoVersion = "2.14.0"
 
   private val compile: Seq[ModuleID] = Seq(
     ws,
@@ -17,7 +17,7 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "bootstrap-frontend-play-30"   % bootstrapVersion,
     "uk.gov.hmrc"                 %% "domain-play-30"               % "11.0.0",
     "uk.gov.hmrc"                 %% "ers-file-validator-config"    % "2.9.0",
-    "uk.gov.hmrc"                 %% "play-frontend-hmrc-play-30"   % "13.11.0"
+    "uk.gov.hmrc"                 %% "play-frontend-hmrc-play-30"   % "13.15.0"
   )
 
   private val test: Seq[ModuleID] = Seq(
