@@ -29,7 +29,7 @@ trait PageBuilder {
   val SCHEME_SAYE: String     = "saye"
   val SCHEME_SIP: String      = "sip"
   val SCHEME_OTHER: String    = "other"
-  val SCHEME_NON_TASS: String    = "non-tass"
+  val SCHEME_NON_TASS: String = "non-tass"
 
   // pageId's
   val PAGE_CHECK_CSV_FILE = "ers_check_csv_file"
@@ -43,11 +43,11 @@ trait PageBuilder {
   val OPTION_CSV                = "csv"
 
   // message file entry prefix
-  val MSG_CSOP: String  = ".csop."
-  val MSG_EMI: String   = ".emi."
-  val MSG_SAYE: String  = ".saye."
-  val MSG_SIP: String   = ".sip."
-  val MSG_OTHER: String = ".other."
+  val MSG_CSOP: String     = ".csop."
+  val MSG_EMI: String      = ".emi."
+  val MSG_SAYE: String     = ".saye."
+  val MSG_SIP: String      = ".sip."
+  val MSG_OTHER: String    = ".other."
   val MSG_NON_TASS: String = ".non-tass."
 
   val CSVFilesList: Map[String, List[CsvFiles]] = Map(
@@ -125,7 +125,7 @@ trait PageBuilder {
       case SCHEME_SIP      => pageId + MSG_SIP + element
       case SCHEME_OTHER    => pageId + MSG_OTHER + element
       case SCHEME_NON_TASS => pageId + MSG_NON_TASS + element
-      case _            => DEFAULT
+      case _               => DEFAULT
     }
 
   def getPageBackLink(fileType: String): String =

@@ -22,13 +22,13 @@ object ContentUtil {
 
   def getScheneNameWithShortenedVersion(schemeType: String): ErrorMessageKeyPrefixAndScheme =
     schemeType.toLowerCase match {
-      case "csop" | "1"  => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.csop", "CSOP")
-      case "emi" | "2"   => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.emi", "EMI")
-      case "saye" | "4"  => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.saye", "SAYE")
-      case "sip" | "5"   => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.sip", "SIP")
-      case "other" | "3" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.other", "OTHER")
+      case "csop" | "1"     => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.csop", "CSOP")
+      case "emi" | "2"      => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.emi", "EMI")
+      case "saye" | "4"     => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.saye", "SAYE")
+      case "sip" | "5"      => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.sip", "SIP")
+      case "other" | "3"    => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.other", "OTHER")
       case "non-tass" | "3" => ErrorMessageKeyPrefixAndScheme("ers_pdf_error_report.non-tass", "Non-TASS")
-      case _             => ErrorMessageKeyPrefixAndScheme("", "")
+      case _                => ErrorMessageKeyPrefixAndScheme("", "")
     }
 
   def withArticle(data: String): String = {

@@ -85,7 +85,8 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
   lazy val useV6andV7Scheme: Boolean = config.getConfBool("features.scheme-version.use-V6-and-V7", defBool = false)
 
   // Start page banner
-  lazy val startPageBannerEnabled: Boolean = config.getConfBool("features.start-page-banner.enabled", defBool = false)
+  lazy val startPageBannerEnabled: Boolean        = config.getConfBool("features.start-page-banner.enabled", defBool = false)
+
   lazy val startPageBannerParaTwoEnabled: Boolean =
     config.getConfBool("features.start-page-banner.para-2-enabled", defBool = false)
 
