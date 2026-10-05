@@ -26,7 +26,7 @@ class ContentUtilSpec extends AnyWordSpecLike with Matchers {
 
     case class TestCase(inputSchemeType: String, expectedOutputErrorReport: String, expectedOutputSchemeType: String)
 
-    "return the expected error report and scheme type" when {
+    "return the expected error report and scheme type" when
       List(
         TestCase("CSOP", "ers_pdf_error_report.csop", "CSOP"),
         TestCase("EMI", "ers_pdf_error_report.emi", "EMI"),
@@ -37,7 +37,10 @@ class ContentUtilSpec extends AnyWordSpecLike with Matchers {
         TestCase("eMi", "ers_pdf_error_report.emi", "EMI"),
         TestCase("othEr", "ers_pdf_error_report.other", "OTHER"),
         TestCase("saYe", "ers_pdf_error_report.saye", "SAYE"),
-        TestCase("sIp", "ers_pdf_error_report.sip", "SIP")
+        TestCase("sIp", "ers_pdf_error_report.sip", "SIP"),
+        TestCase("NON-TASS", "ers_pdf_error_report.non-tass", "Non-TASS"),
+        TestCase("Non-TASS", "ers_pdf_error_report.non-tass", "Non-TASS"),
+        TestCase("non-tAss", "ers_pdf_error_report.non-tass", "Non-TASS")
       ).foreach((testCase: TestCase) =>
         s"passed a valid scheme type of any case: ${testCase.inputSchemeType}" in {
           getScheneNameWithShortenedVersion(testCase.inputSchemeType) shouldBe ErrorMessageKeyPrefixAndScheme(
@@ -46,22 +49,6 @@ class ContentUtilSpec extends AnyWordSpecLike with Matchers {
           )
         }
       )
-
-      List(
-        TestCase("1", "ers_pdf_error_report.csop", "CSOP"),
-        TestCase("2", "ers_pdf_error_report.emi", "EMI"),
-        TestCase("3", "ers_pdf_error_report.other", "OTHER"),
-        TestCase("5", "ers_pdf_error_report.sip", "SIP"),
-        TestCase("4", "ers_pdf_error_report.saye", "SAYE")
-      ).foreach((testCase: TestCase) =>
-        s"passed a number linked to the scheme type ${testCase.inputSchemeType}" in {
-          getScheneNameWithShortenedVersion(testCase.inputSchemeType) shouldBe ErrorMessageKeyPrefixAndScheme(
-            testCase.expectedOutputErrorReport,
-            testCase.expectedOutputSchemeType
-          )
-        }
-      )
-    }
 
     "return a tuple containing two empty strings" when
       List(

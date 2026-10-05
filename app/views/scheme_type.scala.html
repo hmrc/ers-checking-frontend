@@ -29,18 +29,18 @@
 @otherOrNonTassButton = @{
      if(appConfig.displayNonTASSRadio){
          Seq(
-             RadioItem(
-                 id = Some("schemeType-other"),
-                 content = Text(messages("ers_scheme_type.other")),
-                 value = Some("other"),
-                 hint = Some(Hint(content = Text(messages("ers_scheme_type.non-tass.hint"))))
-             ),
-             RadioItem(
-                 id = Some("schemeType-non-tass"),
-                 content = Text(messages("ers_scheme_type.non-tass")),
-                 value = Some("non-tass"),
-                 hint = Some(Hint(content = Text(messages("ers_scheme_type.non-tass.hint"))))
-             )
+            RadioItem(
+                id = Some("schemeType-non-tass"),
+                content = Text(messages("ers_scheme_type.non-tass")),
+                value = Some("non-tass"),
+                hint = Some(Hint(content = Text(messages("ers_scheme_type.non-tass.hint"))))
+            ),
+            RadioItem(
+                id = Some("schemeType-other"),
+                content = Text(messages("ers_scheme_type.other")),
+                value = Some("other"),
+                hint = Some(Hint(content = Text(messages("ers_scheme_type.other.hint"))))
+            )
          )
      } else {
          Seq(
