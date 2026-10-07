@@ -75,7 +75,7 @@ class SchemeTypeViewSpec extends ViewSpecBase {
       getRadioButtonsFormDoc(doc) mustBe expectedRadioButtons
     }
 
-    "not show the Other radio button post April when other-radio.enabled is set to true" in new SchemeTypeViewSetUp(
+    "not show the Other radio button post April when remove-other-radio.enabled is set to true" in new SchemeTypeViewSetUp(
       false,
       true
     ) {
