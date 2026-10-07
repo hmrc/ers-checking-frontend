@@ -60,6 +60,7 @@ ers_scheme_type.other = Other
 ers_scheme_type.other.hint = For checking files created with sheet names beginning with OTHER
 ers_scheme_type.non-tass = Non-tax advantaged share schemes (Non-TASS)
 ers_scheme_type.non-tass.hint = For checking files created with sheet names beginning with Non-TASS
+ers_scheme_type.non-tass.post.april.hint = Previously called 'Other schemes and arrangements'
 ers_scheme_type.continue = Continue
 ers_scheme_type.select_scheme_type = Select the type of Employment Related Securities (ERS) scheme or arrangement
 

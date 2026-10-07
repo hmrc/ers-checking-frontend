@@ -28,10 +28,11 @@ import views.html.scheme_type
 
 class SchemeTypeViewSpec extends ViewSpecBase {
 
-  class SchemeTypeViewSetUp(nonTasRadioEnabled: Boolean) {
+  class SchemeTypeViewSetUp(nonTasRadioEnabled: Boolean, otherRadioDisabled: Boolean) {
 
-    implicit val applicationConfig                            = new ApplicationConfig(mock[ServicesConfig]) {
-      override lazy val displayNonTASSRadio = nonTasRadioEnabled
+    implicit val applicationConfig: ApplicationConfig = new ApplicationConfig(mock[ServicesConfig]) {
+      override lazy val displayNonTASSRadio: Boolean = nonTasRadioEnabled
+      override lazy val removeOtherRadio: Boolean  = otherRadioDisabled
     }
 
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
@@ -44,11 +45,12 @@ class SchemeTypeViewSpec extends ViewSpecBase {
 
   "scheme type view" should {
     "show the Non-TASS radio button and Other button when non-tass-radio.enabled is set to true with hint text" in new SchemeTypeViewSetUp(
-      true
+      true,
+      false
     ) {
       val doc: Document = asDocument(view(schemeTypeForm))
 
-      val expectedRadioButtons = "Company Share Option Plan (CSOP) " +
+      val expectedRadioButtons: String = "Company Share Option Plan (CSOP) " +
         "Enterprise Management Incentives (EMI) " +
         "Save As You Earn (SAYE) " +
         "Share Incentive Plan (SIP) " +
@@ -58,14 +60,33 @@ class SchemeTypeViewSpec extends ViewSpecBase {
       getRadioButtonsFormDoc(doc) mustBe expectedRadioButtons
     }
 
-    "not show the Non-TASS radio button when non-tass-radio.enabled is set to false" in new SchemeTypeViewSetUp(false) {
+    "not show the Non-TASS radio button when non-tass-radio.enabled is set to false" in new SchemeTypeViewSetUp(
+      false,
+      false
+    ) {
       val doc: Document = asDocument(view(schemeTypeForm))
 
-      val expectedRadioButtons = "Company Share Option Plan (CSOP) " +
+      val expectedRadioButtons: String = "Company Share Option Plan (CSOP) " +
         "Enterprise Management Incentives (EMI) " +
         "Save As You Earn (SAYE) " +
         "Share Incentive Plan (SIP) " +
         "Other"
+
+      getRadioButtonsFormDoc(doc) mustBe expectedRadioButtons
+    }
+
+    "not show the Other radio button post April when other-radio.enabled is set to true" in new SchemeTypeViewSetUp(
+      false,
+      true
+    ) {
+
+      val doc: Document = asDocument(view(schemeTypeForm))
+
+      val expectedRadioButtons: String = "Company Share Option Plan (CSOP) " +
+        "Enterprise Management Incentives (EMI) " +
+        "Save As You Earn (SAYE) " +
+        "Share Incentive Plan (SIP) " +
+        "Non-tax advantaged share schemes (Non-TASS) Previously called Other schemes and arrangements"
 
       getRadioButtonsFormDoc(doc) mustBe expectedRadioButtons
     }

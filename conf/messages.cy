@@ -60,6 +60,7 @@ ers_scheme_type.other = Arall
 ers_scheme_type.other.hint = For checking files created with sheet names beginning with OTHER
 ers_scheme_type.non-tass = Non-TASS
 ers_scheme_type.non-tass.hint = For checking files created with sheet names beginning with Non-TASS
+ers_scheme_type.non-tass.post.april.hint = Previously called 'Other schemes and arrangements'
 ers_scheme_type.continue = Yn eich blaen
 ers_scheme_type.select_scheme_type = Dewiswch y math o gynllun neu drefniant Gwarantau Ar Sail Cyflogaeth (ERS)
 

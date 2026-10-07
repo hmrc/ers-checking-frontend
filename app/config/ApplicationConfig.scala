@@ -93,4 +93,6 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
   // Non-TASS radio button
   lazy val displayNonTASSRadio: Boolean = config.getConfBool("features.non-tass-radio.enabled", defBool = false)
 
+  lazy val removeOtherRadio: Boolean = config.getConfBool("features.remove-other-radio.enabled", defBool = false)
+
 }
