@@ -32,7 +32,7 @@ class SchemeTypeViewSpec extends ViewSpecBase {
 
     implicit val applicationConfig: ApplicationConfig = new ApplicationConfig(mock[ServicesConfig]) {
       override lazy val displayNonTASSRadio: Boolean = nonTasRadioEnabled
-      override lazy val removeOtherRadio: Boolean  = otherRadioDisabled
+      override lazy val removeOtherRadio: Boolean    = otherRadioDisabled
     }
 
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
