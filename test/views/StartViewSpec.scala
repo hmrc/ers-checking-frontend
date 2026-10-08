@@ -40,7 +40,7 @@ class StartViewSpec extends ViewSpecBase {
 
     def getBanner(doc: Document): String = doc.getElementsByClass("govuk-notification-banner").text()
 
-    val bannerText: String            =
+    val bannerText: String =
       "Important From 6 April 2027 you must use the updated version of the HMRC templates when " +
         "you submit your ERS return. If you create your own files you will need to use the technical notes to update your file."
 
