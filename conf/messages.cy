@@ -57,9 +57,9 @@ ers_scheme_type.emi = Cymhellion Rheoli Mentrau (EMI)
 ers_scheme_type.saye = Cynilo Wrth Ennill (SAYE)
 ers_scheme_type.sip = Cynllun Cymell Cyfranddaliadau (SIP)
 ers_scheme_type.other = Arall
-ers_scheme_type.other.hint = For checking files created with sheet names beginning with OTHER
-ers_scheme_type.non-tass = Non-TASS
-ers_scheme_type.non-tass.hint = For checking files created with sheet names beginning with Non-TASS
+ers_scheme_type.other.hint = Ar gyfer gwirio ffeiliau sydd wedi’u creu ag enwau dalennau sy’n dechrau gydag ARALL
+ers_scheme_type.non-tass = Dim-TASS
+ers_scheme_type.non-tass.hint = Ar gyfer gwirio ffeiliau sydd wedi’u creu ag enwau dalennau sy’n dechrau gyda Dim-TASS
 ers_scheme_type.continue = Yn eich blaen
 ers_scheme_type.select_scheme_type = Dewiswch y math o gynllun neu drefniant Gwarantau Ar Sail Cyflogaeth (ERS)
 
@@ -110,15 +110,15 @@ ers_check_csv_file.other.OTHER_NOTIONAL =Rhyddhau benthyciadau tybiannol ar ôl 
 ers_check_csv_file.other.OTHER_ENCHANCEMENT =Gwelliant artiffisial y gwerth marchnad. Gwerth gwarantau ar ôl caffael
 ers_check_csv_file.other.OTHER_SOLD =Gwarantau sydd wedi’u gwerthu am fwy na’r gwerth marchnadol ar ôl caffael
 
-ers_check_csv_file.non-tass.OTHER_GRANTS = Grant of options
-ers_check_csv_file.non-tass.OTHER_OPTIONS = Other option events
-ers_check_csv_file.non-tass.OTHER_ACQUISITION = Acquisition of securities
-ers_check_csv_file.non-tass.OTHER_RESTRICTED = Restricted securities post acquisition events
-ers_check_csv_file.non-tass.OTHER_BENEFITS = Receipt of other benefits from securities post acquisition
-ers_check_csv_file.non-tass.OTHER_CONVERTABLE = Convertible securities post-acquisition
-ers_check_csv_file.non-tass.OTHER_NOTIONAL = Discharge of notional loans post-acquisition
-ers_check_csv_file.non-tass.OTHER_ENCHANCEMENT = Artificial enhancement of market value. Value of securities post acquisition
-ers_check_csv_file.non-tass.OTHER_SOLD = Securities sold for more than market value post acquisition
+ers_check_csv_file.non-tass.OTHER_GRANTS =Caniatáu opsiynau
+ers_check_csv_file.non-tass.OTHER_OPTIONS =Digwyddiadau opsiynau eraill
+ers_check_csv_file.non-tass.OTHER_ACQUISITION =Caffael gwarantau
+ers_check_csv_file.non-tass.OTHER_RESTRICTED =Gwarantau cyfyngedig ar ôl digwyddiadau caffael
+ers_check_csv_file.non-tass.OTHER_BENEFITS =Buddiannau eraill a gafwyd o warantau ar ôl caffael
+ers_check_csv_file.non-tass.OTHER_CONVERTABLE =Gwarantau trosadwy ar ôl caffael
+ers_check_csv_file.non-tass.OTHER_NOTIONAL =Rhyddhau benthyciadau tybiannol ar ôl caffael
+ers_check_csv_file.non-tass.OTHER_ENCHANCEMENT =Gwelliant artiffisial y gwerth marchnad. Gwerth gwarantau ar ôl caffael
+ers_check_csv_file.non-tass.OTHER_SOLD =Gwarantau sydd wedi’u gwerthu am fwy na’r gwerth marchnadol ar ôl caffael
 
 ers_check_file.title =Dewiswch y ffeil ODS rydych am ei gwirio am wallau
 ers_check_file.file_upload_label = Uwchlwytho ffeil
@@ -172,7 +172,7 @@ ers_pdf_error_report.emi =Cymhellion Rheoli Mentrau
 ers_pdf_error_report.saye =Cynilo Wrth Ennill
 ers_pdf_error_report.sip =Cynllun Cymell Cyfranddaliadau
 ers_pdf_error_report.other =Arall
-ers_pdf_error_report.non-tass = Non-tax advantaged share schemes
+ers_pdf_error_report.non-tass = Cynlluniau nad ydyn nhw’n gynlluniau â manteision treth
 
 ers_format_errors.instructions =Dewis ffeil wahanol i’w gwirio
 ers.exceptions.dataParser.fileRetrievalFailed =Ymddengys fod y ffeil a ddewisoch i’w gwirio wedi torri.<br/><br/>Ni fyddwch yn gallu uwchlwytho {0} fel rhan o’ch Datganiad Blynyddol.
