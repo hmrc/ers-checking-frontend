@@ -184,7 +184,7 @@ class CheckingServiceControllerTest
 
     "if no form errors with scheme type and save success" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val schemeTypeData      = Map("schemeType" -> "1")
+      val schemeTypeData      = Map("schemeType" -> "csop")
       val form                = CSformMappings.schemeTypeForm.bind(schemeTypeData)
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result              = controllerUnderTest.showSchemeTypeSelected(request)
@@ -195,7 +195,7 @@ class CheckingServiceControllerTest
 
     "if no form errors with scheme type and save fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
-      val schemeTypeData      = Map("schemeType" -> "1")
+      val schemeTypeData      = Map("schemeType" -> "csop")
       val form                = CSformMappings.schemeTypeForm.bind(schemeTypeData)
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       contentAsString(controllerUnderTest.showSchemeTypeSelected(request)) shouldBe
@@ -349,9 +349,9 @@ class CheckingServiceControllerTest
           .thenReturn(if (schemeRes) Future.successful(("", "")) else Future.failed(new Exception))
 
         when(mockSessionCacheRepo.fetch[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any()))
-          .thenReturn(if (schemeRes) Future.successful(Some("1")) else Future.successful(None))
+          .thenReturn(if (schemeRes) Future.successful(Some("csop")) else Future.successful(None))
         when(mockSessionCacheRepo.fetchAndGetEntry[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any()))
-          .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
+          .thenReturn(if (schemeRes) Future.successful("csop") else Future.failed(new Exception))
 
         when(mockUpscanService.getUpscanFormData(any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(UpscanInitiateResponse(Reference("ref"), Call("GET", "/"), Map.empty)))
@@ -421,7 +421,7 @@ class CheckingServiceControllerTest
         when(mockSessionCacheRepo.cache(refEq(mockErsUtil.SCHEME_CACHE), anyString())(any(), any()))
           .thenReturn(if (schemeRes) Future.successful(("", "")) else Future.failed(new Exception))
         when(mockSessionCacheRepo.fetchAndGetEntry[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any()))
-          .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
+          .thenReturn(if (schemeRes) Future.successful("csop") else Future.failed(new Exception))
         when(
           mockSessionCacheRepo.fetchAndGetEntry[UpscanCsvFilesList](refEq(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())
         )
@@ -540,7 +540,7 @@ class CheckingServiceControllerTest
           .thenReturn(if (schemeRes) Future.successful(("", "")) else Future.failed(new Exception))
 
         when(mockSessionCacheRepo.fetchAndGetEntry[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any()))
-          .thenReturn(if (schemeRes) Future.successful("1") else Future.failed(new Exception))
+          .thenReturn(if (schemeRes) Future.successful("csop") else Future.failed(new Exception))
 
         when(mockSessionCacheRepo.fetchAndGetEntry[String](refEq(mockErsUtil.SCHEME_ERROR_COUNT_CACHE))(any(), any()))
           .thenReturn(if (errorRes) Future.successful(errorCount) else Future.failed(new Exception))

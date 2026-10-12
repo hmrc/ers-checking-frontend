@@ -126,11 +126,12 @@ trait ErsTestHelper extends MockitoSugar {
   when(mockAppConfig.dassGatewayHost).thenReturn("/dassGatewayHost")
 
   // PageBuilder
-  when(mockErsUtil.SCHEME_CSOP).thenReturn("1")
-  when(mockErsUtil.SCHEME_EMI).thenReturn("2")
-  when(mockErsUtil.SCHEME_OTHER).thenReturn("3")
-  when(mockErsUtil.SCHEME_SAYE).thenReturn("4")
-  when(mockErsUtil.SCHEME_SIP).thenReturn("5")
+  when(mockErsUtil.SCHEME_CSOP).thenReturn("csop")
+  when(mockErsUtil.SCHEME_EMI).thenReturn("emi")
+  when(mockErsUtil.SCHEME_OTHER).thenReturn("other")
+  when(mockErsUtil.SCHEME_SAYE).thenReturn("saye")
+  when(mockErsUtil.SCHEME_SIP).thenReturn("sip")
+  when(mockErsUtil.SCHEME_NON_TASS).thenReturn("non-tass")
   when(mockErsUtil.OPTION_CSV).thenReturn("csv")
   when(mockErsUtil.OPTION_ODS).thenReturn("ods")
   when(mockErsUtil.OPTION_YES).thenReturn("1")
