@@ -111,6 +111,16 @@ ers_check_csv_file.other.OTHER_NOTIONAL =Rhyddhau benthyciadau tybiannol ar ôl 
 ers_check_csv_file.other.OTHER_ENCHANCEMENT =Gwelliant artiffisial y gwerth marchnad. Gwerth gwarantau ar ôl caffael
 ers_check_csv_file.other.OTHER_SOLD =Gwarantau sydd wedi’u gwerthu am fwy na’r gwerth marchnadol ar ôl caffael
 
+ers_check_csv_file.non-tass.OTHER_GRANTS =Caniatáu opsiynau
+ers_check_csv_file.non-tass.OTHER_OPTIONS =Digwyddiadau opsiynau eraill
+ers_check_csv_file.non-tass.OTHER_ACQUISITION =Caffael gwarantau
+ers_check_csv_file.non-tass.OTHER_RESTRICTED =Gwarantau cyfyngedig ar ôl digwyddiadau caffael
+ers_check_csv_file.non-tass.OTHER_BENEFITS =Buddiannau eraill a gafwyd o warantau ar ôl caffael
+ers_check_csv_file.non-tass.OTHER_CONVERTABLE =Gwarantau trosadwy ar ôl caffael
+ers_check_csv_file.non-tass.OTHER_NOTIONAL =Rhyddhau benthyciadau tybiannol ar ôl caffael
+ers_check_csv_file.non-tass.OTHER_ENCHANCEMENT =Gwelliant artiffisial y gwerth marchnad. Gwerth gwarantau ar ôl caffael
+ers_check_csv_file.non-tass.OTHER_SOLD =Gwarantau sydd wedi’u gwerthu am fwy na’r gwerth marchnadol ar ôl caffael
+
 ers_check_file.title =Dewiswch y ffeil ODS rydych am ei gwirio am wallau
 ers_check_file.file_upload_label = Uwchlwytho ffeil
 ers_check_file.check_file_button =Gwiriwch eich ffeil
@@ -163,6 +173,7 @@ ers_pdf_error_report.emi =Cymhellion Rheoli Mentrau
 ers_pdf_error_report.saye =Cynilo Wrth Ennill
 ers_pdf_error_report.sip =Cynllun Cymell Cyfranddaliadau
 ers_pdf_error_report.other =Arall
+ers_pdf_error_report.non-tass = Cynlluniau nad ydyn nhw’n gynlluniau â manteision treth
 
 ers_format_errors.instructions =Dewis ffeil wahanol i’w gwirio
 ers.exceptions.dataParser.fileRetrievalFailed =Ymddengys fod y ffeil a ddewisoch i’w gwirio wedi torri.<br/><br/>Ni fyddwch yn gallu uwchlwytho {0} fel rhan o’ch Datganiad Blynyddol.
