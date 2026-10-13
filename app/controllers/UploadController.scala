@@ -252,13 +252,7 @@ class UploadController @Inject() (
         val uploadedFileSchemeTypeWithArticle: String         = withArticle(
           correctCaseSelectedSchemeType(e.uploadedFileSchemeType.toLowerCase())
         )
-        val message                                           = Messages(
-          "ers.exceptions.dataParser.incorrectSchemeType",
-          uploadedFileSchemeTypeWithArticle,
-          selectedSchemeTypeWithArticle,
-          e.fileName
-        )
-
+        val message                                   = "ers.exceptions.dataParser.incorrectSchemeType"
         val optionalParams =
           Seq(uploadedFileSchemeTypeWithArticle, selectedSchemeTypeWithArticle, e.fileName)
 
@@ -266,30 +260,30 @@ class UploadController @Inject() (
 
       case NoDataFailure =>
         updateCacheThenRedirectToFormatErrorsPage(
-          Messages("ers.exceptions.dataParser.noData"),
+          "ers.exceptions.dataParser.noData",
           Seq.empty[String],
           needsExtendedInstructions = true
         )
 
       case DataContainsAmpersandFailure =>
         updateCacheThenRedirectToFormatErrorsPage(
-          Messages("ers.exceptions.dataParser.ampersand"),
+          "ers.exceptions.dataParser.ampersand",
           Seq.empty[String],
           needsExtendedInstructions = true
         )
 
       case e: IncorrectHeaderFailure =>
-        val message        = Messages("ers.exceptions.dataParser.incorrectHeader", e.sheetName, e.fileName)
+        val message        = "ers.exceptions.dataParser.incorrectHeader"
         val optionalParams = Seq(e.sheetName, e.fileName)
         updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
 
       case e: IncorrectSheetNameFailure =>
-        val message        = Messages("ers.exceptions.dataParser.incorrectSheetName", e.sheetName, e.schemeName)
+        val message        = "ers.exceptions.dataParser.incorrectSheetName"
         val optionalParams = Seq(e.sheetName, e.schemeName)
         updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
 
       case _: SheetNameNotInSchemeVersionFailure =>
-        val message = Messages("ers.exceptions.dataParser.wrongSchemeFile")
+        val message = "ers.exceptions.dataParser.wrongSchemeFile"
         updateCacheThenRedirectToFormatErrorsPage(message, Seq.empty[String], needsExtendedInstructions = true)
 
       case other =>
