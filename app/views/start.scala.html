@@ -26,7 +26,7 @@
 
 @ers_main(title = messages("ers.start.page_title")) {
 
-    @if(appConfig.startPageBannerEnabled){
+    @if(appConfig.startPageBannerPara1Enabled){
         <div class="govuk-notification-banner" role="region" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
             <div class="govuk-notification-banner__header">
                 <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
@@ -35,7 +35,7 @@
             </div>
             <div class="govuk-notification-banner__content">
                 @messages("ers_start.banner.para_1")
-                @if(appConfig.startPageBannerParaTwoEnabled){
+                @if(appConfig.startPageBannerPara2Enabled){
                     <br><br>
                     @messages("ers_start.banner.para_2")
                 }

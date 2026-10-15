@@ -5,7 +5,7 @@ lazy val microservice = Project("ers-checking-frontend", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin) // Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(CodeCoverageSettings())
-  .settings(PlayKeys.playDefaultPort := 9225)
+  .settings(PlayKeys.playDefaultPort := 9227)
   .settings(
     libraryDependencies ++= AppDependencies(),
     routesGenerator := InjectedRoutesGenerator,
