@@ -78,22 +78,6 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
     s"$basGatewayHost/bas-gateway/sign-out-without-state?continue=$encodedCallbackUrl"
   }
 
-  /*
-   The following parameters are all related to EPIC DDCE-7243
-   */
-
-  // Which schemes to validate against
-  lazy val useV4andV5Scheme: Boolean = config.getConfBool("features.scheme-version.use-V4-and-V5", defBool = true)
-  lazy val useV6andV7Scheme: Boolean = config.getConfBool("features.scheme-version.use-V6-and-V7", defBool = false)
-
-  // Start page banner
-  lazy val startPageBannerEnabled: Boolean = config.getConfBool("features.start-page-banner.enabled", defBool = false)
-
-  lazy val startPageBannerParaTwoEnabled: Boolean =
-    config.getConfBool("features.start-page-banner.para-2-enabled", defBool = false)
-
-  // Non-TASS radio button
-  lazy val displayNonTASSRadio: Boolean = config.getConfBool("features.non-tass-radio.enabled", defBool = false)
   private val clock : Clock= Clock.system(ZoneId.of("Europe/London"))
 
   private def isEnabledFrom(date: LocalDate): Boolean = {
@@ -113,5 +97,7 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
     isEnabledUntil(LocalDate.parse(config.getString("microservice.services.features.dates.use-V4-and-V5-end")))
 
   lazy val useV6andV7SchemeEnabled: Boolean = isEnabledFrom(LocalDate.parse(config.getString("microservice.services.features.dates.use-V6-and-V7")))
+
+  lazy val displayNonTASSRadioButton: Boolean = isEnabledFrom(LocalDate.parse(config.getString("microservice.services.features.dates.non-tass-radio")))
 
 }

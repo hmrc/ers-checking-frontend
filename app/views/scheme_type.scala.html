@@ -27,7 +27,7 @@
 @(form: Form[CS_schemeType])(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
 
 @otherOrNonTassButton = @{
-     if(appConfig.displayNonTASSRadio){
+     if(appConfig.displayNonTASSRadioButton){
          Seq(
             RadioItem(
                 id = Some("schemeType-non-tass"),
