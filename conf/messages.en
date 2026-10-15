@@ -179,7 +179,7 @@ ers.exceptions.dataParser.fileRetrievalFailed = The file that you chose seems to
 ers.exceptions.dataParser.parserFailure = The file that you chose seems to be damaged.<br/><br/>You won’t be able to upload {0} as part of your annual return.
 ers.exceptions.dataParser.fileParsingError = The file that you chose to check seems to be damaged. You won’t be able to upload {0} as part of your annual return.
 ers.exceptions.dataParser.parsingOfFileData = Parsing of File Data
-ers.exceptions.dataParser.incorrectSheetName = {0} isn’t a sheet name (title) that can be used in {1} files.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Use the Employment Related Securities (ERS) guidance documents</a> to help you create error-free files.
+ers.exceptions.dataParser.incorrectSheetName = The file you uploaded is not the right file.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Check the Employment Related Securities (ERS) guidance documents</a> to make sure that you have the right version of the templates. If you are creating your own files you can check the technical guidance notes.
 ers.exceptions.dataParser.wrongSchemeFile = This is not a file that you said you needed to upload, choose a different file
 ers.exceptions.dataParser.incorrectSchemeType = You chose to check {1} file, but {2} is {0} file.
 ers.exceptions.dataParser.incorrectSchemeType.other = an OTHER
@@ -194,7 +194,7 @@ ers.exceptions.dataParser.headersDontMatch = Header doesn’t match
 ers.exceptions.dataParser.configFailure = It hasn’t been possible to check this file.
 ers.exceptions.dataParser.validatorError = Could not set the validator
 ers.exceptions.dataParser.ampersand = Must not contain ampersands.
-ers.exceptions.dataParser.noData = The file that you chose doesn’t have any data after row 9. The reportable events data must start in cell A10.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Use the Employment Related Securities (ERS) guidance documents</a> to help you create error-free files.
+ers.exceptions.dataParser.noData = Your uploaded file doesn’t have any data after row {0}. The reportable events data must start in cell A{1}.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Use the Employment Related Securities (ERS) guidance documents</a> to help you create error-free files.
 
 ers.global_errors.message = Sorry, there is a problem with the service
 ers.global_errors.heading = Check your Employment Related Securities (ERS) files – Employment Related Securities
