@@ -255,10 +255,10 @@ class UploadController @Inject() (
 
         updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = false)
 
-      case NoDataFailure =>
+      case e: NoDataFailure =>
         updateCacheThenRedirectToFormatErrorsPage(
-          Messages("ers.exceptions.dataParser.noData"),
-          Seq.empty[String],
+          "ers.exceptions.dataParser.noData",
+          Seq(e.numberOdsHeaderRows.toString, (e.numberOdsHeaderRows + 1).toString),
           needsExtendedInstructions = true
         )
 
@@ -275,9 +275,8 @@ class UploadController @Inject() (
         updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
 
       case e: IncorrectSheetNameFailure =>
-        val message        = Messages("ers.exceptions.dataParser.incorrectSheetName", e.sheetName, e.schemeName)
-        val optionalParams = Seq(e.sheetName, e.schemeName)
-        updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = true)
+        val message = Messages("ers.exceptions.dataParser.incorrectSheetName", e.sheetName, e.schemeName)
+        updateCacheThenRedirectToFormatErrorsPage(message, Seq.empty[String], needsExtendedInstructions = true)
 
       case _: SheetNameNotInSchemeVersionFailure =>
         val message = Messages("ers.exceptions.dataParser.wrongSchemeFile")
