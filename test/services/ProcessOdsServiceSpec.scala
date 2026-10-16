@@ -31,6 +31,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import services.ProcessOdsService._
+import services.SipXMLTestData.getSipV7DataStreamWithNoData
 import services.getValidOTHERV4DataStream.validOtherV4DataStream
 import services.completeValidNonTassV7DataStream.validNonTassV7DataStream
 import uk.gov.hmrc.mongo.test.MongoSupport
@@ -337,14 +338,25 @@ class ProcessOdsServiceSpec
         validatorFailure.message shouldBe "Must not contain ampersands."
       }
 
-      "return NoDataFailure when ODS data is empty" in {
+      "return NoDataFailure with 9 header rows when ODS data is empty and parsed a V4 EMI file" in {
         val validatorFailure =
           processOdsService
             .validateOdsFile("EMI.ods", XMLTestData.getEMIAdjustmentsTemplateWithNoData, "EMI")
             .left
             .value
 
-        validatorFailure           mustBe NoDataFailure
+        validatorFailure           mustBe NoDataFailure(9)
+        validatorFailure.message shouldBe "No data in file"
+      }
+
+      "return NoDataFailure with 4 header rows when ODS data is empty and parsed a V7 SIP file" in {
+        val validatorFailure =
+          processOdsService
+            .validateOdsFile("SIP.ods", getSipV7DataStreamWithNoData, "SIP", useV6andV7Scheme = true)
+            .left
+            .value
+
+        validatorFailure           mustBe NoDataFailure(4)
         validatorFailure.message shouldBe "No data in file"
       }
 
