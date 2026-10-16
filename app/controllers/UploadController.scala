@@ -241,9 +241,18 @@ class UploadController @Inject() (
   )(implicit request: Request[AnyContent]): Future[Result] =
     failure match {
       case e: IncorrectSchemeFailure =>
-        val selectedSchemeTypeWithArticle: String     = withArticle(e.selectedSchemeType.toUpperCase())
-        val uploadedFileSchemeTypeWithArticle: String = withArticle(e.uploadedFileSchemeType.toUpperCase())
-        val message                                   = Messages(
+        def correctCaseSelectedSchemeType(schemeType: String) = if (schemeType == "non-tass") {
+          "Non-TASS"
+        } else {
+          schemeType.toUpperCase()
+        }
+        val selectedSchemeTypeWithArticle: String             = withArticle(
+          correctCaseSelectedSchemeType(e.selectedSchemeType.toLowerCase())
+        )
+        val uploadedFileSchemeTypeWithArticle: String         = withArticle(
+          correctCaseSelectedSchemeType(e.uploadedFileSchemeType.toLowerCase())
+        )
+        val message                                           = Messages(
           "ers.exceptions.dataParser.incorrectSchemeType",
           uploadedFileSchemeTypeWithArticle,
           selectedSchemeTypeWithArticle,
