@@ -29,7 +29,7 @@ class StartViewSpec extends ViewSpecBase {
   class StartViewSetUp(bannerEnabled: Boolean, bannerSecondParagraphEnabled: Boolean) {
 
     implicit val applicationConfig = new ApplicationConfig(mock[ServicesConfig]) {
-      override lazy val startPageBannerPara1Enabled = bannerEnabled
+      override lazy val startPageBannerEnabled      = bannerEnabled
       override lazy val startPageBannerPara2Enabled = bannerSecondParagraphEnabled
     }
 

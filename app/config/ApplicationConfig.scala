@@ -87,16 +87,15 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
   private def isEnabledUntil(date: LocalDate): Boolean =
     FeatureDate.isEnabledUntil(date, clock)
 
-  lazy val startPageBannerPara1Enabled: Boolean = isEnabledFrom(
-    LocalDate.parse(config.getString("microservice.services.features.dates.start-page-banner-para1"))
+  lazy val startPageBannerEnabled: Boolean = isEnabledFrom(
+    LocalDate.parse(config.getString("microservice.services.features.dates.start-page-banner"))
   )
 
-  lazy val startPageBannerPara2Enabled: Boolean = isEnabledFrom(
-    LocalDate.parse(config.getString("microservice.services.features.dates.start-page-banner-para2-start"))
-  ) &&
-    isEnabledUntil(
-      LocalDate.parse(config.getString("microservice.services.features.dates.start-page-banner-para2-end"))
-    )
+  lazy val startPageBannerPara2Enabled: Boolean =
+    startPageBannerEnabled &&
+      isEnabledUntil(
+        LocalDate.parse(config.getString("microservice.services.features.dates.start-page-banner-para2-end"))
+      )
 
   lazy val useV4andV5SchemeEnabled: Boolean =
     isEnabledFrom(LocalDate.parse(config.getString("microservice.services.features.dates.use-V4-and-V5-start"))) &&

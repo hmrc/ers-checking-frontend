@@ -16,6 +16,7 @@
 
 package config
 
+import org.mockito.Mockito.when
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -23,6 +24,8 @@ import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.i18n.Lang
 import play.api.mvc.Call
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+
+import java.time.LocalDate
 
 class ApplicationConfigSpec extends AnyWordSpecLike with Matchers {
 
@@ -55,6 +58,53 @@ class ApplicationConfigSpec extends AnyWordSpecLike with Matchers {
         val expectedEncoded    = java.net.URLEncoder.encode(callbackUrl, "UTF-8")
         val expectedUrl        = s"https://example.com/bas-gateway/sign-out-without-state?continue=$expectedEncoded"
         appConfig.getSignOutUrl(callbackUrl) mustBe expectedUrl
+      }
+    }
+
+    "startPageBannerEnabled" should {
+      val servicesConfig = mock[ServicesConfig]
+
+      "return true when the start date has been reached" in {
+        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner"))
+          .thenReturn(LocalDate.now().minusDays(1).toString)
+        val applicationConfig = new ApplicationConfig(servicesConfig)
+        applicationConfig.startPageBannerEnabled mustBe true
+      }
+
+      "return false when the start date has not been reached" in {
+        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner"))
+          .thenReturn(LocalDate.now().plusDays(1).toString)
+        val applicationConfig = new ApplicationConfig(servicesConfig)
+        applicationConfig.startPageBannerEnabled mustBe false
+      }
+    }
+
+    "startPageBannerPara2Enabled" should {
+      val servicesConfig = mock[ServicesConfig]
+
+      "return true when the banner has started and para 2 has not been reached" in {
+        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner"))
+          .thenReturn(LocalDate.now().minusDays(1).toString)
+        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner-para2-end"))
+          .thenReturn(LocalDate.now().plusDays(1).toString)
+        val applicationConfig = new ApplicationConfig(servicesConfig)
+        applicationConfig.startPageBannerPara2Enabled mustBe true
+      }
+
+      "return false when the banner start date has not been reached" in {
+        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner"))
+          .thenReturn(LocalDate.now().plusDays(1).toString)
+        val applicationConfig = new ApplicationConfig(servicesConfig)
+        applicationConfig.startPageBannerPara2Enabled mustBe false
+      }
+
+      "return false when para 2 end date has been reached" in {
+        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner"))
+          .thenReturn(LocalDate.now().minusDays(1).toString)
+        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner-para2-end"))
+          .thenReturn(LocalDate.now().toString)
+        val applicationConfig = new ApplicationConfig(servicesConfig)
+        applicationConfig.startPageBannerPara2Enabled mustBe false
       }
     }
   }
