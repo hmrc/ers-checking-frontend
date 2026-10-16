@@ -22,6 +22,7 @@ import controllers.routes
 
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import utils.FeatureDate
 
 import java.time.{Clock, LocalDate, ZoneId}
 import scala.concurrent.duration._
@@ -81,10 +82,10 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
   private val clock: Clock = Clock.system(ZoneId.of("Europe/London"))
 
   private def isEnabledFrom(date: LocalDate): Boolean =
-    !LocalDate.now(clock).isBefore(date)
+    FeatureDate.isEnabledFrom(date, clock)
 
   private def isEnabledUntil(date: LocalDate): Boolean =
-    LocalDate.now(clock).isBefore(date)
+    FeatureDate.isEnabledUntil(date, clock)
 
   lazy val startPageBannerPara1Enabled: Boolean = isEnabledFrom(
     LocalDate.parse(config.getString("microservice.services.features.dates.start-page-banner-para1"))
