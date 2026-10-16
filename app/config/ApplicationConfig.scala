@@ -89,7 +89,7 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
 
   /*
   The following parameters are all related to EPIC DDCE-7243
-  */
+   */
 
   // Start page banner
   lazy val startPageBannerEnabled: Boolean = isEnabledFrom(
