@@ -27,31 +27,41 @@
 @(form: Form[CS_schemeType])(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
 
 @otherOrNonTassButton = @{
-     if(appConfig.displayNonTASSRadio){
-         Seq(
-            RadioItem(
-                id = Some("schemeType-non-tass"),
-                content = Text(messages("ers_scheme_type.non-tass")),
-                value = Some("non-tass"),
-                hint = Some(Hint(content = Text(messages("ers_scheme_type.non-tass.hint"))))
-            ),
-            RadioItem(
-                id = Some("schemeType-other"),
-                content = Text(messages("ers_scheme_type.other")),
-                value = Some("other"),
-                hint = Some(Hint(content = Text(messages("ers_scheme_type.other.hint"))))
-            )
-         )
-     } else {
-         Seq(
-             RadioItem(
-                 id = Some("schemeType-other"),
-                 content = Text(messages("ers_scheme_type.other")),
-                 value = Some("other")
-             )
-         )
-     }
- }
+
+    val nonTassHint =
+        if (appConfig.removeOtherRadio)
+            "ers_scheme_type.non-tass.post.april.hint"
+        else
+            "ers_scheme_type.non-tass.hint"
+
+    val nonTassRadio = RadioItem(
+                            id = Some("schemeType-non-tass"),
+                            content = Text(messages("ers_scheme_type.non-tass")),
+                            value = Some("non-tass"),
+                            hint = Some(Hint(
+                                content = Text(messages(nonTassHint))
+                            ))
+                        )
+
+    val otherRadio = RadioItem(
+                            id = Some("schemeType-other"),
+                            content = Text(messages("ers_scheme_type.other")),
+                            value = Some("other"),
+                            hint = if(appConfig.displayNonTASSRadio)
+                                    Some(Hint(
+                                        content = Text(messages("ers_scheme_type.other.hint"))
+                                        ))
+                                    else None
+                    )
+
+    if(appConfig.removeOtherRadio) {
+        Seq(nonTassRadio)}
+    else if(appConfig.displayNonTASSRadio) {
+        Seq(nonTassRadio, otherRadio)
+    } else {
+        Seq(otherRadio)
+    }
+}
 
 @* type of scheme template *@
 @ers_main(title = messages("ers.scheme_types.page_title")) {

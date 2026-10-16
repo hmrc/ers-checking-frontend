@@ -60,6 +60,7 @@ ers_scheme_type.other = Arall
 ers_scheme_type.other.hint = Ar gyfer gwirio ffeiliau sydd wedi’u creu ag enwau dalennau sy’n dechrau gydag ARALL
 ers_scheme_type.non-tass = Cynlluniau nad ydyn nhw’n gynlluniau â manteision treth (Dim-TASS)
 ers_scheme_type.non-tass.hint = Ar gyfer gwirio ffeiliau sydd wedi’u creu ag enwau dalennau sy’n dechrau gyda Dim-TASS
+ers_scheme_type.non-tass.post.april.hint = A elwir yn ‘Cynlluniau a threfniadau eraill’ yn flaenorol
 ers_scheme_type.continue = Yn eich blaen
 ers_scheme_type.select_scheme_type = Dewiswch y math o gynllun neu drefniant Gwarantau Ar Sail Cyflogaeth (ERS)
 
