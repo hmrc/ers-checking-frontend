@@ -23,7 +23,7 @@ import java.time.{Clock, LocalDate, ZoneId}
 
 class FeatureDateSpec extends AnyWordSpecLike {
 
-  private val zone                         = ZoneId.of("Europe/London")
+  private val zone = ZoneId.of("Europe/London")
 
   private def clockAt(date: String): Clock =
     Clock.fixed(
@@ -31,7 +31,7 @@ class FeatureDateSpec extends AnyWordSpecLike {
       zone
     )
 
-  "isEnabledFrom"  should {
+  "isEnabledFrom" should {
     "be false before the start date" in {
       FeatureDate.isEnabledFrom(
         LocalDate.parse("2026-11-02"),

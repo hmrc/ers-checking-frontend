@@ -28,41 +28,38 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import java.time.LocalDate
 
 class ApplicationConfigSpec extends AnyWordSpecLike with Matchers {
+  val servicesConfig: ServicesConfig = mock[ServicesConfig]
 
   "ApplicationConfig" when {
     ".languageMap" should {
       "return correct language map" in {
-        val servicesConfig = mock[ServicesConfig]
-        val appConfig      = new ApplicationConfig(servicesConfig)
-        val expected       = Map("english" -> Lang("en"), "cymraeg" -> Lang("cy"))
+        val appConfig = new ApplicationConfig(servicesConfig)
+        val expected  = Map("english" -> Lang("en"), "cymraeg" -> Lang("cy"))
         appConfig.languageMap mustBe expected
       }
     }
 
     ".routeToSwitchLanguage" should {
       "return correct route to switch language" in {
-        val servicesConfig = mock[ServicesConfig]
-        val appConfig      = new ApplicationConfig(servicesConfig)
-        val call: Call     = appConfig.routeToSwitchLanguage("cy")
+        val appConfig  = new ApplicationConfig(servicesConfig)
+        val call: Call = appConfig.routeToSwitchLanguage("cy")
         call.url must include("/language/cy")
       }
     }
 
     ".getSignOutUrl" should {
       "return a correctly formatted sign-out URL with encoded callback" in {
-        val mockServicesConfig = mock[ServicesConfig]
-        val appConfig          = new ApplicationConfig(mockServicesConfig) {
+        val appConfig       = new ApplicationConfig(servicesConfig) {
           override lazy val basGatewayHost: String = "https://example.com"
         }
-        val callbackUrl        = "http://localhost:9000/callback"
-        val expectedEncoded    = java.net.URLEncoder.encode(callbackUrl, "UTF-8")
-        val expectedUrl        = s"https://example.com/bas-gateway/sign-out-without-state?continue=$expectedEncoded"
+        val callbackUrl     = "http://localhost:9000/callback"
+        val expectedEncoded = java.net.URLEncoder.encode(callbackUrl, "UTF-8")
+        val expectedUrl     = s"https://example.com/bas-gateway/sign-out-without-state?continue=$expectedEncoded"
         appConfig.getSignOutUrl(callbackUrl) mustBe expectedUrl
       }
     }
 
     "startPageBannerEnabled" should {
-      val servicesConfig = mock[ServicesConfig]
 
       "return true when the start date has been reached" in {
         when(servicesConfig.getString("microservice.services.features.dates.start-page-banner"))
@@ -80,7 +77,6 @@ class ApplicationConfigSpec extends AnyWordSpecLike with Matchers {
     }
 
     "startPageBannerPara2Enabled" should {
-      val servicesConfig = mock[ServicesConfig]
 
       "return true when the banner has started and para 2 has not been reached" in {
         when(servicesConfig.getString("microservice.services.features.dates.start-page-banner"))
@@ -105,6 +101,32 @@ class ApplicationConfigSpec extends AnyWordSpecLike with Matchers {
           .thenReturn(LocalDate.now().toString)
         val applicationConfig = new ApplicationConfig(servicesConfig)
         applicationConfig.startPageBannerPara2Enabled mustBe false
+      }
+    }
+
+    "useV4andV5SchemeEnabled" should {
+
+      "return true within the configured date range" in {
+        when(servicesConfig.getString("microservice.services.features.dates.use-V4-and-V5-start"))
+          .thenReturn(LocalDate.now().minusDays(1).toString)
+        when(servicesConfig.getString("microservice.services.features.dates.use-V4-and-V5-end"))
+          .thenReturn(LocalDate.now().plusDays(1).toString)
+        val applicationConfig = new ApplicationConfig(servicesConfig)
+        applicationConfig.useV4andV5SchemeEnabled mustBe true
+      }
+    }
+
+    "useV6andV7SchemeEnabled & displayNonTASSRadioButton" should {
+
+      "return true when the configured date has been reached" in {
+        when(servicesConfig.getString("microservice.services.features.dates.use-V6-and-V7"))
+          .thenReturn(LocalDate.now().minusDays(1).toString)
+        when(servicesConfig.getString("microservice.services.features.dates.non-tass-radio"))
+          .thenReturn(LocalDate.now().minusDays(1).toString)
+        val applicationConfig = new ApplicationConfig(servicesConfig)
+        applicationConfig.useV6andV7SchemeEnabled   mustBe true
+        applicationConfig.displayNonTASSRadioButton mustBe true
+
       }
     }
   }
