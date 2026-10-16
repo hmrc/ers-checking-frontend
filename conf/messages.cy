@@ -187,7 +187,7 @@ ers.exceptions.dataParser.incorrectHeader =Nid yw’r penynnau ar {0} yn {1} yn 
 ers.exceptions.dataParser.headersDontMatch =Nid yw’r pennyn yn cyd-fynd
 ers.exceptions.dataParser.configFailure =Ni fu’n bosibl gwirio’r ffeil hon.
 ers.exceptions.dataParser.ampersand =Rhaid peidio â chynnwys ampersandau.
-ers.exceptions.dataParser.noData =Nid oes unrhyw ddata ar ôl rhes 9 yn y ffeil a ddewisoch. Mae’n rhaid i ddata’r digwyddiadau hysbysadwy ddechrau yng nghell A10.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link>Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i’ch helpu i greu ffeiliau heb wallau.
+ers.exceptions.dataParser.noData =Nid oes unrhyw ddata ar ôl rhes 9 yn y ffeil a ddewisoch. Mae’n rhaid i ddata’r digwyddiadau hysbysadwy ddechrau yng nghell A10.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i’ch helpu i greu ffeiliau heb wallau.
 
 ers.global_errors.message = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth
 ers.global_errors.heading = Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS)
