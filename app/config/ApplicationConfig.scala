@@ -87,6 +87,11 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
   private def isEnabledUntil(date: LocalDate): Boolean =
     FeatureDate.isEnabledUntil(date, clock)
 
+  /*
+  The following parameters are all related to EPIC DDCE-7243
+  */
+
+  // Start page banner
   lazy val startPageBannerEnabled: Boolean = isEnabledFrom(
     LocalDate.parse(config.getString("microservice.services.features.dates.start-page-banner"))
   )
@@ -97,6 +102,7 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
         LocalDate.parse(config.getString("microservice.services.features.dates.start-page-banner-para2-end"))
       )
 
+  // Which schemes to validate against
   lazy val useV4andV5SchemeEnabled: Boolean =
     isEnabledFrom(LocalDate.parse(config.getString("microservice.services.features.dates.use-V4-and-V5-start"))) &&
       isEnabledUntil(LocalDate.parse(config.getString("microservice.services.features.dates.use-V4-and-V5-end")))
@@ -105,6 +111,7 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
     LocalDate.parse(config.getString("microservice.services.features.dates.use-V6-and-V7"))
   )
 
+  // Non-TASS radio button
   lazy val displayNonTASSRadioButton: Boolean = isEnabledFrom(
     LocalDate.parse(config.getString("microservice.services.features.dates.non-tass-radio"))
   )
