@@ -96,7 +96,7 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
     LocalDate.parse(config.getString("microservice.services.features.dates.start-page-banner"))
   )
 
-  lazy val startPageBannerPara2Enabled: Boolean =
+  lazy val startPageBannerParaTwoEnabled: Boolean =
     startPageBannerEnabled &&
       isEnabledUntil(
         LocalDate.parse(config.getString("microservice.services.features.dates.start-page-banner-para2-end"))

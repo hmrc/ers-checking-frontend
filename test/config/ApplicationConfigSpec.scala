@@ -84,14 +84,14 @@ class ApplicationConfigSpec extends AnyWordSpecLike with Matchers {
         when(servicesConfig.getString("microservice.services.features.dates.start-page-banner-para2-end"))
           .thenReturn(LocalDate.now().plusDays(1).toString)
         val applicationConfig = new ApplicationConfig(servicesConfig)
-        applicationConfig.startPageBannerPara2Enabled mustBe true
+        applicationConfig.startPageBannerParaTwoEnabled mustBe true
       }
 
       "return false when the banner start date has not been reached" in {
         when(servicesConfig.getString("microservice.services.features.dates.start-page-banner"))
           .thenReturn(LocalDate.now().plusDays(1).toString)
         val applicationConfig = new ApplicationConfig(servicesConfig)
-        applicationConfig.startPageBannerPara2Enabled mustBe false
+        applicationConfig.startPageBannerParaTwoEnabled mustBe false
       }
 
       "return false when para 2 end date has been reached" in {
@@ -100,7 +100,7 @@ class ApplicationConfigSpec extends AnyWordSpecLike with Matchers {
         when(servicesConfig.getString("microservice.services.features.dates.start-page-banner-para2-end"))
           .thenReturn(LocalDate.now().toString)
         val applicationConfig = new ApplicationConfig(servicesConfig)
-        applicationConfig.startPageBannerPara2Enabled mustBe false
+        applicationConfig.startPageBannerParaTwoEnabled mustBe false
       }
     }
 
