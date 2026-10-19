@@ -16,11 +16,11 @@
 
 package controllers
 
+import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes}
 import org.apache.pekko.stream.scaladsl.{Sink, Source}
 import org.apache.pekko.testkit.TestKit
-import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import helpers.ErsTestHelper
 import models.ERSFileProcessingException
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
@@ -35,7 +35,7 @@ import play.api.http.Status
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents, Request, Result}
-import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
+import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, i18n}
 import services.{ProcessCsvService, ProcessOdsService}
@@ -278,7 +278,7 @@ class UploadControllerSpec
         .headers("Location") shouldBe routes.CheckingServiceController.formatErrorsPage().toString
       verify(mockSessionCacheRepo).cache(
         meq("format_error"),
-        meq("This is not a file that you said you needed to upload, choose a different file")
+        meq("ers.exceptions.dataParser.wrongSchemeFile")
       )(any(), any())
       verify(mockSessionCacheRepo).cache(
         meq("format_error_params"),
@@ -299,7 +299,7 @@ class UploadControllerSpec
         .headers("Location") shouldBe routes.CheckingServiceController.formatErrorsPage().toString
       verify(mockSessionCacheRepo).cache(
         meq("format_error"),
-        meq("This is not a file that you said you needed to upload, choose a different file")
+        meq("ers.exceptions.dataParser.wrongSchemeFile")
       )(any(), any())
       verify(mockSessionCacheRepo).cache(
         meq("format_error_params"),

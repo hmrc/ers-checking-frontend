@@ -18,7 +18,7 @@ package utils
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import utils.ContentUtil.{ErrorMessageKeyPrefixAndScheme, getScheneNameWithShortenedVersion, withArticle}
+import utils.ContentUtil.{ErrorMessageKeyPrefixAndScheme, getScheneNameWithShortenedVersion}
 
 class ContentUtilSpec extends AnyWordSpecLike with Matchers {
 
@@ -62,17 +62,6 @@ class ContentUtilSpec extends AnyWordSpecLike with Matchers {
           )
         }
       )
-
-    "parse withArticle" when {
-      "data starts with a consonant" in {
-        val string = "bing!"
-        withArticle(string) shouldBe "a bing!"
-      }
-      "data starts with a vowel" in {
-        val string = "apple"
-        withArticle(string) shouldBe "an apple"
-      }
-    }
   }
 
 }
