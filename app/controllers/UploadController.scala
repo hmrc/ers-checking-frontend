@@ -240,7 +240,7 @@ class UploadController @Inject() (
   )(implicit request: Request[AnyContent]): Future[Result] =
     failure match {
       case e: IncorrectSchemeFailure =>
-        val message                                   = "ers.exceptions.dataParser.incorrectSchemeType"
+        val message                     = "ers.exceptions.dataParser.incorrectSchemeType"
         val optionalParams: Seq[String] =
           Seq(
             s"ers.exceptions.dataParser.incorrectSchemeType.${e.uploadedFileSchemeType.toLowerCase()}",
