@@ -182,6 +182,12 @@ ers.exceptions.dataParser.parsingOfFileData =Dosrannu Data Ffeil
 ers.exceptions.dataParser.incorrectSheetName =Nid yw {0} yn (deitl) enw dalen all gael ei ddefnyddio yn ffeiliau {1}.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i’ch helpu i greu ffeiliau heb wallau.
 ers.exceptions.dataParser.wrongSchemeFile =Nid yw hon yn ffeil y rhoesoch wybod fod angen i chi ei huwchlwytho – dewiswch ffeil wahanol
 ers.exceptions.dataParser.incorrectSchemeType =Gwnaethoch ddewis gwirio ffeil {1}, ond ffeil {0} yw {2}.
+ers.exceptions.dataParser.incorrectSchemeType.other = ARALL
+ers.exceptions.dataParser.incorrectSchemeType.csop = CSOP
+ers.exceptions.dataParser.incorrectSchemeType.emi = EMI
+ers.exceptions.dataParser.incorrectSchemeType.saye = SAYE
+ers.exceptions.dataParser.incorrectSchemeType.sip = SIP
+ers.exceptions.dataParser.incorrectSchemeType.non-tass = Dim-TASS
 ers.exceptions.dataParser.unidentifiableSheetName =Nid oedd modd adnabod EnwDalen
 ers.exceptions.dataParser.incorrectHeader =Nid yw’r penynnau ar {0} yn {1} yn gywir.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i sicrhau eu bod yn bodloni gofynion.
 ers.exceptions.dataParser.headersDontMatch =Nid yw’r pennyn yn cyd-fynd
