@@ -33,31 +33,23 @@ class FeatureDateSpec extends AnyWordSpecLike {
 
   "isEnabledFrom" should {
     "be false before the start date" in {
-      FeatureDate.isEnabledFrom(
-        LocalDate.parse("2026-11-02"),
-        clockAt("2026-11-01")
+      FeatureDate(clockAt("2026-11-01")).isEnabledFrom(
+        LocalDate.parse("2026-11-02")
       ) mustBe false
     }
     "be true on the start date" in {
-      FeatureDate.isEnabledFrom(
-        LocalDate.parse("2026-11-02"),
-        clockAt("2026-11-02")
+      FeatureDate(clockAt("2026-11-02")).isEnabledFrom(
+        LocalDate.parse("2026-11-02")
       ) mustBe true
     }
   }
 
   "isEnabledUntil" should {
     "be true the day before the end date" in {
-      FeatureDate.isEnabledUntil(
-        LocalDate.parse("2027-04-06"),
-        clockAt("2027-04-05")
-      ) mustBe true
+      FeatureDate(clockAt("2027-04-05")).isEnabledUntil(LocalDate.parse("2027-04-06")) mustBe true
     }
     "be false on the end date" in {
-      FeatureDate.isEnabledUntil(
-        LocalDate.parse("2027-04-06"),
-        clockAt("2027-04-06")
-      ) mustBe false
+      FeatureDate(clockAt("2027-04-06")).isEnabledUntil(LocalDate.parse("2027-04-06")) mustBe false
     }
   }
 

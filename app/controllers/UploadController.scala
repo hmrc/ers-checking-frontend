@@ -171,8 +171,8 @@ class UploadController @Inject() (
                     fileName,
                     processor,
                     scheme,
-                    appConfig.useV4andV5SchemeEnabled,
-                    appConfig.useV6andV7SchemeEnabled
+                    appConfig.useV4andV5SchemeEnabledFrom,
+                    appConfig.useV6andV7SchemeEnabledFrom
                   )(
                     request
                   )

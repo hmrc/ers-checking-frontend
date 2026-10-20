@@ -62,70 +62,70 @@ class ApplicationConfigSpec extends AnyWordSpecLike with Matchers {
     "startPageBannerEnabled" should {
 
       "return true when the start date has been reached" in {
-        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner"))
+        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner-enabled-from"))
           .thenReturn(LocalDate.now().minusDays(1).toString)
         val applicationConfig = new ApplicationConfig(servicesConfig)
-        applicationConfig.startPageBannerEnabled mustBe true
+        applicationConfig.startPageBannerEnabledFrom mustBe true
       }
 
       "return false when the start date has not been reached" in {
-        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner"))
+        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner-enabled-from"))
           .thenReturn(LocalDate.now().plusDays(1).toString)
         val applicationConfig = new ApplicationConfig(servicesConfig)
-        applicationConfig.startPageBannerEnabled mustBe false
+        applicationConfig.startPageBannerEnabledFrom mustBe false
       }
     }
 
     "startPageBannerPara2Enabled" should {
 
       "return true when the banner has started and para 2 has not been reached" in {
-        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner"))
+        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner-enabled-from"))
           .thenReturn(LocalDate.now().minusDays(1).toString)
-        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner-para2-end"))
+        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner-para2-enabled-until"))
           .thenReturn(LocalDate.now().plusDays(1).toString)
         val applicationConfig = new ApplicationConfig(servicesConfig)
-        applicationConfig.startPageBannerParaTwoEnabled mustBe true
+        applicationConfig.startPageBannerParaTwoEnabledFrom mustBe true
       }
 
       "return false when the banner start date has not been reached" in {
-        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner"))
+        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner-enabled-from"))
           .thenReturn(LocalDate.now().plusDays(1).toString)
         val applicationConfig = new ApplicationConfig(servicesConfig)
-        applicationConfig.startPageBannerParaTwoEnabled mustBe false
+        applicationConfig.startPageBannerParaTwoEnabledFrom mustBe false
       }
 
       "return false when para 2 end date has been reached" in {
-        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner"))
+        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner-enabled-from"))
           .thenReturn(LocalDate.now().minusDays(1).toString)
-        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner-para2-end"))
+        when(servicesConfig.getString("microservice.services.features.dates.start-page-banner-para2-enabled-until"))
           .thenReturn(LocalDate.now().toString)
         val applicationConfig = new ApplicationConfig(servicesConfig)
-        applicationConfig.startPageBannerParaTwoEnabled mustBe false
+        applicationConfig.startPageBannerParaTwoEnabledFrom mustBe false
       }
     }
 
     "useV4andV5SchemeEnabled" should {
 
       "return true within the configured date range" in {
-        when(servicesConfig.getString("microservice.services.features.dates.use-V4-and-V5-start"))
+        when(servicesConfig.getString("microservice.services.features.dates.use-V4-and-V5-start-enabled-from"))
           .thenReturn(LocalDate.now().minusDays(1).toString)
-        when(servicesConfig.getString("microservice.services.features.dates.use-V4-and-V5-end"))
+        when(servicesConfig.getString("microservice.services.features.dates.use-V4-and-V5-enabled-until"))
           .thenReturn(LocalDate.now().plusDays(1).toString)
         val applicationConfig = new ApplicationConfig(servicesConfig)
-        applicationConfig.useV4andV5SchemeEnabled mustBe true
+        applicationConfig.useV4andV5SchemeEnabledFrom mustBe true
       }
     }
 
     "useV6andV7SchemeEnabled & displayNonTASSRadioButton" should {
 
       "return true when the configured date has been reached" in {
-        when(servicesConfig.getString("microservice.services.features.dates.use-V6-and-V7"))
+        when(servicesConfig.getString("microservice.services.features.dates.use-V6-and-V7-enabled-from"))
           .thenReturn(LocalDate.now().minusDays(1).toString)
-        when(servicesConfig.getString("microservice.services.features.dates.non-tass-radio"))
+        when(servicesConfig.getString("microservice.services.features.dates.non-tass-radio-enabled-from"))
           .thenReturn(LocalDate.now().minusDays(1).toString)
         val applicationConfig = new ApplicationConfig(servicesConfig)
-        applicationConfig.useV6andV7SchemeEnabled   mustBe true
-        applicationConfig.displayNonTASSRadioButton mustBe true
+        applicationConfig.useV6andV7SchemeEnabledFrom mustBe true
+        applicationConfig.displayNonTASSRadioButton   mustBe true
 
       }
     }

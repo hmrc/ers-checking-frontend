@@ -79,41 +79,43 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
     s"$basGatewayHost/bas-gateway/sign-out-without-state?continue=$encodedCallbackUrl"
   }
 
-  private val clock: Clock = Clock.system(ZoneId.of("Europe/London"))
-
   private def isEnabledFrom(date: LocalDate): Boolean =
-    FeatureDate.isEnabledFrom(date, clock)
+    FeatureDate().isEnabledFrom(date)
 
   private def isEnabledUntil(date: LocalDate): Boolean =
-    FeatureDate.isEnabledUntil(date, clock)
+    FeatureDate().isEnabledUntil(date)
 
   /*
   The following parameters are all related to EPIC DDCE-7243
    */
 
   // Start page banner
-  lazy val startPageBannerEnabled: Boolean = isEnabledFrom(
-    LocalDate.parse(config.getString("microservice.services.features.dates.start-page-banner"))
+  lazy val startPageBannerEnabledFrom: Boolean = isEnabledFrom(
+    LocalDate.parse(config.getString("microservice.services.features.dates.start-page-banner-enabled-from"))
   )
 
-  lazy val startPageBannerParaTwoEnabled: Boolean =
-    startPageBannerEnabled &&
+  lazy val startPageBannerParaTwoEnabledFrom: Boolean =
+    startPageBannerEnabledFrom &&
       isEnabledUntil(
-        LocalDate.parse(config.getString("microservice.services.features.dates.start-page-banner-para2-end"))
+        LocalDate.parse(config.getString("microservice.services.features.dates.start-page-banner-para2-enabled-until"))
       )
 
   // Which schemes to validate against
-  lazy val useV4andV5SchemeEnabled: Boolean =
-    isEnabledFrom(LocalDate.parse(config.getString("microservice.services.features.dates.use-V4-and-V5-start"))) &&
-      isEnabledUntil(LocalDate.parse(config.getString("microservice.services.features.dates.use-V4-and-V5-end")))
+  lazy val useV4andV5SchemeEnabledFrom: Boolean =
+    isEnabledFrom(
+      LocalDate.parse(config.getString("microservice.services.features.dates.use-V4-and-V5-start-enabled-from"))
+    ) &&
+      isEnabledUntil(
+        LocalDate.parse(config.getString("microservice.services.features.dates.use-V4-and-V5-enabled-until"))
+      )
 
-  lazy val useV6andV7SchemeEnabled: Boolean = isEnabledFrom(
-    LocalDate.parse(config.getString("microservice.services.features.dates.use-V6-and-V7"))
+  lazy val useV6andV7SchemeEnabledFrom: Boolean = isEnabledFrom(
+    LocalDate.parse(config.getString("microservice.services.features.dates.use-V6-and-V7-enabled-from"))
   )
 
   // Non-TASS radio button
   lazy val displayNonTASSRadioButton: Boolean = isEnabledFrom(
-    LocalDate.parse(config.getString("microservice.services.features.dates.non-tass-radio"))
+    LocalDate.parse(config.getString("microservice.services.features.dates.non-tass-radio-enabled-from"))
   )
 
 }

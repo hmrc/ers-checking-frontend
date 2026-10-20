@@ -104,7 +104,7 @@ class ProcessCsvService @Inject() (
       dataEngine                  <- EitherT.fromEither[Future](
                                        DataEngine(
                                          sheetName,
-                                         getSchemeVersion(appConfig.useV4andV5SchemeEnabled, appConfig.useV6andV7SchemeEnabled)
+                                         getSchemeVersion(appConfig.useV4andV5SchemeEnabledFrom, appConfig.useV6andV7SchemeEnabledFrom)
                                        ).left.map(_.asThrowable)
                                      )
       csvValidationResult         <- EitherT(validateCsv(source, dataEngine))

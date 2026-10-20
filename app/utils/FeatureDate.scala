@@ -16,14 +16,14 @@
 
 package utils
 
-import java.time.{Clock, LocalDate}
+import java.time.{Clock, LocalDate, ZoneId}
 
-object FeatureDate {
+case class FeatureDate(clock: Clock = Clock.system(ZoneId.of("Europe/London"))) {
 
-  def isEnabledFrom(date: LocalDate, clock: Clock): Boolean =
+  def isEnabledFrom(date: LocalDate): Boolean =
     !LocalDate.now(clock).isBefore(date)
 
-  def isEnabledUntil(date: LocalDate, clock: Clock): Boolean =
+  def isEnabledUntil(date: LocalDate): Boolean =
     LocalDate.now(clock).isBefore(date)
 
 }
