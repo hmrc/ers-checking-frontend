@@ -37,6 +37,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.DefaultMessagesControllerComponents
 import play.api.{Application, i18n}
 import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.validator.{DataEngine, SchemeVersion}
 import uk.gov.hmrc.validator.models.{Cell, ValidationError}
 import uk.gov.hmrc.validator.models.csv.RowValidationResults
 import uk.gov.hmrc.validator.models.ods.SheetErrors
@@ -44,6 +45,8 @@ import uk.gov.hmrc.validator.models.ods.SheetErrors
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+
+case class CsvErrorKeyTestCase(data: String, sheetName: String, expectedErrorKey: String)
 
 class ProcessCsvServiceSpec
     extends TestKit(ActorSystem("Test"))
@@ -160,6 +163,183 @@ class ProcessCsvServiceSpec
       val exception: Throwable =
         processCsvService.processFiles(Some(callback), "csop", returnStubSource(_, data)).head.futureValue.swap.value
       exception.getMessage shouldBe "You chose to check a CSV file, but NOT A VALID SHEET NAME isn’t a CSV file."
+    }
+
+    Seq(
+      CsvErrorKeyTestCase(
+        "2015,250,123.12,12.1234,12.1234,no,yes,AB12345678,no",
+        "CSOP_OptionsGranted_V5",
+        "ers.upload.error.date"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-07-23,,Daniel,Springer,AB123456A,123/CD1234,2015-08-29,123.12,yes,no,12.1234,12.1234,12.1234,yes,AB12345678,yes,yes,12.1234,yes,yes",
+        "CSOP_OptionsExercised_V5",
+        "ers.upload.error.first-name"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-07-23,Mark,AbcdefghijklmnopqrstuvwxyzAbcdefghijklmnopqrstuvwxyz,Springer,AB123456A,123/CD1234,2015-08-29,123.12,yes,no,12.1234,12.1234,12.1234,yes,AB12345678,yes,yes,12.1234,yes,yes",
+        "CSOP_OptionsExercised_V5",
+        "ers.upload.error.second-name"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-07-23,Mark,R,,AB123456A,123/CD1234,2015-08-29,123.12,yes,no,12.1234,12.1234,12.1234,yes,AB12345678,yes,yes,12.1234,yes,yes",
+        "CSOP_OptionsExercised_V5",
+        "ers.upload.error.last-name"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-10-09,yes,12.1234,Jonathan,Riley,Stinston,,123/CD1234,yes",
+        "CSOP_OptionsRCL_V5",
+        "ers.upload.error.nino"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-01-02,yes,12345678,John,Adam,Williams,AA123456A,123/AB12345678,2015-01-03,Company Name,12 Example Street,Example,Exampley,Example-upon-River,United Kingdom,SE1 2AB,AB123456,1234567890,123/XZ12345678910199,Another Company Name,12 Test Street,Test,Testing,Testing-upon-River,United Kingdom,TE123ST,AB123456,1234567890,123/DC12345678,yes,123.12,12.1234,12.1234,no,yes,AB12345678,12.1234,yes,12.1234,yes,yes,yes",
+        "Non-TASS_Options_V7",
+        "ers.upload.error.paye"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-10-09,yes,12.1234,Jonathan,Riley,Stinston,AB123456A,123/CD1234/1234,yes",
+        "CSOP_OptionsRCL_V5",
+        "ers.upload.error.paye-emp"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-07-23,Mark,Daniel,Springer,AB123456A,123/CD1234,2015-08-29,123.12,yes,no,12.1234,12.1234,12.1234,yes,,yes,yes,12.1234,yes,yes",
+        "CSOP_OptionsExercised_V5",
+        "ers.upload.error.hmrcRef"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-01-02,yes,12345678AA,John,Davey,Doe,AB123456A,123/BG12345678,123.12,12.1234,12.1234,12.1234,yes,yes",
+        "Non-TASS_Sold_V7",
+        "ers.upload.error.srn"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-03-24,100,4,yes,2:1,10.1234,10.12,10.1234,123456AA,123456,123456,123456,123456,123456,no,yes,AB12345678",
+        "SIP_Awards_V4",
+        "ers.upload.error.digitsUpTo2"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-01-01,250,123.12123,12.1234,12.1234,no,yes,AB12345678,no",
+        "CSOP_OptionsGranted_V5",
+        "ers.upload.error.digits2"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-01-03,yes,12345678,Julie,Erin,Smith,AB123456A,123/AB12345678,Company Name,12 Example Road,Example,Exampley,Example-upon-River,United Kingdom,TE123ST,AB123456,1234567890,123/AB12345678,1,yes,no,yes,12345678,123.12,1,2,1234567.12345,12.1234,1234.1234,yes,all,12.1234,12.1234,yes,yes,1,yes,yes,yes,no",
+        "Non-TASS_Acquisition_V7",
+        "ers.upload.error.digitsUpTo4"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-01-01,250,123.12,12.1234123,12.1234,no,yes,AB12345678,no",
+        "CSOP_OptionsGranted_V5",
+        "ers.upload.error.digits4"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-01-01,25000000,123.12,12.1234,12.1234,no,yes,AB12345678,no",
+        "CSOP_OptionsGranted_V5",
+        "ers.upload.error.int6"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-01-01,250,123.12,12.1234,12.1234,no,BLAH,AB12345678,no",
+        "CSOP_OptionsGranted_V5",
+        "ers.upload.error.yes-no"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-10-09,yes,12.1234,Jonathan,Riley,Stinston,AB123456A,123/CD1234,",
+        "CSOP_OptionsRCL_V5",
+        "ers.upload.error.paye-yes-no"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-01-03,yes,12345678,Julie,Erin,Smith,AB123456A,123/AB12345678,Company Name,12 ExampleRoad,Example,Exampley,Example-upon-River,United Kingdom,TE123ST,AB123456,1234567890,123/AB12345678,1,yes,no,yes,12345678,123.12,1,2,0.6,12.1234,12.1234,yes,all,12.1234,12.1234,yes,yes,,yes,yes,yes,no",
+        "Non-TASS_Acquisition_V7",
+        "ers.upload.error.enum1-3"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-03-24,100,6,yes,2:1,10.1234,10.12,10.1234,123456,123456,123456,123456,123456,123456, no,yes,AB12345678",
+        "SIP_Awards_V4",
+        "ers.upload.error.enum1-4"
+      ),
+      CsvErrorKeyTestCase(
+        "no,no,yes,9,2015-12-09,John,Barry,Doe,AA123456A,123/XZ55555555,10.1234,100.12,10.1234,10.1234",
+        "EMI40_Adjustments_V7",
+        "ers.upload.error.enum1-8"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-01-03,yes,12345678,Julie,Erin,Smith,AB123456A,123/AB12345678,Company Name,12 Example Road,Example,Exampley,Example-upon-River,United Kingdom,TE123ST,AB123456,1234567890,123/AB12345678,10,yes,no,yes,12345678,123.12,1,2,0.6,12.1234,12.1234,yes,all,12.1234,12.1234,yes,yes,1,yes,yes,yes,no",
+        "Non-TASS_Acquisition_V7",
+        "ers.upload.error.enum1-9"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-01-03,yes,12345678,Julie,Erin,Smith,AB123456A,123/AB12345678,Company Name,12 Example Road,Example,Exampley,Example-upon-River,United Kingdom,TE123ST,AB123456,1234567890,123/AB12345678,1,yes,no,yes,12345678,123.12,1,2,0.6,12.1234,12.1234,yes,same,12.1234,12.1234,yes,yes,1,yes,yes,yes,no",
+        "Non-TASS_Acquisition_V7",
+        "ers.upload.error.enum-all-some"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-03-24,100,4,yes,2   1,10.1234,10.12,10.1234,123456,123456,123456,123456,123456,123456,no,yes,AB12345678",
+        "SIP_Awards_V4",
+        "ers.upload.error.ratio"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-12-09,2015-12-09,John,Barry,Smith,AA123456A,123/XZ55555555,10.1234,,1 Example Street,Bucknall,Stoke,Staffordshire,United Kingdom,SE1 2AB,1234567890,AB123456",
+        "EMI40_Replaced_V4",
+        "ers.upload.error.company-name"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-12-09,2015-12-09,John,Barry,Smith,AA123456A,123/XZ55555555,10.1234,10,,Bucknall,Stoke,Staffordshire,United Kingdom,SE1 2AB,1234567890,AB123456",
+        "EMI40_Replaced_V4",
+        "ers.upload.error.address-line1"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-12-09,2015-12-09,John,Barry,Smith,AA123456A,123/XZ55555555,10.1234,10,1 Example Street,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,Stoke,Staffordshire,United Kingdom,SE1 2AB,1234567890,AB123456",
+        "EMI40_Replaced_V4",
+        "ers.upload.error.address-line2"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-12-09,2015-12-09,John,Barry,Smith,AA123456A,123/XZ55555555,10.1234,10,1 Example Street,Bucknall,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,Staffordshire,United Kingdom,SE1 2AB,1234567890,AB123456",
+        "EMI40_Replaced_V4",
+        "ers.upload.error.address-line3"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-12-09,2015-12-09,John,Barry,Smith,AA123456A,123/XZ55555555,10.1234,10,1 Example Street,Bucknall,Stoke,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,United Kingdom,SE1 2AB,1234567890,AB123456",
+        "EMI40_Replaced_V4",
+        "ers.upload.error.address-line4"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-12-09,2015-12-09,John,Barry,Smith,AA123456A,123/XZ55555555,10.1234,10,1 Example Street,Bucknall,Stoke,Staffordshire,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,SE1 2AB,1234567890,AB123456",
+        "EMI40_Replaced_V4",
+        "ers.upload.error.address-country"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-01-03,yes,12345678,Julie,Erin,Smith,AB123456A,123/AB12345678,Company Name,12 Example Road,Example,Exampley,Example-upon-River,United Kingdom,TE123STABCD,AB123456,1234567890,123/AB12345678,1,yes,no,yes,12345678,123.12,1,2,0.6,12.1234,12.1234,yes,all,12.1234,12.1234,yes,yes,1,yes,yes,yes,no",
+        "Non-TASS_Acquisition_V7",
+        "ers.upload.error.address-postcode"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-12-09,2015-12-09,John,Barry,Smith,AA123456A,123/XZ55555555,10.1234,10,1 Example Street,Bucknall,Stoke,Staffordshire,United Kingdom,abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefgh,1234567890,AB123456",
+        "EMI40_Replaced_V4",
+        "ers.upload.error.address-postcode-mand"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-12-09,2015-12-09,John,Barry,Smith,AA123456A,123/XZ55555555,10.1234,10,1 Example Street,Bucknall,Stoke,Staffordshire,United Kingdom,SE1 2AB,1234567890,AB12345678010",
+        "EMI40_Replaced_V4",
+        "ers.upload.error.crn"
+      ),
+      CsvErrorKeyTestCase(
+        "2015-12-09,2015-12-09,John,Barry,Smith,AA123456A,123/XZ55555555,10.1234,10,1 Example Street,Bucknall,Stoke,Staffordshire,United Kingdom,SE1 2AB,12345678901,AB123456",
+        "EMI40_Replaced_V4",
+        "ers.upload.error.ctr"
+      )
+    ).foreach { csvErrorKeyTestCase: CsvErrorKeyTestCase =>
+      s"return ${csvErrorKeyTestCase.expectedErrorKey} when parsed data containing that error" in {
+        val dataEngine = DataEngine(csvErrorKeyTestCase.sheetName, SchemeVersion.All).toOption.get
+        Await
+          .result(
+            processCsvService.validateCsv(Source.single(HttpResponse(entity = csvErrorKeyTestCase.data)), dataEngine),
+            Duration.Inf
+          )
+          .map { (validationResults: Seq[RowValidationResults]) =>
+            val validationErrors: Seq[ValidationError] = validationResults.flatMap(_.validationErrors)
+            validationErrors.length        shouldBe 1
+            validationErrors.head.errorMsg shouldBe csvErrorKeyTestCase.expectedErrorKey
+          }
+      }
     }
   }
 
