@@ -16,15 +16,14 @@
 
 package config
 
+import controllers.routes
 import play.api.i18n.Lang
 import play.api.mvc.Call
-import controllers.routes
-
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import utils.FeatureDate
 
-import java.time.{Clock, LocalDate, ZoneId}
+import java.time.LocalDate
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.duration._
 
 @Singleton
