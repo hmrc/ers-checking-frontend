@@ -29,8 +29,8 @@ class StartViewSpec extends ViewSpecBase {
   class StartViewSetUp(bannerEnabled: Boolean, bannerSecondParagraphEnabled: Boolean) {
 
     implicit val applicationConfig: ApplicationConfig = new ApplicationConfig(mock[ServicesConfig]) {
-      override lazy val startPageBannerEnabledFrom        = bannerEnabled
-      override lazy val startPageBannerParaTwoEnabledFrom = bannerSecondParagraphEnabled
+      override lazy val startPageBannerEnabled: Boolean        = bannerEnabled
+      override lazy val startPageBannerParaTwoEnabled: Boolean = bannerSecondParagraphEnabled
     }
 
     implicit val request: FakeRequest[AnyRef] = fakeRequest

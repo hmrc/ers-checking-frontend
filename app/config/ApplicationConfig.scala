@@ -79,29 +79,27 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
     s"$basGatewayHost/bas-gateway/sign-out-without-state?continue=$encodedCallbackUrl"
   }
 
+  protected def featureDate: FeatureDate = FeatureDate()
+
   private def isEnabledFrom(date: LocalDate): Boolean =
-    FeatureDate().isEnabledFrom(date)
+    featureDate.isEnabledFrom(date)
 
   private def isEnabledUntil(date: LocalDate): Boolean =
-    FeatureDate().isEnabledUntil(date)
+    featureDate.isEnabledUntil(date)
 
   /*
   The following parameters are all related to EPIC DDCE-7243
    */
 
   // Start page banner
-  lazy val startPageBannerEnabledFrom: Boolean = isEnabledFrom(
-    LocalDate.parse(config.getString("microservice.services.features.dates.start-page-banner-enabled-from"))
-  )
 
-  lazy val startPageBannerParaTwoEnabledFrom: Boolean =
-    startPageBannerEnabledFrom &&
-      isEnabledUntil(
-        LocalDate.parse(config.getString("microservice.services.features.dates.start-page-banner-para2-enabled-until"))
-      )
+  lazy val startPageBannerEnabled: Boolean = config.getConfBool("features.start-page-banner.enabled", defBool = false)
+
+  lazy val startPageBannerParaTwoEnabled: Boolean =
+    config.getConfBool("features.start-page-banner.para-2-enabled", defBool = false)
 
   // Which schemes to validate against
-  lazy val useV4andV5SchemeEnabledFrom: Boolean =
+  def useV4andV5SchemeEnabledFrom: Boolean =
     isEnabledFrom(
       LocalDate.parse(config.getString("microservice.services.features.dates.use-V4-and-V5-start-enabled-from"))
     ) &&
@@ -109,12 +107,12 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
         LocalDate.parse(config.getString("microservice.services.features.dates.use-V4-and-V5-enabled-until"))
       )
 
-  lazy val useV6andV7SchemeEnabledFrom: Boolean = isEnabledFrom(
+  def useV6andV7SchemeEnabledFrom: Boolean = isEnabledFrom(
     LocalDate.parse(config.getString("microservice.services.features.dates.use-V6-and-V7-enabled-from"))
   )
 
   // Non-TASS radio button
-  lazy val displayNonTASSRadioButton: Boolean = isEnabledFrom(
+  def displayNonTASSRadioButton: Boolean = isEnabledFrom(
     LocalDate.parse(config.getString("microservice.services.features.dates.non-tass-radio-enabled-from"))
   )
 
