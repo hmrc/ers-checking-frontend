@@ -69,8 +69,8 @@ class ProcessCsvServiceSpec
 
   val processCsvService: ProcessCsvService = new ProcessCsvService(mockAppConfig, mockSessionCacheRepo, mockErsUtil)
 
-  when(mockAppConfig.useV4andV5Scheme).thenReturn(true)
-  when(mockAppConfig.useV6andV7Scheme).thenReturn(false)
+  when(mockAppConfig.useV4andV5SchemeEnabledFrom).thenReturn(true)
+  when(mockAppConfig.useV6andV7SchemeEnabledFrom).thenReturn(false)
 
   "extractBodyOfRequest" should {
 
