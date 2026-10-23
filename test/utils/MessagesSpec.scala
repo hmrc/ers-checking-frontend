@@ -37,10 +37,10 @@ class MessagesSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPerSuit
   }
 
   "all welsh messages should have a english translation" in {
-    val missingWelshKeys = uniqueWelshMessages.filterNot(uniqueEnglishMessages)
-    if (missingWelshKeys.nonEmpty) {
+    val missingEnglshKeys = uniqueEnglishMessages.filterNot(uniqueWelshMessages)
+    if (missingEnglshKeys.nonEmpty) {
       val welshFailureText =
-        missingWelshKeys.foldLeft(s"There are ${missingWelshKeys.size} missing Welsh translations:") {
+        missingEnglshKeys.foldLeft(s"There are ${missingEnglshKeys.size} missing English translations:") {
           case (failureString, key) =>
             failureString + s"\n$key:${welshMessages(key)}"
         }
