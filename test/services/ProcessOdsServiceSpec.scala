@@ -370,15 +370,15 @@ class ProcessOdsServiceSpec
         val expectedSheetErrors: SheetErrors = SheetErrors(
           "EMI40_Adjustments_V4",
           ListBuffer(
-            ValidationError(Cell("A", 10, "123"), "error.1", "001", "Enter 'yes' or 'no'"),
-            ValidationError(Cell("B", 10, "123"), "error.2", "002", "Enter 'yes' or 'no'"),
-            ValidationError(Cell("C", 10, "123"), "error.3", "003", "Enter 'yes' or 'no'"),
-            ValidationError(Cell("D", 10, "canoe"), "error.4", "004", "Enter '1', '2', '3', '4', '5', '6', '7' or '8'"),
+            ValidationError(Cell("A", 10, "123"), "error.1", "001", "ers.upload.error.yes-no"),
+            ValidationError(Cell("B", 10, "123"), "error.2", "002", "ers.upload.error.yes-no"),
+            ValidationError(Cell("C", 10, "123"), "error.3", "003", "ers.upload.error.yes-no"),
+            ValidationError(Cell("D", 10, "canoe"), "error.4", "004", "ers.upload.error.enum1-8"),
             ValidationError(
               Cell("E", 10, "apples"),
               "error.5",
               "005",
-              "Enter a date that matches the yyyy-mm-dd pattern"
+              "ers.upload.error.date"
             )
           )
         )
