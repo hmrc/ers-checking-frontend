@@ -100,7 +100,7 @@ class FormatErrorsViewSpec extends ViewSpecBase with ErsTestHelper {
     "display the correct error message for no data exception" when {
       "when using the english message keys" in new FormatErrorsViewSetUp("en") {
         val expectedErrorMessage =
-          "The file that you chose doesn’t have any data after row 9. The reportable events data must start in cell A10. " +
+          "Your uploaded file doesn’t have any data after row {0}. The reportable events data must start in cell A{1}. " +
             "Use the Employment Related Securities (ERS) guidance documents to help you create error-free files."
         getErrorMessage(noDataFailureDoc) mustBe expectedErrorMessage
       }
@@ -141,8 +141,8 @@ class FormatErrorsViewSpec extends ViewSpecBase with ErsTestHelper {
 
     "display the correct error message for incorrect sheet name exception" when {
       "when using the english message keys" in new FormatErrorsViewSetUp("en") {
-        val expectedErrorMessage = "EMI_V4 isn’t a sheet name (title) that can be used in CSOP_V4 files. Use the " +
-          "Employment Related Securities (ERS) guidance documents to help you create error-free files."
+        val expectedErrorMessage =
+          "The file you uploaded is not the right file. Check the Employment Related Securities (ERS) guidance documents to make sure that you have the right version of the templates. If you are creating your own files you can check the technical guidance notes."
         getErrorMessage(incorrectSheetNameFailureDoc) mustBe expectedErrorMessage
       }
 
