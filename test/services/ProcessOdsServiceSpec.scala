@@ -419,10 +419,7 @@ class ProcessOdsServiceSpec
 
           val validatorFailure: ValidatorFailure =
             processOdsService
-              .validateOdsFile(
-                "SIP.ods",
-                SipXMLTestData.getValidSipV7DataStream,
-                "SIP")
+              .validateOdsFile("SIP.ods", SipXMLTestData.getValidSipV7DataStream, "SIP")
               .left
               .value
 
