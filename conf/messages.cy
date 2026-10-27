@@ -287,7 +287,6 @@ ers.file_problem.tryAgain = Rhowch gynnig arall arni
 # Successful checking messages
 #********************************************************************
 ers_file_format_successful.lead_in=Gallwch wneud y canlynol:
-ers_file_format_successful.org.bullet_one=<link>bwrw golwg dros eich cynlluniau a’ch trefniadau</link>
 
 ers_file_format_successful.agent.bullet_one_link=dewis cleient
 ers_file_format_successful.agent.bullet_one_end= a chyflwyno’u datganiad
