@@ -53,7 +53,7 @@ class FormatErrorsViewSpec extends ViewSpecBase with ErsTestHelper {
     val noDataFailureDoc: Document =
       generateFailureDoc(
         errorMsg = "ers.exceptions.dataParser.noData",
-        errorMsgParams = List.empty[String]
+        errorMsgParams = List(4.toString, 5.toString)
       )
 
     val dataContainsAmpersandFailureDoc: Document =
@@ -100,14 +100,14 @@ class FormatErrorsViewSpec extends ViewSpecBase with ErsTestHelper {
     "display the correct error message for no data exception" when {
       "when using the english message keys" in new FormatErrorsViewSetUp("en") {
         val expectedErrorMessage =
-          "Your uploaded file doesn’t have any data after row {0}. The reportable events data must start in cell A{1}. " +
+          "Your uploaded file doesn’t have any data after row 4. The reportable events data must start in cell A5. " +
             "Use the Employment Related Securities (ERS) guidance documents to help you create error-free files."
         getErrorMessage(noDataFailureDoc) mustBe expectedErrorMessage
       }
 
       "when using the welsh message keys" in new FormatErrorsViewSetUp("cy") {
-        val expectedErrorMessage = "Nid oes unrhyw ddata ar ôl rhes 9 yn y ffeil a ddewisoch. Mae’n rhaid i ddata’r " +
-          "digwyddiadau hysbysadwy ddechrau yng nghell A10. Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail " +
+        val expectedErrorMessage = "Nid oes unrhyw ddata ar ôl rhes 4 yn y ffeil a ddewisoch. Mae’n rhaid i ddata’r " +
+          "digwyddiadau hysbysadwy ddechrau yng nghell A5. Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail " +
           "Cyflogaeth (ERS) i’ch helpu i greu ffeiliau heb wallau."
         getErrorMessage(noDataFailureDoc) mustBe expectedErrorMessage
       }
@@ -147,8 +147,10 @@ class FormatErrorsViewSpec extends ViewSpecBase with ErsTestHelper {
       }
 
       "when using the welsh message keys" in new FormatErrorsViewSetUp("cy") {
-        val expectedErrorMessage = "Nid yw EMI_V4 yn (deitl) enw dalen all gael ei ddefnyddio yn ffeiliau CSOP_V4. " +
-          "Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS) i’ch helpu i greu ffeiliau heb wallau."
+        val expectedErrorMessage
+          : String = "Nid hon yw’r ffeil gywir. Gwiriwch y dogfennau arweiniad ar Warantau Ar Sail " +
+          "Cyflogaeth (ERS) i wneud yn siŵr bod gennych y fersiwn gywir o’r templed. Os ydych yn creu eich ffeiliau " +
+          "eich hun, gallwch wirio’r nodiadau arweiniad technegol."
         getErrorMessage(incorrectSheetNameFailureDoc) mustBe expectedErrorMessage
       }
     }
