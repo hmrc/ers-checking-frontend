@@ -179,7 +179,7 @@ ers.exceptions.dataParser.fileRetrievalFailed =Ymddengys fod y ffeil a ddewisoch
 ers.exceptions.dataParser.parserFailure =Ymddengys fod y ffeil a ddewisoch i’w gwirio wedi torri.<br/><br/>Ni fyddwch yn gallu uwchlwytho {0} fel rhan o’ch Datganiad Blynyddol.
 ers.exceptions.dataParser.fileParsingError =Ymddengys fod y ffeil a ddewisoch i’w gwirio wedi torri. Ni fyddwch yn gallu uwchlwytho {0} fel rhan o’ch Datganiad Blynyddol.
 ers.exceptions.dataParser.parsingOfFileData =Dosrannu Data Ffeil
-ers.exceptions.dataParser.incorrectSheetName =Nid yw {0} yn (deitl) enw dalen all gael ei ddefnyddio yn ffeiliau {1}.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i’ch helpu i greu ffeiliau heb wallau.
+ers.exceptions.dataParser.incorrectSheetName = Nid hon yw’r ffeil gywir.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Gwiriwch y dogfennau arweiniad ar Warantau Ar Sail Cyflogaeth (ERS)</a> i wneud yn siŵr bod gennych y fersiwn gywir o’r templed. Os ydych yn creu eich ffeiliau eich hun, gallwch wirio’r nodiadau arweiniad technegol.
 ers.exceptions.dataParser.wrongSchemeFile =Nid yw hon yn ffeil y rhoesoch wybod fod angen i chi ei huwchlwytho – dewiswch ffeil wahanol
 ers.exceptions.dataParser.incorrectSchemeType =Gwnaethoch ddewis gwirio ffeil {1}, ond ffeil {0} yw {2}.
 ers.exceptions.dataParser.incorrectSchemeType.other = ARALL
@@ -193,7 +193,7 @@ ers.exceptions.dataParser.incorrectHeader =Nid yw’r penynnau ar {0} yn {1} yn 
 ers.exceptions.dataParser.headersDontMatch =Nid yw’r pennyn yn cyd-fynd
 ers.exceptions.dataParser.configFailure =Ni fu’n bosibl gwirio’r ffeil hon.
 ers.exceptions.dataParser.ampersand =Rhaid peidio â chynnwys ampersandau.
-ers.exceptions.dataParser.noData =Nid oes unrhyw ddata ar ôl rhes 9 yn y ffeil a ddewisoch. Mae’n rhaid i ddata’r digwyddiadau hysbysadwy ddechrau yng nghell A10.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i’ch helpu i greu ffeiliau heb wallau.
+ers.exceptions.dataParser.noData =Nid oes unrhyw ddata ar ôl rhes {0} yn y ffeil a ddewisoch. Mae’n rhaid i ddata’r digwyddiadau hysbysadwy ddechrau yng nghell A{1}.<br/><br/><a href="https://www.gov.uk/government/collections/employment-related-securities" class="govuk-link">Defnyddiwch y dogfennau arweiniad Gwarantau Ar Sail Cyflogaeth (ERS)</a> i’ch helpu i greu ffeiliau heb wallau.
 
 ers.global_errors.message = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth
 ers.global_errors.heading = Gwirio’ch ffeiliau Gwarantau ar Sail Cyflogaeth (ERS)
