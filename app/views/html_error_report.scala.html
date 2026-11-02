@@ -48,7 +48,7 @@
 
     @schemeErrors.filter(_.errors.nonEmpty).map { sheetErrors =>
         @govukTable(Table(
-            rows = sheetErrors.errors.toSeq.map { error =>
+            rows = sheetErrors.errors.toSeq.sortBy(_.cell.columnName).map { error =>
                 Seq(
                     TableRow(
                         content = Text(error.cell.columnName)
