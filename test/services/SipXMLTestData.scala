@@ -80,6 +80,20 @@ object SipXMLTestData {
     new ByteArrayInputStream(buildValidOdsXml(sipV7BodyXml).getBytes("utf-8"))
   }
 
+  def getSipV7DataStreamWithNoData: ByteArrayInputStream = {
+
+    val sipV7BodyXml: String =
+      openTable(
+        sipAwardsV7SheetName
+      ) + sipAwardsV7Row1 + sipAwardsV7Row2 + sipAwardsV7Row3 + sipAwardsV7Row4 + closeTable +
+        openTable(
+          sipOutV7SheetName,
+          "ta2"
+        ) + sipOutV7Row1 + sipOutV7Row2 + sipOutV7Row3 + sipOutV7Row4 + closeTable
+
+    new ByteArrayInputStream(buildValidOdsXml(sipV7BodyXml).getBytes("utf-8"))
+  }
+
   // ---------------------------- SIP V4 test data ----------------------------
 
   // -------------- SIP Awards V4 --------------

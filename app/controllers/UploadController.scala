@@ -250,10 +250,10 @@ class UploadController @Inject() (
 
         updateCacheThenRedirectToFormatErrorsPage(message, optionalParams, needsExtendedInstructions = false)
 
-      case NoDataFailure =>
+      case e: NoDataFailure =>
         updateCacheThenRedirectToFormatErrorsPage(
           "ers.exceptions.dataParser.noData",
-          Seq.empty[String],
+          Seq(e.numberOdsHeaderRows.toString, (e.numberOdsHeaderRows + 1).toString),
           needsExtendedInstructions = true
         )
 
