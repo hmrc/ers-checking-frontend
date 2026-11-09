@@ -22,18 +22,18 @@ import models.ERSFileProcessingException
 import models.SheetErrors.format
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallbackList}
 import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.http.scaladsl._
+import org.apache.pekko.http.scaladsl.*
 import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse}
 import org.apache.pekko.stream.scaladsl.Source
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
-import play.api.mvc._
+import play.api.mvc.*
 import repository.ErsCheckingFrontendSessionCacheRepository
 import services.{ProcessCsvService, ProcessOdsService}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import uk.gov.hmrc.validator.models._
+import uk.gov.hmrc.validator.models.*
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 import utils.ERSUtil
 import utils.UploadedFileUtil.checkOdsFileType

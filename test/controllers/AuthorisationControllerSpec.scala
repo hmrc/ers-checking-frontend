@@ -71,7 +71,7 @@ class AuthorisationControllerSpec
     }
 
     "check url for individualSignoutRedirect for POST" in {
-      val result = authController.individualSignoutRedirect().apply(FakeRequest())
+      val result = authController.individualSignoutRedirect.apply(FakeRequest())
       result.futureValue.header.status shouldBe Status.SEE_OTHER
       redirectLocation(result)         shouldBe Some(routes.AuthorisationController.individualSignout().url)
     }

@@ -20,12 +20,12 @@ import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRefAndPAYE}
 
 import javax.inject.{Inject, Singleton}
-import models._
+import models.*
 import models.upscan.{NotStarted, UploadId, UpscanCsvFilesList, UpscanIds}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc._
+import play.api.mvc.*
 import repository.ErsCheckingFrontendSessionCacheRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil

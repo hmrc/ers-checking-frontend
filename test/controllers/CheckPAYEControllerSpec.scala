@@ -24,9 +24,9 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n
 import play.api.i18n.MessagesImpl
-import play.api.mvc._
-import play.api.test.Helpers._
-import play.api.test._
+import play.api.mvc.*
+import play.api.test.Helpers.*
+import play.api.test.*
 import views.html.{global_error, not_enrolled_in_paye, sign_out_paye}
 
 class CheckPAYEControllerSpec
@@ -45,7 +45,7 @@ class CheckPAYEControllerSpec
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
 
-  def buildFakeCheckPAYEController() =
+  def buildFakeCheckPAYEController(): CheckPAYEController =
     new CheckPAYEController(mockAuthAction, mcc, notEnrolledView, signOutView, globalErrorView)(mockAppConfig) {
       mockAnyContentAction
     }

@@ -25,7 +25,8 @@ import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
+import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 
 @Singleton
 class UpscanConnector @Inject() (appConfig: ApplicationConfig, httpClient: HttpClientV2)(implicit

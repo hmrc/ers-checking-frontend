@@ -35,7 +35,7 @@ import play.api.http.Status
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents, Request, Result}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, i18n}
 import services.{ProcessCsvService, ProcessOdsService}

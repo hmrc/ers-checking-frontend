@@ -22,7 +22,7 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.mvc.{ControllerComponents, Cookie, Cookies}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.play.language.LanguageUtils
 
 class LanguageSwitchControllerTest extends AnyWordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite {

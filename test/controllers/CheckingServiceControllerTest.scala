@@ -19,10 +19,12 @@ package controllers
 import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import helpers.ErsTestHelper
 import models.CSformMappings
-import models.upscan._
+import models.upscan.*
 import org.jsoup.Jsoup
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
+import org.jsoup.nodes.Document
+import org.mockito.ArgumentMatchers.*
+import org.mockito.Mockito.*
+import org.scalatest.matchers.must.Matchers.*
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -32,11 +34,11 @@ import play.api.http.Status
 import play.api.{Logger, i18n}
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.mvc.{Call, DefaultMessagesControllerComponents, Result}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.api.test.Injecting
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
-import views.html._
+import views.html.*
 
 import scala.concurrent.Future
 
@@ -386,9 +388,9 @@ class CheckingServiceControllerTest
         hc,
         implicitly[Messages]
       )
-      res.map { result =>
-        result shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request, testMessages)))
-      }
+      val doc: Document       = Jsoup.parse(contentAsString(res))
+      val heading             = doc.getElementsByClass("hmrc-page-heading").text()
+      heading shouldBe testMessages.messages("ers.global_errors.message")
     }
 
   }
@@ -459,9 +461,9 @@ class CheckingServiceControllerTest
         implicitly[Messages]
       )
       (Fixtures.buildFakeRequestWithSessionId("GET"), hc, implicitly[Messages])
-      res.map { result =>
-        result shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request, testMessages)))
-      }
+      val doc: Document       = Jsoup.parse(contentAsString(res))
+      val heading             = doc.getElementsByClass("hmrc-page-heading").text()
+      heading shouldBe testMessages.messages("ers.global_errors.message")
     }
 
     "reset the list and return OK when no file is NotStarted (upload-again after errors)" in {
@@ -632,9 +634,9 @@ class CheckingServiceControllerTest
       val controllerUnderTest = buildFakeCheckingServiceController(schemeRes = false)
       val res: Future[Result] =
         controllerUnderTest.showFormatErrorsPage()(Fixtures.buildFakeRequestWithSessionId("GET"))
-      res.map { result =>
-        result shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request, testMessages)))
-      }
+      val doc: Document       = Jsoup.parse(contentAsString(res))
+      val heading             = doc.getElementsByClass("hmrc-page-heading").text()
+      heading shouldBe testMessages.messages("ers.global_errors.message")
     }
 
     "gives a call to showFileUploadErrorPage if user is authenticated and clicks browser back button" in {

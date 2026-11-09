@@ -18,7 +18,7 @@ package controllers
 
 import org.apache.pekko.actor.ActorSystem
 import helpers.ErsTestHelper
-import models.upscan._
+import models.upscan.*
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues

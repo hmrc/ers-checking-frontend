@@ -22,13 +22,13 @@ import metrics.Metrics
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.mockito.ArgumentMatchers
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsObject, JsString, JsValue}
-import play.api.mvc._
+import play.api.mvc.*
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{
   contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessagesApi
@@ -47,7 +47,7 @@ import utils.ERSUtil
 
 import java.time.{LocalDate, ZoneOffset}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.language.postfixOps
 import java.io.InputStream
 

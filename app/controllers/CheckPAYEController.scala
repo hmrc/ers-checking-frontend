@@ -24,7 +24,7 @@ import play.api.mvc.{Action, AnyContent, Result}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 @Singleton

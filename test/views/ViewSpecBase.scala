@@ -23,14 +23,14 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import play.api.test.Helpers.baseApplicationBuilder.injector
+import play.api.test.Helpers.baseApplicationBuilder
 import play.twirl.api.Html
 
 trait ViewSpecBase extends PlaySpec with GuiceOneAppPerSuite {
 
   def asDocument(html: Html): Document = Jsoup.parse(html.toString())
 
-  def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
+  def messagesApi: MessagesApi = baseApplicationBuilder.injector().instanceOf[MessagesApi]
 
   def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
 
