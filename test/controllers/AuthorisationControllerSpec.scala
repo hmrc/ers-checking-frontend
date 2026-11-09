@@ -51,27 +51,27 @@ class AuthorisationControllerSpec
     "call notAuthorised" in {
       val result = authController.notAuthorised.apply(FakeRequest())
       result.futureValue.header.status shouldBe Status.UNAUTHORIZED
-      assert(contentAsString(result) contains "You aren’t authorised to access ERS checking service")
+      assert(contentAsString(result) `contains` "You aren’t authorised to access ERS checking service")
     }
 
     "call individualNotAuthorised" in {
       val result = authController.individualNotAuthorised.apply(FakeRequest())
       result.futureValue.header.status shouldBe Status.UNAUTHORIZED
-      assert(contentAsString(result) contains "You signed in using a Government Gateway user ID for an individual.")
+      assert(contentAsString(result) `contains` "You signed in using a Government Gateway user ID for an individual.")
     }
 
     "call individualSignout" in {
       val result = authController.individualSignout.apply(FakeRequest())
       result.futureValue.header.status shouldBe Status.OK
       assert(
-        contentAsString(result) contains
+        contentAsString(result) `contains`
           "To check your Employment Related Securities (ERS) file you will need to sign in with the Government Gateway user ID " +
           "and password that you use to manage PAYE for employers in your business tax account."
       )
     }
 
     "check url for individualSignoutRedirect for POST" in {
-      val result = authController.individualSignoutRedirect().apply(FakeRequest())
+      val result = authController.individualSignoutRedirect.apply(FakeRequest())
       result.futureValue.header.status shouldBe Status.SEE_OTHER
       redirectLocation(result)         shouldBe Some(routes.AuthorisationController.individualSignout().url)
     }

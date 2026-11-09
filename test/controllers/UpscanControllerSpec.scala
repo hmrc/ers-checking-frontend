@@ -18,7 +18,7 @@ package controllers
 
 import org.apache.pekko.actor.ActorSystem
 import helpers.ErsTestHelper
-import models.upscan._
+import models.upscan.*
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
@@ -54,8 +54,8 @@ class UpscanControllerSpec
     "metrics.enabled"       -> false
   )
 
-  implicit override lazy val app: Application       = new GuiceApplicationBuilder().configure(config).build()
-  implicit val as: ActorSystem                      = app.actorSystem
+  override lazy given app: Application              = new GuiceApplicationBuilder().configure(config).build()
+  given as: ActorSystem                             = app.actorSystem
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(app)
   val mockProcessOdsService: ProcessOdsService      = mock[ProcessOdsService]
   val mockProcessCsvService: ProcessCsvService      = mock[ProcessCsvService]
@@ -69,8 +69,8 @@ class UpscanControllerSpec
 
   def upscanController(csvList: UpscanCsvFilesCallbackList = upscanCsvFilesListCallbackList): UpscanController =
     new UpscanController(mockAuthAction, mockSessionCacheRepo, mcc, globalErrorView) {
-      override def fetchCsvCallbackList(list: UpscanCsvFilesList)(implicit
-        request: Request[_]
+      override def fetchCsvCallbackList(list: UpscanCsvFilesList)(using
+        request: Request[?]
       ): Future[Seq[UpscanCsvFilesCallback]] =
         Future.successful(csvList.files)
       mockAnyContentAction
@@ -102,9 +102,9 @@ class UpscanControllerSpec
       val upscanCsvFilesCallback             = UpscanCsvFilesCallback(uploadId: UploadId, successfully)
       val upscanCsvFilesListCallbackList     = UpscanCsvFilesCallbackList(files = List(upscanCsvFilesCallback))
 
-      when(mockSessionCacheRepo.fetchAndGetEntry[UpscanCsvFilesList](any())(any(), any()))
+      when(mockSessionCacheRepo.fetchAndGetEntry[UpscanCsvFilesList](any())(using any(), any()))
         .thenReturn(Future.successful(singleCsvFile))
-      when(mockSessionCacheRepo.cache(any(), any())(any(), any())).thenReturn(Future.successful(null))
+      when(mockSessionCacheRepo.cache(any(), any())(using any(), any())).thenReturn(Future.successful(null))
 
       val result = upscanController(upscanCsvFilesListCallbackList)
         .successCsv(uploadId, Fixtures.getMockSchemeTypeString)
@@ -119,9 +119,9 @@ class UpscanControllerSpec
       val upscanId: UpscanIds               = UpscanIds(uploadId, "fileId", NotStarted)
       val singleCsvFile: UpscanCsvFilesList = UpscanCsvFilesList(ids = Seq(upscanId))
 
-      when(mockSessionCacheRepo.fetchAndGetEntry[UpscanCsvFilesList](any())(any(), any()))
+      when(mockSessionCacheRepo.fetchAndGetEntry[UpscanCsvFilesList](any())(using any(), any()))
         .thenReturn(Future.successful(singleCsvFile))
-      when(mockSessionCacheRepo.cache(any(), any())(any(), any())).thenReturn(Future.successful(null))
+      when(mockSessionCacheRepo.cache(any(), any())(using any(), any())).thenReturn(Future.successful(null))
 
       val result = upscanController(upscanCsvFilesListCallbackList)
         .successCsv(uploadId, Fixtures.getMockSchemeTypeString)
@@ -133,9 +133,9 @@ class UpscanControllerSpec
       val fakeRequest                       = Fixtures.buildFakeRequestWithSessionId("GET")
       val singleCsvFile: UpscanCsvFilesList = UpscanCsvFilesList(Nil)
 
-      when(mockSessionCacheRepo.fetchAndGetEntry[UpscanCsvFilesList](any())(any(), any()))
+      when(mockSessionCacheRepo.fetchAndGetEntry[UpscanCsvFilesList](any())(using any(), any()))
         .thenReturn(Future.successful(singleCsvFile))
-      when(mockSessionCacheRepo.cache(any(), any())(any(), any())).thenReturn(Future.successful(null))
+      when(mockSessionCacheRepo.cache(any(), any())(using any(), any())).thenReturn(Future.successful(null))
 
       val result = upscanController(upscanCsvFilesListCallbackList)
         .successCsv(uploadId, Fixtures.getMockSchemeTypeString)
@@ -148,14 +148,14 @@ class UpscanControllerSpec
       val upscanId: UpscanIds               = UpscanIds(uploadId, "fileId", NotStarted)
       val singleCsvFile: UpscanCsvFilesList = UpscanCsvFilesList(ids = Seq(upscanId))
 
-      when(mockSessionCacheRepo.fetchAndGetEntry[UpscanCsvFilesList](any())(any(), any()))
+      when(mockSessionCacheRepo.fetchAndGetEntry[UpscanCsvFilesList](any())(using any(), any()))
         .thenReturn(Future.successful(singleCsvFile))
-      when(mockSessionCacheRepo.cache(any(), any())(any, any())).thenReturn(Future.successful(null))
+      when(mockSessionCacheRepo.cache(any(), any())(using any, any())).thenReturn(Future.successful(null))
 
       def upscanControllerError(): UpscanController =
         new UpscanController(mockAuthAction, mockSessionCacheRepo, mcc, globalErrorView) {
-          override def fetchCsvCallbackList(list: UpscanCsvFilesList)(implicit
-            request: Request[_]
+          override def fetchCsvCallbackList(list: UpscanCsvFilesList)(using
+            request: Request[?]
           ): Future[Seq[UpscanCsvFilesCallback]] =
             Future.failed(new Exception("error"))
           mockAnyContentAction
@@ -171,7 +171,7 @@ class UpscanControllerSpec
       val fakeRequest                        = Fixtures.buildFakeRequestWithSessionId("GET")
       val successfully: UploadedSuccessfully = UploadedSuccessfully("thefilename", "downloadUrl", Some(1000))
 
-      when(mockSessionCacheRepo.fetch[UploadStatus](any())(any(), any()))
+      when(mockSessionCacheRepo.fetch[UploadStatus](any())(using any(), any()))
         .thenReturn(Future.successful(Some(successfully)))
 
       val result = upscanController().successOds(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
@@ -184,7 +184,7 @@ class UpscanControllerSpec
     "return a 500 (getGlobalErrorPage) when getCallbackRecord returns a None" in {
       val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET")
 
-      when(mockSessionCacheRepo.fetch[UploadStatus](any())(any(), any())).thenReturn(Future.successful(None))
+      when(mockSessionCacheRepo.fetch[UploadStatus](any())(using any(), any())).thenReturn(Future.successful(None))
 
       val result = upscanController().successOds(Fixtures.getMockSchemeTypeString).apply(fakeRequest)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
@@ -193,7 +193,7 @@ class UpscanControllerSpec
     "return a 500 (getGlobalErrorPage) when an exception occurs" in {
       val fakeRequest = Fixtures.buildFakeRequestWithSessionId("GET")
 
-      when(mockSessionCacheRepo.fetch[UploadStatus](any())(any(), any()))
+      when(mockSessionCacheRepo.fetch[UploadStatus](any())(using any(), any()))
         .thenReturn(Future.failed(new Exception("an error occured")))
 
       val result = upscanController().successOds(Fixtures.getMockSchemeTypeString).apply(fakeRequest)

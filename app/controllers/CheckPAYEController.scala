@@ -24,7 +24,7 @@ import play.api.mvc.{Action, AnyContent, Result}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 @Singleton
@@ -42,21 +42,21 @@ class CheckPAYEController @Inject() (
       showMissingPAYE()
   }
 
-  def showMissingPAYE()(implicit
+  def showMissingPAYE()(using
     request: RequestWithOptionalEmpRefAndPAYE[AnyContent],
     messages: Messages
   ): Future[Result] =
-    Future.successful(Ok(not_enrolled_in_paye(request, messages, appConfig)))
+    Future.successful(Ok(not_enrolled_in_paye(using request, messages, appConfig)))
 
   def signOutPAYE(): Action[AnyContent] = authAction.async {
     implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent] =>
       showSignOutPAYE()
   }
 
-  def showSignOutPAYE()(implicit
+  def showSignOutPAYE()(using
     request: RequestWithOptionalEmpRefAndPAYE[AnyContent],
     messages: Messages
   ): Future[Result] =
-    Future.successful(Ok(sign_out_paye(request, messages, appConfig)).withNewSession)
+    Future.successful(Ok(sign_out_paye(using request, messages, appConfig)).withNewSession)
 
 }

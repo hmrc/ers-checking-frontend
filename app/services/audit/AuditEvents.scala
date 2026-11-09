@@ -24,10 +24,9 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AuditEvents @Inject() (val auditConnector: AuditConnector)(implicit val ec: ExecutionContext)
-    extends AuditService {
+class AuditEvents @Inject() (val auditConnector: AuditConnector)(using val ec: ExecutionContext) extends AuditService {
 
-  def auditSelectedCsvRadioButtons(selectedCsvFiles: Seq[String])(implicit hc: HeaderCarrier): Future[AuditResult] =
+  def auditSelectedCsvRadioButtons(selectedCsvFiles: Seq[String])(using hc: HeaderCarrier): Future[AuditResult] =
     sendEvent(
       "SelectedCsvRadioButtons",
       Map(
@@ -35,7 +34,7 @@ class AuditEvents @Inject() (val auditConnector: AuditConnector)(implicit val ec
       )
     )
 
-  def auditFileSize(fileSize: String)(implicit hc: HeaderCarrier): Future[AuditResult] =
+  def auditFileSize(fileSize: String)(using hc: HeaderCarrier): Future[AuditResult] =
     sendEvent(
       "UploadFileSizeFromUpscanCallback",
       Map(
@@ -43,7 +42,7 @@ class AuditEvents @Inject() (val auditConnector: AuditConnector)(implicit val ec
       )
     )
 
-  def auditRunTimeError(exception: Throwable, contextInfo: String, sheetName: String)(implicit
+  def auditRunTimeError(exception: Throwable, contextInfo: String, sheetName: String)(using
     hc: HeaderCarrier,
     ec: ExecutionContext
   ): Future[AuditResult] =
@@ -57,7 +56,7 @@ class AuditEvents @Inject() (val auditConnector: AuditConnector)(implicit val ec
       )
     )
 
-  def fileProcessingErrorAudit(schemeType: String, sheetName: String, errorMsg: String)(implicit
+  def fileProcessingErrorAudit(schemeType: String, sheetName: String, errorMsg: String)(using
     hc: HeaderCarrier,
     ec: ExecutionContext
   ): Future[AuditResult] =
@@ -66,9 +65,9 @@ class AuditEvents @Inject() (val auditConnector: AuditConnector)(implicit val ec
       Map("schemeType" -> schemeType, "sheetName" -> sheetName, "ErrorMessage" -> errorMsg)
     )
 
-  def numRowsInSchemeData(sheetName: String, rowsWithData: Int)(implicit
+  def numRowsInSchemeData(sheetName: String, rowsWithData: Int)(using
     hc: HeaderCarrier,
-    request: RequestWithOptionalEmpRefAndPAYE[_],
+    request: RequestWithOptionalEmpRefAndPAYE[?],
     ec: ExecutionContext
   ): Future[AuditResult] = {
     val empRef = request.optionalEmpRef.map(_.value).getOrElse("")

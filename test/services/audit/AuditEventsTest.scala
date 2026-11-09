@@ -19,8 +19,8 @@ package services.audit
 import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import helpers.ErsTestHelper
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.*
+import org.mockito.Mockito.*
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -58,7 +58,7 @@ class AuditEventsTest extends AnyWordSpecLike with Matchers with OptionValues wi
       )
 
       testAuditEvent.auditRunTimeError(testException, "testContextInfo", "testSheetName")
-      verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(any(), any())
+      verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(using any(), any())
       expectedDataEvent.auditSource    shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditSource
       expectedDataEvent.auditType      shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditType
       expectedDataEvent.detail.head    shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail.head
@@ -78,7 +78,7 @@ class AuditEventsTest extends AnyWordSpecLike with Matchers with OptionValues wi
       )
 
       testAuditEvent.fileProcessingErrorAudit("testScheme", "testSheetName", "testErrorMessage")
-      verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(any(), any())
+      verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(using any(), any())
       expectedDataEvent.auditSource shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditSource
       expectedDataEvent.auditType   shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditType
       expectedDataEvent.detail      shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail
@@ -87,15 +87,15 @@ class AuditEventsTest extends AnyWordSpecLike with Matchers with OptionValues wi
 
   "The numRowsInSchemeData DataEvent" should {
     "include the 'CheckingServiceFileProcessingError' audit type when the request has no EmpRef" in {
-      val mockAuditConnector: DefaultAuditConnector                 = mock[DefaultAuditConnector]
-      val testAuditEvent                                            = new AuditEvents(mockAuditConnector)
-      implicit val fakeRequest: RequestWithOptionalEmpRefAndPAYE[_] = RequestWithOptionalEmpRefAndPAYE(
+      val mockAuditConnector: DefaultAuditConnector          = mock[DefaultAuditConnector]
+      val testAuditEvent                                     = new AuditEvents(mockAuditConnector)
+      given fakeRequest: RequestWithOptionalEmpRefAndPAYE[?] = RequestWithOptionalEmpRefAndPAYE(
         FakeRequest(),
         None,
         PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig)
       )
-      val eventCaptor                                               = ArgumentCaptor.forClass(classOf[DataEvent])
-      val expectedDataEvent: DataEvent                              = dataEvent.copy(
+      val eventCaptor                                        = ArgumentCaptor.forClass(classOf[DataEvent])
+      val expectedDataEvent: DataEvent                       = dataEvent.copy(
         auditType = "CheckingServiceNumRowsInSchemeData",
         detail = Map(
           "sheetName"    -> "testSheetName",
@@ -105,22 +105,22 @@ class AuditEventsTest extends AnyWordSpecLike with Matchers with OptionValues wi
       )
 
       testAuditEvent.numRowsInSchemeData("testSheetName", 3)
-      verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(any(), any())
+      verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(using any(), any())
       expectedDataEvent.auditSource shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditSource
       expectedDataEvent.auditType   shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditType
       expectedDataEvent.detail      shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail
     }
 
     "include the 'CheckingServiceFileProcessingError' audit type when the request has an EmpRef" in {
-      val mockAuditConnector: DefaultAuditConnector                 = mock[DefaultAuditConnector]
-      val testAuditEvent                                            = new AuditEvents(mockAuditConnector)
-      implicit val fakeRequest: RequestWithOptionalEmpRefAndPAYE[_] = RequestWithOptionalEmpRefAndPAYE(
+      val mockAuditConnector: DefaultAuditConnector          = mock[DefaultAuditConnector]
+      val testAuditEvent                                     = new AuditEvents(mockAuditConnector)
+      given fakeRequest: RequestWithOptionalEmpRefAndPAYE[?] = RequestWithOptionalEmpRefAndPAYE(
         FakeRequest(),
         Some(EmpRef("1234", "GA4567")),
         PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig)
       )
-      val eventCaptor                                               = ArgumentCaptor.forClass(classOf[DataEvent])
-      val expectedDataEvent: DataEvent                              = dataEvent.copy(
+      val eventCaptor                                        = ArgumentCaptor.forClass(classOf[DataEvent])
+      val expectedDataEvent: DataEvent                       = dataEvent.copy(
         auditType = "CheckingServiceNumRowsInSchemeData",
         detail = Map(
           "sheetName"    -> "testSheetName",
@@ -130,7 +130,7 @@ class AuditEventsTest extends AnyWordSpecLike with Matchers with OptionValues wi
       )
 
       testAuditEvent.numRowsInSchemeData("testSheetName", 2)
-      verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(any(), any())
+      verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(using any(), any())
       expectedDataEvent.auditSource shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditSource
       expectedDataEvent.auditType   shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].auditType
       expectedDataEvent.detail      shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail

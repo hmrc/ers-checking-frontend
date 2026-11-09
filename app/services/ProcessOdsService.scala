@@ -36,7 +36,7 @@ import scala.util.{Failure, Success}
 
 @Singleton
 class ProcessOdsService @Inject() (sessionCacheService: ErsCheckingFrontendSessionCacheRepository, ersUtil: ERSUtil)(
-  implicit ec: ExecutionContext
+  using ec: ExecutionContext
 ) extends Logging {
 
   def validateOdsFile(
@@ -55,7 +55,7 @@ class ProcessOdsService @Inject() (sessionCacheService: ErsCheckingFrontendSessi
     scheme: String,
     useV4andV5Scheme: Boolean = true,
     useV6andV7Scheme: Boolean = false
-  )(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Boolean] = {
+  )(using request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Boolean] = {
     for {
       _           <- sessionCacheService.cache[String](ersUtil.FILE_NAME_CACHE, fileName)
       sheetErrors <- validateOdsFile(fileName, processor, scheme, useV4andV5Scheme, useV6andV7Scheme) match {
@@ -75,8 +75,8 @@ class ProcessOdsService @Inject() (sessionCacheService: ErsCheckingFrontendSessi
       logger.warn(s"[ProcessOdsService][performOdsUpload] XMLStreamException - $e")
   }
 
-  def processSheetErrors(sheetErrors: ListBuffer[SheetErrors], errorCount: Int)(implicit
-    request: Request[_]
+  def processSheetErrors(sheetErrors: ListBuffer[SheetErrors], errorCount: Int)(using
+    request: Request[?]
   ): Future[Boolean] =
     if (ProcessOdsService.isValid(sheetErrors)) {
       Future.successful(true)

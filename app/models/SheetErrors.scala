@@ -21,7 +21,7 @@ import uk.gov.hmrc.validator.models._
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 
 object SheetErrors {
-  implicit val formatCell: OFormat[Cell]              = Json.format[Cell]
-  implicit val formatErrors: OFormat[ValidationError] = Json.format[ValidationError]
-  implicit val format: OFormat[SheetErrors]           = Json.format[SheetErrors]
+  given formatCell: OFormat[Cell]              = Json.format[Cell]
+  given formatErrors: OFormat[ValidationError] = Json.format[ValidationError]
+  given format: OFormat[SheetErrors]           = Json.format[SheetErrors]
 }

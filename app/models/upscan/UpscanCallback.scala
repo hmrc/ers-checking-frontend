@@ -16,10 +16,9 @@
 
 package models.upscan
 
-import java.net.URL
+import java.net.{URI, URL}
 import java.time.Instant
-
-import play.api.libs.json._
+import play.api.libs.json.*
 
 import scala.util.Try
 
@@ -39,10 +38,10 @@ case class UpscanFailedCallback(
 ) extends UpscanCallback
 
 object UpscanCallback {
-  implicit val uploadDetailsFormat: Format[UploadDetails] = Json.format[UploadDetails]
-  implicit val errorDetailsFormat: Format[ErrorDetails]   = Json.format[ErrorDetails]
+  given uploadDetailsFormat: Format[UploadDetails] = Json.format[UploadDetails]
+  given errorDetailsFormat: Format[ErrorDetails]   = Json.format[ErrorDetails]
 
-  implicit val formatURL: Format[URL] = new Format[URL] {
+  given formatURL: Format[URL] = new Format[URL] {
     override def reads(json: JsValue): JsResult[URL] = json match {
       case JsString(s) =>
         parseUrl(s)
@@ -51,15 +50,15 @@ object UpscanCallback {
       case _           => JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.url"))))
     }
 
-    private def parseUrl(s: String): Option[URL] = Try(new URL(s)).toOption
+    private def parseUrl(s: String): Option[URL] = Try(new URI(s).toURL).toOption
 
     override def writes(o: URL): JsValue = JsString(o.toString)
   }
 
-  implicit val readyCallbackBodyFormat: Reads[UpscanReadyCallback]  = Json.reads[UpscanReadyCallback]
-  implicit val failedCallbackBodyReads: Reads[UpscanFailedCallback] = Json.reads[UpscanFailedCallback]
+  given readyCallbackBodyFormat: Reads[UpscanReadyCallback]  = Json.reads[UpscanReadyCallback]
+  given failedCallbackBodyReads: Reads[UpscanFailedCallback] = Json.reads[UpscanFailedCallback]
 
-  implicit val reads: Reads[UpscanCallback] = (json: JsValue) =>
+  given reads: Reads[UpscanCallback] = (json: JsValue) =>
     json \ "fileStatus" match {
       case JsDefined(JsString("READY"))  => implicitly[Reads[UpscanReadyCallback]].reads(json)
       case JsDefined(JsString("FAILED")) => implicitly[Reads[UpscanFailedCallback]].reads(json)

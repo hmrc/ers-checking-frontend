@@ -30,10 +30,10 @@ class UpscanService @Inject() (upscanConnector: UpscanConnector, appConfig: Appl
 
   private def urlToString(c: Call): String = redirectUrlBase + c.url
 
-  def callbackCsv(uploadId: UploadId)(implicit sessionId: String): Call =
+  def callbackCsv(uploadId: UploadId)(using sessionId: String): Call =
     controllers.internal.routes.UpscanCallbackController.callbackCsv(uploadId, sessionId)
 
-  def callbackOds(implicit sessionId: String): Call =
+  def callbackOds(using sessionId: String): Call =
     controllers.internal.routes.UpscanCallbackController.callbackOds(sessionId)
 
   private def successCsv(uploadId: UploadId, scheme: String): String = urlToString(
@@ -45,12 +45,12 @@ class UpscanService @Inject() (upscanConnector: UpscanConnector, appConfig: Appl
   lazy val isSecure: Boolean       = appConfig.upscanProtocol == "https"
   lazy val redirectUrlBase: String = appConfig.upscanRedirectBase
 
-  def getUpscanFormData(isCsv: Boolean, scheme: String, upscanId: Option[UpscanIds] = None)(implicit
+  def getUpscanFormData(isCsv: Boolean, scheme: String, upscanId: Option[UpscanIds] = None)(using
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): Future[UpscanInitiateResponse] = {
 
-    implicit val sessionId: String = hc.sessionId.get.value
+    given sessionId: String = hc.sessionId.get.value
 
     def isCsvAndUploadId = isCsv && upscanId.isDefined
 

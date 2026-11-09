@@ -24,7 +24,7 @@ import javax.inject.Inject
 
 case class FileSizeUtils @Inject() (val auditEvents: AuditEvents) extends Logging {
 
-  def logFileSize(fileSize: Int)(implicit hc: HeaderCarrier): Unit = {
+  def logFileSize(fileSize: Int)(using hc: HeaderCarrier): Unit = {
     auditEvents.auditFileSize(fileSize.toString)
     logger.info(s"[FileSizeUtils][logFileSize]: file size: ${mapFileSizeToString(fileSize)}")
   }

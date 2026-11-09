@@ -20,8 +20,8 @@ import helpers.ErsTestHelper
 import models.SheetErrors.format
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import org.jsoup.Jsoup
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.*
+import org.mockito.Mockito.*
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -29,9 +29,9 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n.MessagesImpl
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.mvc.{DefaultMessagesControllerComponents, Result}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.api.test.Injecting
 import play.api.{Application, i18n}
 import uk.gov.hmrc.validator.models.{Cell, ValidationError}
@@ -42,6 +42,8 @@ import views.html.{global_error, html_error_report}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
+import org.jsoup.nodes.Document
+import org.jsoup.select.Elements
 
 class HtmlReportControllerTest
     extends AnyWordSpecLike
@@ -60,9 +62,9 @@ class HtmlReportControllerTest
     "metrics.enabled"       -> false
   )
 
-  implicit override lazy val app: Application       = new GuiceApplicationBuilder().configure(config).build()
+  override lazy given app: Application              = new GuiceApplicationBuilder().configure(config).build()
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(app)
-  implicit lazy val testMessages: MessagesImpl      = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
+  lazy given testMessages: MessagesImpl             = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
   val view: html_error_report                       = inject[html_error_report]
   val globalErrorView: global_error                 = inject[global_error]
 
@@ -86,7 +88,7 @@ class HtmlReportControllerTest
       val cacheItem = generateTestCacheItem(id = "test", data = storedValues)
       mockAnyContentAction
 
-      when(mockSessionCacheRepo.fetchAll()(any())).thenReturn(Future.successful(cacheItem))
+      when(mockSessionCacheRepo.fetchAll()(using any())).thenReturn(Future.successful(cacheItem))
 
       lazy val result =
         controllerUnderTest.htmlErrorReportPage(true).apply(Fixtures.buildFakeRequestWithSessionId("GET"))
@@ -108,7 +110,7 @@ class HtmlReportControllerTest
           "callback_data_key_csv" -> Json.toJson(callbackList)
         )
       )
-      when(mockSessionCacheRepo.fetchAll()(any())).thenReturn(Future.successful(cacheItem))
+      when(mockSessionCacheRepo.fetchAll()(using any())).thenReturn(Future.successful(cacheItem))
 
       val result   = controllerUnderTest.htmlErrorReportPage(true).apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       val document = Jsoup.parse(contentAsString(result))
@@ -121,12 +123,12 @@ class HtmlReportControllerTest
     "throw exception" in {
       val controllerUnderTest =
         new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
-      when(mockSessionCacheRepo.fetchAll()(any())).thenReturn(Future(throw new NoSuchElementException))
+      when(mockSessionCacheRepo.fetchAll()(using any())).thenReturn(Future(throw new NoSuchElementException))
       val res: Future[Result] = controllerUnderTest
-        .showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"), testMessages)
-      res.map { result =>
-        result shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request, testMessages)))
-      }
+        .showHtmlErrorReportPage(isCsv = true)(using Fixtures.buildFakeRequestWithSessionId("GET"), testMessages)
+      val doc: Document       = Jsoup.parse(contentAsString(res))
+      val heading             = doc.getElementsByClass("hmrc-page-heading").text()
+      heading shouldBe testMessages.messages("ers.global_errors.message")
     }
   }
 
@@ -145,10 +147,10 @@ class HtmlReportControllerTest
         )
       )
 
-      when(mockSessionCacheRepo.fetchAll()(any())).thenReturn(Future.successful(cacheItem))
+      when(mockSessionCacheRepo.fetchAll()(using any())).thenReturn(Future.successful(cacheItem))
 
       val result = controllerUnderTest
-        .showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"), testMessages)
+        .showHtmlErrorReportPage(isCsv = true)(using Fixtures.buildFakeRequestWithSessionId("GET"), testMessages)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
   }
@@ -183,7 +185,7 @@ class HtmlReportControllerTest
       val result =
         new HtmlReportController(mockAuthAction, mcc, mockSessionCacheRepo, view, mockAuditEvents, globalErrorView)
           .csvExtractErrors(Seq(uploadId), cacheItemWithErrors)
-      result shouldBe ((errorList, 1, 1))
+      result shouldBe (errorList, 1, 1)
     }
 
     "display the all the errors and send unique error keys while calling audit" in {
@@ -222,16 +224,21 @@ class HtmlReportControllerTest
         )
       )
 
-      when(mockSessionCacheRepo.fetchAll()(any())).thenReturn(Future.successful(cacheItemWithErrors))
-      val res = controllerUnderTest
-        .showHtmlErrorReportPage(isCsv = true)(Fixtures.buildFakeRequestWithSessionId("GET"), testMessages)
-      res.map { result =>
-        result shouldBe contentAsString(
-          controllerUnderTest.showHtmlErrorReportPage(isCsv = true)(request, testMessages)
-        )
-      }
+      when(mockSessionCacheRepo.fetchAll()(using any())).thenReturn(Future.successful(cacheItemWithErrors))
+      val res             = controllerUnderTest
+        .showHtmlErrorReportPage(isCsv = true)(using Fixtures.buildFakeRequestWithSessionId("GET"), testMessages)
+      val doc: Document   = Jsoup.parse(contentAsString(res))
+      val table: Elements = doc.select("table")
+      table
+        .get(0)
+        .getElementsByClass("govuk-table__cell")
+        .text()                                                   shouldBe "A 1 Enter a date that matches the yyyy-mm-dd pattern"
+      table.get(1).getElementsByClass("govuk-table__cell").text() shouldBe "F 6 Enter ‘yes’ or ‘no’"
+      table
+        .get(2)
+        .getElementsByClass("govuk-table__cell")
+        .text()                                                   shouldBe "A 1 Enter a date that matches the yyyy-mm-dd pattern"
     }
-
   }
 
   "getEntry" must {

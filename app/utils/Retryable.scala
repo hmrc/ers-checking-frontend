@@ -36,7 +36,7 @@ trait Retryable {
 
     def withRetry(
       maxTimes: Int
-    )(pToBreakLoop: A => Boolean)(implicit actorSystem: ActorSystem, ec: ExecutionContext): Future[A] = {
+    )(pToBreakLoop: A => Boolean)(using actorSystem: ActorSystem, ec: ExecutionContext): Future[A] = {
       val delay: FiniteDuration                                       = appConfig.retryDelay
       val scheduler: Scheduler                                        = actorSystem.getScheduler
       def loop(count: Int = 0, previous: Option[A] = None): Future[A] = {

@@ -18,7 +18,7 @@ package services
 
 object XMLTestHelpers {
 
-  def buildValidOdsXml(body: String) =
+  def buildValidOdsXml(body: String): String =
     s"""<office:document-content
       xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
       xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0"

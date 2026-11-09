@@ -27,8 +27,8 @@ class FormatErrorsViewSpec extends ViewSpecBase with ErsTestHelper {
 
   class FormatErrorsViewSetUp(language: String) {
 
-    implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
-    implicit val messages: Messages                           = MessagesImpl(Lang(language), messagesApi)
+    given request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
+    given messages: Messages                           = MessagesImpl(Lang(language), messagesApi)
 
     val view: format_errors = app.injector.instanceOf[format_errors]
 
@@ -39,7 +39,6 @@ class FormatErrorsViewSpec extends ViewSpecBase with ErsTestHelper {
         schemeNameShort = "CSOP",
         errorMsg = errorMsg,
         errorMsgParams = errorMsgParams,
-        showExtendedInstructions = false,
         uploadAgainLink = Call("GET", "/check-your-ers-files/choose-and-check-csv-files?")
       )
     )

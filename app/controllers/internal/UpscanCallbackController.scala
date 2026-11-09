@@ -16,10 +16,10 @@
 
 package controllers.internal
 
-import models.upscan._
+import models.upscan.*
 import play.api.Logging
 import play.api.libs.json.JsValue
-import play.api.mvc._
+import play.api.mvc.*
 import repository.ErsCheckingFrontendSessionCacheRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
@@ -34,11 +34,11 @@ class UpscanCallbackController @Inject() (
   sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
   mcc: MessagesControllerComponents,
   fileSizeUtils: FileSizeUtils
-)(implicit ec: ExecutionContext)
+)(using ec: ExecutionContext)
     extends FrontendController(mcc) with Logging with CacheUtil {
 
   def callbackCsv(uploadId: UploadId, sessionId: String): Action[JsValue] = Action.async(parse.json) {
-    request: MessagesRequest[JsValue] =>
+    (request: MessagesRequest[JsValue]) =>
       request.body
         .validate[UpscanCallback]
         .fold(
@@ -47,9 +47,9 @@ class UpscanCallbackController @Inject() (
             Future.successful(BadRequest)
           },
           valid = callback => {
-            val uploadStatus: UploadStatus                = callback match {
+            val uploadStatus: UploadStatus         = callback match {
               case callback: UpscanReadyCallback    =>
-                fileSizeUtils.logFileSize(callback.uploadDetails.size)(
+                fileSizeUtils.logFileSize(callback.uploadDetails.size)(using
                   HeaderCarrierConverter.fromRequestAndSession(request, request.session)
                 )
                 UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
@@ -63,7 +63,7 @@ class UpscanCallbackController @Inject() (
               s"[UpscanController][callbackCsv] Updating csv callback for upload id: ${uploadId.value} to " +
                 s"${uploadStatus.getClass.getSimpleName}"
             )
-            implicit val updatedRequest: Request[JsValue] = RequestWithUpdatedSession(request, sessionId)
+            given updatedRequest: Request[JsValue] = RequestWithUpdatedSession(request, sessionId)
             (for {
               upscanId <- sessionCacheService.fetch[UpscanIds](uploadId.value)
               _        <- sessionCacheService.cache[UpscanIds](uploadId.value, upscanId.head.copy(uploadStatus = uploadStatus))
@@ -88,9 +88,9 @@ class UpscanCallbackController @Inject() (
           Future.successful(BadRequest)
         },
         valid = callback => {
-          val uploadStatus                              = callback match {
+          val uploadStatus                       = callback match {
             case callback: UpscanReadyCallback    =>
-              fileSizeUtils.logFileSize(callback.uploadDetails.size)(
+              fileSizeUtils.logFileSize(callback.uploadDetails.size)(using
                 HeaderCarrierConverter.fromRequestAndSession(request, request.session)
               )
               UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
@@ -104,7 +104,7 @@ class UpscanCallbackController @Inject() (
           logger.info(
             s"[UpscanController][callbackOds] Updating callback for session: $sessionId to ${uploadStatus.getClass.getSimpleName}"
           )
-          implicit val updatedRequest: Request[JsValue] = RequestWithUpdatedSession(request, sessionId)
+          given updatedRequest: Request[JsValue] = RequestWithUpdatedSession(request, sessionId)
           sessionCacheService
             .cache[UploadStatus](key = CALLBACK_DATA_KEY, uploadStatus)
             .map(_ => Ok)

@@ -24,7 +24,7 @@ import utils.FeatureDate
 
 import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 @Singleton
 class ApplicationConfig @Inject() (config: ServicesConfig) {
