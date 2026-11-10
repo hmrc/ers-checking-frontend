@@ -17,7 +17,7 @@
 package services
 
 import helpers.ErsTestHelper
-import models.upscan._
+import models.upscan.*
 import models.ERSFileProcessingException
 import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ActorSystem
@@ -25,8 +25,8 @@ import org.apache.pekko.http.scaladsl.model.{HttpResponse, StatusCodes}
 import org.apache.pekko.stream.scaladsl.{Sink, Source}
 import org.apache.pekko.testkit.TestKit
 import org.apache.pekko.util.ByteString
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.*
+import org.mockito.Mockito.*
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -45,6 +45,7 @@ import uk.gov.hmrc.validator.models.ods.SheetErrors
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import play.api.test.Helpers.baseApplicationBuilder
 
 case class CsvErrorKeyTestCase(data: String, sheetName: String, expectedErrorKey: String)
 
@@ -58,7 +59,7 @@ class ProcessCsvServiceSpec
     with GuiceOneAppPerSuite
     with ScalaFutures {
 
-  override lazy val fakeApplication: Application = new GuiceApplicationBuilder()
+  override def fakeApplication(): Application = new GuiceApplicationBuilder()
     .configure(
       Map(
         "play.i18n.langs" -> List("en", "cy"),
@@ -67,7 +68,7 @@ class ProcessCsvServiceSpec
     )
     .build()
 
-  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication)
+  lazy val mcc: DefaultMessagesControllerComponents = testMCC(fakeApplication())
   implicit lazy val testMessages: MessagesImpl      = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
 
   val processCsvService: ProcessCsvService = new ProcessCsvService(mockAppConfig, mockSessionCacheRepo, mockErsUtil)
@@ -98,7 +99,7 @@ class ProcessCsvServiceSpec
       val result       = Await.result(resultFuture, Duration.Inf)
       result.head.isLeft shouldBe true
       val exception: Either[List[ByteString], Throwable] = result.head.swap
-      exception.map { e: Throwable =>
+      exception.map { (e: Throwable) =>
         assert(e.isInstanceOf[UpstreamErrorResponse])
         assert(e.asInstanceOf[UpstreamErrorResponse].getMessage.contains("Illegal response from Upscan"))
       }
@@ -326,7 +327,7 @@ class ProcessCsvServiceSpec
         "EMI40_Replaced_V4",
         "ers.upload.error.ctr"
       )
-    ).foreach { csvErrorKeyTestCase: CsvErrorKeyTestCase =>
+    ).foreach { (csvErrorKeyTestCase: CsvErrorKeyTestCase) =>
       s"return ${csvErrorKeyTestCase.expectedErrorKey} when parsed data containing that error" in {
         val dataEngine = DataEngine(csvErrorKeyTestCase.sheetName, SchemeVersion.All).toOption.get
         Await
@@ -421,7 +422,7 @@ class ProcessCsvServiceSpec
       val result = processCsvService.getValidationResultsWithCorrectRowNumber(errors, "test.csv")
 
       result.isRight shouldBe true
-      result.map { value: Seq[ValidationError] =>
+      result.map { (value: Seq[ValidationError]) =>
         value should contain theSameElementsAs Seq(
           ValidationError(Cell("A", 1, "test"), "001", "error.1", "ers.upload.error.date"),
           ValidationError(Cell("B", 1, "test"), "001", "error.1", "ers.upload.error.date"),

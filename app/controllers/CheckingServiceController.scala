@@ -25,14 +25,14 @@ import models.{CS_checkFileType, CS_schemeType, CSformMappings}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc._
+import play.api.mvc.*
 import repository.ErsCheckingFrontendSessionCacheRepository
 import services.UpscanService
 import services.audit.AuditEvents
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ContentUtil.getScheneNameWithShortenedVersion
-import utils._
+import utils.*
 
 import scala.concurrent.{ExecutionContext, Future}
 

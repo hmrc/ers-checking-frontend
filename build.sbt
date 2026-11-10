@@ -1,5 +1,5 @@
-ThisBuild / scalaVersion := "2.13.18"
-ThisBuild / majorVersion := 4
+ThisBuild / scalaVersion := "3.3.9"
+ThisBuild / majorVersion := 5
 
 lazy val microservice = Project("ers-checking-frontend", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)

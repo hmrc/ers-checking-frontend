@@ -19,15 +19,15 @@ package controllers.internal
 import java.net.URL
 import java.time.Instant
 import helpers.ErsTestHelper
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.*
+import org.mockito.Mockito.*
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 
 import scala.concurrent.Future
 
@@ -39,8 +39,8 @@ class UpscanCallbackControllerSpec
     with GuiceOneAppPerSuite
     with BeforeAndAfterEach {
 
-  import models.upscan._
-  import models.upscan.UpscanCallback._
+  import models.upscan.*
+  import models.upscan.UpscanCallback.*
 
   implicit val failedWrites: OWrites[UpscanFailedCallback] = Json
     .writes[UpscanFailedCallback]

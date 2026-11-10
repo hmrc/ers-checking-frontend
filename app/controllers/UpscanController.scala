@@ -19,10 +19,10 @@ package controllers
 import org.apache.pekko.actor.ActorSystem
 import config.ApplicationConfig
 import controllers.auth.AuthAction
-import models.upscan._
+import models.upscan.*
 import play.api.Logger
 import play.api.i18n.I18nSupport
-import play.api.mvc._
+import play.api.mvc.*
 import repository.ErsCheckingFrontendSessionCacheRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{ERSUtil, Retryable}

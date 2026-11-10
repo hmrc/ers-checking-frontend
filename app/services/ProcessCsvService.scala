@@ -85,7 +85,7 @@ class ProcessCsvService @Inject() (
     extractBodyOfRequest(source)
       .via(FlowOps.eitherFromFunction((rowBytes: Seq[ByteString]) => CsvValidator.validateCsvRow(dataEngine, rowBytes)))
       .runWith(Sink.seq[Either[Throwable, RowValidationResults]])
-      .map(_.traverse(identity))
+      .map(_.sequence)
 
   def processFile(
     scheme: String,
@@ -120,7 +120,7 @@ class ProcessCsvService @Inject() (
     downloadSourceFile: String => Source[HttpResponse, _]
   )(implicit request: Request[_], messages: Messages): List[Future[Either[Throwable, Boolean]]] =
 
-    callback.get.files map { file: UpscanCsvFilesCallback =>
+    callback.get.files map { (file: UpscanCsvFilesCallback) =>
       val rows = fetchRows(file.uploadStatus).getOrElse(0)
       logger.info(
         s"[ProcessCsvService][processFiles] upscan callback successful for scheme: $scheme, with no of rows: $rows"

@@ -30,7 +30,7 @@ class SchemeTypeViewSpec extends ViewSpecBase {
 
   class SchemeTypeViewSetUp(nonTasRadioEnabled: Boolean) {
 
-    implicit val applicationConfig = new ApplicationConfig(mock[ServicesConfig]) {
+    implicit val applicationConfig: ApplicationConfig = new ApplicationConfig(mock[ServicesConfig]) {
       override lazy val displayNonTASSRadioButton = nonTasRadioEnabled
     }
 

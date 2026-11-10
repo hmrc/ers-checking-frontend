@@ -16,7 +16,7 @@
 
 package models.upscan
 
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.mvc.Call
 
 case class UpscanInitiateResponse(

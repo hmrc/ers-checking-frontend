@@ -19,7 +19,7 @@ package models.upscan
 import java.net.URL
 import java.time.Instant
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
 import scala.util.Try
 

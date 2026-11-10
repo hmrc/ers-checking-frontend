@@ -25,7 +25,7 @@ import models.upscan.{UploadId, UpscanCsvFilesCallbackList}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.Reads
-import play.api.mvc._
+import play.api.mvc.*
 import repository.ErsCheckingFrontendSessionCacheRepository
 import services.audit.AuditEvents
 import uk.gov.hmrc.http.InternalServerException

@@ -36,7 +36,7 @@ import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents, Request, R
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Injecting}
 import uk.gov.hmrc.http.HttpResponse
-import views.html._
+import views.html.*
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -129,8 +129,8 @@ class CheckCsvFilesControllerSpec
             InternalServerError("this is very bad")
           mockAnyContentAction
         }
-      when(mockSessionCacheRepo.delete(refEq(mockErsUtil.CSV_FILES_UPLOAD))(any()))
-        .thenReturn(Future.successful(HttpResponse(Status.OK, "we uploadin")))
+      when(mockSessionCacheRepo.delete[Unit](refEq(mockErsUtil.CSV_FILES_UPLOAD))(any()))
+        .thenReturn(Future.successful(()))
       when(mockSessionCacheRepo.fetchAndGetEntry[String](refEq(mockErsUtil.SCHEME_CACHE))(any(), any()))
         .thenReturn(Future.successful("a string"))
       when(mockErsUtil.getCsvFilesList(any())).thenReturn(Seq(CsvFiles("a file")))

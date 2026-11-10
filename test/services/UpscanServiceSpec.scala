@@ -18,10 +18,10 @@ package services
 
 import connectors.UpscanConnector
 import helpers.ErsTestHelper
-import models.upscan._
+import models.upscan.*
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike

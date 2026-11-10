@@ -16,10 +16,10 @@
 
 package controllers.internal
 
-import models.upscan._
+import models.upscan.*
 import play.api.Logging
 import play.api.libs.json.JsValue
-import play.api.mvc._
+import play.api.mvc.*
 import repository.ErsCheckingFrontendSessionCacheRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
@@ -38,7 +38,7 @@ class UpscanCallbackController @Inject() (
     extends FrontendController(mcc) with Logging with CacheUtil {
 
   def callbackCsv(uploadId: UploadId, sessionId: String): Action[JsValue] = Action.async(parse.json) {
-    request: MessagesRequest[JsValue] =>
+    (request: MessagesRequest[JsValue]) =>
       request.body
         .validate[UpscanCallback]
         .fold(
