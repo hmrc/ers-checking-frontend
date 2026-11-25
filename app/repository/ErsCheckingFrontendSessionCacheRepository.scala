@@ -33,7 +33,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ErsCheckingFrontendSessionCacheRepository @Inject() (
   mongoComponent: MongoComponent,
   configuration: Configuration
-)(implicit ec: ExecutionContext)
+)(using ec: ExecutionContext)
     extends SessionCacheRepository(
       mongoComponent = mongoComponent,
       collectionName = "sessions",
@@ -43,20 +43,20 @@ class ErsCheckingFrontendSessionCacheRepository @Inject() (
     )
     with Logging {
 
-  def cache[T](key: String, body: T)(implicit request: Request[_], formats: json.Format[T]): Future[(String, String)] =
+  def cache[T](key: String, body: T)(using request: Request[?], formats: json.Format[T]): Future[(String, String)] =
     putSession(DataKey(key), body)
 
-  def fetch[T](key: String)(implicit request: Request[_], formats: json.Format[T]): Future[Option[T]] =
+  def fetch[T](key: String)(using request: Request[?], formats: json.Format[T]): Future[Option[T]] =
     getFromSession[T](DataKey(key))
 
-  def delete[T](key: String)(implicit request: Request[_]): Future[Unit] =
+  def delete[T](key: String)(using request: Request[?]): Future[Unit] =
     deleteFromSession(DataKey(key))
 
-  def getAllFromSession()(implicit request: Request[Any]): Future[Option[CacheItem]] =
+  def getAllFromSession()(using request: Request[Any]): Future[Option[CacheItem]] =
     cacheRepo.findById(request)
 
   @throws(classOf[NoSuchElementException])
-  def fetchAndGetEntry[T](key: String)(implicit request: Request[_], reads: Reads[T]): Future[T] =
+  def fetchAndGetEntry[T](key: String)(using request: Request[?], reads: Reads[T]): Future[T] =
     getFromSession[T](DataKey[T](key)) map {
       case Some(value) => value
       case None        =>
@@ -68,7 +68,7 @@ class ErsCheckingFrontendSessionCacheRepository @Inject() (
     }
 
   @throws(classOf[NoSuchElementException])
-  def fetchAll()(implicit request: Request[_]): Future[CacheItem] =
+  def fetchAll()(using request: Request[?]): Future[CacheItem] =
     getAllFromSession().map { res =>
       try {
         val sessionMap = res.get

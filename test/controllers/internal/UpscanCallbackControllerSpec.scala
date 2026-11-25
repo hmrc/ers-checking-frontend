@@ -16,18 +16,18 @@
 
 package controllers.internal
 
-import java.net.URL
+import java.net.URI
 import java.time.Instant
 import helpers.ErsTestHelper
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.*
+import org.mockito.Mockito.*
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 
 import scala.concurrent.Future
 
@@ -39,14 +39,14 @@ class UpscanCallbackControllerSpec
     with GuiceOneAppPerSuite
     with BeforeAndAfterEach {
 
-  import models.upscan._
-  import models.upscan.UpscanCallback._
+  import models.upscan.*
+  import models.upscan.UpscanCallback.{errorDetailsFormat, formatURL, uploadDetailsFormat}
 
-  implicit val failedWrites: OWrites[UpscanFailedCallback] = Json
+  given failedWrites: OWrites[UpscanFailedCallback] = Json
     .writes[UpscanFailedCallback]
     .transform((js: JsValue) => js.as[JsObject] + ("fileStatus" -> JsString("FAILED")))
 
-  implicit val readWrites: OWrites[UpscanReadyCallback] =
+  given readWrites: OWrites[UpscanReadyCallback] =
     Json.writes[UpscanReadyCallback].transform((js: JsValue) => js.as[JsObject] + ("fileStatus" -> JsString("READY")))
 
   val sessionId = "sessionId"
@@ -54,7 +54,7 @@ class UpscanCallbackControllerSpec
   val uploadDetails: UploadDetails = UploadDetails(Instant.now(), "checksum", "fileMimeType", "fileName", 100)
 
   val readyCallback: UpscanReadyCallback =
-    UpscanReadyCallback(Reference("Reference"), new URL("https://callbackUrl.com"), uploadDetails)
+    UpscanReadyCallback(Reference("Reference"), new URI("https://callbackUrl.com").toURL, uploadDetails)
 
   val failedCallback: UpscanFailedCallback =
     UpscanFailedCallback(Reference("Reference"), ErrorDetails("failureReason", "message"))
@@ -80,13 +80,14 @@ class UpscanCallbackControllerSpec
         val uploadedSuccessfully = UploadedSuccessfully("name", "downloadUrl", noOfRows = None)
         val upscanId             = UpscanIds(uploadId, "fileId", uploadedSuccessfully)
 
-        when(mockSessionCacheRepo.fetch[UpscanIds](any())(any(), any())).thenReturn(Future.successful(Some(upscanId)))
-        when(mockSessionCacheRepo.cache(any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
+        when(mockSessionCacheRepo.fetch[UpscanIds](any())(using any(), any()))
+          .thenReturn(Future.successful(Some(upscanId)))
+        when(mockSessionCacheRepo.cache(any(), any())(using any(), any())).thenReturn(Future.successful(("", "")))
 
         val result = upscanCallbackController.callbackCsv(uploadId, sessionId)(request(Json.toJson(readyCallback)))
         status(result) shouldBe OK
-        verify(mockSessionCacheRepo, times(1)).fetch[UpscanIds](any())(any(), any())
-        verify(mockSessionCacheRepo, times(1)).cache(any(), any())(any(), any())
+        verify(mockSessionCacheRepo, times(1)).fetch[UpscanIds](any())(using any(), any())
+        verify(mockSessionCacheRepo, times(1)).cache(any(), any())(using any(), any())
       }
     }
 
@@ -94,14 +95,15 @@ class UpscanCallbackControllerSpec
       "callback is UpscanFailedCallback and upload is InProgress" in {
         val upscanId = UpscanIds(uploadId, "fileId", Failed)
 
-        when(mockSessionCacheRepo.fetch[UpscanIds](any())(any(), any())).thenReturn(Future.successful(Some(upscanId)))
-        when(mockSessionCacheRepo.cache(any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
+        when(mockSessionCacheRepo.fetch[UpscanIds](any())(using any(), any()))
+          .thenReturn(Future.successful(Some(upscanId)))
+        when(mockSessionCacheRepo.cache(any(), any())(using any(), any())).thenReturn(Future.successful(("", "")))
 
         val result = upscanCallbackController.callbackCsv(uploadId, sessionId)(request(Json.toJson(failedCallback)))
 
         status(result) shouldBe OK
-        verify(mockSessionCacheRepo, times(1)).fetch[UpscanIds](any())(any(), any())
-        verify(mockSessionCacheRepo, times(1)).cache(any(), any())(any(), any())
+        verify(mockSessionCacheRepo, times(1)).fetch[UpscanIds](any())(using any(), any())
+        verify(mockSessionCacheRepo, times(1)).cache(any(), any())(using any(), any())
       }
     }
 
@@ -109,13 +111,13 @@ class UpscanCallbackControllerSpec
       "updating the cache fails" in {
         val body = UpscanFailedCallback(Reference("ref"), ErrorDetails("failed", "message"))
 
-        when(mockSessionCacheRepo.fetch[UpscanIds](any())(any(), any()))
+        when(mockSessionCacheRepo.fetch[UpscanIds](any())(using any(), any()))
           .thenReturn(Future.failed(new Exception("Test Exception")))
 
         val result = upscanCallbackController.callbackCsv(uploadId, sessionId)(request(Json.toJson(body)))
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockSessionCacheRepo, times(1)).fetch[UpscanIds](any())(any(), any())
+        verify(mockSessionCacheRepo, times(1)).fetch[UpscanIds](any())(using any(), any())
       }
     }
 
@@ -125,8 +127,8 @@ class UpscanCallbackControllerSpec
         val result   = upscanCallbackController.callbackCsv(uploadId, sessionId)(request(jsonBody))
 
         status(result) shouldBe BAD_REQUEST
-        verify(mockSessionCacheRepo, never()).fetchAndGetEntry[UpscanIds](any())(any(), any())
-        verify(mockSessionCacheRepo, never()).cache(any(), any())(any(), any())
+        verify(mockSessionCacheRepo, never()).fetchAndGetEntry[UpscanIds](any())(using any(), any())
+        verify(mockSessionCacheRepo, never()).cache(any(), any())(using any(), any())
       }
     }
   }
@@ -135,30 +137,30 @@ class UpscanCallbackControllerSpec
 
     "update callback" when {
       "Upload status is UpscanReadyCallback" in {
-        when(mockSessionCacheRepo.cache(any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
+        when(mockSessionCacheRepo.cache(any(), any())(using any(), any())).thenReturn(Future.successful(("", "")))
 
         val result = upscanCallbackController.callbackOds(sessionId)(request(Json.toJson(readyCallback)))
         status(result) shouldBe OK
-        verify(mockSessionCacheRepo, times(1)).cache(any(), any())(any(), any())
+        verify(mockSessionCacheRepo, times(1)).cache(any(), any())(using any(), any())
       }
 
       "Upload status is failed" in {
-        when(mockSessionCacheRepo.cache(any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
+        when(mockSessionCacheRepo.cache(any(), any())(using any(), any())).thenReturn(Future.successful(("", "")))
         val result = upscanCallbackController.callbackOds(sessionId)(request(Json.toJson(failedCallback)))
 
         status(result) shouldBe OK
-        verify(mockSessionCacheRepo, times(1)).cache(any(), any())(any(), any())
+        verify(mockSessionCacheRepo, times(1)).cache(any(), any())(using any(), any())
       }
     }
 
     "return InternalServerError" when {
       "updating the cache fails" in {
-        when(mockSessionCacheRepo.cache(any(), any())(any(), any()))
+        when(mockSessionCacheRepo.cache(any(), any())(using any(), any()))
           .thenReturn(Future.failed(new Exception("Test exception")))
         val result = upscanCallbackController.callbackOds(sessionId)(request(Json.toJson(readyCallback)))
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockSessionCacheRepo, times(1)).cache(any(), any())(any(), any())
+        verify(mockSessionCacheRepo, times(1)).cache(any(), any())(using any(), any())
       }
     }
 
@@ -168,7 +170,7 @@ class UpscanCallbackControllerSpec
         val result   = upscanCallbackController.callbackOds(sessionId)(request(jsonBody))
 
         status(result) shouldBe BAD_REQUEST
-        verify(mockSessionCacheRepo, never()).cache(any(), any())(any(), any())
+        verify(mockSessionCacheRepo, never()).cache(any(), any())(using any(), any())
       }
     }
   }

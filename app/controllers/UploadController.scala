@@ -22,28 +22,28 @@ import models.ERSFileProcessingException
 import models.SheetErrors.format
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallbackList}
 import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.http.scaladsl._
+import org.apache.pekko.http.scaladsl.*
 import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse}
 import org.apache.pekko.stream.scaladsl.Source
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
-import play.api.mvc._
+import play.api.mvc.*
 import repository.ErsCheckingFrontendSessionCacheRepository
 import services.{ProcessCsvService, ProcessOdsService}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import uk.gov.hmrc.validator.models._
+import uk.gov.hmrc.validator.models.*
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 import utils.ERSUtil
 import utils.UploadedFileUtil.checkOdsFileType
 
 import java.io.InputStream
-import java.net.URL
 import java.util.zip.ZipInputStream
 import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
+import java.net.URI
 
 @Singleton
 class UploadController @Inject() (
@@ -53,16 +53,16 @@ class UploadController @Inject() (
   sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
   mcc: MessagesControllerComponents,
   override val global_error: views.html.global_error
-)(implicit
+)(using
   executionContext: ExecutionContext,
   actorSystem: ActorSystem,
   val ersUtil: ERSUtil,
   override val appConfig: ApplicationConfig
 ) extends FrontendController(mcc) with I18nSupport with ErsBaseController with Logging {
 
-  def downloadAsInputStream(downloadUrl: String): InputStream = new URL(downloadUrl).openStream()
+  def downloadAsInputStream(downloadUrl: String): InputStream = new URI(downloadUrl).toURL.openStream()
 
-  def clearErrorCache()(implicit request: Request[_]): Future[Boolean] =
+  def clearErrorCache()(using request: Request[?]): Future[Boolean] =
     // remove function doesn't work, the cache needs to be overwritten with 'blank' data
     (for {
       _ <- sessionCacheService.cache[Long](ersUtil.SCHEME_ERROR_COUNT_CACHE, 0L)
@@ -75,17 +75,17 @@ class UploadController @Inject() (
       Future.successful(false)
     }
 
-  private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, _] =
+  private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, ?] =
     Source
       .single(HttpRequest(uri = downloadUrl))
       .mapAsync(parallelism = 1)(makeRequest)
 
   private[controllers] def makeRequest(request: HttpRequest): Future[HttpResponse] =
-    Http()(actorSystem).singleRequest(request)
+    Http()(using actorSystem).singleRequest(request)
 
   private[controllers] def readFileOds(
     downloadUrl: String
-  )(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Either[Result, InputStream] =
+  )(using request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Either[Result, InputStream] =
     try {
       val stream: InputStream = downloadAsInputStream(downloadUrl)
       val targetFileName      = "content.xml"
@@ -132,7 +132,7 @@ class UploadController @Inject() (
 
   def finaliseRequestAndRedirect(
     validationResults: List[Future[Either[Throwable, Boolean]]]
-  )(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Result] =
+  )(using request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Result] =
     Future.sequence(validationResults).flatMap {
       case noFailures if noFailures.forall(_.contains(true)) =>
         Future.successful(Redirect(routes.CheckingServiceController.checkingSuccessPage()))
@@ -151,7 +151,7 @@ class UploadController @Inject() (
 
   def showUploadOdsFile(
     scheme: String
-  )(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent], messages: Messages): Future[Result] =
+  )(using request: RequestWithOptionalEmpRefAndPAYE[AnyContent], messages: Messages): Future[Result] =
     clearErrorCache().flatMap { clearedSuccessfully =>
       if (clearedSuccessfully) {
         // These .get's are safe because the UploadedSuccessfully model is already validated as existing in the UpscanController
@@ -172,8 +172,6 @@ class UploadController @Inject() (
                     scheme,
                     appConfig.useV4andV5SchemeEnabledFrom,
                     appConfig.useV6andV7SchemeEnabledFrom
-                  )(
-                    request
                   )
                   .map(fileIsValid =>
                     if (fileIsValid) {
@@ -197,7 +195,7 @@ class UploadController @Inject() (
         }
       } else {
         logger.error(s"[UploadController][showuploadOdsFile] failed for clearErrorCache scheme : $scheme")
-        Future.successful(getGlobalErrorPage(request, messages))
+        Future.successful(getGlobalErrorPage(using request, messages))
       }
     }
 
@@ -205,14 +203,14 @@ class UploadController @Inject() (
     message: String,
     params: Seq[String],
     needsExtendedInstructions: Boolean
-  )(implicit request: Request[AnyContent]): Future[Result] =
+  )(using request: Request[AnyContent]): Future[Result] =
     for {
       _ <- sessionCacheService.cache[String](ersUtil.FORMAT_ERROR_CACHE, message)
       _ <- sessionCacheService.cache[Seq[String]](ersUtil.FORMAT_ERROR_CACHE_PARAMS, params)
       _ <- sessionCacheService.cache[Boolean](ersUtil.FORMAT_ERROR_EXTENDED_CACHE, needsExtendedInstructions)
     } yield Redirect(routes.CheckingServiceController.formatErrorsPage())
 
-  def handleException(t: Throwable)(implicit request: Request[AnyContent]): Future[Result] =
+  def handleException(t: Throwable)(using request: Request[AnyContent]): Future[Result] =
     t match {
       case ValidatorFailure.Wrapper(failure) =>
         handleValidatorFailure(failure)
@@ -237,7 +235,7 @@ class UploadController @Inject() (
 
   private def handleValidatorFailure(
     failure: ValidatorFailure
-  )(implicit request: Request[AnyContent]): Future[Result] =
+  )(using request: Request[AnyContent]): Future[Result] =
     failure match {
       case e: IncorrectSchemeFailure =>
         val message                     = "ers.exceptions.dataParser.incorrectSchemeType"

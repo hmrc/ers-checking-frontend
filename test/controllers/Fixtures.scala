@@ -19,17 +19,18 @@ package controllers
 import config.ApplicationConfig
 import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import models.SheetErrors.format
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import uk.gov.hmrc.validator.models.{Cell, ValidationError}
 import uk.gov.hmrc.validator.models.ods.SheetErrors
 
 import scala.collection.mutable.ListBuffer
+import play.api.mvc.AnyContentAsEmpty
 
 object Fixtures {
 
-  def buildFakeRequestWithSessionId(method: String, url: String = "") =
+  def buildFakeRequestWithSessionId(method: String, url: String = ""): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(method, url).withSession("sessionId" -> "FAKE_SESSION_ID")
 
   def buildEmpRefRequestWithSessionId(

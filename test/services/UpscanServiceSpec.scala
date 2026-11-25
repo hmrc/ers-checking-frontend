@@ -18,14 +18,14 @@ package services
 
 import connectors.UpscanConnector
 import helpers.ErsTestHelper
-import models.upscan._
+import models.upscan.*
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import play.api.mvc.{AnyContentAsEmpty, Call}
+import play.api.mvc.{Call, Request}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -34,9 +34,9 @@ import scala.concurrent.{Await, Future}
 
 class UpscanServiceSpec extends AnyWordSpecLike with Matchers with OptionValues with ErsTestHelper {
 
-  implicit override val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "http://localhost:9290/")
-  val mockUpscanConnector: UpscanConnector                           = mock[UpscanConnector]
-  val sessionId                                                      = "testSessionId"
+  override protected def makeRequest: Request[AnyRef] = FakeRequest("GET", "http://localhost:9290/")
+  val mockUpscanConnector: UpscanConnector            = mock[UpscanConnector]
+  val sessionId                                       = "testSessionId"
 
   val upscanInitiateResponse: UpscanInitiateResponse = UpscanInitiateResponse(
     Reference("reference"),
@@ -59,7 +59,7 @@ class UpscanServiceSpec extends AnyWordSpecLike with Matchers with OptionValues 
       val initiateRequestCaptor: ArgumentCaptor[UpscanInitiateRequest] =
         ArgumentCaptor.forClass(classOf[UpscanInitiateRequest])
 
-      when(mockUpscanConnector.getUpscanFormData(initiateRequestCaptor.capture())(any[HeaderCarrier]))
+      when(mockUpscanConnector.getUpscanFormData(initiateRequestCaptor.capture())(using any[HeaderCarrier]))
         .thenReturn(Future.successful(upscanInitiateResponse))
 
       Await.ready(getUpscanFormData(isCsv = false, "csop"), Duration.Inf)
@@ -80,7 +80,7 @@ class UpscanServiceSpec extends AnyWordSpecLike with Matchers with OptionValues 
       val initiateRequestCaptor: ArgumentCaptor[UpscanInitiateRequest] =
         ArgumentCaptor.forClass(classOf[UpscanInitiateRequest])
 
-      when(mockUpscanConnector.getUpscanFormData(initiateRequestCaptor.capture())(any[HeaderCarrier]))
+      when(mockUpscanConnector.getUpscanFormData(initiateRequestCaptor.capture())(using any[HeaderCarrier]))
         .thenReturn(Future.successful(upscanInitiateResponse))
 
       Await.ready(getUpscanFormData(isCsv = true, scheme = "csop", Some(upscanIds)), Duration.Inf)

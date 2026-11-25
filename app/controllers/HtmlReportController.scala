@@ -25,7 +25,7 @@ import models.upscan.{UploadId, UpscanCsvFilesCallbackList}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.Reads
-import play.api.mvc._
+import play.api.mvc.*
 import repository.ErsCheckingFrontendSessionCacheRepository
 import services.audit.AuditEvents
 import uk.gov.hmrc.http.InternalServerException
@@ -47,7 +47,7 @@ class HtmlReportController @Inject() (
   html_error_report: views.html.html_error_report,
   auditEvents: AuditEvents,
   override val global_error: views.html.global_error
-)(implicit executionContext: ExecutionContext, ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
+)(using executionContext: ExecutionContext, ersUtil: ERSUtil, override val appConfig: ApplicationConfig)
     extends FrontendController(mcc) with I18nSupport with ErsBaseController with Logging {
 
   def htmlErrorReportPage(isCsv: Boolean): Action[AnyContent] = authAction.async { implicit request =>
@@ -76,7 +76,7 @@ class HtmlReportController @Inject() (
     (errorsList, errorCountLong, totalErrors)
   }
 
-  def showHtmlErrorReportPage(isCsv: Boolean)(implicit request: Request[AnyRef], messages: Messages): Future[Result] =
+  def showHtmlErrorReportPage(isCsv: Boolean)(using request: Request[AnyRef], messages: Messages): Future[Result] =
     sessionCacheService.fetchAll().map { all =>
       val scheneNameWithShortenedVersion: ErrorMessageKeyPrefixAndScheme =
         getEntry[String](all, ersUtil.SCHEME_CACHE) match {
@@ -123,7 +123,7 @@ class HtmlReportController @Inject() (
           errorCountLong,
           errorsList.toSeq,
           uploadAgainLink
-        )(request, messages, appConfig)
+        )(using request, messages, appConfig)
       )
     } recover { case e: NoSuchElementException =>
       auditEvents.auditRunTimeError(e, "Failed to get values ", "")
@@ -131,10 +131,10 @@ class HtmlReportController @Inject() (
         "Unable to display error report in HtmlReportController.showHtmlErrorReportPage. Error: " + e.getMessage,
         e
       )
-      getGlobalErrorPage(request, messages)
+      getGlobalErrorPage(using request, messages)
     }
 
-  def getEntry[T](cacheItem: CacheItem, key: String)(implicit reads: Reads[T]): Option[T] =
+  def getEntry[T](cacheItem: CacheItem, key: String)(using reads: Reads[T]): Option[T] =
     cacheItem.data.value
       .get(key)
       .map(json =>

@@ -21,22 +21,22 @@ import controllers.auth.{PAYEDetails, RequestWithOptionalEmpRefAndPAYE}
 import helpers.ErsTestHelper
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import org.scalatest.{EitherValues, OptionValues}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.matchers.must.Matchers.mustBe
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
-import services.ProcessOdsService._
+import services.ProcessOdsService.*
 import services.SipXMLTestData.getSipV7DataStreamWithNoData
 import services.getValidOTHERV4DataStream.validOtherV4DataStream
 import services.completeValidNonTassV7DataStream.validNonTassV7DataStream
 import uk.gov.hmrc.mongo.test.MongoSupport
 import uk.gov.hmrc.validator.models.ods.SheetErrors
-import uk.gov.hmrc.validator.models._
+import uk.gov.hmrc.validator.models.*
 
 import java.io.InputStream
 import scala.collection.mutable.ListBuffer
@@ -53,7 +53,7 @@ class ProcessOdsServiceSpec
     with MongoSupport
     with EitherValues {
 
-  implicit val fakeRequest: RequestWithOptionalEmpRefAndPAYE[AnyContent] = RequestWithOptionalEmpRefAndPAYE(
+  given fakeRequest: RequestWithOptionalEmpRefAndPAYE[AnyContent] = RequestWithOptionalEmpRefAndPAYE(
     FakeRequest(),
     None,
     PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, None, mockAppConfig)
@@ -77,13 +77,20 @@ class ProcessOdsServiceSpec
 
     "return false if the file has validation errors" in {
       // mocking calls to cache
-      when(mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any()))
-        .thenReturn(Future.successful(("", "")))
       when(
-        mockSessionCacheRepo.cache[Long](ArgumentMatchers.eq(mockErsUtil.SCHEME_ERROR_COUNT_CACHE), any())(any(), any())
+        mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(using any(), any())
       )
         .thenReturn(Future.successful(("", "")))
-      when(mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.ERROR_LIST_CACHE), any())(any(), any()))
+      when(
+        mockSessionCacheRepo.cache[Long](ArgumentMatchers.eq(mockErsUtil.SCHEME_ERROR_COUNT_CACHE), any())(using
+          any(),
+          any()
+        )
+      )
+        .thenReturn(Future.successful(("", "")))
+      when(
+        mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.ERROR_LIST_CACHE), any())(using any(), any())
+      )
         .thenReturn(Future.successful(("", "")))
 
       val output: Boolean = buildProcessOdsService(sheetErrors)
@@ -93,7 +100,9 @@ class ProcessOdsServiceSpec
     }
 
     "return true if the file doesn't have any errors" in {
-      when(mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any()))
+      when(
+        mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(using any(), any())
+      )
         .thenReturn(Future.successful(("", "")))
 
       val emptyErrors     = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))
@@ -105,7 +114,9 @@ class ProcessOdsServiceSpec
     }
 
     "return a NoSuchElementException if nothing was found in the cache" in {
-      when(mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(any(), any()))
+      when(
+        mockSessionCacheRepo.cache[String](ArgumentMatchers.eq(mockErsUtil.FILE_NAME_CACHE), any())(using any(), any())
+      )
         .thenReturn(Future.failed(new NoSuchElementException))
 
       val emptyErrors = ListBuffer[SheetErrors](SheetErrors("testName", ListBuffer[ValidationError]()))

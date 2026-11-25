@@ -23,12 +23,12 @@ import play.api.mvc.Results.InternalServerError
 
 trait ErsBaseController {
 
-  implicit val appConfig: ApplicationConfig
+  given appConfig: ApplicationConfig
   val global_error: views.html.global_error
 
-  def getGlobalErrorPage(implicit request: Request[AnyRef], messages: Messages): Result =
+  def getGlobalErrorPage(using request: Request[AnyRef], messages: Messages): Result =
     InternalServerError(
-      global_error("ers.global_errors.title", "ers.global_errors.message")(request, messages, appConfig)
+      global_error("ers.global_errors.title", "ers.global_errors.message")(using request, messages, appConfig)
     )
 
 }

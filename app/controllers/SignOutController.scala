@@ -26,14 +26,14 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class SignOutController @Inject() (val mcc: MessagesControllerComponents, signedOutView: views.html.signed_out)(implicit
+class SignOutController @Inject() (val mcc: MessagesControllerComponents, signedOutView: views.html.signed_out)(using
   val ec: ExecutionContext,
   val appConfig: ApplicationConfig
 ) extends FrontendController(mcc) with I18nSupport with Logging {
 
   def timedOut(): Action[AnyContent] = Action { implicit request =>
     logger.info(s"[SignOutContoller][timeout] user remained inactive on the service, user has been signed out")
-    Ok(signedOutView(request, request2Messages, appConfig)).withNewSession
+    Ok(signedOutView(using request, request2Messages, appConfig)).withNewSession
   }
 
   def onSubmit(): Action[AnyContent] = Action { _ =>

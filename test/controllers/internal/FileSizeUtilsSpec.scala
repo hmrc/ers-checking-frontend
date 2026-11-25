@@ -33,14 +33,14 @@ class FileSizeUtilsSpec extends AnyWordSpecLike with Matchers with MockitoSugar 
 
   val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
   val mockAuditEvents: AuditEvents              = new AuditEvents(mockAuditConnector)
-  implicit val hc: HeaderCarrier                = HeaderCarrier()
+  given hc: HeaderCarrier                       = HeaderCarrier()
   val fileSizeUtils: FileSizeUtils              = new FileSizeUtils(mockAuditEvents)
 
   "logFileSize" should {
     "audit the file size with the scheme ref" in {
       fileSizeUtils.logFileSize(100)
       val eventCaptor = ArgumentCaptor.forClass(classOf[DataEvent])
-      verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(any(), any())
+      verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(using any(), any())
       eventCaptor.getValue.asInstanceOf[DataEvent].auditSource shouldBe "ers-checking-frontend"
       eventCaptor.getValue.asInstanceOf[DataEvent].auditType   shouldBe "UploadFileSizeFromUpscanCallback"
       eventCaptor.getValue.asInstanceOf[DataEvent].detail      shouldBe Map("fileSize" -> "100")
@@ -65,7 +65,7 @@ class FileSizeUtilsSpec extends AnyWordSpecLike with Matchers with MockitoSugar 
       (1181116006, "1.10 GB (1181116006 bytes)")
     )
 
-    fileSizeInBytesAndExpectedString.foreach { fileSizeAndExpectedString: (Int, String) =>
+    fileSizeInBytesAndExpectedString.foreach { (fileSizeAndExpectedString: (Int, String)) =>
       s"return the expected string: ${fileSizeAndExpectedString._2} when parsed a file size of: ${fileSizeAndExpectedString._1}" in {
         fileSizeUtils.mapFileSizeToString(fileSizeAndExpectedString._1) shouldBe fileSizeAndExpectedString._2
       }

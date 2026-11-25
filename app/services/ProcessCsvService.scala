@@ -52,12 +52,12 @@ class ProcessCsvService @Inject() (
   appConfig: ApplicationConfig,
   sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
   ersUtil: ERSUtil
-)(implicit executionContext: ExecutionContext, actorSystem: ActorSystem)
+)(using executionContext: ExecutionContext, actorSystem: ActorSystem)
     extends Logging {
 
   private val uploadCsvSizeLimit: Int = appConfig.upscanFileSizeLimit
 
-  def extractEntityData(response: HttpResponse): Source[ByteString, _] =
+  def extractEntityData(response: HttpResponse): Source[ByteString, ?] =
     response match {
       case HttpResponse(org.apache.pekko.http.scaladsl.model.StatusCodes.OK, _, entity, _) =>
         entity.withSizeLimit(uploadCsvSizeLimit).dataBytes
@@ -70,7 +70,7 @@ class ProcessCsvService @Inject() (
         )
     }
 
-  def extractBodyOfRequest: Source[HttpResponse, _] => Source[Either[Throwable, List[ByteString]], _] =
+  def extractBodyOfRequest: Source[HttpResponse, ?] => Source[Either[Throwable, List[ByteString]], ?] =
     _.flatMapConcat(extractEntityData)
       .via(CsvParsing.lineScanner())
       .via(Flow.fromFunction(Right(_)))
@@ -79,22 +79,22 @@ class ProcessCsvService @Inject() (
       }
 
   def validateCsv(
-    source: Source[HttpResponse, _],
+    source: Source[HttpResponse, ?],
     dataEngine: DataEngine
   ): Future[Either[Throwable, Seq[RowValidationResults]]] =
     extractBodyOfRequest(source)
       .via(FlowOps.eitherFromFunction((rowBytes: Seq[ByteString]) => CsvValidator.validateCsvRow(dataEngine, rowBytes)))
       .runWith(Sink.seq[Either[Throwable, RowValidationResults]])
-      .map(_.traverse(identity))
+      .map(_.sequence)
 
   def processFile(
     scheme: String,
-    downloadSourceFile: String => Source[HttpResponse, _],
+    downloadSourceFile: String => Source[HttpResponse, ?],
     file: UpscanCsvFilesCallback
-  )(implicit request: Request[_], messages: Messages): Future[Either[Throwable, Boolean]] = {
+  )(using request: Request[?], messages: Messages): Future[Either[Throwable, Boolean]] = {
 
     val successUpload: UploadedSuccessfully = file.uploadStatus.asInstanceOf[UploadedSuccessfully]
-    val source: Source[HttpResponse, _]     = downloadSourceFile(successUpload.downloadUrl)
+    val source: Source[HttpResponse, ?]     = downloadSourceFile(successUpload.downloadUrl)
 
     (for {
       sheetName                   <- EitherT.fromEither[Future](checkFileType(successUpload.name))
@@ -109,7 +109,7 @@ class ProcessCsvService @Inject() (
                                      )
       csvValidationResult         <- EitherT(validateCsv(source, dataEngine))
       rowsWithCorrectedRowNumbers <-
-        EitherT.fromEither(getValidationResultsWithCorrectRowNumber(csvValidationResult, sheetName)(messages))
+        EitherT.fromEither(getValidationResultsWithCorrectRowNumber(csvValidationResult, sheetName)(using messages))
       result                      <- EitherT(checkValidityOfRows(rowsWithCorrectedRowNumbers, sheetName, file))
     } yield result).value
   }
@@ -117,10 +117,10 @@ class ProcessCsvService @Inject() (
   def processFiles(
     callback: Option[UpscanCsvFilesCallbackList],
     scheme: String,
-    downloadSourceFile: String => Source[HttpResponse, _]
-  )(implicit request: Request[_], messages: Messages): List[Future[Either[Throwable, Boolean]]] =
+    downloadSourceFile: String => Source[HttpResponse, ?]
+  )(using request: Request[?], messages: Messages): List[Future[Either[Throwable, Boolean]]] =
 
-    callback.get.files map { file: UpscanCsvFilesCallback =>
+    callback.get.files map { (file: UpscanCsvFilesCallback) =>
       val rows = fetchRows(file.uploadStatus).getOrElse(0)
       logger.info(
         s"[ProcessCsvService][processFiles] upscan callback successful for scheme: $scheme, with no of rows: $rows"
@@ -129,7 +129,7 @@ class ProcessCsvService @Inject() (
       processFile(scheme = scheme, downloadSourceFile = downloadSourceFile, file = file)
     }
 
-  def generateNoDataException(name: String)(implicit messages: Messages): ERSFileProcessingException =
+  def generateNoDataException(name: String)(using messages: Messages): ERSFileProcessingException =
     ERSFileProcessingException(
       "ers_check_csv_file.noData",
       messages("ers_check_csv_file.noData", name),
@@ -142,7 +142,7 @@ class ProcessCsvService @Inject() (
     validationResults.isEmpty || allRowsEmpty
   }
 
-  def getValidationResultsWithCorrectRowNumber(validationResults: Seq[RowValidationResults], name: String)(implicit
+  def getValidationResultsWithCorrectRowNumber(validationResults: Seq[RowValidationResults], name: String)(using
     messages: Messages
   ): Either[Throwable, Seq[ValidationError]] =
     if (checkIfValidationResultsEmpty(validationResults)) {
@@ -165,8 +165,8 @@ class ProcessCsvService @Inject() (
         }
       }
 
-  def checkValidityOfRows(listOfErrors: Seq[ValidationError], name: String, file: UpscanCsvFilesCallback)(implicit
-    request: Request[_]
+  def checkValidityOfRows(listOfErrors: Seq[ValidationError], name: String, file: UpscanCsvFilesCallback)(using
+    request: Request[?]
   ): Future[Either[Throwable, Boolean]] =
     if (listOfErrors.isEmpty) {
       Future.successful(Right(true))
@@ -185,14 +185,14 @@ class ProcessCsvService @Inject() (
   def getSheetErrors(schemeErrors: SheetErrors): SheetErrors =
     schemeErrors.copy(errors = schemeErrors.errors.take(appConfig.errorCount))
 
-  def checkFileType(name: String)(implicit messages: Messages): Either[Throwable, String] =
+  def checkFileType(name: String)(using messages: Messages): Either[Throwable, String] =
     if (name.endsWith(".csv")) {
       Right(FilenameUtils.removeExtension(name))
     } else {
       Left(
         ERSFileProcessingException(
-          Messages("ers_check_csv_file.file_type_error", name)(messages),
-          Messages("ers_check_csv_file.file_type_error", name)(messages)
+          Messages("ers_check_csv_file.file_type_error", name)(using messages),
+          Messages("ers_check_csv_file.file_type_error", name)(using messages)
         )
       )
     }
@@ -201,7 +201,7 @@ class ProcessCsvService @Inject() (
 
     def eitherFromFunction[A, B](
       input: A => Either[Throwable, B]
-    ): Flow[Either[Throwable, A], Either[Throwable, B], _] =
+    ): Flow[Either[Throwable, A], Either[Throwable, B], ?] =
       Flow.fromFunction(_.flatMap(input))
 
   }

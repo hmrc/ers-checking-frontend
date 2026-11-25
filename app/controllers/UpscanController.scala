@@ -19,10 +19,10 @@ package controllers
 import org.apache.pekko.actor.ActorSystem
 import config.ApplicationConfig
 import controllers.auth.AuthAction
-import models.upscan._
+import models.upscan.*
 import play.api.Logger
 import play.api.i18n.I18nSupport
-import play.api.mvc._
+import play.api.mvc.*
 import repository.ErsCheckingFrontendSessionCacheRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{ERSUtil, Retryable}
@@ -36,7 +36,7 @@ class UpscanController @Inject() (
   sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
   mcc: MessagesControllerComponents,
   override val global_error: views.html.global_error
-)(implicit
+)(using
   executionContext: ExecutionContext,
   ersUtil: ERSUtil,
   actorSystem: ActorSystem,
@@ -60,7 +60,7 @@ class UpscanController @Inject() (
 
   def fetchCsvCallbackList(
     list: UpscanCsvFilesList
-  )(implicit request: Request[_]): Future[Seq[UpscanCsvFilesCallback]] =
+  )(using request: Request[?]): Future[Seq[UpscanCsvFilesCallback]] =
     Future.sequence {
       list.ids map { head =>
         sessionCacheService.fetchAndGetEntry[UpscanIds](head.uploadId.value) map { upscanId =>
@@ -96,7 +96,7 @@ class UpscanController @Inject() (
         } flatMap { files =>
           val callbackData = UpscanCsvFilesCallbackList(files.toList.reverse)
           logger.debug(s"[UpscanController][successCsv] - before adding into mongo: $callbackData")
-          sessionCacheService.cache[UpscanCsvFilesCallbackList](ersUtil.CALLBACK_DATA_KEY_CSV, callbackData).map { ele =>
+          sessionCacheService.cache[UpscanCsvFilesCallbackList](ersUtil.CALLBACK_DATA_KEY_CSV, callbackData).map { _ =>
             if (callbackData.areAllFilesSuccessful()) {
               logger.debug(s"[UpscanController][successCsv] - callback upscan successful, callback: $callbackData")
               Redirect(routes.UploadController.uploadCsvFile(scheme))

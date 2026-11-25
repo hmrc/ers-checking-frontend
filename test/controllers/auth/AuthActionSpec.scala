@@ -20,7 +20,7 @@ import controllers.routes
 import helpers.ErsTestHelper
 import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentMatchers
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -32,7 +32,7 @@ import play.api.mvc.{BodyParsers, Result, Results}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status}
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
-import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.domain.EmpRef
@@ -56,7 +56,7 @@ class AuthActionSpec
         .authorise[RetrievalType](
           ArgumentMatchers.any(),
           ArgumentMatchers.any()
-        )(
+        )(using
           ArgumentMatchers.any(),
           ArgumentMatchers.any()
         )
@@ -64,7 +64,7 @@ class AuthActionSpec
 
   override val testBodyParser: BodyParsers.Default = fakeApplication().injector.instanceOf[BodyParsers.Default]
 
-  implicit def materializer: Materializer = Play.materializer(fakeApplication())
+  given materializer: Materializer = Play.materializer(using fakeApplication())
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
@@ -74,7 +74,7 @@ class AuthActionSpec
   def authAction: AuthAction = new AuthAction(mockAuthConnector, mockAppConfig, testBodyParser)
 
   def assertOrganisationWithMissingPAYE(
-    requestWithOptionalEmpRefAndPAYE: RequestWithOptionalEmpRefAndPAYE[_]
+    requestWithOptionalEmpRefAndPAYE: RequestWithOptionalEmpRefAndPAYE[?]
   ): Assertion = {
     requestWithOptionalEmpRefAndPAYE.optionalEmpRef                                   shouldBe None
     requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getPAYERedirectCall.url    shouldBe "/check-your-ers-files/not-enrolled-for-PAYE"
@@ -82,8 +82,8 @@ class AuthActionSpec
   }
 
   def defaultAsyncBody(
-    requestTestCase: RequestWithOptionalEmpRefAndPAYE[_] => Assertion
-  ): RequestWithOptionalEmpRefAndPAYE[_] => Result = testRequest => {
+    requestTestCase: RequestWithOptionalEmpRefAndPAYE[?] => Assertion
+  ): RequestWithOptionalEmpRefAndPAYE[?] => Result = testRequest => {
     requestTestCase(testRequest)
     Results.Ok("Successful")
   }
@@ -166,7 +166,7 @@ class AuthActionSpec
       "return a perform the action if the user is authorised with an empref in the request" in {
         mockAuthoriseFunc(Future.successful(organisationWithPAYE))
         val result: Future[Result] = authAction(
-          defaultAsyncBody { (requestWithOptionalEmpRefAndPAYE: RequestWithOptionalEmpRefAndPAYE[_]) =>
+          defaultAsyncBody { (requestWithOptionalEmpRefAndPAYE: RequestWithOptionalEmpRefAndPAYE[?]) =>
             requestWithOptionalEmpRefAndPAYE.optionalEmpRef                                   shouldBe Some(EmpRef("1234", "1234"))
             requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getPAYERedirectCall.url    shouldBe "/dassGatewayHost/ers/org/1234/1234/schemes"
             requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getSignOutRedirectCall.url shouldBe "/business-account"
@@ -209,7 +209,7 @@ class AuthActionSpec
       "return a perform the action if the user is authorised with IR-PAYE-AGENT enrolement" in {
         mockAuthoriseFunc(Future.successful(agentWithPAYE))
         val result: Future[Result] = authAction(
-          defaultAsyncBody { (requestWithOptionalEmpRefAndPAYE: RequestWithOptionalEmpRefAndPAYE[_]) =>
+          defaultAsyncBody { (requestWithOptionalEmpRefAndPAYE: RequestWithOptionalEmpRefAndPAYE[?]) =>
             requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getPAYERedirectCall.url    shouldBe "/ers/agent/clients"
             requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getSignOutRedirectCall.url shouldBe "/ers/agent/clients"
           }
@@ -221,7 +221,7 @@ class AuthActionSpec
       "return a perform the action if the user is not authorised with IR-PAYE-AGENT enrolement" in {
         mockAuthoriseFunc(Future.successful(agentWithoutPAYE))
         val result: Future[Result] = authAction(
-          defaultAsyncBody { (requestWithOptionalEmpRefAndPAYE: RequestWithOptionalEmpRefAndPAYE[_]) =>
+          defaultAsyncBody { (requestWithOptionalEmpRefAndPAYE: RequestWithOptionalEmpRefAndPAYE[?]) =>
             requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getPAYERedirectCall.url    shouldBe "/check-your-ers-files/not-enrolled-for-PAYE"
             requestWithOptionalEmpRefAndPAYE.orgOrAgentPAYEDetails.getSignOutRedirectCall.url shouldBe "/ers/agent/clients"
           }

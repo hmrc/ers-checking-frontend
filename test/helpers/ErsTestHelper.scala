@@ -22,13 +22,13 @@ import metrics.Metrics
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.mockito.ArgumentMatchers
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsObject, JsString, JsValue}
-import play.api.mvc._
+import play.api.mvc.*
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{
   contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessagesApi
@@ -47,7 +47,7 @@ import utils.ERSUtil
 
 import java.time.{LocalDate, ZoneOffset}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.language.postfixOps
 import java.io.InputStream
 
@@ -76,12 +76,13 @@ trait ErsTestHelper extends MockitoSugar {
   val organisationAffinityGroup: Option[AffinityGroup.Organisation.type] = Some(AffinityGroup.Organisation)
   val mockHttp: DefaultHttpClient                                        = mock[DefaultHttpClient]
 
-  implicit val request: Request[AnyRef]                               = FakeRequest()
-  implicit val hc: HeaderCarrier                                      = HeaderCarrier(sessionId = Some(SessionId("testSessionId")))
-  implicit val ec: ExecutionContext                                   = ExecutionContext.Implicits.global
+  protected def makeRequest: Request[AnyRef]                          = FakeRequest()
+  given request: Request[AnyRef]                                      = makeRequest
+  given hc: HeaderCarrier                                             = HeaderCarrier(sessionId = Some(SessionId("testSessionId")))
+  given ec: ExecutionContext                                          = ExecutionContext.Implicits.global
   val mockMetrics: Metrics                                            = mock[Metrics]
-  implicit val mockAppConfig: ApplicationConfig                       = mock[ApplicationConfig]
-  implicit val mockErsUtil: ERSUtil                                   = mock[ERSUtil]
+  given mockAppConfig: ApplicationConfig                              = mock[ApplicationConfig]
+  given mockErsUtil: ERSUtil                                          = mock[ERSUtil]
   val mockAuditEvents: AuditEvents                                    = mock[AuditEvents]
   val mockSessionCacheRepo: ErsCheckingFrontendSessionCacheRepository = mock[ErsCheckingFrontendSessionCacheRepository]
   val mockUpscanService: UpscanService                                = mock[UpscanService]
@@ -102,10 +103,11 @@ trait ErsTestHelper extends MockitoSugar {
 
   def mockAnyContentAction: OngoingStubbing[Future[Enrolments ~ Option[AffinityGroup]]] =
     when(
-      mockAuthConnector.authorise[Enrolments ~ Option[AffinityGroup]](ArgumentMatchers.any(), ArgumentMatchers.any())(
-        ArgumentMatchers.any(),
-        ArgumentMatchers.any()
-      )
+      mockAuthConnector
+        .authorise[Enrolments ~ Option[AffinityGroup]](ArgumentMatchers.any(), ArgumentMatchers.any())(using
+          ArgumentMatchers.any(),
+          ArgumentMatchers.any()
+        )
     )
       .thenReturn(Future.successful(authResultDefault))
 

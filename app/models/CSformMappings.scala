@@ -16,8 +16,8 @@
 
 package models
 
-import play.api.data.Forms._
-import play.api.data._
+import play.api.data.Forms.*
+import play.api.data.*
 
 object CSformMappings {
 
@@ -27,7 +27,7 @@ object CSformMappings {
   val checkFileTypeForm: Form[CS_checkFileType] = Form(
     mapping("checkFileType" -> optional(text).verifying("ers_check_file_type.alert", _.isDefined))(
       CS_checkFileType.apply
-    )(CS_checkFileType.unapply)
+    )(form => Some(form.checkFileType))
   )
 
   /*
@@ -36,7 +36,7 @@ object CSformMappings {
   val schemeTypeForm: Form[CS_schemeType] = Form(
     mapping(
       "schemeType" -> optional(text).verifying("ers_scheme_type.select_scheme_type", _.isDefined)
-    )(CS_schemeType.apply)(CS_schemeType.unapply)
+    )(CS_schemeType.apply)((form: CS_schemeType) => Some(form.schemeType))
   )
 
   def csvFileCheckForm(): Form[List[CsvFiles]] = Form(
@@ -46,12 +46,12 @@ object CSformMappings {
           "fileId" -> text
             .verifying("no_file_error", _.nonEmpty)
             .verifying("invalidCharacters", id => fileIdList.contains(id))
-        )(CsvFiles.apply)(CsvFiles.unapply)
+        )(CsvFiles.apply)((files: CsvFiles) => Some(files.fileId))
       )
     )(List[CsvFiles])(Option[List[CsvFiles]])
   )
 
-  val fileIdList = Seq(
+  val fileIdList: Seq[String] = Seq(
     "EMI_ADJUSTMENTS",
     "EMI_REPLACED",
     "EMI_RCL",

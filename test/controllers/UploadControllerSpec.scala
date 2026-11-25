@@ -35,7 +35,7 @@ import play.api.http.Status
 import play.api.i18n.{Messages, MessagesImpl}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, DefaultMessagesControllerComponents, Request, Result}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.api.test.{FakeRequest, Injecting}
 import play.api.{Application, i18n}
 import services.{ProcessCsvService, ProcessOdsService}
@@ -66,9 +66,9 @@ class UploadControllerSpec
     "mongodb.timeToLiveInSeconds" -> 3600
   )
 
-  implicit override lazy val app: Application       = new GuiceApplicationBuilder().configure(config).build()
+  override lazy given app: Application              = new GuiceApplicationBuilder().configure(config).build()
   lazy val mcc: DefaultMessagesControllerComponents = testMCC(app)
-  implicit lazy val testMessages: MessagesImpl      = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
+  lazy given testMessages: MessagesImpl             = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
   val mockProcessOdsService: ProcessOdsService      = mock[ProcessOdsService]
   val mockProcessCsvService: ProcessCsvService      = mock[ProcessCsvService]
 
@@ -97,16 +97,16 @@ class UploadControllerSpec
       globalErrorView
     ) {
 
-      override def clearErrorCache()(implicit request: Request[_]): Future[Boolean] =
+      override def clearErrorCache()(using request: Request[?]): Future[Boolean] =
         Future.successful(clearCacheResponse)
 
-      override def getGlobalErrorPage(implicit request: Request[AnyRef], messages: Messages): Result =
+      override def getGlobalErrorPage(using request: Request[AnyRef], messages: Messages): Result =
         InternalServerError("Test body")
 
-      val mockSource: Source[HttpResponse, _] =
+      val mockSource: Source[HttpResponse, ?] =
         Source.fromIterator(() => List(HttpResponse(StatusCodes.OK)).iterator)
 
-      override private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, _] = if (
+      override private[controllers] def readFileCsv(downloadUrl: String): Source[HttpResponse, ?] = if (
         mockReadFileCsv
       ) {
         mockSource
@@ -124,23 +124,23 @@ class UploadControllerSpec
           List(Future.successful(Left(ERSFileProcessingException("", ""))))
         }
 
-      when(mockProcessCsvService.processFiles(any(), any(), any())(any(), any())).thenReturn(returnValue)
+      when(mockProcessCsvService.processFiles(any(), any(), any())(using any(), any())).thenReturn(returnValue)
 
-      when(mockSessionCacheRepo.cache(refEq("format_error"), anyString())(any(), any()))
+      when(mockSessionCacheRepo.cache(refEq("format_error"), anyString())(using any(), any()))
         .thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))
-      when(mockSessionCacheRepo.cache(refEq("format_error_params"), any[Seq[String]])(any(), any()))
+      when(mockSessionCacheRepo.cache(refEq("format_error_params"), any[Seq[String]])(using any(), any()))
         .thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))
-      when(mockSessionCacheRepo.cache(refEq(ersUtil.FORMAT_ERROR_EXTENDED_CACHE), any[Boolean])(any(), any()))
+      when(mockSessionCacheRepo.cache(refEq(ersUtil.FORMAT_ERROR_EXTENDED_CACHE), any[Boolean])(using any(), any()))
         .thenReturn(if (formatRes) Future.successful(null) else Future.failed(new Exception))
 
-      when(mockSessionCacheRepo.fetch[UpscanCsvFilesCallbackList](anyString())(any(), any()))
+      when(mockSessionCacheRepo.fetch[UpscanCsvFilesCallbackList](anyString())(using any(), any()))
         .thenReturn(Future.successful(callbackList))
 
       mockAnyContentAction
     }
 
   "Calling UploadController.uploadCsvFile" should {
-    implicit val fakeRequest: RequestWithOptionalEmpRefAndPAYE[AnyContent] = RequestWithOptionalEmpRefAndPAYE(
+    given fakeRequest: RequestWithOptionalEmpRefAndPAYE[AnyContent] = RequestWithOptionalEmpRefAndPAYE(
       Fixtures.buildFakeRequestWithSessionId("GET"),
       None,
       PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig)
@@ -188,7 +188,7 @@ class UploadControllerSpec
       val controllerUnderTest = buildFakeUploadControllerCsv()
       val result              = controllerUnderTest.finaliseRequestAndRedirect(
         List(Future.successful(Left(ERSFileProcessingException("this is a problem", "help"))))
-      )(
+      )(using
         RequestWithOptionalEmpRefAndPAYE(
           FakeRequest("GET", ""),
           None,
@@ -203,13 +203,14 @@ class UploadControllerSpec
     "send user to GlobalErrorPage if unexpected exception is found" in {
       val controllerUnderTest = buildFakeUploadControllerCsv()
       val result              =
-        controllerUnderTest.finaliseRequestAndRedirect(List(Future.successful(Left(new Exception("taste the pain")))))(
-          RequestWithOptionalEmpRefAndPAYE(
-            FakeRequest("GET", ""),
-            None,
-            PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig)
+        controllerUnderTest
+          .finaliseRequestAndRedirect(List(Future.successful(Left(new Exception("taste the pain")))))(using
+            RequestWithOptionalEmpRefAndPAYE(
+              FakeRequest("GET", ""),
+              None,
+              PAYEDetails(isAgent = false, agentHasPAYEEnrollement = false, optionalEmpRef = None, mockAppConfig)
+            )
           )
-        )
 
       status(result)          shouldBe Status.INTERNAL_SERVER_ERROR
       contentAsString(result) shouldBe "Test body"
@@ -231,7 +232,7 @@ class UploadControllerSpec
   "Calling handleException" should {
     "redirect to formatErrorPages if it's given a processing exception" in {
       val controllerUnderTest = buildFakeUploadControllerCsv()
-      val result              = controllerUnderTest.handleException(ERSFileProcessingException("a", "b"))(FakeRequest("", ""))
+      val result              = controllerUnderTest.handleException(ERSFileProcessingException("a", "b"))(using FakeRequest("", ""))
 
       status(result)         shouldBe Status.SEE_OTHER
       result.futureValue.header
@@ -240,7 +241,7 @@ class UploadControllerSpec
 
     "redirect to globalErrorPage if it's given an UpstreamErrorResponse" in {
       val controllerUnderTest = buildFakeUploadControllerCsv()
-      val result              = controllerUnderTest.handleException(UpstreamErrorResponse("a", Status.INTERNAL_SERVER_ERROR))(
+      val result              = controllerUnderTest.handleException(UpstreamErrorResponse("a", Status.INTERNAL_SERVER_ERROR))(using
         FakeRequest("", "")
       )
 
@@ -250,7 +251,7 @@ class UploadControllerSpec
 
     "redirect to globalErrorPage if it's given an unexpected exception" in {
       val controllerUnderTest = buildFakeUploadControllerCsv()
-      val result              = controllerUnderTest.handleException(new Exception("this is a big whoops"))(FakeRequest("", ""))
+      val result              = controllerUnderTest.handleException(new Exception("this is a big whoops"))(using FakeRequest("", ""))
 
       status(result)          shouldBe Status.INTERNAL_SERVER_ERROR
       contentAsString(result) shouldBe "Test body"
@@ -259,7 +260,9 @@ class UploadControllerSpec
     "redirect to globalErrorPage if it's given a XMLStreamException" in {
       val controllerUnderTest = buildFakeUploadControllerCsv()
       val result              =
-        controllerUnderTest.handleException(new javax.xml.stream.XMLStreamException("file to big"))(FakeRequest("", ""))
+        controllerUnderTest.handleException(new javax.xml.stream.XMLStreamException("file to big"))(using
+          FakeRequest("", "")
+        )
 
       status(result)          shouldBe Status.INTERNAL_SERVER_ERROR
       contentAsString(result) shouldBe "Test body"
@@ -270,7 +273,7 @@ class UploadControllerSpec
       val controllerUnderTest = buildFakeUploadControllerCsv()
       val result              =
         controllerUnderTest.handleException(SheetNameNotInSchemeVersionFailure("Sheet1", SchemeVersion.V4).asThrowable)(
-          FakeRequest("", "")
+          using FakeRequest("", "")
         )
 
       status(result)         shouldBe Status.SEE_OTHER
@@ -279,11 +282,11 @@ class UploadControllerSpec
       verify(mockSessionCacheRepo).cache(
         meq("format_error"),
         meq("ers.exceptions.dataParser.wrongSchemeFile")
-      )(any(), any())
+      )(using any(), any())
       verify(mockSessionCacheRepo).cache(
         meq("format_error_params"),
         meq(Seq.empty[String])
-      )(any(), any())
+      )(using any(), any())
     }
 
     "redirect to formatErrorsPage with wrongSchemeFile message for SheetNameNotInSchemeVersion with V5 scheme version" in {
@@ -291,7 +294,7 @@ class UploadControllerSpec
       val controllerUnderTest = buildFakeUploadControllerCsv()
       val result              =
         controllerUnderTest.handleException(SheetNameNotInSchemeVersionFailure("Sheet1", SchemeVersion.V5).asThrowable)(
-          FakeRequest("", "")
+          using FakeRequest("", "")
         )
 
       status(result)         shouldBe Status.SEE_OTHER
@@ -300,11 +303,11 @@ class UploadControllerSpec
       verify(mockSessionCacheRepo).cache(
         meq("format_error"),
         meq("ers.exceptions.dataParser.wrongSchemeFile")
-      )(any(), any())
+      )(using any(), any())
       verify(mockSessionCacheRepo).cache(
         meq("format_error_params"),
         meq(Seq.empty[String])
-      )(any(), any())
+      )(using any(), any())
     }
   }
 

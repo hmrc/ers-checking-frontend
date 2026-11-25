@@ -24,9 +24,9 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n
 import play.api.i18n.MessagesImpl
-import play.api.mvc._
-import play.api.test.Helpers._
-import play.api.test._
+import play.api.mvc.*
+import play.api.test.Helpers.*
+import play.api.test.*
 import views.html.{global_error, not_enrolled_in_paye, sign_out_paye}
 
 class CheckPAYEControllerSpec
@@ -43,9 +43,9 @@ class CheckPAYEControllerSpec
   val signOutView: sign_out_paye                    = inject[sign_out_paye]
   val globalErrorView: global_error                 = inject[global_error]
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
+  lazy given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mcc.messagesApi)
 
-  def buildFakeCheckPAYEController() =
+  def buildFakeCheckPAYEController(): CheckPAYEController =
     new CheckPAYEController(mockAuthAction, mcc, notEnrolledView, signOutView, globalErrorView)(mockAppConfig) {
       mockAnyContentAction
     }
@@ -59,7 +59,7 @@ class CheckPAYEControllerSpec
 
     "checking page for missingPAYE" in {
       val controllerUnderTest = buildFakeCheckPAYEController()
-      val result              = controllerUnderTest.showMissingPAYE()(
+      val result              = controllerUnderTest.showMissingPAYE()(using
         Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig),
         testMessages
       )
@@ -80,7 +80,7 @@ class CheckPAYEControllerSpec
 
     "checking page for signOutPAYE" in {
       val controllerUnderTest = buildFakeCheckPAYEController()
-      val result              = controllerUnderTest.showSignOutPAYE()(
+      val result              = controllerUnderTest.showSignOutPAYE()(using
         Fixtures.buildEmpRefRequestWithSessionId("GET", mockAppConfig),
         testMessages
       )

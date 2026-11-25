@@ -20,12 +20,12 @@ import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalEmpRefAndPAYE}
 
 import javax.inject.{Inject, Singleton}
-import models._
+import models.*
 import models.upscan.{NotStarted, UploadId, UpscanCsvFilesList, UpscanIds}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc._
+import play.api.mvc.*
 import repository.ErsCheckingFrontendSessionCacheRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
@@ -39,14 +39,14 @@ class CheckCsvFilesController @Inject() (
   sessionCacheService: ErsCheckingFrontendSessionCacheRepository,
   select_csv_file_types: views.html.select_csv_file_types,
   override val global_error: views.html.global_error
-)(implicit ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+)(using ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
     extends FrontendController(mcc) with I18nSupport with ErsBaseController with Logging {
 
   def selectCsvFilesPage(): Action[AnyContent] = authAction.async { implicit request =>
     showCheckCsvFilesPage()
   }
 
-  def showCheckCsvFilesPage()(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Result] =
+  def showCheckCsvFilesPage()(using request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Result] =
     (for {
       _      <- sessionCacheService.delete(ersUtil.CSV_FILES_UPLOAD)
       scheme <- sessionCacheService.fetchAndGetEntry[String](ersUtil.SCHEME_CACHE)
@@ -61,7 +61,7 @@ class CheckCsvFilesController @Inject() (
     validateCsvFilesPageSelected()
   }
 
-  def validateCsvFilesPageSelected()(implicit request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Result] =
+  def validateCsvFilesPageSelected()(using request: RequestWithOptionalEmpRefAndPAYE[AnyContent]): Future[Result] =
     CSformMappings
       .csvFileCheckForm()
       .bindFromRequest()
@@ -70,7 +70,7 @@ class CheckCsvFilesController @Inject() (
         formData => performCsvFilesPageSelected(formData)
       )
 
-  def performCsvFilesPageSelected(formData: Seq[CsvFiles])(implicit request: Request[AnyRef]): Future[Result] = {
+  def performCsvFilesPageSelected(formData: Seq[CsvFiles])(using request: Request[AnyRef]): Future[Result] = {
     val csvFilesCallbackList: UpscanCsvFilesList = createCacheData(formData)
     if (csvFilesCallbackList.ids.isEmpty) {
       logger.info("[CheckCsvFilesController][csvFilesCallbackList] ids are empty")
@@ -89,7 +89,7 @@ class CheckCsvFilesController @Inject() (
     }
   }
 
-  def cacheUpscanIds(ids: Seq[UpscanIds])(implicit request: Request[AnyRef]): Seq[Future[(String, String)]] =
+  def cacheUpscanIds(ids: Seq[UpscanIds])(using request: Request[AnyRef]): Seq[Future[(String, String)]] =
     ids map { id =>
       sessionCacheService.cache[UpscanIds](id.uploadId.value, id)
     }
@@ -99,7 +99,7 @@ class CheckCsvFilesController @Inject() (
     UpscanCsvFilesList(ids)
   }
 
-  def reloadWithError(form: Option[Form[List[CsvFiles]]] = None)(implicit messages: Messages): Future[Result] = {
+  def reloadWithError(form: Option[Form[List[CsvFiles]]] = None)(using messages: Messages): Future[Result] = {
     val errorKey = if (form.isDefined) form.get.errors.head.message else "no_file_error"
     Future.successful(
       Redirect(routes.CheckCsvFilesController.selectCsvFilesPage())

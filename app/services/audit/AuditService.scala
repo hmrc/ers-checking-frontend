@@ -27,13 +27,13 @@ trait AuditService {
 
   def auditConnector: AuditConnector
 
-  def sendEvent(transactionName: String, details: Map[String, String])(implicit
+  def sendEvent(transactionName: String, details: Map[String, String])(using
     hc: HeaderCarrier,
     ec: ExecutionContext
   ): Future[AuditResult] =
     auditConnector.sendEvent(buildEvent(transactionName, details))
 
-  private[audit] def buildEvent(transactionName: String, details: Map[String, String])(implicit hc: HeaderCarrier) =
+  private[audit] def buildEvent(transactionName: String, details: Map[String, String])(using hc: HeaderCarrier) =
     DataEvent(
       auditSource = auditSource,
       auditType = transactionName,

@@ -19,8 +19,8 @@ package controllers
 import helpers.ErsTestHelper
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
-import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.matchers.must.Matchers.{must, mustBe}
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.mvc.{MessagesControllerComponents, Result}
@@ -34,9 +34,9 @@ import scala.concurrent.Future
 class SignOutControllerSpec
     extends AnyWordSpecLike with Matchers with GuiceOneAppPerSuite with Injecting with ErsTestHelper {
 
-  implicit val mcc: MessagesControllerComponents = inject[MessagesControllerComponents]
-  implicit val timeoutView: signed_out           = inject[signed_out]
-  val signOutController                          = new SignOutController(mcc, timeoutView)
+  given mcc: MessagesControllerComponents = inject[MessagesControllerComponents]
+  given timeoutView: signed_out           = inject[signed_out]
+  val signOutController                   = new SignOutController(mcc, timeoutView)
 
   "Calling SignOutController.timeout" should {
     val result: Future[Result] = signOutController.timedOut().apply(FakeRequest())

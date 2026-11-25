@@ -28,13 +28,13 @@ class StartViewSpec extends ViewSpecBase {
 
   class StartViewSetUp(bannerEnabled: Boolean, bannerSecondParagraphEnabled: Boolean) {
 
-    implicit val applicationConfig: ApplicationConfig = new ApplicationConfig(mock[ServicesConfig]) {
+    given applicationConfig: ApplicationConfig = new ApplicationConfig(mock[ServicesConfig]) {
       override lazy val startPageBannerEnabled: Boolean        = bannerEnabled
       override lazy val startPageBannerParaTwoEnabled: Boolean = bannerSecondParagraphEnabled
     }
 
-    implicit val request: FakeRequest[AnyRef] = fakeRequest
-    implicit val messages: Messages           = testMessages
+    given request: FakeRequest[AnyRef] = fakeRequest
+    given messages: Messages           = testMessages
 
     val view: start = app.injector.instanceOf[start]
 
@@ -52,7 +52,7 @@ class StartViewSpec extends ViewSpecBase {
   "start view" should {
 
     "show not show the banner when it is disabled" in new StartViewSetUp(false, false) {
-      val doc: Document = asDocument(view(request, messages, applicationConfig))
+      val doc: Document = asDocument(view(using request, messages, applicationConfig))
       getBanner(doc) mustBe ""
     }
 
@@ -60,12 +60,12 @@ class StartViewSpec extends ViewSpecBase {
       true,
       false
     ) {
-      val doc: Document = asDocument(view(request, messages, applicationConfig))
+      val doc: Document = asDocument(view(using request, messages, applicationConfig))
       getBanner(doc) mustBe bannerText
     }
 
     "show the banner with second paragraph when both are enabled" in new StartViewSetUp(true, true) {
-      val doc: Document = asDocument(view(request, messages, applicationConfig))
+      val doc: Document = asDocument(view(using request, messages, applicationConfig))
       getBanner(doc) mustBe (bannerText + secondBannerParagraph)
     }
 

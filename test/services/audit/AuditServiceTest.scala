@@ -21,7 +21,7 @@ import org.mockito.Mockito.when
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.DefaultAuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
@@ -33,7 +33,7 @@ import scala.concurrent.Future
 
 class AuditServiceTest extends AnyWordSpecLike with Matchers with MockitoSugar {
   val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
-  implicit val hc: HeaderCarrier                = HeaderCarrier()
+  given hc: HeaderCarrier                       = HeaderCarrier()
 
   val dataEvent: DataEvent = DataEvent(
     auditSource = "ers-checking-frontend",
@@ -46,10 +46,10 @@ class AuditServiceTest extends AnyWordSpecLike with Matchers with MockitoSugar {
   "sendEvent" should {
     class TestAuditService(auditResult: AuditResult) extends AuditService {
       override val auditConnector: DefaultAuditConnector = mockAuditConnector
-      override def buildEvent(transactionName: String, details: Map[String, String])(implicit
+      override def buildEvent(transactionName: String, details: Map[String, String])(using
         hc: HeaderCarrier
       ): DataEvent = dataEvent
-      when(auditConnector.sendEvent(any())(any(), any())).thenReturn(Future.successful(auditResult))
+      when(auditConnector.sendEvent(any())(using any(), any())).thenReturn(Future.successful(auditResult))
     }
 
     "return a Success" in {
